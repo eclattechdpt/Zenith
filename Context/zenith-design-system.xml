@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ZENITH Design System v2.0
+  AI-readable token reference for LLM code generation.
+  When generating UI for ZENITH, use ONLY these tokens.
+  CSS variable names follow the pattern: --{category}-{step}
+-->
+
+<zenith_design_system version="2.0" product="POS Cosmetics" brand="ZENITH">
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 01 · FONTS                                   -->
+  <!-- ════════════════════════════════════════════ -->
+  <fonts>
+    <font role="display" family="Zodiak" fallback="serif" source="https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&amp;display=swap" var="--font-display">
+      <weight name="Light" value="300"/>
+      <weight name="Regular" value="400"/>
+      <weight name="Medium" value="500"/>
+      <weight name="SemiBold" value="600"/>
+      <weight name="Bold" value="700"/>
+    </font>
+    <font role="body" family="Plus Jakarta Sans" fallback="sans-serif" source="https://api.fontshare.com/v2/css?f[]=plus-jakarta-sans@300,400,500,600,700,800&amp;display=swap" var="--font-body">
+      <weight name="Light" value="300"/>
+      <weight name="Regular" value="400"/>
+      <weight name="Medium" value="500"/>
+      <weight name="SemiBold" value="600"/>
+      <weight name="Bold" value="700"/>
+      <weight name="ExtraBold" value="800"/>
+    </font>
+  </fonts>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 02 · COLOR                                   -->
+  <!-- ════════════════════════════════════════════ -->
+  <color>
+
+    <!-- ROSE — Primary brand color. CTAs, buttons, links, active states, prices, focus rings, badges. -->
+    <palette name="rose" role="primary">
+      <swatch step="50"  hex="#FFF0F3" hsb="348/6/100"  var="--rose-50"  on="dark-text"/>
+      <swatch step="100" hex="#FFE0E8" hsb="345/12/100" var="--rose-100" on="dark-text"/>
+      <swatch step="200" hex="#FFC2D4" hsb="343/24/100" var="--rose-200" on="dark-text"/>
+      <swatch step="300" hex="#FF9DB5" hsb="340/38/100" var="--rose-300" on="dark-text"/>
+      <swatch step="400" hex="#FF6B8A" hsb="348/58/100" var="--rose-400" on="white-text"/>
+      <swatch step="500" hex="#F43F6B" hsb="346/74/96"  var="--rose-500" on="white-text" base="true"/>
+      <swatch step="600" hex="#E11D52" hsb="345/87/88"  var="--rose-600" on="white-text"/>
+      <swatch step="700" hex="#BE1143" hsb="344/91/75"  var="--rose-700" on="white-text"/>
+      <swatch step="800" hex="#9D1139" hsb="343/89/62"  var="--rose-800" on="white-text"/>
+      <swatch step="900" hex="#871335" hsb="343/86/53"  var="--rose-900" on="white-text"/>
+      <swatch step="950" hex="#4C0519" hsb="340/93/30"  var="--rose-950" on="white-text"/>
+    </palette>
+
+    <!-- TEAL — Secondary. Navbar, sidebar, headers, primary text, charts accent, secondary buttons. -->
+    <palette name="teal" role="secondary">
+      <swatch step="50"  hex="#EFFCFC" hsb="180/4/99"   var="--teal-50"  on="dark-text"/>
+      <swatch step="100" hex="#D6F6F8" hsb="184/14/97"  var="--teal-100" on="dark-text"/>
+      <swatch step="200" hex="#B2ECF0" hsb="184/26/94"  var="--teal-200" on="dark-text"/>
+      <swatch step="300" hex="#7DDCE4" hsb="184/45/89"  var="--teal-300" on="white-text"/>
+      <swatch step="400" hex="#40C2D0" hsb="185/69/82"  var="--teal-400" on="white-text"/>
+      <swatch step="500" hex="#25A6B6" hsb="187/79/71"  var="--teal-500" on="white-text" base="true"/>
+      <swatch step="600" hex="#22859A" hsb="189/78/60"  var="--teal-600" on="white-text"/>
+      <swatch step="700" hex="#236C7D" hsb="192/72/49"  var="--teal-700" on="white-text"/>
+      <swatch step="800" hex="#255867" hsb="194/65/40"  var="--teal-800" on="white-text"/>
+      <swatch step="900" hex="#1E3D47" hsb="195/58/28"  var="--teal-900" on="white-text"/>
+      <swatch step="950" hex="#0F2830" hsb="195/68/19"  var="--teal-950" on="white-text"/>
+    </palette>
+
+    <!-- NEUTRAL — Warm grays (subtone ~H25-30°). Backgrounds, borders, text, placeholders, disabled states. -->
+    <palette name="neutral" role="foundation">
+      <swatch step="50"  hex="#FDFBFA" hsb="20/2/99"   var="--neutral-50"  on="dark-text"/>
+      <swatch step="100" hex="#F7F3F0" hsb="26/4/97"   var="--neutral-100" on="dark-text"/>
+      <swatch step="200" hex="#EDE7E2" hsb="27/5/93"   var="--neutral-200" on="dark-text"/>
+      <swatch step="300" hex="#DED6CF" hsb="28/7/87"   var="--neutral-300" on="dark-text"/>
+      <swatch step="400" hex="#C4B8AE" hsb="27/11/77"  var="--neutral-400" on="dark-text"/>
+      <swatch step="500" hex="#A99D93" hsb="27/13/66"  var="--neutral-500" on="white-text"/>
+      <swatch step="600" hex="#8A7F76" hsb="27/14/54"  var="--neutral-600" on="white-text"/>
+      <swatch step="700" hex="#6E655E" hsb="26/14/43"  var="--neutral-700" on="white-text"/>
+      <swatch step="800" hex="#4E4741" hsb="28/17/31"  var="--neutral-800" on="white-text"/>
+      <swatch step="900" hex="#302B27" hsb="27/18/19"  var="--neutral-900" on="white-text"/>
+      <swatch step="950" hex="#1A1714" hsb="30/23/10"  var="--neutral-950" on="white-text"/>
+    </palette>
+
+    <!-- BLUSH — Decorative accent. Promo banners, featured cards, overlays, soft selected states. -->
+    <palette name="blush" role="accent">
+      <swatch step="50"  hex="#FFF8F9" hsb="350/3/100"  var="--blush-50"  on="dark-text"/>
+      <swatch step="100" hex="#FFF0F2" hsb="349/6/100"  var="--blush-100" on="dark-text"/>
+      <swatch step="200" hex="#FFDDE3" hsb="349/13/100" var="--blush-200" on="dark-text"/>
+      <swatch step="300" hex="#FFC4CF" hsb="349/23/100" var="--blush-300" on="dark-text"/>
+      <swatch step="400" hex="#FFB0C0" hsb="348/31/100" var="--blush-400" on="dark-text"/>
+      <swatch step="500" hex="#FF96AE" hsb="347/41/100" var="--blush-500" on="white-text" base="true"/>
+      <swatch step="600" hex="#E87A95" hsb="346/47/91"  var="--blush-600" on="white-text"/>
+      <swatch step="700" hex="#C45E78" hsb="345/52/77"  var="--blush-700" on="white-text"/>
+      <swatch step="800" hex="#9E4A60" hsb="344/53/62"  var="--blush-800" on="white-text"/>
+      <swatch step="900" hex="#7A3A4C" hsb="343/52/48"  var="--blush-900" on="white-text"/>
+    </palette>
+
+    <!-- SEMANTIC — System states. Each has 3 variants: light (bg), default (icon/border), dark (text). -->
+    <semantic>
+      <state name="success" use="Payment completed, stock OK, confirmations">
+        <variant role="light" hex="#F0FDF4" var="--success-light"/>
+        <variant role="default" hex="#16A34A" var="--success"/>
+        <variant role="dark" hex="#166534" var="--success-dark"/>
+      </state>
+      <state name="warning" use="Low stock, expiring discounts, alerts">
+        <variant role="light" hex="#FEFCE8" var="--warning-light"/>
+        <variant role="default" hex="#CA8A04" var="--warning"/>
+        <variant role="dark" hex="#854D0E" var="--warning-dark"/>
+      </state>
+      <state name="error" use="Payment rejected, invalid data, out of stock">
+        <variant role="light" hex="#FEF2F2" var="--error-light"/>
+        <variant role="default" hex="#DC2626" var="--error"/>
+        <variant role="dark" hex="#991B1B" var="--error-dark"/>
+      </state>
+      <state name="info" use="Active promotions, tips, neutral notifications">
+        <variant role="light" hex="#EFF6FF" var="--info-light"/>
+        <variant role="default" hex="#2563EB" var="--info"/>
+        <variant role="dark" hex="#1E40AF" var="--info-dark"/>
+      </state>
+    </semantic>
+
+  </color>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 03 · TYPOGRAPHY SCALE                        -->
+  <!-- ════════════════════════════════════════════ -->
+  <typography>
+
+    <!-- DISPLAY — Zodiak. For hero headlines, feature titles, branding moments. -->
+    <style name="display-xl" font="Zodiak" weight="500" size="64px" line-height="68px" tracking="-2px"/>
+    <style name="display-lg" font="Zodiak" weight="500" size="48px" line-height="52px" tracking="-1.5px"/>
+    <style name="display-md" font="Zodiak" weight="500" size="36px" line-height="40px" tracking="-1px"/>
+    <style name="display-sm" font="Zodiak" weight="500" size="28px" line-height="34px" tracking="-0.5px"/>
+
+    <!-- HEADINGS — Plus Jakarta Sans. For section headers, card titles, UI structure. -->
+    <style name="h1" font="Plus Jakarta Sans" weight="700" size="30px" line-height="38px" tracking="-0.5px"/>
+    <style name="h2" font="Plus Jakarta Sans" weight="700" size="24px" line-height="32px" tracking="-0.3px"/>
+    <style name="h3" font="Plus Jakarta Sans" weight="600" size="20px" line-height="28px" tracking="0"/>
+    <style name="h4" font="Plus Jakarta Sans" weight="600" size="16px" line-height="24px" tracking="0"/>
+    <style name="h5" font="Plus Jakarta Sans" weight="600" size="14px" line-height="20px" tracking="0"/>
+    <style name="h6" font="Plus Jakarta Sans" weight="600" size="12px" line-height="18px" tracking="0.2px"/>
+
+    <!-- BODY — Plus Jakarta Sans. For paragraph text, descriptions, content. -->
+    <style name="body-lg" font="Plus Jakarta Sans" weight="400" size="16px" line-height="26px" tracking="0"/>
+    <style name="body-md" font="Plus Jakarta Sans" weight="400" size="14px" line-height="22px" tracking="0"/>
+    <style name="body-sm" font="Plus Jakarta Sans" weight="400" size="13px" line-height="20px" tracking="0"/>
+
+    <!-- UI ELEMENTS — Plus Jakarta Sans. For labels, captions, overlines, badges, buttons. -->
+    <style name="caption"  font="Plus Jakarta Sans" weight="500" size="12px" line-height="16px" tracking="0" color="--neutral-600"/>
+    <style name="overline" font="Plus Jakarta Sans" weight="700" size="10px" line-height="14px" tracking="2.5px" transform="uppercase" color="--neutral-500"/>
+    <style name="label"    font="Plus Jakarta Sans" weight="600" size="11px" line-height="14px" tracking="0.3px"/>
+    <style name="badge"    font="Plus Jakarta Sans" weight="700" size="10px" line-height="10px" tracking="0.5px"/>
+    <style name="price"    font="Plus Jakarta Sans" weight="800" size="24px" line-height="24px" tracking="-0.5px"/>
+    <style name="mono"     font="Plus Jakarta Sans" weight="500" size="12px" line-height="18px" tracking="0" variant="tabular-nums"/>
+
+    <!-- BUTTONS -->
+    <style name="button-lg" font="Plus Jakarta Sans" weight="700" size="14px" line-height="14px" tracking="0.2px"/>
+    <style name="button-md" font="Plus Jakarta Sans" weight="600" size="13px" line-height="13px" tracking="0.2px"/>
+    <style name="button-sm" font="Plus Jakarta Sans" weight="600" size="11px" line-height="11px" tracking="0.3px"/>
+
+  </typography>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 04 · SPACING                                 -->
+  <!-- ════════════════════════════════════════════ -->
+  <spacing unit="px" scale="4px-base">
+    <token name="space-0"  value="0"    var="--space-0"/>
+    <token name="space-1"  value="4px"  var="--space-1"/>
+    <token name="space-2"  value="8px"  var="--space-2"/>
+    <token name="space-3"  value="12px" var="--space-3"/>
+    <token name="space-4"  value="16px" var="--space-4"/>
+    <token name="space-5"  value="20px" var="--space-5"/>
+    <token name="space-6"  value="24px" var="--space-6"/>
+    <token name="space-8"  value="32px" var="--space-8"/>
+    <token name="space-10" value="40px" var="--space-10"/>
+    <token name="space-12" value="48px" var="--space-12"/>
+    <token name="space-16" value="64px" var="--space-16"/>
+    <token name="space-20" value="80px" var="--space-20"/>
+    <token name="space-24" value="96px" var="--space-24"/>
+    <token name="space-32" value="128px" var="--space-32"/>
+  </spacing>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 05 · BORDER RADIUS                           -->
+  <!-- ════════════════════════════════════════════ -->
+  <radius>
+    <token name="radius-none" value="0"      var="--radius-none"/>
+    <token name="radius-sm"   value="4px"    var="--radius-sm"/>
+    <token name="radius-md"   value="8px"    var="--radius-md"/>
+    <token name="radius-lg"   value="12px"   var="--radius-lg"/>
+    <token name="radius-xl"   value="16px"   var="--radius-xl"/>
+    <token name="radius-2xl"  value="20px"   var="--radius-2xl"/>
+    <token name="radius-3xl"  value="24px"   var="--radius-3xl"/>
+    <token name="radius-full" value="9999px" var="--radius-full"/>
+  </radius>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 06 · ELEVATION (SHADOWS)                     -->
+  <!-- ════════════════════════════════════════════ -->
+  <shadows base-color="rgba(26,23,20)">
+    <token name="shadow-xs"   value="0 1px 2px rgba(26,23,20,0.04)"                                        var="--shadow-xs"/>
+    <token name="shadow-sm"   value="0 1px 3px rgba(26,23,20,0.06), 0 1px 2px rgba(26,23,20,0.04)"        var="--shadow-sm"/>
+    <token name="shadow-md"   value="0 4px 6px rgba(26,23,20,0.05), 0 2px 4px rgba(26,23,20,0.04)"        var="--shadow-md"/>
+    <token name="shadow-lg"   value="0 10px 15px rgba(26,23,20,0.06), 0 4px 6px rgba(26,23,20,0.04)"      var="--shadow-lg"/>
+    <token name="shadow-xl"   value="0 20px 25px rgba(26,23,20,0.08), 0 8px 10px rgba(26,23,20,0.04)"     var="--shadow-xl"/>
+    <token name="shadow-2xl"  value="0 25px 50px rgba(26,23,20,0.14)"                                      var="--shadow-2xl"/>
+    <token name="shadow-rose" value="0 4px 20px rgba(244,63,107,0.25)"                                     var="--shadow-rose"/>
+    <token name="shadow-teal" value="0 4px 20px rgba(37,166,182,0.20)"                                     var="--shadow-teal"/>
+  </shadows>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 07 · Z-INDEX                                 -->
+  <!-- ════════════════════════════════════════════ -->
+  <z_index>
+    <token name="z-base"     value="0"   var="--z-base"/>
+    <token name="z-dropdown" value="100" var="--z-dropdown"/>
+    <token name="z-sticky"   value="200" var="--z-sticky"/>
+    <token name="z-overlay"  value="300" var="--z-overlay"/>
+    <token name="z-modal"    value="400" var="--z-modal"/>
+    <token name="z-popover"  value="500" var="--z-popover"/>
+    <token name="z-toast"    value="600" var="--z-toast"/>
+    <token name="z-tooltip"  value="700" var="--z-tooltip"/>
+  </z_index>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 08 · MOTION                                  -->
+  <!-- ════════════════════════════════════════════ -->
+  <motion>
+    <easing>
+      <curve name="ease-default" value="cubic-bezier(0.4, 0, 0.2, 1)" var="--ease-default" use="General transitions"/>
+      <curve name="ease-in"      value="cubic-bezier(0.4, 0, 1, 1)"   var="--ease-in"      use="Elements exiting view"/>
+      <curve name="ease-out"     value="cubic-bezier(0, 0, 0.2, 1)"   var="--ease-out"      use="Elements entering view"/>
+      <curve name="ease-bounce"  value="cubic-bezier(0.34, 1.56, 0.64, 1)" var="--ease-bounce" use="Playful feedback, toast entry"/>
+    </easing>
+    <duration>
+      <token name="duration-fast"   value="100ms" var="--duration-fast"   use="Hover color, opacity"/>
+      <token name="duration-normal" value="200ms" var="--duration-normal" use="Button press, toggle, tooltip"/>
+      <token name="duration-slow"   value="350ms" var="--duration-slow"   use="Expand/collapse, slide panel"/>
+      <token name="duration-slower" value="500ms" var="--duration-slower" use="Page transition, modal entry"/>
+    </duration>
+  </motion>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 09 · BORDERS                                 -->
+  <!-- ════════════════════════════════════════════ -->
+  <borders>
+    <token name="border-thin"   value="1px"   var="--border-thin"/>
+    <token name="border-medium" value="1.5px" var="--border-medium"/>
+    <token name="border-thick"  value="2px"   var="--border-thick"/>
+  </borders>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 10 · OPACITY                                 -->
+  <!-- ════════════════════════════════════════════ -->
+  <opacity>
+    <token name="opacity-disabled"    value="0.4"  var="--opacity-disabled"/>
+    <token name="opacity-hover"       value="0.08" var="--opacity-hover"/>
+    <token name="opacity-pressed"     value="0.12" var="--opacity-pressed"/>
+    <token name="opacity-overlay"     value="0.5"  var="--opacity-overlay"/>
+    <token name="opacity-placeholder" value="0.5"  var="--opacity-placeholder"/>
+  </opacity>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- 11 · BREAKPOINTS                             -->
+  <!-- ════════════════════════════════════════════ -->
+  <breakpoints>
+    <token name="sm"  value="640px"  rem="40rem"/>
+    <token name="md"  value="768px"  rem="48rem"/>
+    <token name="lg"  value="1024px" rem="64rem"/>
+    <token name="xl"  value="1280px" rem="80rem"/>
+    <token name="2xl" value="1536px" rem="96rem"/>
+  </breakpoints>
+
+</zenith_design_system>

@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ZENITH Iconography v1.0
+  Consultar cuando: se necesite usar un ícono en cualquier parte de la UI.
+  Librería base: Lucide Icons (https://lucide.dev)
+  Todos los íconos heredan currentColor salvo excepciones documentadas.
+-->
+
+<zenith_iconography version="1.0" product="POS Cosmetics" brand="ZENITH">
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- LIBRERÍA BASE                                            -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <library
+    name="Lucide"
+    url="https://lucide.dev"
+    package="lucide-react"
+    version="latest"
+    license="ISC">
+    <justification>
+      Lucide es la librería de íconos más popular y activa del ecosistema React (2026).
+      Estilo limpio de trazo consistente que complementa la tipografía Plus Jakarta Sans de ZENITH.
+      Más de 1,600 íconos con tree-shaking nativo — solo se incluyen los íconos usados.
+      Es el default de shadcn/ui, lo que facilita integración si se usa ese sistema de componentes.
+      Soporte para personalizar color, tamaño y stroke-width via props.
+    </justification>
+  </library>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- ESTILO DE TRAZO                                          -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <stroke>
+    <weight default="1.75" range="1.5-2.5" note="1.75 para UI general. 2 para emphasis (nav activa). 1.5 para íconos decorativos grandes."/>
+    <line-cap value="round"/>
+    <line-join value="round"/>
+    <fill value="none" note="Nunca usar fill en íconos UI. Solo stroke."/>
+  </stroke>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- TAMAÑOS                                                  -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <sizes grid="24px">
+    <size name="xs" value="14px" use="Dentro de badges, indicadores pequeños"/>
+    <size name="sm" value="16px" use="Dentro de botones sm, inputs sm, tabla compacta"/>
+    <size name="md" value="18px" use="Dentro de botones md, inputs md, nav items. Tamaño por defecto."/>
+    <size name="lg" value="20px" use="Dentro de botones lg, encabezados, cards"/>
+    <size name="xl" value="24px" use="Íconos standalone, nav principal, cards de stat"/>
+    <size name="2xl" value="32px" use="Empty states, onboarding, íconos hero"/>
+    <size name="3xl" value="48px" use="Empty states grandes, errores de página completa"/>
+  </sizes>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- COLORES                                                  -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <colors>
+    <rule name="inherit" default="true">
+      Los íconos heredan el color del texto de su contexto via currentColor.
+      No asignar color directamente al ícono salvo excepciones.
+    </rule>
+    <exception context="nav-item-active" color="#FFFFFF"/>
+    <exception context="stat-card-icon" color="--rose-500"/>
+    <exception context="success-toast" color="--success"/>
+    <exception context="warning-toast" color="--warning"/>
+    <exception context="error-toast" color="--error"/>
+    <exception context="info-toast" color="--info"/>
+    <exception context="empty-state" color="--neutral-300"/>
+    <exception context="color-swatch" note="No aplica — el swatch usa shade_hex del ProductVariant"/>
+  </colors>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- CATÁLOGO POS — Mapeo concepto → ícono Lucide             -->
+  <!-- ════════════════════════════════════════════════════════ -->
+
+  <!-- NAVEGACIÓN -->
+  <category name="navegacion">
+    <icon concept="inicio"          lucide="home"              aliases="dashboard, landing"/>
+    <icon concept="menú"            lucide="menu"              aliases="hamburger"/>
+    <icon concept="atrás"           lucide="arrow-left"        aliases="regresar, back"/>
+    <icon concept="buscar"          lucide="search"            aliases="lupa"/>
+    <icon concept="cerrar"          lucide="x"                 aliases="close, dismiss"/>
+    <icon concept="chevron-derecha" lucide="chevron-right"     aliases="expand, next"/>
+    <icon concept="chevron-abajo"   lucide="chevron-down"      aliases="dropdown"/>
+    <icon concept="chevron-arriba"  lucide="chevron-up"        aliases="collapse"/>
+    <icon concept="más opciones"    lucide="more-vertical"     aliases="kebab, three-dots"/>
+    <icon concept="expandir"        lucide="maximize-2"        aliases="fullscreen"/>
+    <icon concept="contraer"        lucide="minimize-2"        aliases="exit-fullscreen"/>
+  </category>
+
+  <!-- PRODUCTO -->
+  <category name="producto">
+    <icon concept="producto"        lucide="sparkles"          aliases="cosmético, lipstick" note="Sparkles evoca belleza/cosméticos sin ser literal."/>
+    <icon concept="categoría"       lucide="layers"            aliases="category, grupo"/>
+    <icon concept="etiqueta"        lucide="tag"               aliases="label, marca"/>
+    <icon concept="código de barras" lucide="scan-barcode"     aliases="barcode, escanear"/>
+    <icon concept="imagen"          lucide="image"             aliases="foto, picture"/>
+    <icon concept="color/tono"      lucide="palette"           aliases="shade, swatch"/>
+    <icon concept="variante"        lucide="copy"              aliases="variant, duplicado"/>
+    <icon concept="acabado"         lucide="droplets"          aliases="finish, textura" note="Evoca acabados como matte, shimmer, gloss."/>
+  </category>
+
+  <!-- CARRITO / VENTA -->
+  <category name="carrito">
+    <icon concept="carrito"         lucide="shopping-cart"     aliases="cart, canasta"/>
+    <icon concept="agregar"         lucide="plus"              aliases="add, nuevo"/>
+    <icon concept="agregar al carrito" lucide="plus-circle"    aliases="add-to-cart"/>
+    <icon concept="quitar"          lucide="minus"             aliases="remove, restar"/>
+    <icon concept="eliminar"        lucide="trash-2"           aliases="delete, borrar"/>
+    <icon concept="cantidad"        lucide="hash"              aliases="qty, count"/>
+    <icon concept="descuento"       lucide="percent"           aliases="discount, promo, oferta"/>
+    <icon concept="ticket"          lucide="receipt"           aliases="receipt, nota"/>
+  </category>
+
+  <!-- PAGO -->
+  <category name="pago">
+    <icon concept="tarjeta"         lucide="credit-card"       aliases="card, terminal"/>
+    <icon concept="efectivo"        lucide="banknote"          aliases="cash, billetes"/>
+    <icon concept="billetera"       lucide="wallet"            aliases="wallet"/>
+    <icon concept="cobrar"          lucide="circle-dollar-sign" aliases="charge, pay, checkout"/>
+    <icon concept="cambio"          lucide="arrow-left-right"  aliases="change, vuelto"/>
+    <icon concept="comprobante"     lucide="file-text"         aliases="invoice, factura"/>
+    <icon concept="pago confirmado" lucide="check-circle"      aliases="paid, success"/>
+  </category>
+
+  <!-- INVENTARIO -->
+  <category name="inventario">
+    <icon concept="inventario"      lucide="package"           aliases="stock, almacén, box"/>
+    <icon concept="entrada"         lucide="package-plus"      aliases="restock, ingreso"/>
+    <icon concept="salida"          lucide="package-minus"     aliases="merma, egreso"/>
+    <icon concept="stock bajo"      lucide="alert-triangle"    aliases="low-stock, alerta"/>
+    <icon concept="sin stock"       lucide="package-x"         aliases="out-of-stock, agotado"/>
+    <icon concept="movimiento"      lucide="arrow-up-down"     aliases="movement, transfer"/>
+  </category>
+
+  <!-- CLIENTES -->
+  <category name="clientes">
+    <icon concept="cliente"         lucide="user"              aliases="person, individual"/>
+    <icon concept="clientes"        lucide="users"             aliases="people, grupo"/>
+    <icon concept="cliente nuevo"   lucide="user-plus"         aliases="new-customer, registrar"/>
+    <icon concept="favorito"        lucide="heart"             aliases="favorite, wishlist"/>
+    <icon concept="VIP/frecuente"   lucide="star"              aliases="star, loyalty"/>
+    <icon concept="historial"       lucide="history"           aliases="record, timeline"/>
+    <icon concept="teléfono"        lucide="phone"             aliases="phone, contacto"/>
+    <icon concept="email"           lucide="mail"              aliases="correo, email"/>
+  </category>
+
+  <!-- ACCIONES -->
+  <category name="acciones">
+    <icon concept="editar"          lucide="pencil"            aliases="edit, modificar"/>
+    <icon concept="eliminar"        lucide="trash-2"           aliases="delete, borrar"/>
+    <icon concept="duplicar"        lucide="copy"              aliases="clone, copiar"/>
+    <icon concept="exportar"        lucide="download"          aliases="export, descargar"/>
+    <icon concept="importar"        lucide="upload"            aliases="import, subir"/>
+    <icon concept="imprimir"        lucide="printer"           aliases="print"/>
+    <icon concept="compartir"       lucide="share-2"           aliases="share"/>
+    <icon concept="guardar"         lucide="save"              aliases="save"/>
+    <icon concept="cancelar"        lucide="x-circle"          aliases="cancel, anular"/>
+    <icon concept="devolver"        lucide="undo-2"            aliases="return, devolución"/>
+  </category>
+
+  <!-- ESTADOS / FEEDBACK -->
+  <category name="estados">
+    <icon concept="éxito"           lucide="check-circle"      aliases="success, completado"/>
+    <icon concept="advertencia"     lucide="alert-triangle"    aliases="warning, precaución"/>
+    <icon concept="error"           lucide="x-circle"          aliases="fail, fallo"/>
+    <icon concept="información"     lucide="info"              aliases="info, ayuda"/>
+    <icon concept="en progreso"     lucide="clock"             aliases="pending, esperando"/>
+    <icon concept="cargando"        lucide="loader-2"          aliases="loading, spinner" note="Usar con animación rotate continua."/>
+  </category>
+
+  <!-- DASHBOARD / REPORTES -->
+  <category name="dashboard">
+    <icon concept="gráfica barras"  lucide="bar-chart-3"       aliases="bar-chart"/>
+    <icon concept="gráfica línea"   lucide="line-chart"        aliases="trend"/>
+    <icon concept="tendencia arriba" lucide="trending-up"      aliases="growth, crecimiento"/>
+    <icon concept="tendencia abajo" lucide="trending-down"     aliases="decline, caída"/>
+    <icon concept="dinero"          lucide="dollar-sign"       aliases="revenue, ingreso"/>
+    <icon concept="calendario"      lucide="calendar"          aliases="date, fecha, periodo"/>
+    <icon concept="reporte"         lucide="file-bar-chart"    aliases="report, analytics"/>
+    <icon concept="objetivo/meta"   lucide="target"            aliases="goal, KPI"/>
+  </category>
+
+  <!-- SISTEMA / CONFIGURACIÓN -->
+  <category name="sistema">
+    <icon concept="configuración"   lucide="settings"          aliases="config, ajustes"/>
+    <icon concept="cerrar sesión"   lucide="log-out"           aliases="logout, salir"/>
+    <icon concept="actualizar"      lucide="refresh-cw"        aliases="refresh, reload"/>
+    <icon concept="filtrar"         lucide="filter"            aliases="filter, filtro"/>
+    <icon concept="ordenar"         lucide="arrow-up-down"     aliases="sort"/>
+    <icon concept="columnas"        lucide="columns-3"         aliases="layout, vista"/>
+    <icon concept="notificación"    lucide="bell"              aliases="notification, alerta"/>
+    <icon concept="sucursal"        lucide="store"             aliases="branch, tienda"/>
+    <icon concept="impuestos"       lucide="calculator"        aliases="tax, IVA"/>
+    <icon concept="impresora"       lucide="printer"           aliases="thermal, ticket"/>
+    <icon concept="ayuda"           lucide="help-circle"       aliases="help, soporte"/>
+  </category>
+
+  <!-- CAJA REGISTRADORA -->
+  <category name="caja">
+    <icon concept="abrir caja"      lucide="lock-open"         aliases="open-register"/>
+    <icon concept="cerrar caja"     lucide="lock"              aliases="close-register"/>
+    <icon concept="corte de caja"   lucide="scissors"          aliases="cash-cut, reconciliation"/>
+    <icon concept="entrada efectivo" lucide="arrow-down-circle" aliases="cash-in"/>
+    <icon concept="salida efectivo" lucide="arrow-up-circle"   aliases="cash-out"/>
+    <icon concept="caja"            lucide="landmark"          aliases="register, caja-registradora"/>
+  </category>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- USO EN CÓDIGO                                            -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <usage lang="jsx">
+    <![CDATA[
+import { ShoppingCart, Search, Plus } from 'lucide-react';
+
+// Uso básico — hereda color del contexto
+<Search size={18} strokeWidth={1.75} />
+
+// Con color explícito (solo en excepciones documentadas)
+<CheckCircle size={20} strokeWidth={1.75} className="text-success" />
+
+// Dentro de un botón
+<Button variant="primary" size="md">
+  <ShoppingCart size={18} strokeWidth={1.75} />
+  Cobrar $1,805
+</Button>
+
+// Spinner de carga (loading state)
+<Loader2 size={18} strokeWidth={1.75} className="animate-spin" />
+    ]]>
+  </usage>
+
+</zenith_iconography>
