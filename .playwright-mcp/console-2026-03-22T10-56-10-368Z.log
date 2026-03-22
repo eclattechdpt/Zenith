@@ -1,0 +1,3858 @@
+[      26ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/:0
+[      52ms] Error: ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component]
+
+
+    at <unknown> (Error: ./src/app/globals.css:3809:8)
+    at <unknown> (./src/app/globals.css:3809:8)
+    at Object.getCompilationErrors (file://C:\Users\opsyo\Downloads\Zenith\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1189:59)
+    at DevBundlerService.getCompilationError (file://C:\Users\opsyo\Downloads\Zenith\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://C:\Users\opsyo\Downloads\Zenith\node_modules\next\dist\server\dev\next-dev-server.js:719:42)
+    at DevServer.findPageComponents (file://C:\Users\opsyo\Downloads\Zenith\node_modules\next\dist\server\dev\next-dev-server.js:689:43)
+    at async DevServer.renderErrorToResponseImpl (file://C:\Users\opsyo\Downloads\Zenith\node_modules\next\dist\server\base-server.js:1745:26)
+[      50ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[      50ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[      51ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     149ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     211ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     275ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     337ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     398ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     460ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     521ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     583ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     645ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     708ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     770ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     832ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     892ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[     953ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1015ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1078ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1138ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1200ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1262ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1323ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1386ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1447ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1508ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1569ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1631ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1691ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1756ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1818ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1879ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    1941ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2004ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2066ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2128ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2190ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2251ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2311ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2372ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2421ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2483ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2546ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2610ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2672ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2735ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2796ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2859ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2922ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    2985ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3047ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3110ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3173ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3236ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3298ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3360ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3422ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3470ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3530ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3593ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3656ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3719ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3766ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3826ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3889ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    3952ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4014ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4077ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4139ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4202ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4263ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4325ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4389ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4451ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4500ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4562ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4609ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4672ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4736ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4798ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4860ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4924ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    4987ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5049ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5112ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5176ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5238ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5302ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5363ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5426ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5488ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5550ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5613ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5675ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5723ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5786ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5848ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5912ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    5975ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6039ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6102ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6163ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6225ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6287ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6347ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6409ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6470ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6532ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6594ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6656ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6717ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6779ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6841ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6903ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    6964ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7025ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7087ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7149ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7211ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7273ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7336ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7396ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7458ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7520ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7581ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7643ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7706ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7767ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7829ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7891ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    7951ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8011ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8073ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8135ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8198ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8260ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8322ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8372ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8433ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8494ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8558ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8620ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8683ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8746ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8795ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8856ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[    8918ms] [ERROR] ./src/app/globals.css:3809:8
+Parsing CSS source code failed
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:3809:8
+  3807 |   initial-value: 0;
+  3808 | }
+> 3809 | @import url("https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap");
+       |        ^
+  3810 | :root {
+  3811 |   --background: #FDFBFA;
+  3812 |   --foreground: #1A1714;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
