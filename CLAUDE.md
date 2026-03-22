@@ -2,7 +2,34 @@
 
 ## Proyecto
 
-POS + Inventario web para tienda de belleza y cosméticos. Stack: Next.js App Router + Supabase + TypeScript + Tailwind + shadcn/ui + Motion.
+**Zenith POS** — Sistema de punto de venta e inventario web para tienda de belleza y cosméticos. Stack: Next.js App Router + Supabase + TypeScript + Tailwind + shadcn/ui + Motion.
+
+### Branding
+
+- El nombre del producto es **Zenith** (o **Zenith POS** cuando se necesite contexto).
+- Usar "Zenith" en toda la UI, títulos, meta tags, y documentación.
+- Supabase project ID: `lccclwtwkegbvlpdwisu` | Org: `Zenith System`
+- La variable `NEXT_PUBLIC_APP_NAME` debe ser `"Zenith POS"`.
+
+## MCP (Model Context Protocol)
+
+Este proyecto usa Supabase MCP para interactuar con la base de datos. La configuración está en `.mcp.json` en la raíz del repo.
+
+**Al iniciar una sesión**, verifica que el MCP de Supabase esté conectado. Si no lo está o falla alguna operación de Supabase MCP, indica al usuario:
+
+1. Ejecutar `/mcp` en Claude Code para autenticarse vía navegador.
+2. Confirmar que `.mcp.json` existe en la raíz con el contenido correcto:
+   ```json
+   {
+     "mcpServers": {
+       "supabase": {
+         "type": "http",
+         "url": "https://mcp.supabase.com/mcp"
+       }
+     }
+   }
+   ```
+3. La autenticación es por máquina — cada vez que se clone el repo en una máquina nueva, hay que ejecutar `/mcp` de nuevo.
 
 ## Documentación del proyecto
 
