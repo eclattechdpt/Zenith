@@ -1,30 +1,383 @@
-import { LogOut, Sparkles } from "lucide-react"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
+import {
+  CalendarDays,
+  DollarSign,
+  ShoppingBag,
+  TrendingUp,
+  AlertTriangle,
+  ArrowUpRight,
+  Package,
+  RotateCcw,
+  ClipboardList,
+} from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { logout } from "@/features/auth/actions"
+import { createServerClient } from "@/lib/supabase/server"
+import { SalesChart } from "@/features/dashboard/components/sales-chart"
+import mockData from "@/features/dashboard/mock-data.json"
 
-export default function DashboardPage() {
+const formatMXN = (v: number) =>
+  new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+  }).format(v)
+
+const kpis = [
+  {
+    label: "Ventas del dia",
+    value: formatMXN(mockData.kpis.ventasDelDia),
+    change: `+${mockData.kpis.ventasDelDiaCambio}%`,
+    trend: "up" as const,
+    icon: DollarSign,
+    iconBg: "bg-rose-50",
+    iconColor: "text-rose-500",
+  },
+  {
+    label: "Transacciones",
+    value: mockData.kpis.transacciones.toString(),
+    change: `+${mockData.kpis.transaccionesCambio}`,
+    trend: "up" as const,
+    icon: ShoppingBag,
+    iconBg: "bg-teal-50",
+    iconColor: "text-teal-600",
+  },
+  {
+    label: "Ticket promedio",
+    value: formatMXN(mockData.kpis.ticketPromedio),
+    change: `+${mockData.kpis.ticketPromedioCambio}%`,
+    trend: "up" as const,
+    icon: TrendingUp,
+    iconBg: "bg-blush-50",
+    iconColor: "text-rose-400",
+  },
+  {
+    label: "Stock bajo",
+    value: mockData.kpis.stockBajoAlertas.toString(),
+    change: "alertas",
+    trend: "alert" as const,
+    icon: AlertTriangle,
+    iconBg: "bg-warning-light",
+    iconColor: "text-warning",
+  },
+]
+
+const activityIcons: Record<string, typeof DollarSign> = {
+  venta: ShoppingBag,
+  devolucion: RotateCcw,
+  ajuste: ClipboardList,
+}
+
+const activityStyles: Record<string, { bg: string; color: string }> = {
+  venta: { bg: "bg-neutral-100", color: "text-neutral-600" },
+  devolucion: { bg: "bg-warning-light", color: "text-warning" },
+  ajuste: { bg: "bg-info-light", color: "text-info" },
+}
+
+export default async function DashboardPage() {
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const displayName =
+    user?.user_metadata?.full_name ??
+    user?.email?.split("@")[0] ??
+    "usuario"
+
+  const today = new Date()
+  const formattedDate = format(today, "d 'de' MMMM, yyyy", { locale: es })
+
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-8 p-6">
-      <div className="flex flex-col items-center gap-6 text-center">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-rose-500 shadow-rose">
-          <Sparkles className="size-7 text-white" strokeWidth={1.75} />
-        </div>
+    <div className="space-y-6">
+      {/* Greeting */}
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight text-neutral-950">
-            Bienvenido a Zenith
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-neutral-950">
+            Hola, {displayName}
           </h1>
-          <p className="mt-2 text-neutral-500">
-            Tu sistema de punto de venta inteligente.
+          <p className="mt-1 text-sm text-neutral-500">
+            Bienvenido de vuelta a Zenith
           </p>
         </div>
+        <div className="hidden items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 shadow-xs sm:flex">
+          <CalendarDays
+            className="size-3.5 text-neutral-400"
+            strokeWidth={1.75}
+          />
+          <span className="text-xs font-medium text-neutral-600">
+            {formattedDate}
+          </span>
+        </div>
       </div>
-      <form action={logout}>
-        <Button variant="outline" type="submit" className="gap-2">
-          <LogOut className="size-4" strokeWidth={1.75} />
-          Cerrar sesion
-        </Button>
-      </form>
+
+      {/* KPI Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {kpis.map((kpi) => {
+          const Icon = kpi.icon
+          return (
+            <div
+              key={kpi.label}
+              className="rounded-2xl border border-neutral-200 bg-white p-5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-[2px] text-neutral-500">
+                  {kpi.label}
+                </span>
+                <div
+                  className={`flex size-8 items-center justify-center rounded-lg ${kpi.iconBg}`}
+                >
+                  <Icon className={`size-4 ${kpi.iconColor}`} strokeWidth={1.75} />
+                </div>
+              </div>
+              <p className="mt-3 text-2xl font-extrabold tracking-tight text-neutral-950">
+                {kpi.value}
+              </p>
+              <div className="mt-1.5 flex items-center gap-1">
+                {kpi.trend === "up" && (
+                  <ArrowUpRight
+                    className="size-3 text-success"
+                    strokeWidth={2.5}
+                  />
+                )}
+                <span
+                  className={
+                    kpi.trend === "alert"
+                      ? "text-xs font-semibold text-warning"
+                      : "text-xs font-semibold text-success"
+                  }
+                >
+                  {kpi.change}
+                </span>
+                {kpi.trend === "up" && (
+                  <span className="text-[11px] text-neutral-400">vs ayer</span>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Chart + Activity */}
+      <div className="grid gap-5 xl:grid-cols-5">
+        {/* Sales chart */}
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6 xl:col-span-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-neutral-900">
+                Rendimiento de ventas
+              </h2>
+              <p className="mt-0.5 text-[11px] text-neutral-500">
+                Comparativa semanal
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-rose-400" />
+                <span className="text-[11px] font-medium text-neutral-500">
+                  Esta semana
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-teal-300" />
+                <span className="text-[11px] font-medium text-neutral-500">
+                  Semana pasada
+                </span>
+              </div>
+            </div>
+          </div>
+          <SalesChart />
+        </div>
+
+        {/* Recent activity */}
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6 xl:col-span-2">
+          <h2 className="text-sm font-bold text-neutral-900">
+            Actividad reciente
+          </h2>
+          <div className="mt-4 space-y-0.5">
+            {mockData.actividadReciente.map((item) => {
+              const Icon = activityIcons[item.tipo] ?? ShoppingBag
+              const styles = activityStyles[item.tipo] ?? activityStyles.venta
+              const isNegative = item.monto !== null && item.monto < 0
+              return (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors duration-[200ms] hover:bg-neutral-50"
+                >
+                  <div
+                    className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${styles.bg}`}
+                  >
+                    <Icon
+                      className={`size-3.5 ${styles.color}`}
+                      strokeWidth={1.75}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-semibold text-neutral-800">
+                      {item.descripcion}
+                    </p>
+                    <p className="truncate text-[11px] text-neutral-500">
+                      {item.detalle}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    {item.monto !== null ? (
+                      <span
+                        className={`text-[13px] font-bold tabular-nums ${
+                          isNegative ? "text-warning-dark" : "text-neutral-900"
+                        }`}
+                      >
+                        {isNegative ? "-" : ""}
+                        {formatMXN(Math.abs(item.monto))}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-semibold text-info">
+                        ajuste
+                      </span>
+                    )}
+                    <p className="text-[10px] text-neutral-400">{item.hora}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom row — Top products + Inventory alerts */}
+      <div className="grid gap-5 xl:grid-cols-2">
+        {/* Top products */}
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-neutral-900">
+              Productos mas vendidos
+            </h2>
+            <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+              Este mes
+            </span>
+          </div>
+          <div className="mt-5">
+            {/* Table header */}
+            <div className="grid grid-cols-[1fr_50px_90px_50px] gap-2 border-b border-neutral-200 pb-2.5 text-[10px] font-bold uppercase tracking-[2px] text-neutral-500">
+              <span>Producto</span>
+              <span className="text-right">Uds</span>
+              <span className="text-right">Ingresos</span>
+              <span className="text-right">%</span>
+            </div>
+            {/* Rows */}
+            <div className="divide-y divide-neutral-100">
+              {mockData.topProductos.map((p, i) => (
+                <div
+                  key={p.nombre}
+                  className="grid grid-cols-[1fr_50px_90px_50px] items-center gap-2 py-3"
+                >
+                  <div className="flex items-center gap-2.5 overflow-hidden">
+                    <span
+                      className={`flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-extrabold ${
+                        i === 0
+                          ? "bg-rose-50 text-rose-500"
+                          : i === 1
+                            ? "bg-blush-50 text-rose-400"
+                            : "bg-neutral-100 text-neutral-500"
+                      }`}
+                    >
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-semibold text-neutral-800">
+                        {p.nombre}
+                      </p>
+                      <p className="truncate text-[11px] text-neutral-500">
+                        {p.variante}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-right text-[13px] font-medium tabular-nums text-neutral-700">
+                    {p.unidades}
+                  </span>
+                  <span className="text-right text-[13px] font-bold tabular-nums text-neutral-900">
+                    {formatMXN(p.ingresos)}
+                  </span>
+                  <span className="text-right text-[12px] font-bold text-success">
+                    {p.margen}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Inventory alerts */}
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-neutral-900">
+                Alertas de inventario
+              </h2>
+              <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600">
+                {mockData.alertasInventario.length}
+              </span>
+            </div>
+          </div>
+          <div className="mt-4 space-y-0.5">
+            {mockData.alertasInventario.map((item) => {
+              const pct = Math.round(
+                (item.stockActual / item.stockMinimo) * 100
+              )
+              const isCritical = item.estado === "critico"
+              return (
+                <div
+                  key={item.nombre + item.variante}
+                  className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors duration-[200ms] hover:bg-neutral-50"
+                >
+                  <div
+                    className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${
+                      isCritical ? "bg-error-light" : "bg-warning-light"
+                    }`}
+                  >
+                    <Package
+                      className={`size-3.5 ${
+                        isCritical ? "text-error" : "text-warning"
+                      }`}
+                      strokeWidth={1.75}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-semibold text-neutral-800">
+                      {item.nombre}
+                    </p>
+                    <p className="truncate text-[11px] text-neutral-500">
+                      {item.variante}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`text-[13px] font-bold tabular-nums ${
+                          isCritical ? "text-error" : "text-warning-dark"
+                        }`}
+                      >
+                        {item.stockActual}
+                      </span>
+                      <span className="text-[11px] text-neutral-400">
+                        / {item.stockMinimo}
+                      </span>
+                    </div>
+                    {/* Mini progress bar */}
+                    <div className="mt-1 h-1 w-14 overflow-hidden rounded-full bg-neutral-100">
+                      <div
+                        className={`h-full rounded-full ${
+                          isCritical ? "bg-error" : "bg-warning"
+                        }`}
+                        style={{ width: `${Math.min(pct, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -221,3 +221,25 @@ Seguir el orden de sprints del archivo `04-PROJECT-STRUCTURE.md`:
 8. Polish
 
 No saltar sprints. Cada sprint depende del anterior.
+
+## Progreso actual
+
+**Sprint 1 — Fundacion: ~70% completo** (actualizado 2026-03-23)
+
+### Completado
+- Proyecto Next.js inicializado con App Router, TS, Tailwind, shadcn/ui (23 componentes)
+- Supabase: proyecto configurado, migraciones ejecutadas (17 tablas), seed data, RLS activo
+- Auth completo: login/logout server actions, middleware con refresh de sesion, redirect logic
+- Supabase clients: `client.ts`, `server.ts`, `proxy.ts` (middleware helper)
+- Login page: UI pulida con Silk background, split layout desktop/mobile, formulario animado con RHF+Zod
+- Root layout: Plus Jakarta Sans + Geist Mono + Zodiak fonts, QueryProvider, NuqsAdapter, Sonner
+- Tipos de DB generados (`database.ts`)
+- Dashboard placeholder con logout
+- Status pill debug en login (cicla online/warning/error en dev)
+
+### Pendiente Sprint 1
+- Dashboard layout: sidebar + header con navegacion
+- Navegacion movil (Sheet)
+- Componentes shared: data-table, page-header, confirm-dialog, empty-state, loading-skeleton
+- `constants.ts` (sale statuses, payment methods, etc.)
+- Verificar/completar `utils.ts` (formatCurrency)

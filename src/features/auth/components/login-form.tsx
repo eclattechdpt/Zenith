@@ -2,9 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Eye, EyeOff, LogIn } from "lucide-react"
-import { motion } from "motion/react"
+import { motion, useMotionValue, useTransform, useSpring } from "motion/react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useForm } from "react-hook-form"
 
 import { login } from "../actions"
@@ -134,23 +134,130 @@ export function LoginForm() {
 
       {/* Submit */}
       <motion.div {...fieldVariant(2)}>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="group relative mt-2 h-12 w-full cursor-pointer overflow-hidden rounded-xl bg-neutral-950 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-neutral-800 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
-        >
-          <span className="transition-all duration-500">
-            {isSubmitting ? "Iniciando sesion..." : "Entrar"}
-          </span>
-          <div className={`absolute right-1.5 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-[10px] text-white transition-all duration-500 ${isSubmitting ? "bg-white/15" : "bg-white/15 group-hover:bg-white group-hover:text-neutral-950"}`}>
-            {isSubmitting ? (
-              <Loader2 size={15} strokeWidth={2} className="animate-spin" />
-            ) : (
-              <LogIn size={15} strokeWidth={2} className="transition-transform duration-500 group-hover:translate-x-0.5" />
-            )}
-          </div>
-        </button>
+        <LoginButton isSubmitting={isSubmitting} />
       </motion.div>
     </form>
+  )
+}
+
+function LoginButton({ isSubmitting }: { isSubmitting: boolean }) {
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [isHovered, setIsHovered] = useState(false)
+
+  const mouseX = useMotionValue(0.5)
+  const mouseY = useMotionValue(0.5)
+
+  const springX = useSpring(mouseX, { stiffness: 300, damping: 30 })
+  const springY = useSpring(mouseY, { stiffness: 300, damping: 30 })
+
+  // SVG border dash offset driven by mouse position
+  const dashOffset = useTransform(springX, [0, 1], [0, -120])
+
+  // Glow position follows cursor
+  const glowX = useTransform(springX, [0, 1], [0, 100])
+  const glowY = useTransform(springY, [0, 1], [0, 100])
+
+  function handleMouseMove(e: React.MouseEvent) {
+    if (!buttonRef.current) return
+    const rect = buttonRef.current.getBoundingClientRect()
+    mouseX.set((e.clientX - rect.left) / rect.width)
+    mouseY.set((e.clientY - rect.top) / rect.height)
+  }
+
+  // Perimeter for a 48px tall, full-width rounded-xl button (approximated)
+  const rx = 12
+  const h = 48
+
+  return (
+    <button
+      ref={buttonRef}
+      type="submit"
+      disabled={isSubmitting}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onMouseMove={handleMouseMove}
+      className="group relative mt-2 h-12 w-full cursor-pointer overflow-hidden rounded-xl bg-neutral-950 text-sm font-semibold text-white active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+    >
+      {/* SVG animated border */}
+      <svg
+        className="pointer-events-none absolute inset-0 h-full w-full"
+        xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="none"
+      >
+        <motion.rect
+          x="1"
+          y="1"
+          width="calc(100% - 2px)"
+          height={h - 2}
+          rx={rx}
+          ry={rx}
+          fill="none"
+          strokeWidth="2"
+          stroke="url(#btn-gradient)"
+          strokeDasharray="8 4"
+          style={{ strokeDashoffset: dashOffset }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isHovered ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
+        />
+        <defs>
+          <linearGradient id="btn-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#fb7185" />
+            <stop offset="50%" stopColor="#f9a8d4" />
+            <stop offset="100%" stopColor="#fb7185" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      {/* Cursor-tracking glow */}
+      <motion.div
+        className="pointer-events-none absolute -inset-1 rounded-xl"
+        style={{
+          background: useTransform(
+            [glowX, glowY],
+            ([x, y]) =>
+              `radial-gradient(circle at ${x}% ${y}%, rgba(251,113,133,0.25) 0%, transparent 60%)`
+          ),
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+      />
+
+      {/* Shimmer sweep on hover */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 rounded-xl"
+        style={{
+          background:
+            "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.08) 55%, transparent 60%)",
+          backgroundSize: "200% 100%",
+        }}
+        animate={{ backgroundPosition: isHovered ? "200% 0" : "-100% 0" }}
+        transition={{ duration: 0.8, ease: "easeInOut" }}
+      />
+
+      {/* Content */}
+      <span className="relative z-10 transition-all duration-500">
+        {isSubmitting ? "Iniciando sesion..." : "Entrar"}
+      </span>
+      <div
+        className={`absolute right-1.5 top-1/2 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-[10px] text-white transition-all duration-500 ${
+          isSubmitting
+            ? "bg-white/15"
+            : "bg-white/15 group-hover:bg-white group-hover:text-neutral-950"
+        }`}
+      >
+        {isSubmitting ? (
+          <Loader2 size={15} strokeWidth={2} className="animate-spin" />
+        ) : (
+          <motion.div
+            animate={{ x: isHovered ? 2 : 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          >
+            <LogIn size={15} strokeWidth={2} />
+          </motion.div>
+        )}
+      </div>
+    </button>
   )
 }

@@ -10,7 +10,12 @@ export default function AuthLayout({
     <>
       {/* ── Desktop: split layout ── */}
       <div className="hidden min-h-svh w-full bg-white lg:flex">
-        {/* Left — Silk "window" */}
+        {/* Left — Login form */}
+        <div className="relative flex flex-1 flex-col items-center justify-center px-10">
+          {children}
+        </div>
+
+        {/* Right — Silk "window" */}
         <div className="relative w-[52%] p-4">
           <div className="relative h-full w-full overflow-hidden rounded-3xl">
             <div className="absolute inset-0">
@@ -26,11 +31,6 @@ export default function AuthLayout({
               <LeftPanelAnimations />
             </div>
           </div>
-        </div>
-
-        {/* Right — Login form */}
-        <div className="relative flex flex-1 flex-col items-center justify-center px-10">
-          {children}
         </div>
       </div>
 
