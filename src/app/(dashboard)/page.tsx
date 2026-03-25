@@ -13,19 +13,14 @@ import {
 } from "lucide-react"
 
 import { createServerClient } from "@/lib/supabase/server"
+import { formatCurrency } from "@/lib/utils"
 import { SalesChart } from "@/features/dashboard/components/sales-chart"
 import mockData from "@/features/dashboard/mock-data.json"
-
-const formatMXN = (v: number) =>
-  new Intl.NumberFormat("es-MX", {
-    style: "currency",
-    currency: "MXN",
-  }).format(v)
 
 const kpis = [
   {
     label: "Ventas del dia",
-    value: formatMXN(mockData.kpis.ventasDelDia),
+    value: formatCurrency(mockData.kpis.ventasDelDia),
     change: `+${mockData.kpis.ventasDelDiaCambio}%`,
     trend: "up" as const,
     icon: DollarSign,
@@ -43,7 +38,7 @@ const kpis = [
   },
   {
     label: "Ticket promedio",
-    value: formatMXN(mockData.kpis.ticketPromedio),
+    value: formatCurrency(mockData.kpis.ticketPromedio),
     change: `+${mockData.kpis.ticketPromedioCambio}%`,
     trend: "up" as const,
     icon: TrendingUp,
@@ -227,7 +222,7 @@ export default async function DashboardPage() {
                         }`}
                       >
                         {isNegative ? "-" : ""}
-                        {formatMXN(Math.abs(item.monto))}
+                        {formatCurrency(Math.abs(item.monto))}
                       </span>
                     ) : (
                       <span className="text-[11px] font-semibold text-info">
@@ -295,7 +290,7 @@ export default async function DashboardPage() {
                     {p.unidades}
                   </span>
                   <span className="text-right text-[13px] font-bold tabular-nums text-neutral-900">
-                    {formatMXN(p.ingresos)}
+                    {formatCurrency(p.ingresos)}
                   </span>
                   <span className="text-right text-[12px] font-bold text-success">
                     {p.margen}%

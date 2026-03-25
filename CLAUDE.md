@@ -229,7 +229,7 @@ No saltar sprints. Cada sprint depende del anterior.
 ### Completado
 - Proyecto Next.js inicializado con App Router, TS, Tailwind, shadcn/ui (23 componentes)
 - Supabase: proyecto configurado, migraciones ejecutadas (17 tablas), seed data, RLS activo
-- Auth completo: login/logout server actions, middleware con refresh de sesion, redirect logic
+- Auth completo: login/logout server actions, middleware con refresh de sesion, redirect logic, errores de Supabase traducidos a espanol
 - Supabase clients: `client.ts`, `server.ts`, `proxy.ts` (middleware helper)
 - Login page: UI pulida con Silk background, split layout desktop/mobile, formulario animado con RHF+Zod
 - Root layout: Plus Jakarta Sans + Geist Mono + Zodiak fonts, QueryProvider, NuqsAdapter, Sonner

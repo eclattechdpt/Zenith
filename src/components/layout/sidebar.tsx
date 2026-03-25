@@ -67,9 +67,7 @@ function ScoopBottom() {
   )
 }
 
-// ── DEBUG: flip to false for production ──
-const DEBUG_PINK = true
-const sidebarBg = DEBUG_PINK ? "bg-rose-300" : "bg-neutral-50"
+const sidebarBg = "bg-neutral-100"
 
 export function Sidebar() {
   const pathname = usePathname()
