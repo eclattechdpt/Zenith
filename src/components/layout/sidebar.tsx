@@ -100,9 +100,9 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative flex items-center gap-3 py-3 pl-3 pr-4 text-[13px] transition-colors duration-[200ms]",
+                  "group relative flex items-center gap-3 py-3 pl-3 pr-4 text-[13px] transition-colors duration-[200ms]",
                   isActive
-                    ? "z-10 font-semibold"
+                    ? "font-semibold"
                     : "font-medium text-neutral-500 hover:text-neutral-800"
                 )}
               >
@@ -127,7 +127,7 @@ export function Sidebar() {
                   <Icon
                     className={cn(
                       "size-[17px] transition-colors duration-[200ms]",
-                      isActive ? "text-rose-500" : "text-neutral-400"
+                      isActive ? "text-rose-500" : "text-neutral-400 group-hover:text-neutral-600"
                     )}
                     strokeWidth={isActive ? 2 : 1.5}
                   />
