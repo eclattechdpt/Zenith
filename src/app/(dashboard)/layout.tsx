@@ -13,7 +13,7 @@ export default function DashboardLayout({
         <Sidebar />
 
         {/* Main area */}
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col bg-white">
           {/* Mobile-only top bar */}
           <div className="flex items-center px-4 pt-4 lg:hidden">
             <MobileNav />

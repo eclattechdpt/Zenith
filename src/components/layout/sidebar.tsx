@@ -111,11 +111,11 @@ export function Sidebar() {
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active"
-                    className="absolute inset-0 bg-white"
-                    style={{ borderRadius: "22px 0 0 22px" }}
+                    className="absolute inset-0 rounded-l-[22px] bg-white"
+                    style={{ overflow: "visible" }}
                     transition={{
                       type: "spring",
-                      stiffness: 380,
+                      stiffness: 300,
                       damping: 32,
                       mass: 0.8,
                     }}
