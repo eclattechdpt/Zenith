@@ -22,7 +22,7 @@
 
 | Sprint | Name | Status | Description |
 |--------|------|--------|-------------|
-| 1 | Fundacion | In progress (~75%) | Auth, layout, providers, shared components |
+| 1 | Fundacion | Complete | Auth, layout, providers, shared components, collapsible sidebar |
 | 2 | Catalogo de productos | Not started | CRUD productos con variantes |
 | 3 | Clientes y precios | Not started | Gestion de clientes, listas de precios |
 | 4 | POS | Not started | Punto de venta, carrito, cobro |

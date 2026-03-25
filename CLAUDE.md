@@ -224,7 +224,7 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
-**Sprint 1 — Fundacion: ~75% completo** (actualizado 2026-03-25)
+**Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-25)
 
 ### Completado
 - Proyecto Next.js inicializado con App Router, TS, Tailwind, shadcn/ui (23 componentes)
@@ -235,12 +235,10 @@ No saltar sprints. Cada sprint depende del anterior.
 - Root layout: Plus Jakarta Sans + Geist Mono + Zodiak fonts, QueryProvider, NuqsAdapter, Sonner
 - Tipos de DB generados (`database.ts`)
 - Dashboard completo con KPIs, grafica de ventas, actividad reciente, top productos, alertas de inventario (mock data)
-- Sidebar con navegacion, animacion de tab activo con scoops concavos y spring animation (Motion)
+- Sidebar colapsable con animacion spring (Motion): tab activo con scoops concavos, logo split (Z fijo + ENITH animado), tooltips en modo colapsado, toggle con rotacion de icono
 - Header con saludo, fecha, y mobile nav
-- Status pill debug en login (cicla online/warning/error en dev)
-
-### Pendiente Sprint 1
-- Navegacion movil (Sheet) — mejorar
+- Navegacion movil (Sheet)
 - Componentes shared: data-table, page-header, confirm-dialog, empty-state, loading-skeleton
-- `constants.ts` (sale statuses, payment methods, etc.)
-- Verificar/completar `utils.ts` (formatCurrency)
+- `constants.ts` (sale statuses, payment methods, movement types, credit notes, return statuses, prefijos)
+- `utils.ts` completo (cn, formatCurrency, formatDate, formatTime)
+- Status pill debug en login (cicla online/warning/error en dev)
