@@ -1,13 +1,15 @@
+import Link from "next/link"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import {
   CalendarDays,
   DollarSign,
   ShoppingBag,
-  TrendingUp,
+  Package,
   AlertTriangle,
   ArrowUpRight,
-  Package,
+  PlusCircle,
+  Boxes,
   RotateCcw,
   ClipboardList,
 } from "lucide-react"
@@ -26,6 +28,17 @@ const kpis = [
     icon: DollarSign,
     iconBg: "bg-rose-50",
     iconColor: "text-rose-500",
+    gradient: "from-rose-50/80 to-white",
+  },
+  {
+    label: "Productos vendidos",
+    value: mockData.kpis.productosVendidos.toString(),
+    change: `+${mockData.kpis.productosVendidosCambio}`,
+    trend: "up" as const,
+    icon: Package,
+    iconBg: "bg-blush-50",
+    iconColor: "text-blush-500",
+    gradient: "from-blush-50/80 to-white",
   },
   {
     label: "Transacciones",
@@ -35,15 +48,7 @@ const kpis = [
     icon: ShoppingBag,
     iconBg: "bg-teal-50",
     iconColor: "text-teal-600",
-  },
-  {
-    label: "Ticket promedio",
-    value: formatCurrency(mockData.kpis.ticketPromedio),
-    change: `+${mockData.kpis.ticketPromedioCambio}%`,
-    trend: "up" as const,
-    icon: TrendingUp,
-    iconBg: "bg-blush-50",
-    iconColor: "text-rose-400",
+    gradient: "from-teal-50/80 to-white",
   },
   {
     label: "Stock bajo",
@@ -53,6 +58,7 @@ const kpis = [
     icon: AlertTriangle,
     iconBg: "bg-warning-light",
     iconColor: "text-warning",
+    gradient: "from-amber-50/80 to-white",
   },
 ]
 
@@ -83,9 +89,9 @@ export default async function DashboardPage() {
   const formattedDate = format(today, "d 'de' MMMM, yyyy", { locale: es })
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* Greeting */}
-      <div className="flex items-start justify-center lg:justify-between">
+      <div className="order-0 flex items-start justify-center lg:order-none lg:justify-between">
         <div className="text-center lg:text-left">
           <h1 className="font-display text-3xl font-semibold tracking-tight text-neutral-950">
             Hola, {displayName}
@@ -106,13 +112,13 @@ export default async function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="order-2 grid gap-4 sm:grid-cols-2 lg:order-none xl:grid-cols-4">
         {kpis.map((kpi) => {
           const Icon = kpi.icon
           return (
             <div
               key={kpi.label}
-              className="rounded-2xl border border-neutral-200 bg-white p-5"
+              className={`rounded-2xl border border-neutral-200 bg-gradient-to-br ${kpi.gradient} p-5 shadow-sm`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-[2px] text-neutral-500">
@@ -152,10 +158,41 @@ export default async function DashboardPage() {
         })}
       </div>
 
+      {/* Quick Actions */}
+      <div className="order-1 grid gap-4 sm:grid-cols-2 lg:order-none">
+        <Link
+          href="/pos"
+          className="group flex items-center gap-4 rounded-2xl border border-neutral-200 bg-gradient-to-br from-rose-50/60 to-white p-5 shadow-sm transition-all duration-200 hover:border-rose-200 hover:shadow-md"
+        >
+          <div className="flex size-11 items-center justify-center rounded-xl bg-rose-100 transition-colors group-hover:bg-rose-200">
+            <PlusCircle className="size-5 text-rose-600" strokeWidth={1.75} />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-neutral-900">Nueva venta</p>
+            <p className="text-[11px] text-neutral-500">Ir al punto de venta</p>
+          </div>
+          <ArrowUpRight className="ml-auto size-4 text-neutral-300 transition-colors group-hover:text-rose-400" strokeWidth={2} />
+        </Link>
+
+        <Link
+          href="/inventario"
+          className="group flex items-center gap-4 rounded-2xl border border-neutral-200 bg-gradient-to-br from-teal-50/60 to-white p-5 shadow-sm transition-all duration-200 hover:border-teal-200 hover:shadow-md"
+        >
+          <div className="flex size-11 items-center justify-center rounded-xl bg-teal-100 transition-colors group-hover:bg-teal-200">
+            <Boxes className="size-5 text-teal-600" strokeWidth={1.75} />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-neutral-900">Ver inventario</p>
+            <p className="text-[11px] text-neutral-500">Revisar stock y productos</p>
+          </div>
+          <ArrowUpRight className="ml-auto size-4 text-neutral-300 transition-colors group-hover:text-teal-400" strokeWidth={2} />
+        </Link>
+      </div>
+
       {/* Chart + Activity */}
-      <div className="grid gap-5 xl:grid-cols-5">
+      <div className="order-3 grid gap-5 lg:order-none xl:grid-cols-5">
         {/* Sales chart */}
-        <div className="rounded-2xl border border-neutral-200 bg-white p-6 xl:col-span-3">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm xl:col-span-3">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-neutral-900">
@@ -184,7 +221,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Recent activity */}
-        <div className="rounded-2xl border border-neutral-200 bg-white p-6 xl:col-span-2">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm xl:col-span-2">
           <h2 className="text-sm font-bold text-neutral-900">
             Actividad reciente
           </h2>
@@ -238,10 +275,10 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Bottom row — Top products + Inventory alerts */}
-      <div className="grid gap-5 xl:grid-cols-2">
+      {/* Top Products + Inventory Alerts */}
+      <div className="order-4 grid gap-5 lg:order-none xl:grid-cols-2">
         {/* Top products */}
-        <div className="rounded-2xl border border-neutral-200 bg-white p-6">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-neutral-900">
               Productos mas vendidos
@@ -302,7 +339,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Inventory alerts */}
-        <div className="rounded-2xl border border-neutral-200 bg-white p-6">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-bold text-neutral-900">
@@ -373,6 +410,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
+
     </div>
   )
 }

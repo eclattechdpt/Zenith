@@ -9,7 +9,9 @@
       "Bash(npm install:*)",
       "Bash(git commit:*)",
       "Bash(npm run:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(ls:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

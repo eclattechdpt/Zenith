@@ -251,10 +251,10 @@ export function Sidebar() {
               Ayuda
             </TooltipContent>
           </SidebarTooltip>
-          <SidebarTooltip collapsed={collapsed}>
-            <TooltipTrigger
-              render={
-                <form action={logout}>
+          <form action={logout}>
+            <SidebarTooltip collapsed={collapsed}>
+              <TooltipTrigger
+                render={
                   <button
                     type="submit"
                     className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-500 transition-colors duration-[200ms] hover:bg-rose-50 hover:text-rose-600"
@@ -268,13 +268,13 @@ export function Sidebar() {
                       Cerrar sesion
                     </motion.span>
                   </button>
-                </form>
-              }
-            />
-            <TooltipContent side="right" sideOffset={12}>
-              Cerrar sesion
-            </TooltipContent>
-          </SidebarTooltip>
+                }
+              />
+              <TooltipContent side="right" sideOffset={12}>
+                Cerrar sesion
+              </TooltipContent>
+            </SidebarTooltip>
+          </form>
         </div>
       </motion.aside>
     </TooltipProvider>

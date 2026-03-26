@@ -234,7 +234,8 @@ No saltar sprints. Cada sprint depende del anterior.
 - Login page: UI pulida con Silk background, split layout desktop/mobile, formulario animado con RHF+Zod
 - Root layout: Plus Jakarta Sans + Geist Mono + Zodiak fonts, QueryProvider, NuqsAdapter, Sonner
 - Tipos de DB generados (`database.ts`)
-- Dashboard completo con KPIs, grafica de ventas, actividad reciente, top productos, alertas de inventario (mock data)
+- Dashboard rediseñado: KPIs con gradientes suaves (ventas, productos vendidos, transacciones, stock bajo), quick actions (nueva venta, ver inventario), grafica de ventas, actividad reciente, top productos, alertas de inventario (mock data). Quick actions antes de KPIs en mobile, despues en desktop
+- Sidebar logout: form movido fuera de TooltipTrigger para evitar error de redirect
 - Sidebar colapsable con animacion spring (Motion): tab activo con scoops concavos, logo split (Z fijo + ENITH animado), tooltips en modo colapsado, toggle con rotacion de icono, transiciones de fade refinadas (fade-in lento, fade-out rapido)
 - Header con saludo, fecha, y mobile nav
 - Navegacion movil (Sheet) con boton organico: scoops concavos flush al borde izquierdo, fixed/sticky con z-50

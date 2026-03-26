@@ -23,7 +23,7 @@ export function SalesChart() {
       showGridLines={false}
       showYAxis={false}
       curveType="monotone"
-      className="mt-6 h-[220px]"
+      className="mt-6 h-[260px]"
     />
   )
 }
