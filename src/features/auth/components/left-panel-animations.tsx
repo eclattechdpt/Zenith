@@ -1,22 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "motion/react"
-import { ChevronDown, AlertTriangle, XCircle, CheckCircle2 } from "lucide-react"
+import { ChevronDown, AlertTriangle, XCircle, CheckCircle2, Loader2 } from "lucide-react"
+
+import type { HealthStatus, HealthResponse } from "@/app/api/health/route"
 
 const ease = [0.22, 1, 0.36, 1] as const
 
-type SystemStatus = "online" | "warning" | "error"
+const POLL_INTERVAL_MS = 30_000
 
 const statusConfig: Record<
-  SystemStatus,
+  HealthStatus,
   {
     label: string
     color: string
     ping: string
     glow: string
     icon: typeof CheckCircle2
-    message?: string
   }
 > = {
   online: {
@@ -32,8 +33,6 @@ const statusConfig: Record<
     ping: "bg-amber-400",
     glow: "shadow-[0_0_6px_rgba(251,191,36,0.6)]",
     icon: AlertTriangle,
-    message:
-      "Rendimiento reducido en algunos servicios. El equipo esta investigando.",
   },
   error: {
     label: "Interrupcion",
@@ -41,43 +40,88 @@ const statusConfig: Record<
     ping: "bg-red-400",
     glow: "shadow-[0_0_6px_rgba(248,113,113,0.6)]",
     icon: XCircle,
-    message:
-      "Se detecto un problema critico con el sistema. Algunas funciones podrian no estar disponibles.",
   },
 }
 
-const debugStates: SystemStatus[] = ["online", "warning", "error"]
+const debugStates: HealthStatus[] = ["online", "warning", "error"]
 
 function StatusPill() {
   const isDebug = process.env.NODE_ENV === "development"
-  const [status, setStatus] = useState<SystemStatus>("online")
+  const [status, setStatus] = useState<HealthStatus>("online")
+  const [message, setMessage] = useState<string | undefined>()
   const [expanded, setExpanded] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [debugOverride, setDebugOverride] = useState(false)
+
+  const checkHealth = useCallback(async () => {
+    if (debugOverride) return
+
+    try {
+      const res = await fetch("/api/health")
+      if (!res.ok) {
+        setStatus("error")
+        setMessage("El servidor devolvio un error inesperado.")
+        setExpanded(true)
+        return
+      }
+
+      const data: HealthResponse = await res.json()
+      setStatus(data.status)
+      setMessage(data.message)
+
+      if (data.status !== "online") {
+        setExpanded(true)
+      } else {
+        setExpanded(false)
+      }
+    } catch {
+      setStatus("error")
+      setMessage("Sin conexion al servidor. Verifica tu conexion a internet.")
+      setExpanded(true)
+    } finally {
+      setLoading(false)
+    }
+  }, [debugOverride])
+
+  useEffect(() => {
+    checkHealth()
+    const interval = setInterval(checkHealth, POLL_INTERVAL_MS)
+    return () => clearInterval(interval)
+  }, [checkHealth])
 
   const config = statusConfig[status]
   const hasDetails = status !== "online"
 
   function cycleStatus() {
     if (!isDebug) return
+    setDebugOverride(true)
     const nextIndex =
       (debugStates.indexOf(status) + 1) % debugStates.length
     const next = debugStates[nextIndex]
     setStatus(next)
+    setMessage(
+      next === "online"
+        ? undefined
+        : next === "warning"
+          ? "Debug: estado de warning simulado."
+          : "Debug: estado de error simulado."
+    )
     setExpanded(next !== "online")
+  }
+
+  function resetDebug() {
+    if (!isDebug || !debugOverride) return
+    setDebugOverride(false)
+    setLoading(true)
+    checkHealth()
   }
 
   const StatusIcon = config.icon
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.8, y: -10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.2, ease }}
-      className="flex flex-col items-start"
-    >
+    <div className="flex flex-col items-start">
       {/* Pill */}
       <motion.button
-        layout="position"
         type="button"
         onClick={hasDetails ? () => setExpanded((v) => !v) : undefined}
         onDoubleClick={isDebug ? cycleStatus : undefined}
@@ -85,19 +129,23 @@ function StatusPill() {
           hasDetails ? "cursor-pointer hover:bg-white/15" : ""
         } ${isDebug ? "active:scale-95" : ""}`}
       >
-        <span className="relative flex size-2">
-          <span
-            className={`absolute inline-flex size-full animate-ping rounded-full ${config.ping} opacity-75`}
-          />
-          <span
-            className={`relative inline-flex size-2 rounded-full ${config.color} ${config.glow}`}
-          />
-        </span>
+        {loading ? (
+          <Loader2 className="size-3 animate-spin text-white/50" />
+        ) : (
+          <span className="relative flex size-2">
+            <span
+              className={`absolute inline-flex size-full animate-ping rounded-full ${config.ping} opacity-75`}
+            />
+            <span
+              className={`relative inline-flex size-2 rounded-full ${config.color} ${config.glow}`}
+            />
+          </span>
+        )}
         <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80">
-          {config.label}
+          {loading ? "Verificando" : config.label}
         </span>
         <AnimatePresence mode="popLayout">
-          {hasDetails && (
+          {hasDetails && !loading && (
             <motion.span
               key="chevron"
               initial={{ opacity: 0, width: 0 }}
@@ -114,7 +162,7 @@ function StatusPill() {
 
       {/* Expandable error/warning panel */}
       <AnimatePresence initial={false}>
-        {expanded && hasDetails && (
+        {expanded && hasDetails && !loading && (
           <motion.div
             key="panel"
             initial={{ height: 0 }}
@@ -140,7 +188,7 @@ function StatusPill() {
                   />
                   <div className="space-y-2">
                     <p className="text-[13px] leading-relaxed text-white/70">
-                      {config.message}
+                      {message}
                     </p>
                     <p className="text-[11px] leading-relaxed text-white/40">
                       Si el problema persiste, contacta a{" "}
@@ -159,11 +207,22 @@ function StatusPill() {
 
       {/* Debug hint */}
       {isDebug && (
-        <span className="mt-2 text-[9px] uppercase tracking-widest text-white/20">
-          Debug: doble clic para cambiar estado
-        </span>
+        <div className="mt-2 flex flex-col gap-1">
+          <span className="text-[9px] uppercase tracking-widest text-white/20">
+            Debug: doble clic para cambiar estado
+          </span>
+          {debugOverride && (
+            <button
+              type="button"
+              onClick={resetDebug}
+              className="text-[9px] uppercase tracking-widest text-white/30 underline hover:text-white/50"
+            >
+              Volver a check real
+            </button>
+          )}
+        </div>
       )}
-    </motion.div>
+    </div>
   )
 }
 

@@ -7,6 +7,11 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
+  // Public routes that don't require authentication
+  if (path === "/api/health") {
+    return supabaseResponse
+  }
+
   // Unauthenticated users can only access /login
   if (!user && path !== "/login") {
     const url = request.nextUrl.clone()
