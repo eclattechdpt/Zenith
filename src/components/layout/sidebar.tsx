@@ -131,6 +131,7 @@ export function Sidebar() {
     <TooltipProvider delay={300}>
       <motion.aside
         data-sidebar
+        suppressHydrationWarning
         initial={false}
         animate={{ width }}
         transition={!mounted ? { duration: 0 } : SIDEBAR_SPRING}
