@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -67,6 +67,25 @@ function ScoopBottom() {
   )
 }
 
+function SidebarTooltip({
+  collapsed,
+  children,
+}: {
+  collapsed: boolean
+  children: React.ReactNode
+}) {
+  const [open, setOpen] = useState(false)
+  const onOpenChange = useCallback(
+    (nextOpen: boolean) => setOpen(collapsed && nextOpen),
+    [collapsed]
+  )
+  return (
+    <Tooltip open={open} onOpenChange={onOpenChange}>
+      {children}
+    </Tooltip>
+  )
+}
+
 const EXPANDED_WIDTH = 210
 const COLLAPSED_WIDTH = 72
 const SIDEBAR_SPRING = { type: "spring" as const, stiffness: 200, damping: 30 }
@@ -74,7 +93,7 @@ const FADE_SLOW = { duration: 0.7, ease: "easeInOut" as const }
 const FADE_IN_LOGO = { ...FADE_SLOW, delay: 0.1 }
 const FADE_IN_TEXT = { ...FADE_SLOW, delay: 0.1 }
 const FADE_OUT = { duration: 0.25, ease: "easeInOut" as const }
-const FADE_OUT_LOGO = { duration: 0.4, ease: "easeInOut" as const }
+const FADE_OUT_LOGO = { duration: 0.15, ease: "easeInOut" as const }
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -174,14 +193,12 @@ export function Sidebar() {
               )
 
               return (
-                <Tooltip key={item.href}>
+                <SidebarTooltip key={item.href} collapsed={collapsed}>
                   <TooltipTrigger render={link} />
-                  {collapsed && (
-                    <TooltipContent side="right" sideOffset={12}>
-                      {item.label}
-                    </TooltipContent>
-                  )}
-                </Tooltip>
+                  <TooltipContent side="right" sideOffset={12}>
+                    {item.label}
+                  </TooltipContent>
+                </SidebarTooltip>
               )
             })}
           </div>
@@ -212,7 +229,7 @@ export function Sidebar() {
 
         {/* Bottom section */}
         <div className="space-y-0.5 px-3 pb-5">
-          <Tooltip>
+          <SidebarTooltip collapsed={collapsed}>
             <TooltipTrigger
               render={
                 <button
@@ -230,13 +247,11 @@ export function Sidebar() {
                 </button>
               }
             />
-            {collapsed && (
-              <TooltipContent side="right" sideOffset={12}>
-                Ayuda
-              </TooltipContent>
-            )}
-          </Tooltip>
-          <Tooltip>
+            <TooltipContent side="right" sideOffset={12}>
+              Ayuda
+            </TooltipContent>
+          </SidebarTooltip>
+          <SidebarTooltip collapsed={collapsed}>
             <TooltipTrigger
               render={
                 <form action={logout}>
@@ -256,12 +271,10 @@ export function Sidebar() {
                 </form>
               }
             />
-            {collapsed && (
-              <TooltipContent side="right" sideOffset={12}>
-                Cerrar sesion
-              </TooltipContent>
-            )}
-          </Tooltip>
+            <TooltipContent side="right" sideOffset={12}>
+              Cerrar sesion
+            </TooltipContent>
+          </SidebarTooltip>
         </div>
       </motion.aside>
     </TooltipProvider>
