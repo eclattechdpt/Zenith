@@ -31,6 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
+      suppressHydrationWarning
       className={`${plusJakarta.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>

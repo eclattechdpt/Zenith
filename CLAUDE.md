@@ -236,7 +236,7 @@ No saltar sprints. Cada sprint depende del anterior.
 - Tipos de DB generados (`database.ts`)
 - Dashboard rediseñado: KPIs con gradientes suaves (ventas, productos vendidos, transacciones, stock bajo), quick actions (nueva venta, ver productos, registrar cliente), grafica de ventas, actividad reciente, top productos, alertas de inventario (mock data). Quick actions antes de KPIs en mobile, despues en desktop
 - Sidebar logout: form movido fuera de TooltipTrigger para evitar error de redirect
-- Sidebar colapsable con animacion spring (Motion): tab activo con scoops concavos, logo split (Z fijo + ENITH animado), tooltips en modo colapsado, toggle con rotacion de icono, transiciones de fade refinadas (fade-in lento, fade-out rapido), estado persistido en localStorage con blocking script anti-flash (patron next-themes)
+- Sidebar colapsable con animacion spring (Motion): tab activo con scoops concavos, logo split (Z fijo + ENITH animado), tooltips en modo colapsado, toggle con rotacion de icono, transiciones de fade refinadas (fade-in lento, fade-out rapido), estado persistido en localStorage con blocking script anti-flash (patron next-themes), hydration mismatch fix (suppressHydrationWarning + initial={false} + delayed class removal)
 - Sidebar: inner shadow sutil, hover effects en iconos de ayuda y logout
 - Header con saludo, fecha, y mobile nav
 - Navegacion movil (Sheet) con boton organico: scoops concavos flush al borde izquierdo, fixed/sticky con z-50, tab activo animado con scoops (mismo patron que sidebar)

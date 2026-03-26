@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useLayoutEffect, useRef } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -104,13 +104,12 @@ export function Sidebar() {
   })
   const [mounted, setMounted] = useState(false)
 
-  // Remove the blocking CSS class once React takes over, then enable animations
-  useLayoutEffect(() => {
-    document.documentElement.classList.remove("sidebar-collapsed")
-  }, [])
-
+  // Remove the blocking CSS class after Framer Motion has painted the correct frame
   useEffect(() => {
-    setMounted(true)
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove("sidebar-collapsed")
+      setMounted(true)
+    })
   }, [])
 
   // Persist to localStorage on change (skip initial mount sync)
@@ -132,7 +131,7 @@ export function Sidebar() {
     <TooltipProvider delay={300}>
       <motion.aside
         data-sidebar
-        initial={{ width }}
+        initial={false}
         animate={{ width }}
         transition={!mounted ? { duration: 0 } : SIDEBAR_SPRING}
         className="hidden h-full shrink-0 flex-col overflow-hidden bg-neutral-100 shadow-[inset_-6px_0_8px_-6px_rgba(0,0,0,0.06)] lg:flex"
