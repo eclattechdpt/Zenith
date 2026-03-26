@@ -21,6 +21,34 @@ import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { logout } from "@/features/auth/actions"
 
+const MS = 12
+
+function MobileScoopTop() {
+  return (
+    <svg
+      className="absolute left-0 fill-neutral-100 pointer-events-none"
+      style={{ top: -MS, width: MS, height: MS }}
+      viewBox={`0 0 ${MS} ${MS}`}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d={`M0 0L0 ${MS}L${MS} ${MS}A${MS} ${MS} 0 0 1 0 0Z`} />
+    </svg>
+  )
+}
+
+function MobileScoopBottom() {
+  return (
+    <svg
+      className="absolute left-0 fill-neutral-100 pointer-events-none"
+      style={{ bottom: -MS, width: MS, height: MS }}
+      viewBox={`0 0 ${MS} ${MS}`}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d={`M0 ${MS}L0 0L${MS} 0A${MS} ${MS} 0 0 0 0 ${MS}Z`} />
+    </svg>
+  )
+}
+
 const navItems = [
   { href: "/", label: "Inicio", icon: LayoutDashboard },
   { href: "/pos", label: "Punto de venta", icon: Monitor },
@@ -38,10 +66,13 @@ export function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
-        className="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 lg:hidden"
+        className="relative -ml-4 flex items-center justify-center rounded-l-none rounded-r-[16px] bg-neutral-100 py-2.5 pl-4 pr-3 lg:hidden"
+        style={{ overflow: "visible" }}
         aria-label="Abrir menu"
       >
-        <Menu className="size-4" strokeWidth={1.75} />
+        <MobileScoopTop />
+        <MobileScoopBottom />
+        <Menu className="size-4 text-neutral-600" strokeWidth={1.75} />
       </SheetTrigger>
       <SheetContent side="left" className="w-[260px] bg-neutral-50 p-0">
         {/* Logo */}
