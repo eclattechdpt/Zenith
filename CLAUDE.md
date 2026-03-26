@@ -235,7 +235,7 @@ No saltar sprints. Cada sprint depende del anterior.
 - Root layout: Plus Jakarta Sans + Geist Mono + Zodiak fonts, QueryProvider, NuqsAdapter, Sonner
 - Tipos de DB generados (`database.ts`)
 - Dashboard completo con KPIs, grafica de ventas, actividad reciente, top productos, alertas de inventario (mock data)
-- Sidebar colapsable con animacion spring (Motion): tab activo con scoops concavos, logo split (Z fijo + ENITH animado), tooltips en modo colapsado, toggle con rotacion de icono
+- Sidebar colapsable con animacion spring (Motion): tab activo con scoops concavos, logo split (Z fijo + ENITH animado), tooltips en modo colapsado, toggle con rotacion de icono, transiciones de fade refinadas (fade-in lento, fade-out rapido)
 - Header con saludo, fecha, y mobile nav
 - Navegacion movil (Sheet)
 - Componentes shared: data-table, page-header, confirm-dialog, empty-state, loading-skeleton

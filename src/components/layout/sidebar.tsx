@@ -69,16 +69,24 @@ function ScoopBottom() {
 
 const EXPANDED_WIDTH = 210
 const COLLAPSED_WIDTH = 72
+const SIDEBAR_SPRING = { type: "spring" as const, stiffness: 200, damping: 30 }
+const FADE_SLOW = { duration: 0.7, ease: "easeInOut" as const }
+const FADE_IN_LOGO = { ...FADE_SLOW, delay: 0.1 }
+const FADE_IN_TEXT = { ...FADE_SLOW, delay: 0.1 }
+const FADE_OUT = { duration: 0.25, ease: "easeInOut" as const }
+const FADE_OUT_LOGO = { duration: 0.4, ease: "easeInOut" as const }
 
 export function Sidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const logoFade = collapsed ? FADE_OUT_LOGO : FADE_IN_LOGO
+  const textFade = collapsed ? FADE_OUT : FADE_IN_TEXT
 
   return (
     <TooltipProvider delay={300}>
       <motion.aside
         animate={{ width: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        transition={SIDEBAR_SPRING}
         className="hidden h-full shrink-0 flex-col overflow-hidden bg-neutral-100 lg:flex"
       >
         {/* Logo */}
@@ -95,7 +103,7 @@ export function Sidebar() {
             />
             <motion.span
               animate={{ opacity: collapsed ? 0 : 1 }}
-              transition={{ duration: 0.2 }}
+              transition={logoFade}
               className="whitespace-nowrap"
             >
               <Image
@@ -156,7 +164,7 @@ export function Sidebar() {
                     />
                     <motion.span
                       animate={{ opacity: collapsed ? 0 : 1 }}
-                      transition={{ duration: 0.2 }}
+                      transition={textFade}
                       className={cn("whitespace-nowrap", isActive ? "text-neutral-900" : undefined)}
                     >
                       {item.label}
@@ -165,18 +173,16 @@ export function Sidebar() {
                 </Link>
               )
 
-              if (collapsed) {
-                return (
-                  <Tooltip key={item.href}>
-                    <TooltipTrigger render={link} />
+              return (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger render={link} />
+                  {collapsed && (
                     <TooltipContent side="right" sideOffset={12}>
                       {item.label}
                     </TooltipContent>
-                  </Tooltip>
-                )
-              }
-
-              return <div key={item.href}>{link}</div>
+                  )}
+                </Tooltip>
+              )
             })}
           </div>
         </nav>
@@ -190,13 +196,13 @@ export function Sidebar() {
           >
             <motion.div
               animate={{ rotate: collapsed ? 180 : 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              transition={SIDEBAR_SPRING}
             >
               <ChevronsLeft className="size-[17px]" strokeWidth={1.5} />
             </motion.div>
             <motion.span
               animate={{ opacity: collapsed ? 0 : 1 }}
-              transition={{ duration: 0.2 }}
+              transition={textFade}
               className="whitespace-nowrap"
             >
               Colapsar
@@ -216,7 +222,7 @@ export function Sidebar() {
                   <HelpCircle className="size-[17px] shrink-0 text-neutral-400" strokeWidth={1.5} />
                   <motion.span
                     animate={{ opacity: collapsed ? 0 : 1 }}
-                    transition={{ duration: 0.2 }}
+                    transition={textFade}
                     className="whitespace-nowrap"
                   >
                     Ayuda
@@ -241,7 +247,7 @@ export function Sidebar() {
                     <LogOut className="size-[17px] shrink-0 text-neutral-400" strokeWidth={1.5} />
                     <motion.span
                       animate={{ opacity: collapsed ? 0 : 1 }}
-                      transition={{ duration: 0.2 }}
+                      transition={textFade}
                       className="whitespace-nowrap"
                     >
                       Cerrar sesion
