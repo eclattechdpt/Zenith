@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
+import { motion, AnimatePresence } from "motion/react"
 import {
   Menu,
   LayoutDashboard,
@@ -22,6 +23,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { logout } from "@/features/auth/actions"
 
 const MS = 12
+const S = 16
 
 function MobileScoopTop() {
   return (
@@ -45,6 +47,34 @@ function MobileScoopBottom() {
       xmlns="http://www.w3.org/2000/svg"
     >
       <path d={`M0 ${MS}L0 0L${MS} 0A${MS} ${MS} 0 0 0 0 ${MS}Z`} />
+    </svg>
+  )
+}
+
+function NavScoopTop() {
+  return (
+    <svg
+      className="absolute left-0 pointer-events-none"
+      style={{ top: -S, width: S, height: S }}
+      viewBox={`0 0 ${S} ${S}`}
+      fill="white"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d={`M0 0L0 ${S}L${S} ${S}A${S} ${S} 0 0 1 0 0Z`} />
+    </svg>
+  )
+}
+
+function NavScoopBottom() {
+  return (
+    <svg
+      className="absolute left-0 pointer-events-none"
+      style={{ bottom: -S, width: S, height: S }}
+      viewBox={`0 0 ${S} ${S}`}
+      fill="white"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d={`M0 ${S}L0 0L${S} 0A${S} ${S} 0 0 0 0 ${S}Z`} />
     </svg>
   )
 }
@@ -74,7 +104,7 @@ export function MobileNav() {
         <MobileScoopBottom />
         <Menu className="size-4 text-neutral-600" strokeWidth={1.75} />
       </SheetTrigger>
-      <SheetContent side="left" className="w-[260px] bg-neutral-50 p-0">
+      <SheetContent side="left" className="w-[260px] bg-neutral-100 p-0">
         {/* Logo */}
         <div className="flex items-center px-6 pb-2 pt-7">
           <Image
@@ -86,39 +116,65 @@ export function MobileNav() {
         </div>
 
         {/* Navigation */}
-        <nav className="space-y-0.5 px-3 pt-8">
-          {navItems.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href)
-            const Icon = item.icon
+        <nav className="pr-3 pt-8">
+          <div className="space-y-1.5">
+            {navItems.map((item) => {
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href)
+              const Icon = item.icon
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] transition-all duration-[200ms]",
-                  isActive
-                    ? "bg-white font-semibold text-neutral-900 shadow-xs"
-                    : "font-medium text-neutral-500 hover:bg-white/60 hover:text-neutral-800"
-                )}
-              >
-                <Icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
                   className={cn(
-                    "size-[17px]",
+                    "group relative flex items-center gap-3 py-3 pl-4 pr-3 text-[13px] transition-colors duration-[200ms]",
                     isActive
-                      ? "text-rose-500"
-                      : "text-neutral-400"
+                      ? "font-semibold"
+                      : "font-medium text-neutral-500 hover:text-neutral-800"
                   )}
-                  strokeWidth={isActive ? 2 : 1.5}
-                />
-                {item.label}
-              </Link>
-            )
-          })}
+                >
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.div
+                        layoutId="mobile-nav-active"
+                        className="absolute inset-0 rounded-r-[22px] bg-white"
+                        style={{ overflow: "visible" }}
+                        initial={{ x: -30, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -30, opacity: 0 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 32,
+                          mass: 0.8,
+                        }}
+                      >
+                        <NavScoopTop />
+                        <NavScoopBottom />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <span className="relative z-10 flex items-center gap-3">
+                    <Icon
+                      className={cn(
+                        "size-[17px] shrink-0 transition-colors duration-[200ms]",
+                        isActive ? "text-rose-500" : "text-neutral-400 group-hover:text-neutral-600"
+                      )}
+                      strokeWidth={isActive ? 2 : 1.5}
+                    />
+                    <span className={cn(isActive ? "text-neutral-900" : undefined)}>
+                      {item.label}
+                    </span>
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
         </nav>
 
         {/* Bottom section */}

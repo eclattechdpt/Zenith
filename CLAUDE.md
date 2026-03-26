@@ -224,7 +224,7 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
-**Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-25)
+**Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-26)
 
 ### Completado
 - Proyecto Next.js inicializado con App Router, TS, Tailwind, shadcn/ui (23 componentes)
@@ -234,13 +234,16 @@ No saltar sprints. Cada sprint depende del anterior.
 - Login page: UI pulida con Silk background, split layout desktop/mobile, formulario animado con RHF+Zod
 - Root layout: Plus Jakarta Sans + Geist Mono + Zodiak fonts, QueryProvider, NuqsAdapter, Sonner
 - Tipos de DB generados (`database.ts`)
-- Dashboard rediseñado: KPIs con gradientes suaves (ventas, productos vendidos, transacciones, stock bajo), quick actions (nueva venta, ver inventario), grafica de ventas, actividad reciente, top productos, alertas de inventario (mock data). Quick actions antes de KPIs en mobile, despues en desktop
+- Dashboard rediseñado: KPIs con gradientes suaves (ventas, productos vendidos, transacciones, stock bajo), quick actions (nueva venta, ver productos, registrar cliente), grafica de ventas, actividad reciente, top productos, alertas de inventario (mock data). Quick actions antes de KPIs en mobile, despues en desktop
 - Sidebar logout: form movido fuera de TooltipTrigger para evitar error de redirect
-- Sidebar colapsable con animacion spring (Motion): tab activo con scoops concavos, logo split (Z fijo + ENITH animado), tooltips en modo colapsado, toggle con rotacion de icono, transiciones de fade refinadas (fade-in lento, fade-out rapido)
+- Sidebar colapsable con animacion spring (Motion): tab activo con scoops concavos, logo split (Z fijo + ENITH animado), tooltips en modo colapsado, toggle con rotacion de icono, transiciones de fade refinadas (fade-in lento, fade-out rapido), estado persistido en localStorage, sin animacion en primer render
+- Sidebar: inner shadow sutil, hover effects en iconos de ayuda y logout
 - Header con saludo, fecha, y mobile nav
-- Navegacion movil (Sheet) con boton organico: scoops concavos flush al borde izquierdo, fixed/sticky con z-50
+- Navegacion movil (Sheet) con boton organico: scoops concavos flush al borde izquierdo, fixed/sticky con z-50, tab activo animado con scoops (mismo patron que sidebar)
 - Greeting centrado en mobile, left-aligned en desktop; date pill oculto en mobile
 - Componentes shared: data-table, page-header, confirm-dialog, empty-state, loading-skeleton
+- Tooltip personalizado: fondo neutral-600, texto neutral-50 (reemplaza foreground/background defaults)
 - `constants.ts` (sale statuses, payment methods, movement types, credit notes, return statuses, prefijos)
 - `utils.ts` completo (cn, formatCurrency, formatDate, formatTime)
 - Status pill debug en login (cicla online/warning/error en dev)
+- Playwright MCP configurado para testing visual

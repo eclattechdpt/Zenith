@@ -7,7 +7,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-svh bg-neutral-200 p-0 lg:p-3">
+    <div className="min-h-svh bg-white p-0 lg:p-3">
       {/* Mobile nav (fixed, outside flow) */}
       <MobileNav />
       {/* Rounded container */}

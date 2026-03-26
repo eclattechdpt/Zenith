@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -97,16 +97,33 @@ const FADE_OUT_LOGO = { duration: 0.15, ease: "easeInOut" as const }
 
 export function Sidebar() {
   const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
-  const logoFade = collapsed ? FADE_OUT_LOGO : FADE_IN_LOGO
-  const textFade = collapsed ? FADE_OUT : FADE_IN_TEXT
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false
+    return localStorage.getItem("sidebar-collapsed") === "true"
+  })
+
+  const isFirstRender = useRef(true)
+
+  useEffect(() => {
+    localStorage.setItem("sidebar-collapsed", String(collapsed))
+  }, [collapsed])
+
+  useEffect(() => {
+    isFirstRender.current = false
+  }, [])
+
+  const noMotion = { duration: 0 }
+  const logoFade = isFirstRender.current ? noMotion : collapsed ? FADE_OUT_LOGO : FADE_IN_LOGO
+  const textFade = isFirstRender.current ? noMotion : collapsed ? FADE_OUT : FADE_IN_TEXT
+  const width = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH
 
   return (
     <TooltipProvider delay={300}>
       <motion.aside
-        animate={{ width: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH }}
-        transition={SIDEBAR_SPRING}
-        className="hidden h-full shrink-0 flex-col overflow-hidden bg-neutral-100 lg:flex"
+        initial={{ width }}
+        animate={{ width }}
+        transition={isFirstRender.current ? { duration: 0 } : SIDEBAR_SPRING}
+        className="hidden h-full shrink-0 flex-col overflow-hidden bg-neutral-100 shadow-[inset_-6px_0_8px_-6px_rgba(0,0,0,0.06)] lg:flex"
       >
         {/* Logo */}
         {/* Logo */}
@@ -222,7 +239,7 @@ export function Sidebar() {
               transition={textFade}
               className="whitespace-nowrap"
             >
-              Colapsar
+              Ocultar
             </motion.span>
           </button>
         </div>
@@ -234,9 +251,9 @@ export function Sidebar() {
               render={
                 <button
                   type="button"
-                  className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-500 transition-colors duration-[200ms] hover:bg-white/60 hover:text-neutral-800"
+                  className="group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-500 transition-colors duration-[200ms] hover:bg-white/60 hover:text-neutral-800"
                 >
-                  <HelpCircle className="size-[17px] shrink-0 text-neutral-400" strokeWidth={1.5} />
+                  <HelpCircle className="size-[17px] shrink-0 text-neutral-400 transition-colors duration-[200ms] group-hover:text-neutral-800" strokeWidth={1.5} />
                   <motion.span
                     animate={{ opacity: collapsed ? 0 : 1 }}
                     transition={textFade}
@@ -257,9 +274,9 @@ export function Sidebar() {
                 render={
                   <button
                     type="submit"
-                    className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-500 transition-colors duration-[200ms] hover:bg-rose-50 hover:text-rose-600"
+                    className="group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-500 transition-colors duration-[200ms] hover:bg-rose-50 hover:text-rose-600"
                   >
-                    <LogOut className="size-[17px] shrink-0 text-neutral-400" strokeWidth={1.5} />
+                    <LogOut className="size-[17px] shrink-0 text-neutral-400 transition-colors duration-[200ms] group-hover:text-rose-600" strokeWidth={1.5} />
                     <motion.span
                       animate={{ opacity: collapsed ? 0 : 1 }}
                       transition={textFade}
