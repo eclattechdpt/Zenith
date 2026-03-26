@@ -38,6 +38,11 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://api.fontshare.com/v2/css?f[]=zodiak@300,400,500,600,700&display=swap"
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem("sidebar-collapsed")==="true"){document.documentElement.classList.add("sidebar-collapsed")}}catch(e){}`,
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
         <QueryProvider>

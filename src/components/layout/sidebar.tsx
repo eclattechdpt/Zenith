@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useState, useCallback, useEffect, useLayoutEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -97,32 +97,44 @@ const FADE_OUT_LOGO = { duration: 0.15, ease: "easeInOut" as const }
 
 export function Sidebar() {
   const pathname = usePathname()
+  // Read initial state from the class set by the blocking script
   const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window === "undefined") return false
-    return localStorage.getItem("sidebar-collapsed") === "true"
+    if (typeof document === "undefined") return false
+    return document.documentElement.classList.contains("sidebar-collapsed")
   })
+  const [mounted, setMounted] = useState(false)
 
-  const isFirstRender = useRef(true)
+  // Remove the blocking CSS class once React takes over, then enable animations
+  useLayoutEffect(() => {
+    document.documentElement.classList.remove("sidebar-collapsed")
+  }, [])
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Persist to localStorage on change (skip initial mount sync)
+  const isInitialSync = useRef(true)
+  useEffect(() => {
+    if (isInitialSync.current) {
+      isInitialSync.current = false
+      return
+    }
     localStorage.setItem("sidebar-collapsed", String(collapsed))
   }, [collapsed])
 
-  useEffect(() => {
-    isFirstRender.current = false
-  }, [])
-
   const noMotion = { duration: 0 }
-  const logoFade = isFirstRender.current ? noMotion : collapsed ? FADE_OUT_LOGO : FADE_IN_LOGO
-  const textFade = isFirstRender.current ? noMotion : collapsed ? FADE_OUT : FADE_IN_TEXT
+  const logoFade = !mounted ? noMotion : collapsed ? FADE_OUT_LOGO : FADE_IN_LOGO
+  const textFade = !mounted ? noMotion : collapsed ? FADE_OUT : FADE_IN_TEXT
   const width = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH
 
   return (
     <TooltipProvider delay={300}>
       <motion.aside
+        data-sidebar
         initial={{ width }}
         animate={{ width }}
-        transition={isFirstRender.current ? { duration: 0 } : SIDEBAR_SPRING}
+        transition={!mounted ? { duration: 0 } : SIDEBAR_SPRING}
         className="hidden h-full shrink-0 flex-col overflow-hidden bg-neutral-100 shadow-[inset_-6px_0_8px_-6px_rgba(0,0,0,0.06)] lg:flex"
       >
         {/* Logo */}
@@ -138,6 +150,7 @@ export function Sidebar() {
               className="shrink-0"
             />
             <motion.span
+              data-sidebar-text
               animate={{ opacity: collapsed ? 0 : 1 }}
               transition={logoFade}
               className="whitespace-nowrap"
@@ -199,6 +212,7 @@ export function Sidebar() {
                       strokeWidth={isActive ? 2 : 1.5}
                     />
                     <motion.span
+                      data-sidebar-text
                       animate={{ opacity: collapsed ? 0 : 1 }}
                       transition={textFade}
                       className={cn("whitespace-nowrap", isActive ? "text-neutral-900" : undefined)}
@@ -235,6 +249,7 @@ export function Sidebar() {
               <ChevronsLeft className="size-[17px]" strokeWidth={1.5} />
             </motion.div>
             <motion.span
+              data-sidebar-text
               animate={{ opacity: collapsed ? 0 : 1 }}
               transition={textFade}
               className="whitespace-nowrap"
@@ -255,6 +270,7 @@ export function Sidebar() {
                 >
                   <HelpCircle className="size-[17px] shrink-0 text-neutral-400 transition-colors duration-[200ms] group-hover:text-neutral-800" strokeWidth={1.5} />
                   <motion.span
+                    data-sidebar-text
                     animate={{ opacity: collapsed ? 0 : 1 }}
                     transition={textFade}
                     className="whitespace-nowrap"
@@ -278,6 +294,7 @@ export function Sidebar() {
                   >
                     <LogOut className="size-[17px] shrink-0 text-neutral-400 transition-colors duration-[200ms] group-hover:text-rose-600" strokeWidth={1.5} />
                     <motion.span
+                      data-sidebar-text
                       animate={{ opacity: collapsed ? 0 : 1 }}
                       transition={textFade}
                       className="whitespace-nowrap"

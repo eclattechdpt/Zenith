@@ -4,6 +4,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Prevent sidebar flash: blocking script sets this class before first paint */
+.sidebar-collapsed [data-sidebar] {
+  width: 72px !important;
+  transition: none !important;
+}
+.sidebar-collapsed [data-sidebar] [data-sidebar-text] {
+  opacity: 0 !important;
+}
+
 @theme inline {
   /* ── Fonts ── */
   --font-sans: var(--font-body);
