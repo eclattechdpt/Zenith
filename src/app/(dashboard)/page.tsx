@@ -85,8 +85,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Greeting */}
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex items-start justify-center lg:justify-between">
+        <div className="text-center lg:text-left">
           <h1 className="font-display text-3xl font-semibold tracking-tight text-neutral-950">
             Hola, {displayName}
           </h1>
@@ -94,7 +94,7 @@ export default async function DashboardPage() {
             Bienvenido de vuelta a Zenith
           </p>
         </div>
-        <div className="hidden items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 shadow-xs sm:flex">
+        <div className="hidden items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 shadow-xs lg:flex">
           <CalendarDays
             className="size-3.5 text-neutral-400"
             strokeWidth={1.75}

@@ -66,7 +66,7 @@ export function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
-        className="relative -ml-4 flex items-center justify-center rounded-l-none rounded-r-[16px] bg-neutral-100 py-2.5 pl-4 pr-3 lg:hidden"
+        className="fixed left-0 top-10 z-50 flex items-center justify-center rounded-l-none rounded-r-[16px] bg-neutral-100 py-2.5 pl-4 pr-3 lg:hidden"
         style={{ overflow: "visible" }}
         aria-label="Abrir menu"
       >

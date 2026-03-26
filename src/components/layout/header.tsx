@@ -23,17 +23,14 @@ export async function Header() {
 
   return (
     <header className="flex items-center justify-between bg-white px-4 pb-0 pt-6 lg:px-8 lg:pt-7">
-      {/* Left — Mobile nav + greeting */}
-      <div className="flex items-center gap-3">
-        <MobileNav />
-        <div>
-          <h1 className="font-display text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
-            Hola, {displayName}
-          </h1>
-          <p className="mt-0.5 text-[13px] text-neutral-400">
-            Bienvenido de vuelta a Zenith
-          </p>
-        </div>
+      {/* Left — Greeting */}
+      <div>
+        <h1 className="font-display text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
+          Hola, {displayName}
+        </h1>
+        <p className="mt-0.5 text-[13px] text-neutral-400">
+          Bienvenido de vuelta a Zenith
+        </p>
       </div>
 
       {/* Right — Date pill */}

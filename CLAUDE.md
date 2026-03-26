@@ -237,7 +237,8 @@ No saltar sprints. Cada sprint depende del anterior.
 - Dashboard completo con KPIs, grafica de ventas, actividad reciente, top productos, alertas de inventario (mock data)
 - Sidebar colapsable con animacion spring (Motion): tab activo con scoops concavos, logo split (Z fijo + ENITH animado), tooltips en modo colapsado, toggle con rotacion de icono, transiciones de fade refinadas (fade-in lento, fade-out rapido)
 - Header con saludo, fecha, y mobile nav
-- Navegacion movil (Sheet) con boton organico: scoops concavos flush al borde izquierdo
+- Navegacion movil (Sheet) con boton organico: scoops concavos flush al borde izquierdo, fixed/sticky con z-50
+- Greeting centrado en mobile, left-aligned en desktop; date pill oculto en mobile
 - Componentes shared: data-table, page-header, confirm-dialog, empty-state, loading-skeleton
 - `constants.ts` (sale statuses, payment methods, movement types, credit notes, return statuses, prefijos)
 - `utils.ts` completo (cn, formatCurrency, formatDate, formatTime)
