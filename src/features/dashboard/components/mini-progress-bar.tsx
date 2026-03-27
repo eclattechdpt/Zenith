@@ -25,23 +25,23 @@ export function InventoryHealth({ ok, bajo, critico }: InventoryHealthProps) {
         </span>
       </div>
       {/* Stacked bar — no gaps */}
-      <div className="flex h-3 w-full overflow-hidden rounded-sm">
+      <div className="flex h-[15px] w-full gap-[3px]">
         <motion.div
-          className="h-full"
+          className="h-full rounded-sm"
           style={{ backgroundColor: "#5DCAA5" }}
           initial={{ width: 0 }}
           animate={{ width: `${okPct}%` }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         />
         <motion.div
-          className="h-full"
+          className="h-full rounded-sm"
           style={{ backgroundColor: "#EF9F27" }}
           initial={{ width: 0 }}
           animate={{ width: `${bajoPct}%` }}
           transition={{ duration: 0.3, ease: "easeOut", delay: 0.05 }}
         />
         <motion.div
-          className="h-full"
+          className="h-full rounded-sm"
           style={{ backgroundColor: "#E24B4A" }}
           initial={{ width: 0 }}
           animate={{ width: `${criticoPct}%` }}

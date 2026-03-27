@@ -26,7 +26,7 @@ export function SalesProgress({ today, yesterday, max }: SalesProgressProps) {
         </span>
       </div>
       {/* Overlapping bars */}
-      <div className="relative h-4 w-full">
+      <div className="relative h-[15px] w-full">
         {/* Yesterday bar (background, lighter) */}
         <div
           className="absolute inset-y-0 left-0 rounded-sm"
