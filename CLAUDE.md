@@ -234,7 +234,8 @@ No saltar sprints. Cada sprint depende del anterior.
 - Login page: UI pulida con Silk background, split layout desktop/mobile, formulario animado con RHF+Zod
 - Root layout: Plus Jakarta Sans + Geist Mono + Zodiak fonts, QueryProvider, NuqsAdapter, Sonner
 - Tipos de DB generados (`database.ts`)
-- Dashboard rediseñado: KPIs con gradientes suaves (ventas, productos vendidos, transacciones, stock bajo), quick actions (nueva venta, ver productos, registrar cliente), grafica de ventas, actividad reciente, top productos, alertas de inventario (mock data). Quick actions antes de KPIs en mobile, despues en desktop
+- Dashboard v2 redesign: bold gradient KPI cards (rose, teal, blush, neutral-dark) con numeros grandes y mini visualizaciones SVG (bar chart, sparkline, progress ring, progress bar), quick actions como seccion principal con hover lift, greeting con hora del dia, staggered entrance animations, activity feed mejorado, top products y inventory alerts card-ificados, count-up animation en KPIs
+- Layout: main area con rounded-l-2xl + inset shadow para continuidad con sidebar, drop-shadow en active tab scoops
 - Sidebar logout: form movido fuera de TooltipTrigger para evitar error de redirect
 - Sidebar colapsable con animacion spring (Motion): tab activo con scoops concavos, logo split (Z fijo + ENITH animado), tooltips en modo colapsado, toggle con rotacion de icono, transiciones de fade refinadas (fade-in lento, fade-out rapido), estado persistido en localStorage con blocking script anti-flash (patron next-themes), hydration mismatch fix (suppressHydrationWarning + initial={false} + delayed class removal)
 - Sidebar: inner shadow sutil, hover effects en iconos de ayuda y logout
@@ -247,3 +248,4 @@ No saltar sprints. Cada sprint depende del anterior.
 - `utils.ts` completo (cn, formatCurrency, formatDate, formatTime)
 - Status pill debug en login (cicla online/warning/error en dev)
 - Playwright MCP configurado para testing visual
+- Custom skill `/explain` para simplificar explicaciones tecnicas

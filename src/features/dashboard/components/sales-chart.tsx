@@ -17,13 +17,13 @@ export function SalesChart() {
       data={mockData.ventasSemana}
       index="dia"
       categories={["estaSemanaMXN", "semanaPasadaMXN"]}
-      colors={["rose", "cyan"]}
+      colors={["rose", "teal"]}
       valueFormatter={formatCurrency}
       showLegend={false}
       showGridLines={false}
       showYAxis={false}
       curveType="monotone"
-      className="mt-6 h-[260px]"
+      className="mt-6 h-[280px]"
     />
   )
 }

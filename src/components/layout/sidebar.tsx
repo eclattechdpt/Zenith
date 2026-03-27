@@ -190,7 +190,7 @@ export function Sidebar() {
                     <motion.div
                       layoutId="sidebar-active"
                       className="absolute inset-0 rounded-l-[22px] bg-white"
-                      style={{ overflow: "visible" }}
+                      style={{ overflow: "visible", filter: "drop-shadow(2px 0 3px rgba(0,0,0,0.06))" }}
                       transition={{
                         type: "spring",
                         stiffness: 300,
