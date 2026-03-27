@@ -57,9 +57,9 @@ export function SalesChart({ totalMes, cambioMes, semanas }: SalesChartProps) {
           const barColor = BAR_COLORS[Math.min(i, BAR_COLORS.length - 1)]
 
           return (
-            <div key={semana.label} className="flex items-center gap-3">
+            <div key={semana.label} className="flex items-center gap-2 sm:gap-3">
               {/* Week label */}
-              <div className="w-16 shrink-0 text-right">
+              <div className="w-12 shrink-0 text-right sm:w-16">
                 <p
                   className={`text-[12px] font-semibold ${
                     isActive ? "text-rose-500" : "text-neutral-700"
@@ -72,7 +72,7 @@ export function SalesChart({ totalMes, cambioMes, semanas }: SalesChartProps) {
               </div>
 
               {/* Bar */}
-              <div className="flex flex-1 items-center gap-2.5">
+              <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2.5">
                 <div className="relative h-8 flex-1 overflow-hidden rounded-lg bg-neutral-50">
                   <div
                     className={`h-full rounded-lg transition-all duration-500 ${barColor} ${
@@ -82,7 +82,7 @@ export function SalesChart({ totalMes, cambioMes, semanas }: SalesChartProps) {
                   />
                 </div>
                 <span
-                  className={`w-20 shrink-0 text-right text-[13px] font-bold tabular-nums ${
+                  className={`hidden w-20 shrink-0 text-right text-[13px] font-bold tabular-nums sm:block ${
                     isActive ? "text-rose-600" : "text-neutral-700"
                   }`}
                 >

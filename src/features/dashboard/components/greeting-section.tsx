@@ -21,7 +21,7 @@ export function GreetingSection({
   return (
     <div className="flex items-start justify-center lg:justify-between">
       <div className="text-center lg:text-left">
-        <h1 className="font-display text-[32px] font-semibold leading-[38px] tracking-[-0.5px] text-neutral-950">
+        <h1 className="font-display text-[22px] font-semibold leading-[28px] tracking-[-0.5px] text-neutral-950 sm:text-[32px] sm:leading-[38px]">
           {greeting}, {displayName}
         </h1>
         <p className="mt-1 text-sm text-neutral-500">

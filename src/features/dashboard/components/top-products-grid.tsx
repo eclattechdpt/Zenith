@@ -18,7 +18,7 @@ const rankStyles = [
 
 export function TopProductsGrid({ products }: { products: Product[] }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-neutral-900">
           Productos mas vendidos
@@ -53,14 +53,14 @@ export function TopProductsGrid({ products }: { products: Product[] }) {
             </div>
 
             {/* Stats */}
-            <div className="flex shrink-0 items-center gap-3">
-              <span className="text-[11px] font-medium tabular-nums text-neutral-500">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+              <span className="hidden text-[11px] font-medium tabular-nums text-neutral-500 sm:block">
                 {p.unidades} uds
               </span>
-              <span className="text-[13px] font-bold tabular-nums text-neutral-900">
+              <span className="text-[12px] font-bold tabular-nums text-neutral-900 sm:text-[13px]">
                 {formatCurrency(p.ingresos)}
               </span>
-              <span className="rounded-full bg-success-light px-2 py-0.5 text-[10px] font-bold text-success-dark">
+              <span className="hidden rounded-full bg-success-light px-2 py-0.5 text-[10px] font-bold text-success-dark sm:block">
                 {p.margen}%
               </span>
             </div>

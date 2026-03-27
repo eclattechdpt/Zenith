@@ -15,8 +15,8 @@ export default function DashboardLayout({
         <Sidebar />
 
         {/* Main area */}
-        <div className="flex flex-1 flex-col bg-white lg:rounded-l-2xl lg:shadow-[inset_2px_2px_8px_-4px_rgba(0,0,0,0.06)]">
-          <main className="flex-1 overflow-y-auto bg-white lg:rounded-l-2xl p-4 lg:p-8">
+        <div className="flex min-w-0 flex-1 flex-col bg-white lg:rounded-l-2xl lg:shadow-[inset_2px_2px_8px_-4px_rgba(0,0,0,0.06)]">
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-white lg:rounded-l-2xl p-4 lg:p-8">
             {children}
           </main>
         </div>

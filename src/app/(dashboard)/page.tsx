@@ -71,9 +71,9 @@ export default async function DashboardPage() {
 
         {/* Chart + Activity */}
         <DashboardItem>
-          <div className="grid gap-5 xl:grid-cols-5">
+          <div className="grid min-w-0 gap-5 xl:grid-cols-5">
             {/* Sales chart */}
-            <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md xl:col-span-3">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-6 xl:col-span-3">
               <SalesChart
                 totalMes={mockData.ventasMensuales.totalMes}
                 cambioMes={mockData.ventasMensuales.cambioMes}
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
 
         {/* Top Products + Inventory Alerts */}
         <DashboardItem>
-          <div className="grid gap-5 xl:grid-cols-2">
+          <div className="grid min-w-0 gap-5 xl:grid-cols-2">
             <TopProductsGrid products={mockData.topProductos} />
             <InventoryAlertsGrid alerts={mockData.alertasInventario} />
           </div>
