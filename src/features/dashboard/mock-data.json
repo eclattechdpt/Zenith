@@ -6,17 +6,33 @@
     "transaccionesCambio": 4,
     "productosVendidos": 67,
     "productosVendidosCambio": 15,
-    "stockBajoAlertas": 7
+    "stockBajoAlertas": 7,
+    "ventasAyer": 13200,
+    "productosMeta": 100,
+    "transaccionesMeta": 30,
+    "productoCritico": "Rimel Lash Sensational",
+    "productoCriticoStock": 2,
+    "ventasMaxDia": 20000,
+    "vendidosPorDia": [12, 9, 11, 8, 14, 10, 3],
+    "vendidosDias": ["L", "M", "X", "J", "V", "S", "D"],
+    "vendidosDiaActual": 5,
+    "pagoTarjeta": 14,
+    "pagoEfectivo": 7,
+    "pagoTransferencia": 2,
+    "inventarioOk": 156,
+    "inventarioBajo": 4,
+    "inventarioCritico": 3
   },
-  "ventasSemana": [
-    { "dia": "Lun", "estaSemanaMXN": 11200, "semanaPasadaMXN": 9800 },
-    { "dia": "Mar", "estaSemanaMXN": 9400, "semanaPasadaMXN": 12100 },
-    { "dia": "Mie", "estaSemanaMXN": 15300, "semanaPasadaMXN": 10500 },
-    { "dia": "Jue", "estaSemanaMXN": 12800, "semanaPasadaMXN": 11700 },
-    { "dia": "Vie", "estaSemanaMXN": 18600, "semanaPasadaMXN": 14200 },
-    { "dia": "Sab", "estaSemanaMXN": 22400, "semanaPasadaMXN": 19800 },
-    { "dia": "Dom", "estaSemanaMXN": 14850, "semanaPasadaMXN": 13100 }
-  ],
+  "ventasMensuales": {
+    "totalMes": 52340,
+    "cambioMes": 8.3,
+    "semanas": [
+      { "label": "Sem 1", "rango": "Mar 1-7", "total": 13850 },
+      { "label": "Sem 2", "rango": "Mar 8-14", "total": 14310 },
+      { "label": "Sem 3", "rango": "Mar 15-21", "total": 14110 },
+      { "label": "Esta sem.", "rango": "Mar 22-26", "total": 10630, "enProgreso": true }
+    ]
+  },
   "actividadReciente": [
     {
       "id": "v-001",

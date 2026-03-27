@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { motion } from "motion/react"
 import { ArrowUpRight } from "lucide-react"
 import type { ReactNode } from "react"
+import type { LucideIcon } from "lucide-react"
 
 interface KpiCardProps {
   label: string
@@ -11,12 +12,19 @@ interface KpiCardProps {
   formatValue: (n: number) => string
   change: string
   trend: "up" | "alert"
-  gradient: string
-  hoverShadow?: string
+  icon: LucideIcon
+  bg: string
+  borderColor: string
+  labelColor: string
+  numberColor: string
+  iconBg: string
+  iconColor: string
+  pillBg: string
+  pillText: string
   children?: ReactNode
 }
 
-function useCountUp(target: number, duration = 1000) {
+function useCountUp(target: number, duration = 800) {
   const [current, setCurrent] = useState(0)
   const rafRef = useRef<number>(0)
 
@@ -44,45 +52,66 @@ export function KpiCard({
   formatValue,
   change,
   trend,
-  gradient,
-  hoverShadow,
+  icon: Icon,
+  bg,
+  borderColor,
+  labelColor,
+  numberColor,
+  iconBg,
+  iconColor,
+  pillBg,
+  pillText,
   children,
 }: KpiCardProps) {
   const animatedValue = useCountUp(value)
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-6 shadow-md transition-shadow duration-200 ${hoverShadow ?? "hover:shadow-lg"}`}
+      whileHover={{ scale: 1.02, y: -1 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.25, ease: "easeInOut" }}
+      className="relative overflow-hidden rounded-[16px] p-5"
+      style={{ backgroundColor: bg, border: `1px solid ${borderColor}` }}
     >
-      {/* Label */}
-      <span className="text-[10px] font-bold uppercase tracking-[2.5px] text-white/70">
-        {label}
-      </span>
+      {/* Header: label + icon (overline style) */}
+      <div className="flex items-center justify-between">
+        <span
+          className="text-[10px] font-bold uppercase tracking-[2.5px]"
+          style={{ color: labelColor }}
+        >
+          {label}
+        </span>
+        <div
+          className="flex size-8 items-center justify-center rounded-[10px]"
+          style={{ backgroundColor: `${iconColor}1F` }}
+        >
+          <Icon className="size-4" style={{ color: iconColor }} strokeWidth={1.75} />
+        </div>
+      </div>
 
-      {/* Big number */}
-      <p className="mt-2 text-[40px] leading-none font-extrabold tracking-tight text-white">
+      {/* Big number (price style) */}
+      <p
+        className="mt-3 text-[24px] leading-none font-extrabold tracking-[-0.5px]"
+        style={{ color: numberColor }}
+      >
         {formatValue(animatedValue)}
       </p>
 
-      {/* Change indicator */}
-      <div className="mt-2 flex items-center gap-1">
-        {trend === "up" && (
-          <ArrowUpRight
-            className="size-3 text-white/80"
-            strokeWidth={2.5}
-          />
-        )}
-        <span className="text-xs font-semibold text-white/80">{change}</span>
+      {/* Delta badge */}
+      <div className="mt-2">
+        <span
+          className="inline-flex items-center gap-1 rounded-[20px] px-2.5 py-[3px] text-[12px] font-medium leading-[16px]"
+          style={{ backgroundColor: pillBg, color: pillText }}
+        >
+          {trend === "up" && (
+            <ArrowUpRight className="size-3" strokeWidth={2.5} />
+          )}
+          {change}
+        </span>
       </div>
 
       {/* Mini visualization */}
-      {children && (
-        <div className="mt-4 flex items-end justify-end">
-          {children}
-        </div>
-      )}
+      {children && <div className="mt-4">{children}</div>}
     </motion.div>
   )
 }

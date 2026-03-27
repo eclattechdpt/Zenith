@@ -1,62 +1,70 @@
-interface MiniSparklineProps {
+"use client"
+
+import { motion } from "motion/react"
+
+interface WeeklyBarChartProps {
   data: number[]
+  labels: string[]
+  currentDayIndex: number
 }
 
-export function MiniSparkline({ data }: MiniSparklineProps) {
-  const width = 120
-  const height = 40
-  const padding = 2
+const BAR_COLORS = [
+  "#B2ECF0", // Mon - lightest (teal-200)
+  "#B2ECF0", // Tue
+  "#7DDCE4", // Wed (teal-300)
+  "#7DDCE4", // Thu
+  "#25A6B6", // Fri - boldest (teal-500)
+  "#25A6B6", // Sat
+  "#7DDCE4", // Sun (if has data)
+]
+
+export function WeeklyBarChart({ data, labels, currentDayIndex }: WeeklyBarChartProps) {
   const max = Math.max(...data)
-  const min = Math.min(...data)
-  const range = max - min || 1
-
-  const points = data.map((value, i) => {
-    const x = padding + (i / (data.length - 1)) * (width - padding * 2)
-    const y = padding + (1 - (value - min) / range) * (height - padding * 2)
-    return `${x},${y}`
-  })
-
-  const linePath = `M${points.join(" L")}`
-  const fillPath = `${linePath} L${width - padding},${height} L${padding},${height} Z`
 
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="hidden h-[40px] w-[120px] sm:block"
-      fill="none"
-    >
-      <defs>
-        <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="white" stopOpacity={0.3} />
-          <stop offset="100%" stopColor="white" stopOpacity={0.05} />
-        </linearGradient>
-      </defs>
-      <path d={fillPath} fill="url(#sparkFill)" />
-      <path
-        d={linePath}
-        stroke="white"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeOpacity={0.9}
-      />
-      {/* Dot on last point */}
-      {data.length > 0 && (
-        <circle
-          cx={
-            padding +
-            ((data.length - 1) / (data.length - 1)) * (width - padding * 2)
-          }
-          cy={
-            padding +
-            (1 - (data[data.length - 1] - min) / range) *
-              (height - padding * 2)
-          }
-          r={3}
-          fill="white"
-          fillOpacity={0.9}
-        />
-      )}
-    </svg>
+    <div className="flex items-end gap-1">
+      {data.map((value, i) => {
+        const heightPct = max > 0 ? (value / max) * 100 : 0
+        const isFuture = i > currentDayIndex
+
+        return (
+          <div key={i} className="flex flex-1 flex-col items-center gap-1">
+            <div className="relative flex h-[40px] w-full items-end">
+              {isFuture ? (
+                <div
+                  className="w-full rounded-t-[3px]"
+                  style={{
+                    height: "6px",
+                    border: "1.5px dashed #B2ECF0",
+                    background: "transparent",
+                  }}
+                />
+              ) : (
+                <motion.div
+                  className="w-full rounded-t-[3px]"
+                  style={{ backgroundColor: BAR_COLORS[i] }}
+                  initial={{ height: 0 }}
+                  animate={{ height: `${Math.max(heightPct, 8)}%` }}
+                  transition={{
+                    duration: 0.25,
+                    ease: "easeInOut",
+                    delay: i * 0.05,
+                  }}
+                />
+              )}
+            </div>
+            <span
+              className="text-[9px]"
+              style={{
+                color: "#236C7D",
+                fontWeight: i === currentDayIndex ? 500 : 400,
+              }}
+            >
+              {labels[i]}
+            </span>
+          </div>
+        )
+      })}
+    </div>
   )
 }

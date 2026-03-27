@@ -1,57 +1,41 @@
-interface MiniProgressRingProps {
-  value: number
-  max: number
+"use client"
+
+import { motion } from "motion/react"
+
+interface PaymentMethod {
+  label: string
+  count: number
+  dotColor: string
 }
 
-export function MiniProgressRing({ value, max }: MiniProgressRingProps) {
-  const size = 44
-  const strokeWidth = 4
-  const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-  const progress = Math.min(value / max, 1)
-  const offset = circumference * (1 - progress)
+interface PaymentBreakdownProps {
+  methods: PaymentMethod[]
+}
 
+export function PaymentBreakdown({ methods }: PaymentBreakdownProps) {
   return (
-    <svg
-      viewBox={`0 0 ${size} ${size}`}
-      className="hidden size-[44px] sm:block"
-      fill="none"
-    >
-      {/* Background ring */}
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        stroke="white"
-        strokeWidth={strokeWidth}
-        strokeOpacity={0.2}
-      />
-      {/* Progress ring */}
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        stroke="white"
-        strokeWidth={strokeWidth}
-        strokeOpacity={0.9}
-        strokeLinecap="round"
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-      />
-      {/* Center number */}
-      <text
-        x={size / 2}
-        y={size / 2}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill="white"
-        fillOpacity={0.9}
-        fontSize={12}
-        fontWeight={700}
-      >
-        {value}
-      </text>
-    </svg>
+    <div className="flex flex-wrap gap-1.5">
+      {methods.map((method, i) => (
+        <motion.div
+          key={method.label}
+          className="inline-flex items-center gap-[5px] rounded-[20px] px-3 py-[5px]"
+          style={{
+            backgroundColor: "#FFFFFF",
+            border: "0.5px solid #FFDDE3",
+          }}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeInOut", delay: i * 0.08 }}
+        >
+          <span
+            className="size-[7px] shrink-0 rounded-full"
+            style={{ backgroundColor: method.dotColor }}
+          />
+          <span className="text-[11px] font-semibold tracking-[0.3px]" style={{ color: "#9E4A60" }}>
+            {method.label} {method.count}
+          </span>
+        </motion.div>
+      ))}
+    </div>
   )
 }

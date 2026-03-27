@@ -33,14 +33,22 @@ export default async function DashboardPage() {
   const kpiData = {
     ventasDelDia: mockData.kpis.ventasDelDia,
     ventasDelDiaCambio: mockData.kpis.ventasDelDiaCambio,
+    ventasAyer: mockData.kpis.ventasAyer,
+    ventasMaxDia: mockData.kpis.ventasMaxDia,
     productosVendidos: mockData.kpis.productosVendidos,
     productosVendidosCambio: mockData.kpis.productosVendidosCambio,
+    vendidosPorDia: mockData.kpis.vendidosPorDia,
+    vendidosDias: mockData.kpis.vendidosDias,
+    vendidosDiaActual: mockData.kpis.vendidosDiaActual,
     transacciones: mockData.kpis.transacciones,
     transaccionesCambio: mockData.kpis.transaccionesCambio,
-    transaccionesMeta: mockData.kpis.transaccionesMeta,
+    pagoTarjeta: mockData.kpis.pagoTarjeta,
+    pagoEfectivo: mockData.kpis.pagoEfectivo,
+    pagoTransferencia: mockData.kpis.pagoTransferencia,
     stockBajoAlertas: mockData.kpis.stockBajoAlertas,
-    ventasPor7Dias: mockData.kpis.ventasPor7Dias,
-    productosTendencia: mockData.kpis.productosTendencia,
+    inventarioOk: mockData.kpis.inventarioOk,
+    inventarioBajo: mockData.kpis.inventarioBajo,
+    inventarioCritico: mockData.kpis.inventarioCritico,
   }
 
   return (
@@ -66,31 +74,11 @@ export default async function DashboardPage() {
           <div className="grid gap-5 xl:grid-cols-5">
             {/* Sales chart */}
             <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md xl:col-span-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-sm font-bold text-neutral-900">
-                    Rendimiento de ventas
-                  </h2>
-                  <p className="mt-0.5 text-[11px] text-neutral-500">
-                    Comparativa semanal
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <span className="size-2 rounded-full bg-rose-400" />
-                    <span className="text-[11px] font-medium text-neutral-500">
-                      Esta semana
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="size-2 rounded-full bg-teal-300" />
-                    <span className="text-[11px] font-medium text-neutral-500">
-                      Semana pasada
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <SalesChart />
+              <SalesChart
+                totalMes={mockData.ventasMensuales.totalMes}
+                cambioMes={mockData.ventasMensuales.cambioMes}
+                semanas={mockData.ventasMensuales.semanas}
+              />
             </div>
 
             {/* Activity feed */}

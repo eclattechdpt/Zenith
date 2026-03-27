@@ -1,36 +1,58 @@
-interface MiniBarChartProps {
-  data: number[]
+"use client"
+
+import { motion } from "motion/react"
+import { formatCurrency } from "@/lib/utils"
+
+interface SalesProgressProps {
+  today: number
+  yesterday: number
+  max: number
 }
 
-export function MiniBarChart({ data }: MiniBarChartProps) {
-  const max = Math.max(...data)
-  const barWidth = 12
-  const gap = 5
-  const height = 40
-  const width = data.length * (barWidth + gap) - gap
+export function SalesProgress({ today, yesterday, max }: SalesProgressProps) {
+  const todayPct = Math.min((today / max) * 100, 100)
+  const yesterdayPct = Math.min((yesterday / max) * 100, 100)
+  const diff = today - yesterday
 
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="hidden h-[40px] w-[120px] sm:block"
-      fill="none"
-    >
-      {data.map((value, i) => {
-        const barHeight = (value / max) * (height - 4)
-        const opacity = 0.3 + (value / max) * 0.7
-        return (
-          <rect
-            key={i}
-            x={i * (barWidth + gap)}
-            y={height - barHeight}
-            width={barWidth}
-            height={barHeight}
-            rx={3}
-            fill="white"
-            fillOpacity={opacity}
-          />
-        )
-      })}
-    </svg>
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-semibold tracking-[0.3px]" style={{ color: "#E11D52" }}>
+          Hoy
+        </span>
+        <span className="text-[11px] font-semibold tracking-[0.3px]" style={{ color: "#E11D52" }}>
+          {diff >= 0 ? "+" : ""}
+          {formatCurrency(diff)} adelante
+        </span>
+      </div>
+      {/* Track */}
+      <div
+        className="relative h-2 w-full overflow-visible rounded-[4px]"
+        style={{ backgroundColor: "rgba(244,63,107,0.12)" }}
+      >
+        {/* Fill bar */}
+        <motion.div
+          className="absolute left-0 top-0 h-full rounded-[4px]"
+          style={{ backgroundColor: "#F43F6B" }}
+          initial={{ width: 0 }}
+          animate={{ width: `${todayPct}%` }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        />
+        {/* Yesterday dashed marker */}
+        <div
+          className="absolute top-0 h-full"
+          style={{
+            left: `${yesterdayPct}%`,
+            borderRight: "2px dashed #FF9DB5",
+          }}
+        />
+      </div>
+      {/* Scale labels */}
+      <div className="flex items-center justify-between text-[10px]" style={{ color: "#FF9DB5" }}>
+        <span>$0</span>
+        <span>— Ayer {formatCurrency(yesterday)}</span>
+        <span>{formatCurrency(max)}</span>
+      </div>
+    </div>
   )
 }

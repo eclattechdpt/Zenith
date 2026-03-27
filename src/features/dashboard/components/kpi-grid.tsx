@@ -1,72 +1,138 @@
 "use client"
 
+import {
+  DollarSign,
+  Package,
+  ShoppingBag,
+  AlertTriangle,
+} from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import { KpiCard } from "./kpi-card"
-import { MiniBarChart } from "./mini-bar-chart"
-import { MiniSparkline } from "./mini-sparkline"
-import { MiniProgressRing } from "./mini-progress-ring"
-import { MiniProgressBar } from "./mini-progress-bar"
+import { SalesProgress } from "./mini-bar-chart"
+import { WeeklyBarChart } from "./mini-sparkline"
+import { PaymentBreakdown } from "./mini-progress-ring"
+import { InventoryHealth } from "./mini-progress-bar"
 
 interface KpiData {
   ventasDelDia: number
   ventasDelDiaCambio: number
+  ventasAyer: number
+  ventasMaxDia: number
   productosVendidos: number
   productosVendidosCambio: number
+  vendidosPorDia: number[]
+  vendidosDias: string[]
+  vendidosDiaActual: number
   transacciones: number
   transaccionesCambio: number
-  transaccionesMeta: number
+  pagoTarjeta: number
+  pagoEfectivo: number
+  pagoTransferencia: number
   stockBajoAlertas: number
-  ventasPor7Dias: number[]
-  productosTendencia: number[]
+  inventarioOk: number
+  inventarioBajo: number
+  inventarioCritico: number
 }
 
 export function KpiGrid({ data }: { data: KpiData }) {
   return (
     <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      {/* Rose — Ventas del dia */}
       <KpiCard
         label="Ventas del dia"
         value={data.ventasDelDia}
         formatValue={formatCurrency}
         change={`+${data.ventasDelDiaCambio}% vs ayer`}
         trend="up"
-        gradient="from-rose-400 to-rose-600"
-        hoverShadow="hover:shadow-[0_4px_20px_rgba(244,63,107,0.25)]"
+        icon={DollarSign}
+        bg="#FFF0F3"
+        borderColor="#FFE0E8"
+        labelColor="#E11D52"
+        numberColor="#9D1139"
+        iconBg="rgba(244,63,107,0.12)"
+        iconColor="#F43F6B"
+        pillBg="rgba(244,63,107,0.15)"
+        pillText="#E11D52"
       >
-        <MiniBarChart data={data.ventasPor7Dias} />
+        <SalesProgress
+          today={data.ventasDelDia}
+          yesterday={data.ventasAyer}
+          max={data.ventasMaxDia}
+        />
       </KpiCard>
 
+      {/* Teal — Vendidos esta semana */}
       <KpiCard
         label="Vendidos esta semana"
         value={data.productosVendidos}
         formatValue={(n) => n.toString()}
         change={`+${data.productosVendidosCambio} vs ayer`}
         trend="up"
-        gradient="from-teal-400 to-teal-600"
-        hoverShadow="hover:shadow-[0_4px_20px_rgba(37,166,182,0.20)]"
+        icon={Package}
+        bg="#EFFCFC"
+        borderColor="#D6F6F8"
+        labelColor="#236C7D"
+        numberColor="#255867"
+        iconBg="rgba(37,166,182,0.12)"
+        iconColor="#25A6B6"
+        pillBg="rgba(37,166,182,0.15)"
+        pillText="#236C7D"
       >
-        <MiniSparkline data={data.productosTendencia} />
+        <WeeklyBarChart
+          data={data.vendidosPorDia}
+          labels={data.vendidosDias}
+          currentDayIndex={data.vendidosDiaActual}
+        />
       </KpiCard>
 
+      {/* Blush — Transacciones */}
       <KpiCard
         label="Transacciones"
         value={data.transacciones}
         formatValue={(n) => n.toString()}
         change={`+${data.transaccionesCambio} vs ayer`}
         trend="up"
-        gradient="from-blush-400 to-blush-600"
+        icon={ShoppingBag}
+        bg="#FFF8F9"
+        borderColor="#FFDDE3"
+        labelColor="#C45E78"
+        numberColor="#9E4A60"
+        iconBg="rgba(255,150,174,0.12)"
+        iconColor="#FF96AE"
+        pillBg="rgba(255,150,174,0.15)"
+        pillText="#C45E78"
       >
-        <MiniProgressRing value={data.transacciones} max={data.transaccionesMeta} />
+        <PaymentBreakdown
+          methods={[
+            { label: "Tarjeta", count: data.pagoTarjeta, dotColor: "#E87A95" },
+            { label: "Efectivo", count: data.pagoEfectivo, dotColor: "#FF96AE" },
+            { label: "Transf.", count: data.pagoTransferencia, dotColor: "#FFC4CF" },
+          ]}
+        />
       </KpiCard>
 
+      {/* Warning — Stock bajo */}
       <KpiCard
         label="Stock bajo"
         value={data.stockBajoAlertas}
         formatValue={(n) => n.toString()}
         change="alertas activas"
         trend="alert"
-        gradient="from-neutral-700 to-neutral-900"
+        icon={AlertTriangle}
+        bg="#FEFCE8"
+        borderColor="rgba(202,138,4,0.25)"
+        labelColor="#854D0E"
+        numberColor="#854D0E"
+        iconBg="rgba(202,138,4,0.12)"
+        iconColor="#CA8A04"
+        pillBg="rgba(202,138,4,0.15)"
+        pillText="#854D0E"
       >
-        <MiniProgressBar value={data.stockBajoAlertas} max={15} />
+        <InventoryHealth
+          ok={data.inventarioOk}
+          bajo={data.inventarioBajo}
+          critico={data.inventarioCritico}
+        />
       </KpiCard>
     </div>
   )
