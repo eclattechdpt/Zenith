@@ -18,7 +18,7 @@ const rankStyles = [
 
 export function TopProductsGrid({ products }: { products: Product[] }) {
   return (
-    <div className="min-w-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-6">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-teal-100 bg-gradient-to-b from-white to-teal-50/30 p-4 shadow-sm transition-shadow duration-200 hover:shadow-[0_4px_20px_rgba(37,166,182,0.10)] sm:p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-neutral-900">
           Productos mas vendidos

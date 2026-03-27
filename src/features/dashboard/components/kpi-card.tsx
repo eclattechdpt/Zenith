@@ -14,6 +14,7 @@ interface KpiCardProps {
   trend: "up" | "alert"
   icon: LucideIcon
   bg: string
+  hoverShadow: string
   borderColor: string
   labelColor: string
   numberColor: string
@@ -54,6 +55,7 @@ export function KpiCard({
   trend,
   icon: Icon,
   bg,
+  hoverShadow,
   borderColor,
   labelColor,
   numberColor,
@@ -69,8 +71,8 @@ export function KpiCard({
     <motion.div
       whileHover={{ y: -2 }}
       transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-      className="relative overflow-hidden rounded-[16px] p-5 shadow-sm transition-shadow duration-200 hover:shadow-md"
-      style={{ backgroundColor: bg, border: `1px solid ${borderColor}` }}
+      className={`relative flex flex-col overflow-hidden rounded-[16px] bg-gradient-to-b ${bg} p-5 shadow-sm transition-shadow duration-200 ${hoverShadow}`}
+      style={{ border: `1px solid ${borderColor}` }}
     >
       {/* Header: label + icon (overline style) */}
       <div className="flex items-center justify-between">
@@ -109,8 +111,13 @@ export function KpiCard({
         </span>
       </div>
 
-      {/* Mini visualization */}
-      {children && <div className="mt-4">{children}</div>}
+      {/* Spacer + Mini visualization */}
+      {children && (
+        <>
+          <div className="min-h-4 max-h-8 flex-1" />
+          <div>{children}</div>
+        </>
+      )}
     </motion.div>
   )
 }

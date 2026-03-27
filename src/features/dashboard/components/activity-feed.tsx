@@ -27,7 +27,7 @@ const styleMap: Record<string, { bg: string; color: string }> = {
 
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-6 xl:col-span-2">
+    <div className="rounded-2xl border border-blush-200/60 bg-gradient-to-b from-white to-blush-50/30 p-4 shadow-sm transition-shadow duration-200 hover:shadow-[0_4px_20px_rgba(255,150,174,0.10)] sm:p-6 xl:col-span-2">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-neutral-900">
           Actividad reciente

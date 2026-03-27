@@ -28,12 +28,12 @@ export function GreetingSection({
           Aqui va tu resumen del dia
         </p>
       </div>
-      <div className="hidden items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 shadow-xs lg:flex">
+      <div className="hidden items-center gap-2 rounded-full border border-rose-100 bg-rose-50/50 px-3.5 py-1.5 shadow-xs lg:flex">
         <CalendarDays
-          className="size-3.5 text-neutral-400"
+          className="size-3.5 text-rose-400"
           strokeWidth={1.75}
         />
-        <span className="text-xs font-medium text-neutral-600">
+        <span className="text-xs font-medium text-rose-700">
           {formattedDate}
         </span>
       </div>

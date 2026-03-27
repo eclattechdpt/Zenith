@@ -10,9 +10,12 @@ const actions = [
     label: "Nueva venta",
     subtitle: "Acceder a caja",
     icon: PlusCircle,
-    iconBg: "bg-rose-100 group-hover:bg-rose-200",
+    bg: "bg-gradient-to-b from-rose-50 to-rose-100/60",
+    border: "border-rose-200",
+    iconBg: "bg-rose-200/60 group-hover:bg-rose-200",
     iconColor: "text-rose-600",
     hoverBorder: "hover:border-rose-200",
+    hoverShadow: "hover:shadow-[0_4px_20px_rgba(244,63,107,0.15)]",
     arrowHover: "group-hover:text-rose-400",
   },
   {
@@ -20,9 +23,12 @@ const actions = [
     label: "Ver productos",
     subtitle: "Catalogo y detalles",
     icon: Boxes,
-    iconBg: "bg-teal-100 group-hover:bg-teal-200",
+    bg: "bg-gradient-to-b from-teal-50 to-teal-100/60",
+    border: "border-teal-200",
+    iconBg: "bg-teal-200/60 group-hover:bg-teal-200",
     iconColor: "text-teal-600",
     hoverBorder: "hover:border-teal-200",
+    hoverShadow: "hover:shadow-[0_4px_20px_rgba(37,166,182,0.15)]",
     arrowHover: "group-hover:text-teal-400",
   },
   {
@@ -30,9 +36,12 @@ const actions = [
     label: "Registrar cliente",
     subtitle: "Nuevo cliente",
     icon: UserPlus,
-    iconBg: "bg-blush-100 group-hover:bg-blush-200",
+    bg: "bg-gradient-to-b from-blush-50 to-blush-100/60",
+    border: "border-blush-300",
+    iconBg: "bg-blush-200/60 group-hover:bg-blush-300/60",
     iconColor: "text-blush-600",
-    hoverBorder: "hover:border-blush-200",
+    hoverBorder: "hover:border-blush-300",
+    hoverShadow: "hover:shadow-[0_4px_20px_rgba(255,150,174,0.15)]",
     arrowHover: "group-hover:text-blush-400",
   },
 ]
@@ -50,7 +59,7 @@ export function QuickActions() {
           >
             <Link
               href={action.href}
-              className={`group flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-all duration-200 ${action.hoverBorder} hover:shadow-md`}
+              className={`group flex items-center gap-4 rounded-2xl ${action.border} ${action.bg} p-5 shadow-sm transition-all duration-200 ${action.hoverBorder} ${action.hoverShadow}`}
             >
               <div
                 className={`flex size-12 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${action.iconBg}`}

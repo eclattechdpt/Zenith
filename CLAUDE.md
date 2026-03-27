@@ -236,6 +236,7 @@ No saltar sprints. Cada sprint depende del anterior.
 - Tipos de DB generados (`database.ts`)
 - Dashboard v2 redesign: KPI cards con fondos tintados (rose, teal, blush, warning) y visualizaciones contextuales (pace tracker ventas, weekly bar chart vendidos, payment pills transacciones, inventory health bar stock), colores del design system, tipografia overline/price/caption/label. Quick actions como seccion principal con hover lift, greeting con hora del dia, staggered entrance animations, activity feed mejorado, top products y inventory alerts card-ificados, count-up animation en KPIs
 - Sales chart reemplazado: horizontal billboard bars por semana con colores progresivos (blush-200 → rose-400), total mensual, semana actual destacada, mejor semana marcada
+- Color system completo: gradientes en KPIs y quick actions, colored hover shadows (shadow-rose, shadow-teal, shadow-blush, shadow-amber), tinted backgrounds en todas las secciones (chart=rose, activity=blush, products=teal, alerts=amber), date pill con rose accent, overlapping sales bar (hoy vs ayer), squared health bar segments
 - Layout: main area con rounded-l-2xl + inset shadow para continuidad con sidebar, drop-shadow en active tab scoops
 - Mobile responsive: greeting responsive (22px/32px), KPIs single column on mobile, chart/activity/products/alerts con padding responsive (p-4 sm:p-6), overflow-hidden, min-w-0, product stats hidden on mobile, chart amounts hidden on mobile
 - Sidebar logout: form movido fuera de TooltipTrigger para evitar error de redirect
