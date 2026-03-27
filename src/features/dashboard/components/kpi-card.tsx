@@ -67,10 +67,9 @@ export function KpiCard({
 
   return (
     <motion.div
-      whileHover={{ scale: 1.02, y: -1 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="relative overflow-hidden rounded-[16px] p-5"
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+      className="relative overflow-hidden rounded-[16px] p-5 shadow-sm transition-shadow duration-200 hover:shadow-md"
       style={{ backgroundColor: bg, border: `1px solid ${borderColor}` }}
     >
       {/* Header: label + icon (overline style) */}

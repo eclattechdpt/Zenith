@@ -36,8 +36,8 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
           Hoy
         </span>
       </div>
-      <div className="mt-4 max-h-[340px] space-y-0.5 overflow-y-auto">
-        {items.map((item) => {
+      <div className="mt-4 space-y-0.5">
+        {items.slice(0, 4).map((item) => {
           const Icon = iconMap[item.tipo] ?? ShoppingBag
           const styles = styleMap[item.tipo] ?? styleMap.venta
           const isNegative = item.monto !== null && item.monto < 0
