@@ -27,7 +27,7 @@ const styleMap: Record<string, { bg: string; color: string }> = {
 
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
   return (
-    <div className="max-w-full min-w-0 rounded-2xl border border-blush-200/60 bg-gradient-to-b from-white to-blush-50/30 p-4 shadow-sm transition-shadow duration-200 hover:shadow-[0_4px_20px_rgba(255,150,174,0.10)] sm:p-6 xl:col-span-2">
+    <div className="max-w-full min-w-0 rounded-2xl border border-blush-200/60 bg-gradient-to-b from-white to-blush-50/30 p-4 shadow-sm sm:p-6 xl:col-span-2">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-neutral-900">
           Actividad reciente
@@ -44,7 +44,7 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
           return (
             <div
               key={item.id}
-              className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors duration-200 hover:bg-neutral-50"
+              className="flex items-center gap-3 rounded-xl px-3 py-3"
             >
               <div
                 className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${styles.bg}`}

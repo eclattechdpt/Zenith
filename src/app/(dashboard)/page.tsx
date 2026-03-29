@@ -73,7 +73,7 @@ export default async function DashboardPage() {
         <DashboardItem>
           <div className="grid min-w-0 gap-5 xl:grid-cols-5">
             {/* Sales chart */}
-            <div className="max-w-full min-w-0 overflow-hidden rounded-2xl border border-rose-100 bg-gradient-to-b from-white to-rose-50/40 p-4 shadow-sm transition-shadow duration-200 hover:shadow-[0_4px_20px_rgba(244,63,107,0.10)] sm:p-6 xl:col-span-3">
+            <div className="max-w-full min-w-0 overflow-hidden rounded-2xl border border-rose-100 bg-gradient-to-b from-white to-rose-50/40 p-4 shadow-sm sm:p-6 xl:col-span-3">
               <SalesChart
                 totalMes={mockData.ventasMensuales.totalMes}
                 cambioMes={mockData.ventasMensuales.cambioMes}

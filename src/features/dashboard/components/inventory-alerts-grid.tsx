@@ -12,7 +12,7 @@ interface Alert {
 
 export function InventoryAlertsGrid({ alerts }: { alerts: Alert[] }) {
   return (
-    <div className="min-w-0 overflow-hidden rounded-2xl border border-amber-100 bg-gradient-to-b from-white to-amber-50/40 p-4 shadow-sm transition-shadow duration-200 hover:shadow-[0_4px_20px_rgba(202,138,4,0.10)] sm:p-6">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-amber-100 bg-gradient-to-b from-white to-amber-50/40 p-4 shadow-sm sm:p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-neutral-900">
@@ -32,7 +32,7 @@ export function InventoryAlertsGrid({ alerts }: { alerts: Alert[] }) {
           return (
             <div
               key={item.nombre + item.variante}
-              className={`flex items-center gap-3 rounded-xl border border-neutral-100 bg-neutral-50/50 p-3 transition-all duration-200 hover:border-neutral-200 hover:bg-white hover:shadow-sm ${
+              className={`flex items-center gap-3 rounded-xl border border-neutral-100 bg-neutral-50/50 p-3  ${
                 isCritical
                   ? "border-l-[3px] border-l-error"
                   : "border-l-[3px] border-l-warning"

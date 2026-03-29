@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { motion } from "motion/react"
 import { ArrowUpRight } from "lucide-react"
 import type { ReactNode } from "react"
 import type { LucideIcon } from "lucide-react"
@@ -14,7 +13,6 @@ interface KpiCardProps {
   trend: "up" | "alert"
   icon: LucideIcon
   bg: string
-  hoverShadow: string
   borderColor: string
   labelColor: string
   numberColor: string
@@ -55,7 +53,6 @@ export function KpiCard({
   trend,
   icon: Icon,
   bg,
-  hoverShadow,
   borderColor,
   labelColor,
   numberColor,
@@ -68,10 +65,8 @@ export function KpiCard({
   const animatedValue = useCountUp(value)
 
   return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-      className={`relative flex flex-col overflow-hidden rounded-[16px] bg-gradient-to-b ${bg} p-5 shadow-sm transition-shadow duration-200 ${hoverShadow}`}
+    <div
+      className={`relative flex flex-col overflow-hidden rounded-[16px] bg-gradient-to-b ${bg} p-5 shadow-sm`}
       style={{ border: `1px solid ${borderColor}` }}
     >
       {/* Header: label + icon (overline style) */}
@@ -118,6 +113,6 @@ export function KpiCard({
           <div>{children}</div>
         </>
       )}
-    </motion.div>
+    </div>
   )
 }

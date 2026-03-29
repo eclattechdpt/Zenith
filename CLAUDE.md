@@ -252,3 +252,4 @@ No saltar sprints. Cada sprint depende del anterior.
 - Status pill debug en login (cicla online/warning/error en dev)
 - Playwright MCP configurado para testing visual
 - Custom skill `/explain` para simplificar explicaciones tecnicas
+- Dashboard widgets sin hover animations: KPIs (removed whileHover lift + colored shadows), sales chart, activity feed, top products, inventory alerts — todos son informativos, sin interaccion hover

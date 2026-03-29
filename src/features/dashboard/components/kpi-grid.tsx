@@ -46,7 +46,6 @@ export function KpiGrid({ data }: { data: KpiData }) {
         trend="up"
         icon={DollarSign}
         bg="from-rose-50 to-rose-100"
-        hoverShadow="hover:shadow-[0_4px_20px_rgba(244,63,107,0.25)]"
         borderColor="#FFE0E8"
         labelColor="#E11D52"
         numberColor="#9D1139"
@@ -71,7 +70,6 @@ export function KpiGrid({ data }: { data: KpiData }) {
         trend="up"
         icon={Package}
         bg="from-teal-50 to-teal-100"
-        hoverShadow="hover:shadow-[0_4px_20px_rgba(37,166,182,0.20)]"
         borderColor="#D6F6F8"
         labelColor="#236C7D"
         numberColor="#255867"
@@ -96,7 +94,6 @@ export function KpiGrid({ data }: { data: KpiData }) {
         trend="up"
         icon={ShoppingBag}
         bg="from-blush-50 to-blush-100"
-        hoverShadow="hover:shadow-[0_4px_20px_rgba(255,150,174,0.25)]"
         borderColor="#FFDDE3"
         labelColor="#C45E78"
         numberColor="#9E4A60"
@@ -123,7 +120,6 @@ export function KpiGrid({ data }: { data: KpiData }) {
         trend="alert"
         icon={AlertTriangle}
         bg="from-[#FEFCE8] to-[#FEF9C3]"
-        hoverShadow="hover:shadow-[0_4px_20px_rgba(202,138,4,0.20)]"
         borderColor="rgba(202,138,4,0.25)"
         labelColor="#854D0E"
         numberColor="#854D0E"

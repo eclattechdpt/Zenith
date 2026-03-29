@@ -18,7 +18,7 @@ const rankStyles = [
 
 export function TopProductsGrid({ products }: { products: Product[] }) {
   return (
-    <div className="min-w-0 overflow-hidden rounded-2xl border border-teal-100 bg-gradient-to-b from-white to-teal-50/30 p-4 shadow-sm transition-shadow duration-200 hover:shadow-[0_4px_20px_rgba(37,166,182,0.10)] sm:p-6">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-teal-100 bg-gradient-to-b from-white to-teal-50/30 p-4 shadow-sm sm:p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-neutral-900">
           Productos mas vendidos
@@ -31,7 +31,7 @@ export function TopProductsGrid({ products }: { products: Product[] }) {
         {products.map((p, i) => (
           <div
             key={p.nombre}
-            className="flex items-center gap-3 rounded-xl border border-neutral-100 bg-neutral-50/50 p-3 transition-all duration-200 hover:border-neutral-200 hover:bg-white hover:shadow-sm"
+            className="flex items-center gap-3 rounded-xl border border-neutral-100 bg-neutral-50/50 p-3 "
           >
             {/* Rank badge */}
             <span
