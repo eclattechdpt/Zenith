@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { Package, Plus, Search } from "lucide-react"
 import Link from "next/link"
 import { useQueryState, parseAsString } from "nuqs"
+import { motion } from "motion/react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,7 +30,7 @@ export function ProductTable() {
     parseAsString.withDefault("")
   )
 
-  const { data: products = [], isLoading } = useProducts({
+  const { data: products = [], isLoading, isFetched } = useProducts({
     search: search || undefined,
     categoryId: categoryId || undefined,
   })
@@ -62,71 +63,76 @@ export function ProductTable() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 sm:max-w-sm">
-          <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
-          <Input
-            placeholder="Buscar producto, marca o SKU..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value || null)}
-            className="pl-9"
-          />
-        </div>
-        <select
-          value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value || null)}
-          className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-neutral-600 outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          <option value="">Todas las categorias</option>
-          {topCategories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Table */}
-      <DataTable
-        columns={columns}
-        data={products}
-        isLoading={isLoading}
-        pageSize={10}
-        emptyState={
-          search || categoryId ? (
-            <EmptyState
-              icon={Search}
-              title="Sin resultados"
-              description="Intenta con otros terminos de busqueda o filtros."
-            />
-          ) : (
-            <EmptyState
-              icon={Package}
-              title="No hay productos"
-              description="Agrega tu primer producto para comenzar."
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: isFetched ? 1 : 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="space-y-4 overflow-hidden rounded-2xl border border-rose-100 bg-gradient-to-b from-white to-rose-50/30 p-4 shadow-sm sm:p-6"
+    >
+          {/* Filters */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1 sm:max-w-sm">
+              <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
+              <Input
+                placeholder="Buscar producto, marca o SKU..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value || null)}
+                className="pl-9"
+              />
+            </div>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value || null)}
+              className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-neutral-600 outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <Button size="sm" nativeButton={false} render={<Link href="/productos/nuevo" />}>
-                <Plus className="mr-1.5 size-4" />
-                Nuevo producto
-              </Button>
-            </EmptyState>
-          )
-        }
-      />
+              <option value="">Todas las categorias</option>
+              {topCategories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      {/* Delete confirmation */}
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Eliminar producto"
-        description={`Se eliminara "${deleteTarget?.name}" y todas sus variantes. Esta accion no se puede deshacer.`}
-        confirmLabel="Eliminar"
-        variant="destructive"
-        isLoading={isDeleting}
-        onConfirm={handleDelete}
-      />
-    </div>
+          {/* Table */}
+          <DataTable
+            columns={columns}
+            data={products}
+            isLoading={isLoading}
+            pageSize={10}
+            emptyState={
+              search || categoryId ? (
+                <EmptyState
+                  icon={Search}
+                  title="Sin resultados"
+                  description="Intenta con otros terminos de busqueda o filtros."
+                />
+              ) : (
+                <EmptyState
+                  icon={Package}
+                  title="No hay productos"
+                  description="Agrega tu primer producto para comenzar."
+                >
+                  <Button size="sm" nativeButton={false} render={<Link href="/productos/nuevo" />}>
+                    <Plus className="mr-1.5 size-4" />
+                    Nuevo producto
+                  </Button>
+                </EmptyState>
+              )
+            }
+          />
+
+          {/* Delete confirmation */}
+          <ConfirmDialog
+            open={!!deleteTarget}
+            onOpenChange={(open) => !open && setDeleteTarget(null)}
+            title="Eliminar producto"
+            description={`Se eliminara "${deleteTarget?.name}" y todas sus variantes. Esta accion no se puede deshacer.`}
+            confirmLabel="Eliminar"
+            variant="destructive"
+            isLoading={isDeleting}
+            onConfirm={handleDelete}
+          />
+    </motion.div>
   )
 }

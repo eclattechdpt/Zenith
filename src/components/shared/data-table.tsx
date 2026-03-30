@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   type ColumnDef,
   type SortingState,
@@ -12,11 +12,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -47,6 +46,16 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [showSpinner, setShowSpinner] = useState(false)
+
+  useEffect(() => {
+    if (!isLoading) {
+      setShowSpinner(false)
+      return
+    }
+    const timer = setTimeout(() => setShowSpinner(true), 500)
+    return () => clearTimeout(timer)
+  }, [isLoading])
 
   const table = useReactTable({
     data,
@@ -78,12 +87,15 @@ export function DataTable<TData, TValue>({
       )}
 
       {/* Table */}
-      <Table>
+      <Table style={{ tableLayout: "fixed", width: "100%" }}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
+                <TableHead
+                  key={header.id}
+                  style={{ width: header.getSize() }}
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -96,16 +108,17 @@ export function DataTable<TData, TValue>({
           ))}
         </TableHeader>
         <TableBody>
-          {isLoading ? (
-            Array.from({ length: pageSize }).map((_, i) => (
-              <TableRow key={i}>
-                {columns.map((_, j) => (
-                  <TableCell key={j}>
-                    <Skeleton className="h-5 w-full" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
+          {isLoading && !data.length ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                {showSpinner ? (
+                  <div className="flex items-center justify-center gap-2 text-neutral-400">
+                    <Loader2 className="size-4 animate-spin" />
+                    <span className="text-sm">Cargando...</span>
+                  </div>
+                ) : null}
+              </TableCell>
+            </TableRow>
           ) : table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>

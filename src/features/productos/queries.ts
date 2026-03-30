@@ -68,6 +68,7 @@ export function useProducts(filters?: ProductFilters) {
       if (error) throw error
       return (data ?? []) as unknown as ProductWithDetails[]
     },
+    placeholderData: (prev) => prev,
   })
 }
 

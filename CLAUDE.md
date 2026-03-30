@@ -249,6 +249,9 @@ No saltar sprints. Cada sprint depende del anterior.
 - Fix updateProduct: ahora actualiza/inserta/elimina variantes en product_variants
 - SKU auto-uppercase en todos los inputs
 - Variantes column muestra "—" para productos simples (1 variante)
+- Categorias actualizadas en Supabase: 5 padres (Cuidado Facial, Maquillaje, Cuidado Corporal, Nutricional, Accesorios) con 21 subcategorias. Categorias anteriores soft-deleted
+- Product table loading UX: eliminado skeleton flash, fade-in suave del contenido completo (card + filtros + tabla) solo cuando datos estan listos, fixed column widths para evitar reflow, placeholderData para transiciones de filtro sin parpadeo
+- Removido Suspense no-op wrapper en /productos (no atrapaba nada con useQuery)
 
 **Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-26)
 

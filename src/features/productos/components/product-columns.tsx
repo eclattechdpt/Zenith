@@ -61,6 +61,8 @@ export function getProductColumns({
   return [
     {
       accessorKey: "name",
+      size: 250,
+      minSize: 180,
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -89,6 +91,8 @@ export function getProductColumns({
     {
       id: "category",
       accessorFn: (row) => row.categories?.name ?? "",
+      size: 160,
+      minSize: 120,
       header: "Categoria",
       cell: ({ row }) => {
         const name = row.original.categories?.name
@@ -100,6 +104,8 @@ export function getProductColumns({
     },
     {
       id: "price",
+      size: 140,
+      minSize: 100,
       header: "Precio",
       cell: ({ row }) => {
         const range = getPriceRange(row.original)
@@ -109,6 +115,8 @@ export function getProductColumns({
     },
     {
       id: "variants",
+      size: 100,
+      minSize: 80,
       header: "Variantes",
       cell: ({ row }) => {
         const count = row.original.product_variants.filter(
@@ -124,6 +132,8 @@ export function getProductColumns({
     },
     {
       id: "stock",
+      size: 100,
+      minSize: 80,
       header: "Stock",
       cell: ({ row }) => {
         const total = getTotalStock(row.original)
@@ -161,6 +171,8 @@ export function getProductColumns({
     },
     {
       id: "status",
+      size: 100,
+      minSize: 80,
       header: "Estado",
       cell: ({ row }) => {
         const active = row.original.is_active
@@ -173,6 +185,8 @@ export function getProductColumns({
     },
     {
       id: "actions",
+      size: 50,
+      minSize: 50,
       header: "",
       cell: ({ row }) => {
         const product = row.original

@@ -1,11 +1,9 @@
 "use client"
 
-import { Suspense } from "react"
 import { Plus, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { motion } from "motion/react"
 
-import { TableSkeleton } from "@/components/shared/loading-skeleton"
 import { ProductTable } from "@/features/productos/components/product-table"
 
 const containerVariants = {
@@ -78,13 +76,7 @@ export default function ProductosPage() {
       </motion.div>
 
       {/* Table */}
-      <motion.div variants={itemVariants}>
-        <div className="overflow-hidden rounded-2xl border border-rose-100 bg-gradient-to-b from-white to-rose-50/30 p-4 shadow-sm sm:p-6">
-          <Suspense fallback={<TableSkeleton />}>
-            <ProductTable />
-          </Suspense>
-        </div>
-      </motion.div>
+      <ProductTable />
     </motion.div>
   )
 }
