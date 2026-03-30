@@ -25,7 +25,12 @@
       "mcp__playwright__browser_console_messages",
       "Bash(git pull:*)",
       "Bash(git stash:*)",
-      "mcp__playwright__browser_resize"
+      "mcp__playwright__browser_resize",
+      "Bash(grep -E \"\\\\.tsx$\")",
+      "Bash(npx next:*)",
+      "Bash(ls src/app/\\\\\\(dashboard\\\\\\)/productos/nuevo/)",
+      "Bash(ls src/app/\\\\\\(dashboard\\\\\\)/productos/[id]/)",
+      "Bash(node:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

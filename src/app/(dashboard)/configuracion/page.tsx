@@ -1,18 +1,48 @@
-import { Settings } from "lucide-react"
+"use client"
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card"
+import { PageHeader } from "@/components/shared/page-header"
+import { CategoryManager } from "@/features/productos/components/category-manager"
+import { VariantTypeManager } from "@/features/productos/components/variant-type-manager"
 
 export default function ConfiguracionPage() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-      <div className="flex size-12 items-center justify-center rounded-2xl bg-neutral-100">
-        <Settings className="size-6 text-neutral-600" strokeWidth={1.5} />
-      </div>
-      <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
-          Configuracion
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Ajustes del sistema — disponible en Sprint 2
-        </p>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Configuracion"
+        description="Categorias y tipos de variante"
+      />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Categorias</CardTitle>
+            <CardDescription>
+              Organiza tus productos en categorias y subcategorias
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CategoryManager />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Tipos de variante</CardTitle>
+            <CardDescription>
+              Define los atributos de tus productos (tono, tamano, formula)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <VariantTypeManager />
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

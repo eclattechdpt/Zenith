@@ -1,0 +1,1 @@
+- [Mock data mode](project_mock_data.md) — Sprint 2 uses mock data, not live Supabase

@@ -224,6 +224,22 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
+**Sprint 2 — Catalogo de productos: EN PROGRESO** (actualizado 2026-03-30)
+
+### Sprint 2 — Completado
+- Schemas Zod: product, variant, category, variantType, variantOption, createProduct (con UUID regex flexible)
+- Tipos del modulo: Product, ProductVariant, Category, VariantType, VariantOption + tipos compuestos (ProductWithDetails, CategoryWithCount, etc.)
+- Mock data: 8 productos realistas (MAC, Revlon, Maybelline, CeraVe, The Ordinary, Olaplex, Carolina Herrera, NYX), 11 categorias, 3 tipos de variante con opciones — todos con UUIDs validos
+- Server Actions (mock): createProduct, updateProduct, deleteProduct, CRUD categorias, CRUD variant types/options — con delay de 1s para testing visual
+- TanStack Query hooks: useProducts (con filtros), useProduct, useCategories, useVariantTypes — consumen mock data
+- Pagina de productos (`/productos`): DataTable con busqueda (nombre/marca/SKU), filtro por categoria (nuqs URL state), paginacion, columnas (producto, categoria, precio range, variantes count, stock con badge "Bajo" + tooltip mostrando variantes con stock bajo, estado activo/inactivo, acciones dropdown)
+- Crear producto (`/productos/nuevo`): formulario con RHF+Zod, auto-slug, categoria grouped (optgroup), descripcion, toggle activo, card de imagenes (drag-and-drop, reorder, preview, badge "Principal", max 5), variant manager (accordion, seleccion de opciones con color swatches, SKU/barcode/precio/costo/stock/stock_min, NumericInput con commit-on-blur)
+- Editar producto (`/productos/[id]`): carga datos existentes, convierte variantes a form values, reusa ProductForm en modo edicion ("Guardar cambios")
+- Eliminar producto: confirmacion con dialog, spinner, toast, query invalidation
+- Configuracion (`/configuracion`): dos cards side-by-side — CategoryManager (CRUD con subcategorias, inline icons, dialog) y VariantTypeManager (CRUD tipos y opciones, pill tags con hover edit/delete, color hex preview para tonos)
+- Base-ui compatibility: `render` prop en lugar de `asChild`, `nativeButton={false}` para Button+Link
+- Suspense boundary en /productos para nuqs (useSearchParams)
+
 **Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-26)
 
 ### Completado
