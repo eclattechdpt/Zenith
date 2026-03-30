@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      bundle_items: {
+        Row: {
+          bundle_id: string
+          id: string
+          product_variant_id: string
+          quantity: number
+        }
+        Insert: {
+          bundle_id: string
+          id?: string
+          product_variant_id: string
+          quantity?: number
+        }
+        Update: {
+          bundle_id?: string
+          id?: string
+          product_variant_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bundle_items_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bundle_items_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -438,6 +474,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          is_bundle: boolean
           name: string
           slug: string
           tenant_id: string
@@ -452,6 +489,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          is_bundle?: boolean
           name: string
           slug: string
           tenant_id: string
@@ -466,6 +504,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          is_bundle?: boolean
           name?: string
           slug?: string
           tenant_id?: string

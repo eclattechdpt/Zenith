@@ -30,7 +30,10 @@
       "Bash(npx next:*)",
       "Bash(ls src/app/\\\\\\(dashboard\\\\\\)/productos/nuevo/)",
       "Bash(ls src/app/\\\\\\(dashboard\\\\\\)/productos/[id]/)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__generate_typescript_types"
     ]
   },
   "enableAllProjectMcpServers": true,

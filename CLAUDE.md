@@ -224,7 +224,7 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
-**Sprint 2 — Catalogo de productos: EN PROGRESO** (actualizado 2026-03-30)
+**Sprint 2 — Catalogo de productos: EN PROGRESO** (actualizado 2026-03-30, Supabase connected)
 
 ### Sprint 2 — Completado
 - Schemas Zod: product, variant, category, variantType, variantOption, createProduct (con UUID regex flexible)
@@ -239,6 +239,11 @@ No saltar sprints. Cada sprint depende del anterior.
 - Configuracion (`/configuracion`): dos cards side-by-side — CategoryManager (CRUD con subcategorias, inline icons, dialog) y VariantTypeManager (CRUD tipos y opciones, pill tags con hover edit/delete, color hex preview para tonos)
 - Base-ui compatibility: `render` prop en lugar de `asChild`, `nativeButton={false}` para Button+Link
 - Suspense boundary en /productos para nuqs (useSearchParams)
+- Supabase connected: queries y actions usan Supabase real (no mock data), tenant_id corregido en .env.local
+- Bundle/Cofre support: `is_bundle` column en products, `bundle_items` table, bundle manager UI para seleccionar productos del cofre
+- Variantes simplificadas: solo SKU, precio, stock (removidos barcode, cost, stock_min, expires_at, option_ids, active toggle)
+- Imagenes removidas del formulario (no requeridas por el negocio)
+- Placeholders actualizados para el negocio (Eclat, Ideal, X-0000)
 
 **Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-26)
 

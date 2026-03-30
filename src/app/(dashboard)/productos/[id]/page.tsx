@@ -41,18 +41,11 @@ function productToFormValues(
     brand: product.brand,
     category_id: product.category_id,
     is_active: product.is_active,
+    is_bundle: product.is_bundle,
     variants: product.product_variants.map((v) => ({
       sku: v.sku,
-      barcode: v.barcode,
       price: v.price,
-      cost: v.cost,
       stock: v.stock,
-      stock_min: v.stock_min,
-      is_active: v.is_active,
-      expires_at: v.expires_at,
-      option_ids: v.variant_option_assignments
-        .map((a) => a.variant_options?.id)
-        .filter((id): id is string => !!id),
     })),
   }
 }

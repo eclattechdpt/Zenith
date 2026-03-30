@@ -9,6 +9,7 @@ export type VariantType = Tables<"variant_types">
 export type VariantOption = Tables<"variant_options">
 export type VariantOptionAssignment = Tables<"variant_option_assignments">
 export type ProductImage = Tables<"product_images">
+export type BundleItem = Tables<"bundle_items">
 
 // --- COMPOSITE TYPES (queries with joins) ---
 

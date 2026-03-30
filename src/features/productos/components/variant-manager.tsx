@@ -6,11 +6,10 @@ import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 
 /** Input that keeps a local string while typing, commits a number on blur. */
-function NumericInput({
+export function NumericInput({
   value,
   onChange,
   decimal = false,
@@ -44,7 +43,6 @@ function NumericInput({
   )
 }
 
-import { useVariantTypes } from "../queries"
 import type { VariantInput } from "../schemas"
 
 import type { FieldErrors } from "react-hook-form"
@@ -59,19 +57,12 @@ interface VariantManagerProps {
 function emptyVariant(): VariantInput {
   return {
     sku: "",
-    barcode: "",
     price: 0,
-    cost: 0,
     stock: 0,
-    stock_min: 0,
-    is_active: true,
-    expires_at: null,
-    option_ids: [],
   }
 }
 
 export function VariantManager({ variants, onChange, errors }: VariantManagerProps) {
-  const { data: variantTypes = [] } = useVariantTypes()
   const [expandedIndex, setExpandedIndex] = useState<number | null>(
     variants.length === 0 ? null : 0
   )
@@ -99,27 +90,8 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
     onChange(updated)
   }
 
-  function toggleOption(variantIndex: number, optionId: string) {
-    const variant = variants[variantIndex]
-    const hasOption = variant.option_ids.includes(optionId)
-    const newOptionIds = hasOption
-      ? variant.option_ids.filter((id) => id !== optionId)
-      : [...variant.option_ids, optionId]
-    updateVariant(variantIndex, { option_ids: newOptionIds })
-  }
-
   function getVariantLabel(variant: VariantInput) {
-    if (variant.option_ids.length === 0) return "Nueva variante"
-    const labels = variant.option_ids
-      .map((id) => {
-        for (const vt of variantTypes) {
-          const opt = vt.variant_options.find((o) => o.id === id)
-          if (opt) return opt.value
-        }
-        return null
-      })
-      .filter(Boolean)
-    return labels.length > 0 ? labels.join(" / ") : "Nueva variante"
+    return variant.sku || "Nueva variante"
   }
 
   return (
@@ -146,11 +118,6 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
                     {variant.sku}
                   </Badge>
                 )}
-                {!variant.is_active && (
-                  <Badge variant="outline" className="text-[10px]">
-                    Inactivo
-                  </Badge>
-                )}
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs tabular-nums text-neutral-500">
@@ -167,64 +134,14 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
             {/* Body */}
             {isExpanded && (
               <div className="border-t border-input px-4 py-4">
-                {/* Variant Options */}
-                <div className="mb-4 flex flex-col gap-3">
-                  <Label className="text-xs text-neutral-500">
-                    Opciones de variante
-                  </Label>
-                  {variantTypes.map((vt) => (
-                    <div key={vt.id} className="flex flex-col gap-1.5">
-                      <span className="text-xs font-medium text-neutral-700">
-                        {vt.name}
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {vt.variant_options.map((opt) => {
-                          const selected = variant.option_ids.includes(opt.id)
-                          return (
-                            <button
-                              key={opt.id}
-                              type="button"
-                              onClick={() => toggleOption(index, opt.id)}
-                              className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
-                                selected
-                                  ? "border-primary bg-primary/5 text-primary"
-                                  : "border-input text-neutral-600 hover:bg-neutral-50"
-                              }`}
-                            >
-                              {opt.color_hex && (
-                                <span
-                                  className="size-3 rounded-full border border-neutral-200"
-                                  style={{ backgroundColor: opt.color_hex }}
-                                />
-                              )}
-                              {opt.value}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Fields grid */}
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <div className="flex flex-col gap-1.5">
                     <Label className="text-xs">SKU</Label>
                     <Input
-                      placeholder="MAC-ML-RL"
+                      placeholder="Ej: X-0000"
                       value={variant.sku ?? ""}
                       onChange={(e) =>
                         updateVariant(index, { sku: e.target.value || null })
-                      }
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-xs">Codigo de barras</Label>
-                    <Input
-                      placeholder="7501234567890"
-                      value={variant.barcode ?? ""}
-                      onChange={(e) =>
-                        updateVariant(index, { barcode: e.target.value || null })
                       }
                     />
                   </div>
@@ -239,31 +156,12 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <Label className="text-xs">Costo *</Label>
-                    <NumericInput
-                      decimal
-                      min={0}
-                      step="0.01"
-                      value={variant.cost}
-                      onChange={(v) => updateVariant(index, { cost: v })}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-xs">Stock inicial</Label>
+                    <Label className="text-xs">Stock</Label>
                     <NumericInput
                       min={0}
                       step="1"
                       value={variant.stock}
                       onChange={(v) => updateVariant(index, { stock: v })}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-xs">Stock minimo</Label>
-                    <NumericInput
-                      min={0}
-                      step="1"
-                      value={variant.stock_min}
-                      onChange={(v) => updateVariant(index, { stock_min: v })}
                     />
                   </div>
                 </div>
@@ -282,24 +180,8 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
                   </div>
                 )}
 
-                {/* Bottom actions */}
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      id={`variant-active-${index}`}
-                      checked={variant.is_active}
-                      onCheckedChange={(checked) =>
-                        updateVariant(index, { is_active: checked })
-                      }
-                      size="sm"
-                    />
-                    <Label
-                      htmlFor={`variant-active-${index}`}
-                      className="text-xs"
-                    >
-                      Activa
-                    </Label>
-                  </div>
+                {/* Delete button */}
+                <div className="mt-4 flex justify-end">
                   <Button
                     type="button"
                     variant="destructive"

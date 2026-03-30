@@ -20,11 +20,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-import { createProductSchema, type CreateProductInput, type VariantInput } from "../schemas"
+import { NumericInput } from "./variant-manager"
+import { createProductSchema, type CreateProductInput, type VariantInput, type BundleItemInput } from "../schemas"
 import { useCategories } from "../queries"
 import { createProduct, updateProduct } from "../actions"
 import { VariantManager } from "./variant-manager"
-import { ImageUpload, type ImageFile } from "./image-upload"
+import { BundleManager } from "./bundle-manager"
 
 function slugify(text: string) {
   return text
@@ -46,7 +47,6 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
   const queryClient = useQueryClient()
   const { data: categories = [] } = useCategories()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [images, setImages] = useState<ImageFile[]>([])
 
   const {
     register,
@@ -64,13 +64,17 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       brand: "",
       category_id: null,
       is_active: true,
+      is_bundle: false,
       variants: [],
+      bundle_items: [],
       ...defaultValues,
     },
   })
 
   const isActive = watch("is_active")
+  const isBundle = watch("is_bundle") ?? false
   const variants = watch("variants")
+  const bundleItems = watch("bundle_items") ?? []
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
     const name = e.target.value
@@ -80,6 +84,10 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
 
   function handleVariantsChange(newVariants: VariantInput[]) {
     setValue("variants", newVariants, { shouldValidate: true })
+  }
+
+  function handleBundleItemsChange(newItems: BundleItemInput[]) {
+    setValue("bundle_items", newItems, { shouldValidate: true })
   }
 
   async function onSubmit(data: CreateProductInput) {
@@ -139,7 +147,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
             <Label htmlFor="name">Nombre *</Label>
             <Input
               id="name"
-              placeholder="Ej: MAC Matte Lipstick"
+              placeholder="Ej: Crema dia y noche de liposomas"
               {...register("name")}
               onChange={handleNameChange}
             />
@@ -152,7 +160,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
             <Label htmlFor="slug">Slug *</Label>
             <Input
               id="slug"
-              placeholder="mac-matte-lipstick"
+              placeholder="crema-dia-y-noche-de-liposomas"
               {...register("slug")}
             />
             {errors.slug && (
@@ -164,7 +172,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
             <Label htmlFor="brand">Marca</Label>
             <Input
               id="brand"
-              placeholder="Ej: MAC, Revlon, CeraVe"
+              placeholder="Ej: Eclat, Ideal"
               {...register("brand")}
             />
           </div>
@@ -208,47 +216,134 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
             />
           </div>
 
-          <div className="flex items-center gap-3">
-            <Switch
-              id="is_active"
-              checked={isActive}
-              onCheckedChange={(checked) => setValue("is_active", checked)}
-            />
-            <Label htmlFor="is_active">Producto activo</Label>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <Switch
+                id="is_active"
+                checked={isActive}
+                onCheckedChange={(checked) => setValue("is_active", checked)}
+              />
+              <Label htmlFor="is_active">Producto activo</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch
+                id="is_bundle"
+                checked={isBundle}
+                onCheckedChange={(checked) => setValue("is_bundle", checked)}
+              />
+              <Label htmlFor="is_bundle">Es un cofre</Label>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Images */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Imagenes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ImageUpload images={images} onChange={setImages} />
-        </CardContent>
-      </Card>
+      {/* Variants or Bundle Items */}
+      {isBundle ? (
+        <>
+          {/* Cofre pricing */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Precio del cofre</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                // Ensure there's always one variant for the cofre
+                const cofreVariant = variants[0] ?? {
+                  sku: "",
+                  price: 0,
+                  stock: 0,
+                }
+                if (variants.length === 0) {
+                  setValue("variants", [cofreVariant])
+                }
+                return (
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="flex flex-col gap-1.5">
+                      <Label className="text-xs">SKU</Label>
+                      <Input
+                        placeholder="Ej: X-0000"
+                        value={cofreVariant.sku ?? ""}
+                        onChange={(e) =>
+                          setValue("variants", [
+                            { ...cofreVariant, sku: e.target.value || null },
+                          ])
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label className="text-xs">Precio *</Label>
+                      <NumericInput
+                        decimal
+                        min={0}
+                        step="0.01"
+                        value={cofreVariant.price}
+                        onChange={(v) =>
+                          setValue("variants", [
+                            { ...cofreVariant, price: v },
+                          ])
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label className="text-xs">Stock</Label>
+                      <NumericInput
+                        min={0}
+                        step="1"
+                        value={cofreVariant.stock}
+                        onChange={(v) =>
+                          setValue("variants", [
+                            { ...cofreVariant, stock: v },
+                          ])
+                        }
+                      />
+                    </div>
+                  </div>
+                )
+              })()}
+            </CardContent>
+          </Card>
 
-      {/* Variants */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Variantes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <VariantManager
-            variants={variants}
-            onChange={handleVariantsChange}
-            errors={errors.variants}
-          />
-          {errors.variants && (
-            <p className="mt-2 text-xs text-destructive">
-              {typeof errors.variants.message === "string"
-                ? errors.variants.message
-                : "Revisa las variantes"}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+          {/* Bundle items */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Productos del cofre</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BundleManager
+                items={bundleItems}
+                onChange={handleBundleItemsChange}
+              />
+              {errors.variants && (
+                <p className="mt-2 text-xs text-destructive">
+                  {typeof errors.variants.message === "string"
+                    ? errors.variants.message
+                    : "Agrega al menos un producto al cofre"}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Variantes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <VariantManager
+              variants={variants}
+              onChange={handleVariantsChange}
+              errors={errors.variants}
+            />
+            {errors.variants && (
+              <p className="mt-2 text-xs text-destructive">
+                {typeof errors.variants.message === "string"
+                  ? errors.variants.message
+                  : "Revisa las variantes"}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-3">

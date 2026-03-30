@@ -58,21 +58,33 @@ export const productSchema = z.object({
 
 export const variantSchema = z.object({
   sku: z.string().max(50).optional().nullable(),
-  barcode: z.string().max(50).optional().nullable(),
   price: z.coerce.number().min(0, "El precio debe ser positivo"),
-  cost: z.coerce.number().min(0, "El costo debe ser positivo"),
   stock: z.coerce.number().int().default(0),
-  stock_min: z.coerce.number().int().min(0).default(0),
-  is_active: z.boolean().default(true),
-  expires_at: z.string().datetime().optional().nullable(),
-  option_ids: z
-    .array(zUuid())
-    .min(1, "Selecciona al menos una opcion de variante"),
+})
+
+// --- BUNDLES (COFRES) ---
+
+export const bundleItemSchema = z.object({
+  product_variant_id: zUuid("Selecciona una variante"),
+  quantity: z.coerce.number().int().min(1, "Minimo 1 unidad"),
 })
 
 export const createProductSchema = productSchema.extend({
-  variants: z.array(variantSchema).min(1, "Agrega al menos una variante"),
-})
+  is_bundle: z.boolean().default(false),
+  variants: z.array(variantSchema),
+  bundle_items: z.array(bundleItemSchema).optional(),
+}).refine(
+  (data) => {
+    if (data.is_bundle) {
+      return (data.bundle_items?.length ?? 0) >= 1 && data.variants.length >= 1
+    }
+    return data.variants.length >= 1
+  },
+  {
+    message: "Agrega al menos una variante o un producto al cofre",
+    path: ["variants"],
+  }
+)
 
 // --- INFERRED TYPES ---
 
@@ -81,4 +93,5 @@ export type VariantTypeInput = z.infer<typeof variantTypeSchema>
 export type VariantOptionInput = z.infer<typeof variantOptionSchema>
 export type ProductInput = z.infer<typeof productSchema>
 export type VariantInput = z.infer<typeof variantSchema>
+export type BundleItemInput = z.infer<typeof bundleItemSchema>
 export type CreateProductInput = z.infer<typeof createProductSchema>

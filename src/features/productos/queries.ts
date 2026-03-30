@@ -1,10 +1,9 @@
 "use client"
 
-// TODO: Replace mock data with real Supabase queries via createBrowserClient
-
 import { useQuery } from "@tanstack/react-query"
 
-import { mockProducts, mockCategories, mockVariantTypes } from "./mock-data"
+import { createClient } from "@/lib/supabase/client"
+
 import type {
   ProductWithDetails,
   CategoryWithCount,
@@ -24,34 +23,50 @@ export function useProducts(filters?: ProductFilters) {
   return useQuery({
     queryKey: ["products", filters],
     queryFn: async (): Promise<ProductWithDetails[]> => {
-      // Mock: filter in memory
-      let results = [...mockProducts]
+      const supabase = createClient()
+
+      let query = supabase
+        .from("products")
+        .select(
+          `*,
+          categories:categories(id, name),
+          product_variants:product_variants(
+            *,
+            variant_option_assignments:variant_option_assignments(
+              variant_options:variant_options(
+                *,
+                variant_types:variant_types(id, name)
+              )
+            )
+          ),
+          product_images:product_images(id, storage_path, sort_order)`
+        )
+        .is("deleted_at", null)
+        .order("name")
 
       if (filters?.search) {
-        const q = filters.search.toLowerCase()
-        results = results.filter(
-          (p) =>
-            p.name.toLowerCase().includes(q) ||
-            (p.brand?.toLowerCase().includes(q) ?? false) ||
-            p.product_variants.some((v) =>
-              v.sku?.toLowerCase().includes(q)
-            )
+        const q = filters.search.trim()
+        query = query.or(
+          `name.ilike.%${q}%,brand.ilike.%${q}%`
         )
       }
 
       if (filters?.categoryId) {
-        results = results.filter((p) => p.category_id === filters.categoryId)
+        query = query.eq("category_id", filters.categoryId)
       }
 
       if (filters?.brand) {
-        results = results.filter((p) => p.brand === filters.brand)
+        query = query.eq("brand", filters.brand)
       }
 
       if (filters?.isActive !== undefined) {
-        results = results.filter((p) => p.is_active === filters.isActive)
+        query = query.eq("is_active", filters.isActive)
       }
 
-      return results
+      const { data, error } = await query
+
+      if (error) throw error
+      return (data ?? []) as unknown as ProductWithDetails[]
     },
   })
 }
@@ -60,7 +75,30 @@ export function useProduct(id: string) {
   return useQuery({
     queryKey: ["products", id],
     queryFn: async (): Promise<ProductWithDetails | null> => {
-      return mockProducts.find((p) => p.id === id) ?? null
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          `*,
+          categories:categories(id, name),
+          product_variants:product_variants(
+            *,
+            variant_option_assignments:variant_option_assignments(
+              variant_options:variant_options(
+                *,
+                variant_types:variant_types(id, name)
+              )
+            )
+          ),
+          product_images:product_images(id, storage_path, sort_order)`
+        )
+        .eq("id", id)
+        .is("deleted_at", null)
+        .single()
+
+      if (error) return null
+      return data as unknown as ProductWithDetails
     },
     enabled: !!id,
   })
@@ -72,7 +110,17 @@ export function useCategories() {
   return useQuery({
     queryKey: ["categories"],
     queryFn: async (): Promise<CategoryWithCount[]> => {
-      return mockCategories
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*, products(count)")
+        .is("deleted_at", null)
+        .order("sort_order")
+        .order("name")
+
+      if (error) throw error
+      return (data ?? []) as unknown as CategoryWithCount[]
     },
   })
 }
@@ -83,7 +131,29 @@ export function useVariantTypes() {
   return useQuery({
     queryKey: ["variant-types"],
     queryFn: async (): Promise<VariantTypeWithOptions[]> => {
-      return mockVariantTypes
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("variant_types")
+        .select(
+          `*,
+          variant_options:variant_options(*)
+        `
+        )
+        .is("deleted_at", null)
+        .order("sort_order")
+
+      if (error) throw error
+
+      // Sort options within each type
+      const sorted = (data ?? []).map((vt) => ({
+        ...vt,
+        variant_options: [...(vt.variant_options ?? [])].sort(
+          (a, b) => a.sort_order - b.sort_order
+        ),
+      }))
+
+      return sorted as unknown as VariantTypeWithOptions[]
     },
   })
 }

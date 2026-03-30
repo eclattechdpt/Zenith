@@ -1,9 +1,8 @@
 "use server"
 
-// TODO: Replace mock implementations with real Supabase calls
-// Each action follows the pattern: validate with Zod → mutate → revalidatePath → return { data } | { error }
-
 import { revalidatePath } from "next/cache"
+
+import { createServerClient } from "@/lib/supabase/server"
 
 import {
   categorySchema,
@@ -16,43 +15,90 @@ import {
   type CreateProductInput,
 } from "./schemas"
 
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
+
+async function getUserId() {
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  return user?.id ?? null
+}
+
 // --- CATEGORIAS ---
 
 export async function createCategory(input: CategoryInput) {
   const parsed = categorySchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  // Mock: simulate created category
-  const category = {
-    id: crypto.randomUUID(),
-    ...parsed.data,
-    tenant_id: "817036a8-d5d3-4301-986c-451b865fbca1",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    created_by: null,
-    deleted_at: null,
-  }
+  const supabase = await createServerClient()
+  const userId = await getUserId()
+
+  const { data, error } = await supabase
+    .from("categories")
+    .insert({
+      ...parsed.data,
+      tenant_id: TENANT_ID,
+      created_by: userId,
+    })
+    .select()
+    .single()
+
+  if (error) return { error: { _form: [error.message] } }
 
   revalidatePath("/productos")
-  return { data: category }
+  revalidatePath("/configuracion")
+  return { data }
 }
 
 export async function updateCategory(id: string, input: CategoryInput) {
   const parsed = categorySchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  // Mock: simulate updated category
-  const category = { id, ...parsed.data }
+  const supabase = await createServerClient()
+
+  const { data, error } = await supabase
+    .from("categories")
+    .update(parsed.data)
+    .eq("id", id)
+    .is("deleted_at", null)
+    .select()
+    .single()
+
+  if (error) return { error: { _form: [error.message] } }
 
   revalidatePath("/productos")
-  return { data: category }
+  revalidatePath("/configuracion")
+  return { data }
 }
 
 export async function deleteCategory(id: string) {
-  // Mock: simulate soft delete
-  // Real impl: verify no active products, then SET deleted_at = now()
+  const supabase = await createServerClient()
+
+  // Check for active products in this category
+  const { count } = await supabase
+    .from("products")
+    .select("*", { count: "exact", head: true })
+    .eq("category_id", id)
+    .is("deleted_at", null)
+
+  if (count && count > 0) {
+    return {
+      error: {
+        _form: ["No se puede eliminar: tiene productos asociados"],
+      },
+    }
+  }
+
+  const { error } = await supabase
+    .from("categories")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+
+  if (error) return { error: { _form: [error.message] } }
 
   revalidatePath("/productos")
+  revalidatePath("/configuracion")
   return { data: { success: true } }
 }
 
@@ -62,36 +108,46 @@ export async function createVariantType(input: VariantTypeInput) {
   const parsed = variantTypeSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  const variantType = {
-    id: crypto.randomUUID(),
-    ...parsed.data,
-    tenant_id: "817036a8-d5d3-4301-986c-451b865fbca1",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    created_by: null,
-    deleted_at: null,
-  }
+  const supabase = await createServerClient()
+  const userId = await getUserId()
+
+  const { data, error } = await supabase
+    .from("variant_types")
+    .insert({
+      ...parsed.data,
+      tenant_id: TENANT_ID,
+      created_by: userId,
+    })
+    .select()
+    .single()
+
+  if (error) return { error: { _form: [error.message] } }
 
   revalidatePath("/configuracion")
-  return { data: variantType }
+  return { data }
 }
 
 export async function createVariantOption(input: VariantOptionInput) {
   const parsed = variantOptionSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  const variantOption = {
-    id: crypto.randomUUID(),
-    ...parsed.data,
-    tenant_id: "817036a8-d5d3-4301-986c-451b865fbca1",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    created_by: null,
-    deleted_at: null,
-  }
+  const supabase = await createServerClient()
+  const userId = await getUserId()
+
+  const { data, error } = await supabase
+    .from("variant_options")
+    .insert({
+      ...parsed.data,
+      tenant_id: TENANT_ID,
+      created_by: userId,
+    })
+    .select()
+    .single()
+
+  if (error) return { error: { _form: [error.message] } }
 
   revalidatePath("/configuracion")
-  return { data: variantOption }
+  return { data }
 }
 
 export async function updateVariantOption(
@@ -101,15 +157,36 @@ export async function updateVariantOption(
   const parsed = variantOptionSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  const variantOption = { id, ...parsed.data }
+  const supabase = await createServerClient()
 
-  return { data: variantOption }
+  const { data, error } = await supabase
+    .from("variant_options")
+    .update({
+      value: parsed.data.value,
+      color_hex: parsed.data.color_hex,
+      sort_order: parsed.data.sort_order,
+    })
+    .eq("id", id)
+    .select()
+    .single()
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/configuracion")
+  return { data }
 }
 
 export async function deleteVariantOption(id: string) {
-  // Mock: simulate soft delete
-  // Real impl: verify not assigned to active variants, then SET deleted_at = now()
+  const supabase = await createServerClient()
 
+  const { error } = await supabase
+    .from("variant_options")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/configuracion")
   return { data: { success: true } }
 }
 
@@ -119,23 +196,75 @@ export async function createProduct(input: CreateProductInput) {
   const parsed = createProductSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  // Mock: simulate network delay so spinner and toast are visible
-  await new Promise((r) => setTimeout(r, 1000))
+  const supabase = await createServerClient()
+  const userId = await getUserId()
 
-  const productId = crypto.randomUUID()
-  const product = {
-    id: productId,
-    name: parsed.data.name,
-    slug: parsed.data.slug,
-    description: parsed.data.description ?? null,
-    brand: parsed.data.brand ?? null,
-    category_id: parsed.data.category_id ?? null,
-    is_active: parsed.data.is_active,
-    tenant_id: "817036a8-d5d3-4301-986c-451b865fbca1",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    created_by: null,
-    deleted_at: null,
+  const isBundle = parsed.data.is_bundle
+
+  // 1. Insert product
+  const { data: product, error: productError } = await supabase
+    .from("products")
+    .insert({
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      description: parsed.data.description ?? null,
+      brand: parsed.data.brand ?? null,
+      category_id: parsed.data.category_id ?? null,
+      is_active: parsed.data.is_active,
+      is_bundle: isBundle,
+      tenant_id: TENANT_ID,
+      created_by: userId,
+    })
+    .select()
+    .single()
+
+  if (productError) return { error: { _form: [productError.message] } }
+
+  // 2a. If bundle, insert bundle items (component products)
+  if (isBundle && parsed.data.bundle_items && parsed.data.bundle_items.length > 0) {
+    const bundleRows = parsed.data.bundle_items.map((item) => ({
+      bundle_id: product.id,
+      product_variant_id: item.product_variant_id,
+      quantity: item.quantity,
+    }))
+
+    const { error: bundleError } = await supabase
+      .from("bundle_items")
+      .insert(bundleRows)
+
+    if (bundleError) return { error: { _form: [bundleError.message] } }
+  }
+
+  // 2b. Insert variants
+  for (const variant of parsed.data.variants) {
+    const { data: pv, error: pvError } = await supabase
+      .from("product_variants")
+      .insert({
+        product_id: product.id,
+        sku: variant.sku ?? null,
+        price: variant.price,
+        stock: variant.stock,
+        tenant_id: TENANT_ID,
+        created_by: userId,
+      })
+      .select()
+      .single()
+
+    if (pvError) return { error: { _form: [pvError.message] } }
+
+    // 3. Create initial inventory movement if stock > 0
+    if (variant.stock > 0) {
+      await supabase.from("inventory_movements").insert({
+        product_variant_id: pv.id,
+        type: "initial",
+        quantity: variant.stock,
+        stock_before: 0,
+        stock_after: variant.stock,
+        reason: "Carga inicial",
+        tenant_id: TENANT_ID,
+        created_by: userId,
+      })
+    }
   }
 
   revalidatePath("/productos")
@@ -146,21 +275,47 @@ export async function updateProduct(id: string, input: CreateProductInput) {
   const parsed = createProductSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  // Mock: simulate network delay so spinner and toast are visible
-  await new Promise((r) => setTimeout(r, 1000))
+  const supabase = await createServerClient()
 
-  const product = { id, ...parsed.data }
+  // Update product fields
+  const { data, error } = await supabase
+    .from("products")
+    .update({
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      description: parsed.data.description ?? null,
+      brand: parsed.data.brand ?? null,
+      category_id: parsed.data.category_id ?? null,
+      is_active: parsed.data.is_active,
+    })
+    .eq("id", id)
+    .is("deleted_at", null)
+    .select()
+    .single()
+
+  if (error) return { error: { _form: [error.message] } }
 
   revalidatePath("/productos")
   revalidatePath(`/productos/${id}`)
-  return { data: product }
+  return { data }
 }
 
 export async function deleteProduct(id: string) {
-  // Mock: simulate soft delete of product + all its variants
-  // Real impl: UPDATE products SET deleted_at = now() WHERE id = $id
-  //            UPDATE product_variants SET deleted_at = now() WHERE product_id = $id
-  await new Promise((r) => setTimeout(r, 1000))
+  const supabase = await createServerClient()
+
+  // Soft delete product
+  const { error: productError } = await supabase
+    .from("products")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+
+  if (productError) return { error: { _form: [productError.message] } }
+
+  // Soft delete its variants
+  await supabase
+    .from("product_variants")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("product_id", id)
 
   revalidatePath("/productos")
   return { data: { success: true } }
