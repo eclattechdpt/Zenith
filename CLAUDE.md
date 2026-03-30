@@ -244,6 +244,11 @@ No saltar sprints. Cada sprint depende del anterior.
 - Variantes simplificadas: solo SKU, precio, stock (removidos barcode, cost, stock_min, expires_at, option_ids, active toggle)
 - Imagenes removidas del formulario (no requeridas por el negocio)
 - Placeholders actualizados para el negocio (Eclat, Ideal, X-0000)
+- Producto simple vs variantes: toggle "Tiene variantes" — por defecto muestra SKU/precio/stock directo, sin accordion
+- Fix stale closure: updateSingleVariant usa getValues() para leer estado fresco
+- Fix updateProduct: ahora actualiza/inserta/elimina variantes en product_variants
+- SKU auto-uppercase en todos los inputs
+- Variantes column muestra "—" para productos simples (1 variante)
 
 **Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-26)
 

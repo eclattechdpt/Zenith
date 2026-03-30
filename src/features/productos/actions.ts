@@ -277,7 +277,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
 
   const supabase = await createServerClient()
 
-  // Update product fields
+  // 1. Update product fields
   const { data, error } = await supabase
     .from("products")
     .update({
@@ -287,6 +287,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
       brand: parsed.data.brand ?? null,
       category_id: parsed.data.category_id ?? null,
       is_active: parsed.data.is_active,
+      is_bundle: parsed.data.is_bundle,
     })
     .eq("id", id)
     .is("deleted_at", null)
@@ -294,6 +295,50 @@ export async function updateProduct(id: string, input: CreateProductInput) {
     .single()
 
   if (error) return { error: { _form: [error.message] } }
+
+  // 2. Get existing variants
+  const { data: existingVariants } = await supabase
+    .from("product_variants")
+    .select("id")
+    .eq("product_id", id)
+    .is("deleted_at", null)
+
+  const existingIds = (existingVariants ?? []).map((v) => v.id)
+
+  // 3. Update or insert variants
+  for (const variant of parsed.data.variants) {
+    if (existingIds.length > 0) {
+      // Update first existing variant, then handle extras
+      const existingId = existingIds.shift()!
+      await supabase
+        .from("product_variants")
+        .update({
+          sku: variant.sku ?? null,
+          price: variant.price,
+          stock: variant.stock,
+        })
+        .eq("id", existingId)
+    } else {
+      // Insert new variant
+      const userId = await getUserId()
+      await supabase.from("product_variants").insert({
+        product_id: id,
+        sku: variant.sku ?? null,
+        price: variant.price,
+        stock: variant.stock,
+        tenant_id: TENANT_ID,
+        created_by: userId,
+      })
+    }
+  }
+
+  // 4. Soft delete any extra variants that were removed
+  for (const leftoverId of existingIds) {
+    await supabase
+      .from("product_variants")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", leftoverId)
+  }
 
   revalidatePath("/productos")
   revalidatePath(`/productos/${id}`)

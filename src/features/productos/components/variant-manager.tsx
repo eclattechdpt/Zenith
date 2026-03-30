@@ -141,7 +141,7 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
                       placeholder="Ej: X-0000"
                       value={variant.sku ?? ""}
                       onChange={(e) =>
-                        updateVariant(index, { sku: e.target.value || null })
+                        updateVariant(index, { sku: e.target.value.toUpperCase() || null })
                       }
                     />
                   </div>

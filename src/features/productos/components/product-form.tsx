@@ -47,12 +47,16 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
   const queryClient = useQueryClient()
   const { data: categories = [] } = useCategories()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [hasVariants, setHasVariants] = useState(
+    (defaultValues?.variants?.length ?? 0) > 1
+  )
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    getValues,
     formState: { errors },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CreateProductInput>({
@@ -65,7 +69,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       category_id: null,
       is_active: true,
       is_bundle: false,
-      variants: [],
+      variants: [{ sku: "", price: 0, stock: 0 }],
       bundle_items: [],
       ...defaultValues,
     },
@@ -88,6 +92,13 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
 
   function handleBundleItemsChange(newItems: BundleItemInput[]) {
     setValue("bundle_items", newItems, { shouldValidate: true })
+  }
+
+  /** Update a single field on variants[0] using fresh state (avoids stale closures) */
+  function updateSingleVariant(field: keyof VariantInput, value: unknown) {
+    const current = getValues("variants")
+    const base = current[0] ?? { sku: "", price: 0, stock: 0 }
+    setValue("variants", [{ ...base, [field]: value }])
   }
 
   async function onSubmit(data: CreateProductInput) {
@@ -246,60 +257,37 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
               <CardTitle>Precio del cofre</CardTitle>
             </CardHeader>
             <CardContent>
-              {(() => {
-                // Ensure there's always one variant for the cofre
-                const cofreVariant = variants[0] ?? {
-                  sku: "",
-                  price: 0,
-                  stock: 0,
-                }
-                if (variants.length === 0) {
-                  setValue("variants", [cofreVariant])
-                }
-                return (
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="flex flex-col gap-1.5">
-                      <Label className="text-xs">SKU</Label>
-                      <Input
-                        placeholder="Ej: X-0000"
-                        value={cofreVariant.sku ?? ""}
-                        onChange={(e) =>
-                          setValue("variants", [
-                            { ...cofreVariant, sku: e.target.value || null },
-                          ])
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <Label className="text-xs">Precio *</Label>
-                      <NumericInput
-                        decimal
-                        min={0}
-                        step="0.01"
-                        value={cofreVariant.price}
-                        onChange={(v) =>
-                          setValue("variants", [
-                            { ...cofreVariant, price: v },
-                          ])
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <Label className="text-xs">Stock</Label>
-                      <NumericInput
-                        min={0}
-                        step="1"
-                        value={cofreVariant.stock}
-                        onChange={(v) =>
-                          setValue("variants", [
-                            { ...cofreVariant, stock: v },
-                          ])
-                        }
-                      />
-                    </div>
-                  </div>
-                )
-              })()}
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-xs">SKU</Label>
+                  <Input
+                    placeholder="Ej: X-0000"
+                    value={variants[0]?.sku ?? ""}
+                    onChange={(e) =>
+                      updateSingleVariant("sku", e.target.value.toUpperCase() || null)
+                    }
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-xs">Precio *</Label>
+                  <NumericInput
+                    decimal
+                    min={0}
+                    step="0.01"
+                    value={variants[0]?.price ?? 0}
+                    onChange={(v) => updateSingleVariant("price", v)}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-xs">Stock</Label>
+                  <NumericInput
+                    min={0}
+                    step="1"
+                    value={variants[0]?.stock ?? 0}
+                    onChange={(v) => updateSingleVariant("stock", v)}
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -325,21 +313,84 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
         </>
       ) : (
         <Card>
-          <CardHeader>
-            <CardTitle>Variantes</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>
+              {hasVariants ? "Variantes" : "Precio y stock"}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="has_variants"
+                checked={hasVariants}
+                size="sm"
+                onCheckedChange={(checked) => {
+                  setHasVariants(checked)
+                  if (!checked && variants.length > 1) {
+                    setValue("variants", [variants[0]])
+                  }
+                }}
+              />
+              <Label htmlFor="has_variants" className="text-xs text-neutral-500">
+                Tiene variantes
+              </Label>
+            </div>
           </CardHeader>
           <CardContent>
-            <VariantManager
-              variants={variants}
-              onChange={handleVariantsChange}
-              errors={errors.variants}
-            />
-            {errors.variants && (
-              <p className="mt-2 text-xs text-destructive">
-                {typeof errors.variants.message === "string"
-                  ? errors.variants.message
-                  : "Revisa las variantes"}
-              </p>
+            {hasVariants ? (
+              <>
+                <VariantManager
+                  variants={variants}
+                  onChange={handleVariantsChange}
+                  errors={errors.variants}
+                />
+                {errors.variants && (
+                  <p className="mt-2 text-xs text-destructive">
+                    {typeof errors.variants.message === "string"
+                      ? errors.variants.message
+                      : "Revisa las variantes"}
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs">SKU</Label>
+                    <Input
+                      placeholder="Ej: X-0000"
+                      value={variants[0]?.sku ?? ""}
+                      onChange={(e) =>
+                        updateSingleVariant("sku", e.target.value.toUpperCase() || null)
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs">Precio *</Label>
+                    <NumericInput
+                      decimal
+                      min={0}
+                      step="0.01"
+                      value={variants[0]?.price ?? 0}
+                      onChange={(v) => updateSingleVariant("price", v)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs">Stock</Label>
+                    <NumericInput
+                      min={0}
+                      step="1"
+                      value={variants[0]?.stock ?? 0}
+                      onChange={(v) => updateSingleVariant("stock", v)}
+                    />
+                  </div>
+                </div>
+                {errors.variants && (
+                  <p className="mt-2 text-xs text-destructive">
+                    {typeof errors.variants.message === "string"
+                      ? errors.variants.message
+                      : "Revisa el precio y stock"}
+                  </p>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
