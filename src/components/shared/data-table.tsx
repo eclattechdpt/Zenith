@@ -87,7 +87,8 @@ export function DataTable<TData, TValue>({
       )}
 
       {/* Table */}
-      <Table style={{ tableLayout: "fixed", width: "100%" }}>
+      <div className="overflow-x-auto">
+      <Table style={{ tableLayout: "fixed", minWidth: "700px" }}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -142,6 +143,7 @@ export function DataTable<TData, TValue>({
           )}
         </TableBody>
       </Table>
+      </div>
 
       {/* Pagination */}
       {!isLoading && table.getPageCount() > 1 && (

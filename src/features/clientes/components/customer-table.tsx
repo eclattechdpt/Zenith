@@ -19,6 +19,7 @@ import { useCustomers } from "../queries"
 import { deleteCustomer } from "../actions"
 import type { CustomerWithPriceList } from "../types"
 import { getCustomerColumns } from "./customer-columns"
+import { CustomerCardMobile } from "./customer-card-mobile"
 
 export function CustomerTable() {
   const [search, setSearch] = useQueryState(
@@ -84,32 +85,65 @@ export function CustomerTable() {
         className="transition-opacity duration-200 ease-out"
         style={{ opacity: isFetching && hasLoadedOnce.current ? 0.5 : 1 }}
       >
-        <DataTable
-          columns={columns}
-          data={customers}
-          isLoading={isLoading}
-          pageSize={10}
-          emptyState={
-            search ? (
-              <EmptyState
-                icon={Search}
-                title="Sin resultados"
-                description="Intenta con otros terminos de busqueda."
+        {/* Mobile cards */}
+        <div className="flex flex-col gap-3 sm:hidden">
+          {customers.length > 0 ? (
+            customers.map((customer) => (
+              <CustomerCardMobile
+                key={customer.id}
+                customer={customer}
+                onDelete={setDeleteTarget}
               />
-            ) : (
-              <EmptyState
-                icon={Users}
-                title="No hay clientes"
-                description="Agrega tu primer cliente para comenzar."
-              >
+            ))
+          ) : (
+            <EmptyState
+              icon={search ? Search : Users}
+              title={search ? "Sin resultados" : "No hay clientes"}
+              description={
+                search
+                  ? "Intenta con otros terminos de busqueda."
+                  : "Agrega tu primer cliente para comenzar."
+              }
+            >
+              {!search && (
                 <Button size="sm" nativeButton={false} render={<Link href="/clientes/nuevo" />}>
                   <Plus className="mr-1.5 size-4" />
                   Nuevo cliente
                 </Button>
-              </EmptyState>
-            )
-          }
-        />
+              )}
+            </EmptyState>
+          )}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden sm:block">
+          <DataTable
+            columns={columns}
+            data={customers}
+            isLoading={isLoading}
+            pageSize={10}
+            emptyState={
+              search ? (
+                <EmptyState
+                  icon={Search}
+                  title="Sin resultados"
+                  description="Intenta con otros terminos de busqueda."
+                />
+              ) : (
+                <EmptyState
+                  icon={Users}
+                  title="No hay clientes"
+                  description="Agrega tu primer cliente para comenzar."
+                >
+                  <Button size="sm" nativeButton={false} render={<Link href="/clientes/nuevo" />}>
+                    <Plus className="mr-1.5 size-4" />
+                    Nuevo cliente
+                  </Button>
+                </EmptyState>
+              )
+            }
+          />
+        </div>
       </div>
 
       {/* Delete confirmation */}

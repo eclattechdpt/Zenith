@@ -232,6 +232,7 @@ No saltar sprints. Cada sprint depende del anterior.
 - Crear/editar cliente (`/clientes/nuevo`, `/clientes/[id]`): formulario con RHF+Zod, campos (nombre, telefono, email, direccion, notas, lista de precios dropdown), unsaved changes guard, Volver/Cancelar con guardedNavigate
 - Config: PriceListManager con CRUD (nombre, descripcion, descuento %), delete bloqueado si hay clientes usando la lista, badge "Precio base" o "-X%"
 - Design system: teal para clientes (table border, action button, hover shadows), neutral para config, animaciones consistentes (stagger + blur)
+- Mobile responsive: card layout en mobile para productos y clientes (cards con info completa en <640px, DataTable en desktop), DataTable con overflow-x-auto y minWidth para scroll horizontal
 
 **Sprint 2 — Catalogo de productos: COMPLETO** (actualizado 2026-03-30, Supabase connected)
 

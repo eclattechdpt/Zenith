@@ -18,6 +18,7 @@ import { toast } from "sonner"
 import { useProducts, useCategories } from "../queries"
 import { deleteProduct } from "../actions"
 import type { ProductWithDetails } from "../types"
+import { ProductCardMobile } from "./product-card-mobile"
 import { getProductColumns } from "./product-columns"
 
 export function ProductTable() {
@@ -106,37 +107,70 @@ export function ProductTable() {
             </select>
           </div>
 
-          {/* Table */}
+          {/* Content */}
           <div
             className="transition-opacity duration-200 ease-out"
             style={{ opacity: isFetching && hasLoadedOnce.current ? 0.5 : 1 }}
           >
-          <DataTable
-            columns={columns}
-            data={products}
-            isLoading={isLoading}
-            pageSize={10}
-            emptyState={
-              search || categoryId ? (
-                <EmptyState
-                  icon={Search}
-                  title="Sin resultados"
-                  description="Intenta con otros terminos de busqueda o filtros."
-                />
+            {/* Mobile cards */}
+            <div className="flex flex-col gap-3 sm:hidden">
+              {products.length > 0 ? (
+                products.map((product) => (
+                  <ProductCardMobile
+                    key={product.id}
+                    product={product}
+                    onDelete={setDeleteTarget}
+                  />
+                ))
               ) : (
                 <EmptyState
-                  icon={Package}
-                  title="No hay productos"
-                  description="Agrega tu primer producto para comenzar."
+                  icon={search || categoryId ? Search : Package}
+                  title={search || categoryId ? "Sin resultados" : "No hay productos"}
+                  description={
+                    search || categoryId
+                      ? "Intenta con otros terminos de busqueda o filtros."
+                      : "Agrega tu primer producto para comenzar."
+                  }
                 >
-                  <Button size="sm" nativeButton={false} render={<Link href="/productos/nuevo" />}>
-                    <Plus className="mr-1.5 size-4" />
-                    Nuevo producto
-                  </Button>
+                  {!search && !categoryId && (
+                    <Button size="sm" nativeButton={false} render={<Link href="/productos/nuevo" />}>
+                      <Plus className="mr-1.5 size-4" />
+                      Nuevo producto
+                    </Button>
+                  )}
                 </EmptyState>
-              )
-            }
-          />
+              )}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block">
+              <DataTable
+                columns={columns}
+                data={products}
+                isLoading={isLoading}
+                pageSize={10}
+                emptyState={
+                  search || categoryId ? (
+                    <EmptyState
+                      icon={Search}
+                      title="Sin resultados"
+                      description="Intenta con otros terminos de busqueda o filtros."
+                    />
+                  ) : (
+                    <EmptyState
+                      icon={Package}
+                      title="No hay productos"
+                      description="Agrega tu primer producto para comenzar."
+                    >
+                      <Button size="sm" nativeButton={false} render={<Link href="/productos/nuevo" />}>
+                        <Plus className="mr-1.5 size-4" />
+                        Nuevo producto
+                      </Button>
+                    </EmptyState>
+                  )
+                }
+              />
+            </div>
           </div>
 
           {/* Delete confirmation */}
