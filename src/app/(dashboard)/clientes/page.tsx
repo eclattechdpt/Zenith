@@ -1,19 +1,82 @@
-import { Users } from "lucide-react"
+"use client"
+
+import { Plus, ArrowUpRight } from "lucide-react"
+import Link from "next/link"
+import { motion } from "motion/react"
+
+import { CustomerTable } from "@/features/clientes/components/customer-table"
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+  },
+}
 
 export default function ClientesPage() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-      <div className="flex size-12 items-center justify-center rounded-2xl bg-blush-50">
-        <Users className="size-6 text-rose-400" strokeWidth={1.5} />
-      </div>
-      <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
-          Clientes
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Gestion de clientes — disponible en Sprint 3
-        </p>
-      </div>
-    </div>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col gap-6"
+    >
+      {/* Header */}
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div className="text-center sm:text-left">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
+            Clientes
+          </h1>
+          <p className="mt-1 text-sm text-neutral-500">
+            Gestion de clientes y listas de precios
+          </p>
+        </div>
+        <motion.div
+          whileHover={{ y: -2 }}
+          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+        >
+          <Link
+            href="/clientes/nuevo"
+            className="group flex items-center gap-3 rounded-2xl border border-teal-200 bg-gradient-to-b from-teal-50 to-teal-100/60 px-4 py-2.5 shadow-sm transition-all duration-200 hover:border-teal-300 hover:shadow-[0_4px_20px_rgba(20,184,166,0.15)]"
+          >
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-200/60 transition-colors duration-200 group-hover:bg-teal-200">
+              <Plus
+                className="size-4 text-teal-600"
+                strokeWidth={1.75}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-neutral-900">
+                Nuevo cliente
+              </p>
+              <p className="text-[11px] text-neutral-500">
+                Agregar al registro
+              </p>
+            </div>
+            <ArrowUpRight
+              className="size-4 shrink-0 text-neutral-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-teal-400"
+              strokeWidth={2}
+            />
+          </Link>
+        </motion.div>
+      </motion.div>
+
+      {/* Table */}
+      <CustomerTable />
+    </motion.div>
   )
 }

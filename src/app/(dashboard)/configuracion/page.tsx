@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card"
 import { PageHeader } from "@/components/shared/page-header"
 import { CategoryManager } from "@/features/productos/components/category-manager"
+import { PriceListManager } from "@/features/clientes/components/price-list-manager"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -41,7 +42,7 @@ export default function ConfiguracionPage() {
       <motion.div variants={itemVariants}>
         <PageHeader
           title="Configuracion"
-          description="Categorias y subcategorias"
+          description="Categorias, subcategorias y listas de precios"
         />
       </motion.div>
 
@@ -55,6 +56,19 @@ export default function ConfiguracionPage() {
           </CardHeader>
           <CardContent>
             <CategoryManager />
+          </CardContent>
+        </Card>
+      </motion.div>
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Listas de precios</CardTitle>
+            <CardDescription>
+              Define niveles de precios para diferentes tipos de clientes
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PriceListManager />
           </CardContent>
         </Card>
       </motion.div>

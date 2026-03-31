@@ -35,7 +35,11 @@
       "mcp__supabase__execute_sql",
       "mcp__supabase__generate_typescript_types",
       "mcp__supabase__apply_migration",
-      "WebSearch"
+      "WebSearch",
+      "Bash(ls \"C:\\\\Users\\\\grupo\\\\Documents\\\\Abbx\\\\EclatInv\\\\Zenith\\\\src\\\\app\\\\\\(dashboard\\)\\\\clientes\")",
+      "Bash(ls \"C:\\\\Users\\\\grupo\\\\Documents\\\\Abbx\\\\EclatInv\\\\Zenith\\\\src\\\\app\\\\\\(dashboard\\)\\\\clientes\\\\nuevo\")",
+      "Bash(ls -la /c/Users/grupo/Documents/Abbx/EclatInv/Zenith/src/app/\\\\\\(dashboard\\\\\\)/clientes/)",
+      "Bash(ls -la /c/Users/grupo/Documents/Abbx/EclatInv/Zenith/src/app/\\\\\\(dashboard\\\\\\)/configuracion/)"
     ]
   },
   "enableAllProjectMcpServers": true,

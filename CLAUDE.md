@@ -224,6 +224,15 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
+**Sprint 3 — Clientes y precios: EN PROGRESO** (actualizado 2026-03-30)
+
+### Sprint 3 — Completado
+- Modulo clientes: schemas (customerSchema, priceListSchema), types (CustomerWithPriceList), queries (useCustomers con search, useCustomer, usePriceLists), actions (CRUD customers + price lists con validaciones de integridad)
+- Pagina de clientes (`/clientes`): DataTable con busqueda (nombre/telefono/email), columnas (nombre, telefono, email, lista de precios con badge descuento, acciones), delete con confirmacion + check de ventas activas, teal color scheme
+- Crear/editar cliente (`/clientes/nuevo`, `/clientes/[id]`): formulario con RHF+Zod, campos (nombre, telefono, email, direccion, notas, lista de precios dropdown), unsaved changes guard, Volver/Cancelar con guardedNavigate
+- Config: PriceListManager con CRUD (nombre, descripcion, descuento %), delete bloqueado si hay clientes usando la lista, badge "Precio base" o "-X%"
+- Design system: teal para clientes (table border, action button, hover shadows), neutral para config, animaciones consistentes (stagger + blur)
+
 **Sprint 2 — Catalogo de productos: COMPLETO** (actualizado 2026-03-30, Supabase connected)
 
 ### Sprint 2 — Completado
