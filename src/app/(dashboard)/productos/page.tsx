@@ -37,7 +37,7 @@ export default function ProductosPage() {
         variants={itemVariants}
         className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >
-        <div>
+        <div className="text-center sm:text-left">
           <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
             Productos
           </h1>

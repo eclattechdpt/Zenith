@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { Plus, Pencil, Trash2, ChevronRight, Loader2 } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -42,6 +43,16 @@ export function CategoryManager() {
   const [parentId, setParentId] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+
+  function toggleExpanded(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const {
     register,
@@ -113,18 +124,35 @@ export function CategoryManager() {
     <div className="flex flex-col gap-3">
       {topLevel.map((cat) => {
         const children = getChildren(cat.id)
+        const isExpanded = expanded.has(cat.id)
         return (
           <div key={cat.id} className="rounded-lg border border-input">
             {/* Parent category */}
             <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => children.length > 0 && toggleExpanded(cat.id)}
+                className="flex items-center gap-2"
+              >
+                {children.length > 0 ? (
+                  <motion.span
+                    animate={{ rotate: isExpanded ? 90 : 0 }}
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <ChevronRight className="size-3.5 text-neutral-400" />
+                  </motion.span>
+                ) : (
+                  <span className="size-3.5" />
+                )}
                 <span className="text-sm font-medium text-neutral-950">
                   {cat.name}
                 </span>
                 <span className="text-xs text-neutral-400">
-                  {cat.products[0]?.count ?? 0} productos
+                  {children.length > 0
+                    ? `${children.length} sub`
+                    : `${cat.products[0]?.count ?? 0} productos`}
                 </span>
-              </div>
+              </button>
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
@@ -152,42 +180,51 @@ export function CategoryManager() {
             </div>
 
             {/* Subcategories */}
-            {children.length > 0 && (
-              <div className="border-t border-input">
-                {children.map((sub) => (
-                  <div
-                    key={sub.id}
-                    className="flex items-center justify-between px-4 py-2.5 pl-8"
-                  >
-                    <div className="flex items-center gap-2">
-                      <ChevronRight className="size-3 text-neutral-300" />
-                      <span className="text-sm text-neutral-700">
-                        {sub.name}
-                      </span>
-                      <span className="text-xs text-neutral-400">
-                        {sub.products[0]?.count ?? 0}
-                      </span>
+            <AnimatePresence initial={false}>
+              {isExpanded && children.length > 0 && (
+                <motion.div
+                  key="children"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden border-t border-input"
+                >
+                  {children.map((sub) => (
+                    <div
+                      key={sub.id}
+                      className="flex items-center justify-between px-4 py-2.5 pl-10"
+                    >
+                      <div className="flex items-center gap-2">
+                        <ChevronRight className="size-3 text-neutral-300" />
+                        <span className="text-sm text-neutral-700">
+                          {sub.name}
+                        </span>
+                        <span className="text-xs text-neutral-400">
+                          {sub.products[0]?.count ?? 0}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => openEdit(sub)}
+                        >
+                          <Pencil className="size-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => setDeleteTarget({ id: sub.id, name: sub.name })}
+                        >
+                          <Trash2 className="size-3" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={() => openEdit(sub)}
-                      >
-                        <Pencil className="size-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={() => setDeleteTarget({ id: sub.id, name: sub.name })}
-                      >
-                        <Trash2 className="size-3" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )
       })}

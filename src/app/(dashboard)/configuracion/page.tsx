@@ -1,5 +1,7 @@
 "use client"
 
+import { motion } from "motion/react"
+
 import {
   Card,
   CardContent,
@@ -9,17 +11,41 @@ import {
 } from "@/components/ui/card"
 import { PageHeader } from "@/components/shared/page-header"
 import { CategoryManager } from "@/features/productos/components/category-manager"
-import { VariantTypeManager } from "@/features/productos/components/variant-type-manager"
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+  },
+}
 
 export default function ConfiguracionPage() {
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Configuracion"
-        description="Categorias y tipos de variante"
-      />
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col gap-6"
+    >
+      <motion.div variants={itemVariants}>
+        <PageHeader
+          title="Configuracion"
+          description="Categorias y subcategorias"
+        />
+      </motion.div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <motion.div variants={itemVariants}>
         <Card>
           <CardHeader>
             <CardTitle>Categorias</CardTitle>
@@ -31,19 +57,7 @@ export default function ConfiguracionPage() {
             <CategoryManager />
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Tipos de variante</CardTitle>
-            <CardDescription>
-              Define los atributos de tus productos (tono, tamano, formula)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <VariantTypeManager />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

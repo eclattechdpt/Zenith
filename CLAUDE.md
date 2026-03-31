@@ -260,6 +260,8 @@ No saltar sprints. Cada sprint depende del anterior.
 - Unsaved changes guard: dialog de confirmacion al salir con cambios sin guardar, beforeunload para cierre de tab, shouldDirty en todos los setValue
 - Precio con "$" prefix y formato decimal (0.00) en blur, raw number al editar. Spinners de number input ocultos, scroll-to-change deshabilitado
 - Cofres: categoria top-level con 5 subcategorias (Cereza, Always Radiant, Parpados, Tesoro, Oxigeno). Standalone categories renderizan como optgroup bold en dropdown
+- Config page: removido VariantTypeManager (no usado), categories full-width, collapsible subcategorias con animacion (Motion), entrada animada con stagger
+- Mobile UX: titulos centrados en mobile (text-center sm:text-left) en todas las paginas de productos y config para evitar overlap con burger menu
 
 **Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-26)
 
