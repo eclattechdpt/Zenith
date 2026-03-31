@@ -57,6 +57,7 @@ export const productSchema = z.object({
 })
 
 export const variantSchema = z.object({
+  name: z.string().max(100).optional().nullable(),
   sku: z.string().max(50).optional().nullable(),
   price: z.coerce.number().min(0, "El precio debe ser positivo"),
   stock: z.coerce.number().int().default(0),
@@ -70,6 +71,7 @@ export const bundleItemSchema = z.object({
 })
 
 export const createProductSchema = productSchema.extend({
+  has_variants: z.boolean().default(false),
   is_bundle: z.boolean().default(false),
   variants: z.array(variantSchema),
   bundle_items: z.array(bundleItemSchema).optional(),

@@ -412,6 +412,7 @@ export type Database = {
           expires_at: string | null
           id: string
           is_active: boolean
+          name: string | null
           price: number
           product_id: string
           sku: string | null
@@ -429,6 +430,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          name?: string | null
           price?: number
           product_id: string
           sku?: string | null
@@ -446,6 +448,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          name?: string | null
           price?: number
           product_id?: string
           sku?: string | null
@@ -472,6 +475,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           description: string | null
+          has_variants: boolean
           id: string
           is_active: boolean
           is_bundle: boolean
@@ -487,6 +491,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string | null
+          has_variants?: boolean
           id?: string
           is_active?: boolean
           is_bundle?: boolean
@@ -502,6 +507,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string | null
+          has_variants?: boolean
           id?: string
           is_active?: boolean
           is_bundle?: boolean

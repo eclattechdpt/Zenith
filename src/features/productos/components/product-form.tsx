@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
@@ -26,6 +26,7 @@ import { useCategories } from "../queries"
 import { createProduct, updateProduct } from "../actions"
 import { VariantManager } from "./variant-manager"
 import { BundleManager } from "./bundle-manager"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 
 function slugify(text: string) {
   return text
@@ -47,9 +48,6 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
   const queryClient = useQueryClient()
   const { data: categories = [] } = useCategories()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [hasVariants, setHasVariants] = useState(
-    (defaultValues?.variants?.length ?? 0) > 1
-  )
 
   const {
     register,
@@ -57,7 +55,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
     setValue,
     watch,
     getValues,
-    formState: { errors },
+    formState: { errors, isDirty },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CreateProductInput>({
     resolver: zodResolver(createProductSchema) as any,
@@ -68,37 +66,64 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       brand: "",
       category_id: null,
       is_active: true,
+      has_variants: false,
       is_bundle: false,
-      variants: [{ sku: "", price: 0, stock: 0 }],
+      variants: [{ name: "", sku: "", price: 0, stock: 0 }],
       bundle_items: [],
       ...defaultValues,
     },
   })
 
+  // Unsaved changes guard
+  const submittedRef = useRef(false)
+  const [pendingNav, setPendingNav] = useState<(() => void) | null>(null)
+
+  useEffect(() => {
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      if (isDirty && !submittedRef.current) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+  }, [isDirty])
+
+  const guardedNavigate = useCallback(
+    (navigate: () => void) => {
+      if (isDirty && !submittedRef.current) {
+        setPendingNav(() => navigate)
+      } else {
+        navigate()
+      }
+    },
+    [isDirty]
+  )
+
   const isActive = watch("is_active")
+  const hasVariants = watch("has_variants") ?? false
   const isBundle = watch("is_bundle") ?? false
   const variants = watch("variants")
   const bundleItems = watch("bundle_items") ?? []
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
     const name = e.target.value
-    setValue("name", name)
-    setValue("slug", slugify(name))
+    setValue("name", name, { shouldDirty: true })
+    setValue("slug", slugify(name), { shouldDirty: true })
   }
 
   function handleVariantsChange(newVariants: VariantInput[]) {
-    setValue("variants", newVariants, { shouldValidate: true })
+    setValue("variants", newVariants, { shouldValidate: true, shouldDirty: true })
   }
 
   function handleBundleItemsChange(newItems: BundleItemInput[]) {
-    setValue("bundle_items", newItems, { shouldValidate: true })
+    setValue("bundle_items", newItems, { shouldValidate: true, shouldDirty: true })
   }
 
   /** Update a single field on variants[0] using fresh state (avoids stale closures) */
   function updateSingleVariant(field: keyof VariantInput, value: unknown) {
     const current = getValues("variants")
-    const base = current[0] ?? { sku: "", price: 0, stock: 0 }
-    setValue("variants", [{ ...base, [field]: value }])
+    const base = current[0] ?? { name: "", sku: "", price: 0, stock: 0 }
+    setValue("variants", [{ ...base, [field]: value }], { shouldDirty: true })
   }
 
   async function onSubmit(data: CreateProductInput) {
@@ -119,6 +144,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       return
     }
 
+    submittedRef.current = true
     toast.success(
       isEditing ? "Producto actualizado" : "Producto creado exitosamente"
     )
@@ -198,11 +224,6 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
               className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="">Sin categoria</option>
-              {topLevel.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
               {grouped.map((g) => (
                 <optgroup key={g.parent.id} label={g.parent.name}>
                   {g.children.map((cat) => (
@@ -210,6 +231,11 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
                       {cat.name}
                     </option>
                   ))}
+                </optgroup>
+              ))}
+              {topLevel.map((cat) => (
+                <optgroup key={cat.id} label={cat.name}>
+                  <option value={cat.id}>{cat.name}</option>
                 </optgroup>
               ))}
             </select>
@@ -227,20 +253,38 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
             />
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-6 sm:col-span-2">
             <div className="flex items-center gap-3">
               <Switch
                 id="is_active"
                 checked={isActive}
-                onCheckedChange={(checked) => setValue("is_active", checked)}
+                onCheckedChange={(checked) => setValue("is_active", checked, { shouldDirty: true })}
               />
               <Label htmlFor="is_active">Producto activo</Label>
             </div>
-            <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-3 ${isBundle ? "opacity-40" : ""}`}>
+              <Switch
+                id="has_variants"
+                checked={hasVariants}
+                disabled={isBundle}
+                onCheckedChange={(checked) => {
+                  setValue("has_variants", checked, { shouldDirty: true })
+                  if (!checked && variants.length > 1) {
+                    setValue("variants", [variants[0]], { shouldDirty: true })
+                  }
+                }}
+              />
+              <Label htmlFor="has_variants">Tiene variantes</Label>
+            </div>
+            <div className={`flex items-center gap-3 ${hasVariants ? "opacity-40" : ""}`}>
               <Switch
                 id="is_bundle"
                 checked={isBundle}
-                onCheckedChange={(checked) => setValue("is_bundle", checked)}
+                disabled={hasVariants}
+                onCheckedChange={(checked) => {
+                  setValue("is_bundle", checked, { shouldDirty: true })
+                  if (checked) setValue("has_variants", false, { shouldDirty: true })
+                }}
               />
               <Label htmlFor="is_bundle">Es un cofre</Label>
             </div>
@@ -272,6 +316,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
                   <Label className="text-xs">Precio *</Label>
                   <NumericInput
                     decimal
+                    prefix="$"
                     min={0}
                     step="0.01"
                     value={variants[0]?.price ?? 0}
@@ -313,26 +358,10 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
         </>
       ) : (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle>
               {hasVariants ? "Variantes" : "Precio y stock"}
             </CardTitle>
-            <div className="flex items-center gap-2">
-              <Switch
-                id="has_variants"
-                checked={hasVariants}
-                size="sm"
-                onCheckedChange={(checked) => {
-                  setHasVariants(checked)
-                  if (!checked && variants.length > 1) {
-                    setValue("variants", [variants[0]])
-                  }
-                }}
-              />
-              <Label htmlFor="has_variants" className="text-xs text-neutral-500">
-                Tiene variantes
-              </Label>
-            </div>
           </CardHeader>
           <CardContent>
             {hasVariants ? (
@@ -367,6 +396,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
                     <Label className="text-xs">Precio *</Label>
                     <NumericInput
                       decimal
+                      prefix="$"
                       min={0}
                       step="0.01"
                       value={variants[0]?.price ?? 0}
@@ -402,7 +432,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => router.back()}
+          onClick={() => guardedNavigate(() => router.back())}
         >
           Cancelar
         </Button>
@@ -411,6 +441,22 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
           {isEditing ? "Guardar cambios" : "Crear producto"}
         </Button>
       </div>
+
+      {/* Unsaved changes dialog */}
+      <ConfirmDialog
+        open={!!pendingNav}
+        onOpenChange={(open) => !open && setPendingNav(null)}
+        title="Cambios sin guardar"
+        description="Algunos cambios no han sido guardados. ¿Seguro que quieres salir?"
+        confirmLabel="Salir sin guardar"
+        cancelLabel="Seguir editando"
+        variant="destructive"
+        onConfirm={() => {
+          const nav = pendingNav
+          setPendingNav(null)
+          nav?.()
+        }}
+      />
     </form>
   )
 }

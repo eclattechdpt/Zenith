@@ -249,9 +249,17 @@ No saltar sprints. Cada sprint depende del anterior.
 - Fix updateProduct: ahora actualiza/inserta/elimina variantes en product_variants
 - SKU auto-uppercase en todos los inputs
 - Variantes column muestra "—" para productos simples (1 variante)
-- Categorias actualizadas en Supabase: 5 padres (Cuidado Facial, Maquillaje, Cuidado Corporal, Nutricional, Accesorios) con 21 subcategorias. Categorias anteriores soft-deleted
-- Product table loading UX: eliminado skeleton flash, fade-in suave del contenido completo (card + filtros + tabla) solo cuando datos estan listos, fixed column widths para evitar reflow, placeholderData para transiciones de filtro sin parpadeo
+- Categorias actualizadas en Supabase: 6 padres (Cuidado Facial, Maquillaje, Cuidado Corporal, Nutricional, Accesorios, Cofres) con 26 subcategorias. Categorias anteriores soft-deleted
+- Product table loading UX: eliminado skeleton flash, fade-in suave del contenido completo (card + filtros + tabla) solo cuando datos estan listos, fixed column widths para evitar reflow, placeholderData para transiciones de filtro sin parpadeo, dimming sutil al buscar/filtrar
 - Removido Suspense no-op wrapper en /productos (no atrapaba nada con useQuery)
+- Variant name: campo `name` en product_variants (DB + schema + UI), accordion header muestra nombre, variantes inician colapsadas en edicion
+- has_variants: columna boolean en products para distinguir producto simple vs con variantes, persistido desde el toggle "Tiene variantes", variantes column en tabla usa has_variants
+- Toggles reorganizados: "Producto activo", "Tiene variantes", "Es un cofre" juntos en card de info. Mutuamente exclusivos (variantes ↔ cofre) con disabled + opacity-40
+- Errores de SKU/slug duplicado: validacion upfront antes de insertar, mensajes claros en espanol, rollback atomico si falla creacion de variantes
+- Queries filtran deleted_at en product_variants nested (evita variantes eliminadas en edicion)
+- Unsaved changes guard: dialog de confirmacion al salir con cambios sin guardar, beforeunload para cierre de tab, shouldDirty en todos los setValue
+- Precio con "$" prefix y formato decimal (0.00) en blur, raw number al editar. Spinners de number input ocultos, scroll-to-change deshabilitado
+- Cofres: categoria top-level con 5 subcategorias (Cereza, Always Radiant, Parpados, Tesoro, Oxigeno). Standalone categories renderizan como optgroup bold en dropdown
 
 **Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-26)
 

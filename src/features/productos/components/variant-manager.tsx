@@ -13,23 +13,56 @@ export function NumericInput({
   value,
   onChange,
   decimal = false,
+  prefix,
   ...props
 }: Omit<React.ComponentProps<typeof Input>, "value" | "onChange"> & {
   value: number
   onChange: (value: number) => void
   decimal?: boolean
+  prefix?: string
 }) {
+  const [focused, setFocused] = useState(false)
   const [display, setDisplay] = useState(String(value))
 
   useEffect(() => {
-    setDisplay(String(value))
-  }, [value])
+    if (!focused) {
+      setDisplay(decimal ? value.toFixed(2) : String(value))
+    }
+  }, [value, decimal, focused])
+
+  function handleFocus() {
+    setFocused(true)
+    // Show raw number without trailing zeros when editing
+    const raw = parseFloat(display)
+    setDisplay(isNaN(raw) ? "" : String(raw))
+  }
 
   function handleBlur() {
+    setFocused(false)
     const parsed = decimal ? parseFloat(display) : parseInt(display)
     const final = isNaN(parsed) ? 0 : Math.max(0, parsed)
     onChange(final)
-    setDisplay(String(final))
+    setDisplay(decimal ? final.toFixed(2) : String(final))
+  }
+
+  if (prefix) {
+    return (
+      <div className="relative">
+        <span className="pointer-events-none absolute left-2.5 top-1/2 z-10 -translate-y-1/2 text-sm text-neutral-400">
+          {prefix}
+        </span>
+        <Input
+          {...props}
+          type="number"
+          value={display}
+          onChange={(e) => setDisplay(e.target.value)}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onWheel={(e) => e.currentTarget.blur()}
+          className="!pl-7"
+        />
+      </div>
+    )
   }
 
   return (
@@ -38,7 +71,9 @@ export function NumericInput({
       type="number"
       value={display}
       onChange={(e) => setDisplay(e.target.value)}
+      onFocus={handleFocus}
       onBlur={handleBlur}
+      onWheel={(e) => e.currentTarget.blur()}
     />
   )
 }
@@ -56,6 +91,7 @@ interface VariantManagerProps {
 
 function emptyVariant(): VariantInput {
   return {
+    name: "",
     sku: "",
     price: 0,
     stock: 0,
@@ -63,9 +99,7 @@ function emptyVariant(): VariantInput {
 }
 
 export function VariantManager({ variants, onChange, errors }: VariantManagerProps) {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(
-    variants.length === 0 ? null : 0
-  )
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
   function addVariant() {
     const updated = [...variants, emptyVariant()]
@@ -91,7 +125,7 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
   }
 
   function getVariantLabel(variant: VariantInput) {
-    return variant.sku || "Nueva variante"
+    return variant.name || variant.sku || "Nueva variante"
   }
 
   return (
@@ -134,6 +168,16 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
             {/* Body */}
             {isExpanded && (
               <div className="border-t border-input px-4 py-4">
+                <div className="mb-3 flex flex-col gap-1.5">
+                  <Label className="text-xs">Nombre</Label>
+                  <Input
+                    placeholder="Ej: Rojo, Rosa Pastel, 30ml..."
+                    value={variant.name ?? ""}
+                    onChange={(e) =>
+                      updateVariant(index, { name: e.target.value || null })
+                    }
+                  />
+                </div>
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div className="flex flex-col gap-1.5">
                     <Label className="text-xs">SKU</Label>
@@ -149,6 +193,7 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
                     <Label className="text-xs">Precio *</Label>
                     <NumericInput
                       decimal
+                      prefix="$"
                       min={0}
                       step="0.01"
                       value={variant.price}

@@ -201,7 +201,31 @@ export async function createProduct(input: CreateProductInput) {
 
   const isBundle = parsed.data.is_bundle
 
-  // 1. Insert product
+  // 1. Validate duplicate SKUs within the form itself
+  const skus = parsed.data.variants
+    .map((v) => v.sku)
+    .filter((s): s is string => !!s)
+  const uniqueSkus = new Set(skus)
+  if (uniqueSkus.size < skus.length) {
+    const dupes = skus.filter((s, i) => skus.indexOf(s) !== i)
+    return { error: { _form: [`SKU duplicado en las variantes: "${dupes[0]}"`] } }
+  }
+
+  // 2. Validate SKUs don't already exist in the database
+  if (uniqueSkus.size > 0) {
+    const { data: existing } = await supabase
+      .from("product_variants")
+      .select("sku")
+      .eq("tenant_id", TENANT_ID)
+      .is("deleted_at", null)
+      .in("sku", [...uniqueSkus])
+
+    if (existing && existing.length > 0) {
+      return { error: { _form: [`El SKU "${existing[0].sku}" ya esta en uso por otra variante`] } }
+    }
+  }
+
+  // 3. Insert product
   const { data: product, error: productError } = await supabase
     .from("products")
     .insert({
@@ -211,6 +235,7 @@ export async function createProduct(input: CreateProductInput) {
       brand: parsed.data.brand ?? null,
       category_id: parsed.data.category_id ?? null,
       is_active: parsed.data.is_active,
+      has_variants: parsed.data.has_variants,
       is_bundle: isBundle,
       tenant_id: TENANT_ID,
       created_by: userId,
@@ -218,9 +243,14 @@ export async function createProduct(input: CreateProductInput) {
     .select()
     .single()
 
-  if (productError) return { error: { _form: [productError.message] } }
+  if (productError) {
+    const msg = productError.message.includes("products_tenant_id_slug_key")
+      ? `Ya existe un producto con el slug "${parsed.data.slug}"`
+      : productError.message
+    return { error: { _form: [msg] } }
+  }
 
-  // 2a. If bundle, insert bundle items (component products)
+  // 4. If bundle, insert bundle items
   if (isBundle && parsed.data.bundle_items && parsed.data.bundle_items.length > 0) {
     const bundleRows = parsed.data.bundle_items.map((item) => ({
       bundle_id: product.id,
@@ -232,39 +262,58 @@ export async function createProduct(input: CreateProductInput) {
       .from("bundle_items")
       .insert(bundleRows)
 
-    if (bundleError) return { error: { _form: [bundleError.message] } }
+    if (bundleError) {
+      // Rollback: delete the product
+      await supabase.from("products").delete().eq("id", product.id)
+      return { error: { _form: [bundleError.message] } }
+    }
   }
 
-  // 2b. Insert variants
-  for (const variant of parsed.data.variants) {
-    const { data: pv, error: pvError } = await supabase
-      .from("product_variants")
-      .insert({
-        product_id: product.id,
-        sku: variant.sku ?? null,
-        price: variant.price,
-        stock: variant.stock,
-        tenant_id: TENANT_ID,
-        created_by: userId,
-      })
-      .select()
-      .single()
+  // 5. Insert all variants
+  const variantRows = parsed.data.variants.map((v) => ({
+    product_id: product.id,
+    name: v.name ?? null,
+    sku: v.sku ?? null,
+    price: v.price,
+    stock: v.stock,
+    tenant_id: TENANT_ID,
+    created_by: userId,
+  }))
 
-    if (pvError) return { error: { _form: [pvError.message] } }
+  const { data: insertedVariants, error: variantsError } = await supabase
+    .from("product_variants")
+    .insert(variantRows)
+    .select()
 
-    // 3. Create initial inventory movement if stock > 0
-    if (variant.stock > 0) {
-      await supabase.from("inventory_movements").insert({
+  if (variantsError) {
+    // Rollback: delete the product
+    await supabase.from("products").delete().eq("id", product.id)
+    const msg = variantsError.message.includes("product_variants_tenant_id_sku_key")
+      ? `El SKU ya esta en uso por otra variante`
+      : variantsError.message
+    return { error: { _form: [msg] } }
+  }
+
+  // 6. Create initial inventory movements for variants with stock > 0
+  const movements = (insertedVariants ?? [])
+    .map((pv, i) => {
+      const stock = parsed.data.variants[i].stock
+      if (stock <= 0) return null
+      return {
         product_variant_id: pv.id,
-        type: "initial",
-        quantity: variant.stock,
+        type: "initial" as const,
+        quantity: stock,
         stock_before: 0,
-        stock_after: variant.stock,
+        stock_after: stock,
         reason: "Carga inicial",
         tenant_id: TENANT_ID,
         created_by: userId,
-      })
-    }
+      }
+    })
+    .filter((m): m is NonNullable<typeof m> => m !== null)
+
+  if (movements.length > 0) {
+    await supabase.from("inventory_movements").insert(movements)
   }
 
   revalidatePath("/productos")
@@ -277,7 +326,32 @@ export async function updateProduct(id: string, input: CreateProductInput) {
 
   const supabase = await createServerClient()
 
-  // 1. Update product fields
+  // 1. Validate duplicate SKUs within the form
+  const skus = parsed.data.variants
+    .map((v) => v.sku)
+    .filter((s): s is string => !!s)
+  const uniqueSkus = new Set(skus)
+  if (uniqueSkus.size < skus.length) {
+    const dupes = skus.filter((s, i) => skus.indexOf(s) !== i)
+    return { error: { _form: [`SKU duplicado en las variantes: "${dupes[0]}"`] } }
+  }
+
+  // 2. Validate SKUs don't exist on OTHER products
+  if (uniqueSkus.size > 0) {
+    const { data: existing } = await supabase
+      .from("product_variants")
+      .select("sku")
+      .eq("tenant_id", TENANT_ID)
+      .is("deleted_at", null)
+      .neq("product_id", id)
+      .in("sku", [...uniqueSkus])
+
+    if (existing && existing.length > 0) {
+      return { error: { _form: [`El SKU "${existing[0].sku}" ya esta en uso por otro producto`] } }
+    }
+  }
+
+  // 3. Update product fields
   const { data, error } = await supabase
     .from("products")
     .update({
@@ -287,6 +361,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
       brand: parsed.data.brand ?? null,
       category_id: parsed.data.category_id ?? null,
       is_active: parsed.data.is_active,
+      has_variants: parsed.data.has_variants,
       is_bundle: parsed.data.is_bundle,
     })
     .eq("id", id)
@@ -296,7 +371,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
 
   if (error) return { error: { _form: [error.message] } }
 
-  // 2. Get existing variants
+  // 4. Get existing variants
   const { data: existingVariants } = await supabase
     .from("product_variants")
     .select("id")
@@ -305,34 +380,38 @@ export async function updateProduct(id: string, input: CreateProductInput) {
 
   const existingIds = (existingVariants ?? []).map((v) => v.id)
 
-  // 3. Update or insert variants
+  // 5. Update or insert variants
   for (const variant of parsed.data.variants) {
     if (existingIds.length > 0) {
-      // Update first existing variant, then handle extras
       const existingId = existingIds.shift()!
-      await supabase
+      const { error: updateErr } = await supabase
         .from("product_variants")
         .update({
+          name: variant.name ?? null,
           sku: variant.sku ?? null,
           price: variant.price,
           stock: variant.stock,
         })
         .eq("id", existingId)
+
+      if (updateErr) return { error: { _form: [updateErr.message] } }
     } else {
-      // Insert new variant
       const userId = await getUserId()
-      await supabase.from("product_variants").insert({
+      const { error: insertErr } = await supabase.from("product_variants").insert({
         product_id: id,
+        name: variant.name ?? null,
         sku: variant.sku ?? null,
         price: variant.price,
         stock: variant.stock,
         tenant_id: TENANT_ID,
         created_by: userId,
       })
+
+      if (insertErr) return { error: { _form: [insertErr.message] } }
     }
   }
 
-  // 4. Soft delete any extra variants that were removed
+  // 6. Soft delete any extra variants that were removed
   for (const leftoverId of existingIds) {
     await supabase
       .from("product_variants")

@@ -30,7 +30,7 @@ export function useProducts(filters?: ProductFilters) {
         .select(
           `*,
           categories:categories(id, name),
-          product_variants:product_variants(
+          product_variants:product_variants!product_variants_product_id_fkey(
             *,
             variant_option_assignments:variant_option_assignments(
               variant_options:variant_options(
@@ -42,6 +42,7 @@ export function useProducts(filters?: ProductFilters) {
           product_images:product_images(id, storage_path, sort_order)`
         )
         .is("deleted_at", null)
+        .is("product_variants.deleted_at", null)
         .order("name")
 
       if (filters?.search) {
@@ -83,7 +84,7 @@ export function useProduct(id: string) {
         .select(
           `*,
           categories:categories(id, name),
-          product_variants:product_variants(
+          product_variants:product_variants!product_variants_product_id_fkey(
             *,
             variant_option_assignments:variant_option_assignments(
               variant_options:variant_options(
@@ -96,6 +97,7 @@ export function useProduct(id: string) {
         )
         .eq("id", id)
         .is("deleted_at", null)
+        .is("product_variants.deleted_at", null)
         .single()
 
       if (error) return null

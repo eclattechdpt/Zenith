@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { Package, Plus, Search } from "lucide-react"
 import Link from "next/link"
 import { useQueryState, parseAsString } from "nuqs"
@@ -30,10 +30,12 @@ export function ProductTable() {
     parseAsString.withDefault("")
   )
 
-  const { data: products = [], isLoading, isFetched } = useProducts({
+  const { data: products = [], isLoading, isFetched, isFetching } = useProducts({
     search: search || undefined,
     categoryId: categoryId || undefined,
   })
+  const hasLoadedOnce = useRef(false)
+  if (isFetched) hasLoadedOnce.current = true
   const { data: categories = [] } = useCategories()
 
   // Delete confirmation state
@@ -65,7 +67,7 @@ export function ProductTable() {
   return (
     <motion.div
       initial={{ opacity: 0 }}
-      animate={{ opacity: isFetched ? 1 : 0 }}
+      animate={{ opacity: hasLoadedOnce.current ? 1 : 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
       className="space-y-4 overflow-hidden rounded-2xl border border-rose-100 bg-gradient-to-b from-white to-rose-50/30 p-4 shadow-sm sm:p-6"
     >
@@ -95,6 +97,10 @@ export function ProductTable() {
           </div>
 
           {/* Table */}
+          <div
+            className="transition-opacity duration-200 ease-out"
+            style={{ opacity: isFetching && hasLoadedOnce.current ? 0.5 : 1 }}
+          >
           <DataTable
             columns={columns}
             data={products}
@@ -121,6 +127,7 @@ export function ProductTable() {
               )
             }
           />
+          </div>
 
           {/* Delete confirmation */}
           <ConfirmDialog

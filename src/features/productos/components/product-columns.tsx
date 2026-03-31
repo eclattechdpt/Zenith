@@ -119,10 +119,12 @@ export function getProductColumns({
       minSize: 80,
       header: "Variantes",
       cell: ({ row }) => {
+        if (!row.original.has_variants) {
+          return <span className="text-neutral-400">—</span>
+        }
         const count = row.original.product_variants.filter(
           (v) => v.is_active
         ).length
-        if (count <= 1) return <span className="text-neutral-400">—</span>
         return (
           <span className="text-sm text-neutral-600">
             {count}

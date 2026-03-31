@@ -41,8 +41,10 @@ function productToFormValues(
     brand: product.brand,
     category_id: product.category_id,
     is_active: product.is_active,
+    has_variants: product.has_variants,
     is_bundle: product.is_bundle,
     variants: product.product_variants.map((v) => ({
+      name: v.name,
       sku: v.sku,
       price: v.price,
       stock: v.stock,
