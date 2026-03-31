@@ -275,6 +275,7 @@ No saltar sprints. Cada sprint depende del anterior.
 - Slug duplicado en categorias: error claro "Ya existe una categoria con el nombre X en este nivel"
 - Busqueda: escape de wildcards SQL/PostgREST (%, _, *) para evitar matches falsos
 - DB limpiada: hard-deleted todos los datos de prueba y soft-deletes obsoletos
+- **Edge case testing & hardening**: 12 casos probados — validacion de datos (nombre vacio, precio $0, slugs/codigos duplicados), integridad relacional (delete parent con subcategorias, delete categoria con productos, variantes huerfanas), UX (double-submit, unsaved changes guard, stale closures), seguridad de busqueda (SQL wildcards). Bugs encontrados y corregidos: creacion parcial de productos sin rollback, false success en delete de categorias, wildcards en search, variantes soft-deleted apareciendo en edicion
 
 **Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-26)
 
