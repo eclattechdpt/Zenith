@@ -46,9 +46,10 @@ export function useProducts(filters?: ProductFilters) {
         .order("name")
 
       if (filters?.search) {
-        const q = filters.search.trim()
+        // Escape SQL/PostgREST wildcards so %, _, and * are treated as literal characters
+        const q = filters.search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
 
-        // Find product IDs that have a variant matching the SKU
+        // Find product IDs that have a variant matching the code
         const { data: skuMatches } = await supabase
           .from("product_variants")
           .select("product_id")

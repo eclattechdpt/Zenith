@@ -44,7 +44,12 @@ export async function createCategory(input: CategoryInput) {
     .select()
     .single()
 
-  if (error) return { error: { _form: [error.message] } }
+  if (error) {
+    const msg = error.message.includes("categories_tenant_id_slug_parent_id_key")
+      ? `Ya existe una categoria con el nombre "${parsed.data.name}" en este nivel`
+      : error.message
+    return { error: { _form: [msg] } }
+  }
 
   revalidatePath("/productos")
   revalidatePath("/configuracion")
@@ -65,7 +70,12 @@ export async function updateCategory(id: string, input: CategoryInput) {
     .select()
     .single()
 
-  if (error) return { error: { _form: [error.message] } }
+  if (error) {
+    const msg = error.message.includes("categories_tenant_id_slug_parent_id_key")
+      ? `Ya existe una categoria con el nombre "${parsed.data.name}" en este nivel`
+      : error.message
+    return { error: { _form: [msg] } }
+  }
 
   revalidatePath("/productos")
   revalidatePath("/configuracion")

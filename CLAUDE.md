@@ -224,7 +224,7 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
-**Sprint 2 — Catalogo de productos: EN PROGRESO** (actualizado 2026-03-30, Supabase connected)
+**Sprint 2 — Catalogo de productos: COMPLETO** (actualizado 2026-03-30, Supabase connected)
 
 ### Sprint 2 — Completado
 - Schemas Zod: product, variant, category, variantType, variantOption, createProduct (con UUID regex flexible)
@@ -272,6 +272,9 @@ No saltar sprints. Cada sprint depende del anterior.
 - Delete categoria: bloquea si tiene subcategorias activas, handleDelete ahora lee errores del server
 - Busqueda por codigo (SKU): query busca en product_variants.sku ademas de name/brand
 - Dialog de categoria muestra "Nueva subcategoria" / "Editar subcategoria" cuando tiene parent
+- Slug duplicado en categorias: error claro "Ya existe una categoria con el nombre X en este nivel"
+- Busqueda: escape de wildcards SQL/PostgREST (%, _, *) para evitar matches falsos
+- DB limpiada: hard-deleted todos los datos de prueba y soft-deletes obsoletos
 
 **Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-26)
 

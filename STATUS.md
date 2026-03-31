@@ -23,7 +23,7 @@
 | Sprint | Name | Status | Description |
 |--------|------|--------|-------------|
 | 1 | Fundacion | Complete | Auth, layout, providers, shared components, collapsible sidebar |
-| 2 | Catalogo de productos | In progress | CRUD productos con variantes (mock data) |
+| 2 | Catalogo de productos | Complete | CRUD productos, variantes, categorias, cofres, validaciones, UX polish |
 | 3 | Clientes y precios | Not started | Gestion de clientes, listas de precios |
 | 4 | POS | Not started | Punto de venta, carrito, cobro |
 | 5 | Inventario | Not started | Stock, movimientos, ajustes |
