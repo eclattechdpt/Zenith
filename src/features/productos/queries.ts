@@ -14,7 +14,7 @@ import type {
 
 interface ProductFilters {
   search?: string
-  categoryId?: string
+  categoryIds?: string[]
   brand?: string
   isActive?: boolean
 }
@@ -47,13 +47,29 @@ export function useProducts(filters?: ProductFilters) {
 
       if (filters?.search) {
         const q = filters.search.trim()
-        query = query.or(
-          `name.ilike.%${q}%,brand.ilike.%${q}%`
-        )
+
+        // Find product IDs that have a variant matching the SKU
+        const { data: skuMatches } = await supabase
+          .from("product_variants")
+          .select("product_id")
+          .ilike("sku", `%${q}%`)
+          .is("deleted_at", null)
+
+        const skuProductIds = [...new Set((skuMatches ?? []).map((m) => m.product_id))]
+
+        if (skuProductIds.length > 0) {
+          query = query.or(
+            `name.ilike.%${q}%,brand.ilike.%${q}%,id.in.(${skuProductIds.join(",")})`
+          )
+        } else {
+          query = query.or(
+            `name.ilike.%${q}%,brand.ilike.%${q}%`
+          )
+        }
       }
 
-      if (filters?.categoryId) {
-        query = query.eq("category_id", filters.categoryId)
+      if (filters?.categoryIds && filters.categoryIds.length > 0) {
+        query = query.in("category_id", filters.categoryIds)
       }
 
       if (filters?.brand) {

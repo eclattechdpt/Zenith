@@ -262,6 +262,16 @@ No saltar sprints. Cada sprint depende del anterior.
 - Cofres: categoria top-level con 5 subcategorias (Cereza, Always Radiant, Parpados, Tesoro, Oxigeno). Standalone categories renderizan como optgroup bold en dropdown
 - Config page: removido VariantTypeManager (no usado), categories full-width, collapsible subcategorias con animacion (Motion), entrada animada con stagger
 - Mobile UX: titulos centrados en mobile (text-center sm:text-left) en todas las paginas de productos y config para evitar overlap con burger menu
+- SKU renombrado a "Codigo" en toda la UI (labels, placeholders, errores)
+- Volver button movido dentro de ProductForm con guardedNavigate (unsaved changes guard en ambos Volver y Cancelar)
+- Filtro por categoria incluye subcategorias (parent + children IDs con `.in()`)
+- Variante name se limpia al desactivar "Tiene variantes" (usa getValues para evitar stale closure)
+- Precio no puede ser $0 (validacion `.gt(0)` en schema)
+- Variantes: toggle is_active para activar/desactivar sin eliminar, dimmed + badge "Inactiva"
+- Confirmacion de eliminacion en variantes y bundle items (ConfirmDialog)
+- Delete categoria: bloquea si tiene subcategorias activas, handleDelete ahora lee errores del server
+- Busqueda por codigo (SKU): query busca en product_variants.sku ademas de name/brand
+- Dialog de categoria muestra "Nueva subcategoria" / "Editar subcategoria" cuando tiene parent
 
 **Sprint 1 — Fundacion: COMPLETO** (actualizado 2026-03-26)
 

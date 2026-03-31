@@ -109,9 +109,16 @@ export function CategoryManager() {
   async function handleDelete() {
     if (!deleteTarget) return
     setIsDeleting(true)
-    await deleteCategory(deleteTarget.id)
+    const result = await deleteCategory(deleteTarget.id)
     setIsDeleting(false)
     setDeleteTarget(null)
+
+    if ("error" in result) {
+      const msg = (result.error as Record<string, string[]>)._form?.[0] ?? "Error al eliminar la categoria"
+      toast.error(msg)
+      return
+    }
+
     toast.success("Categoria eliminada")
     queryClient.invalidateQueries({ queryKey: ["categories"] })
   }
@@ -239,7 +246,9 @@ export function CategoryManager() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editId ? "Editar categoria" : "Nueva categoria"}
+              {editId
+                ? parentId ? "Editar subcategoria" : "Editar categoria"
+                : parentId ? "Nueva subcategoria" : "Nueva categoria"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">

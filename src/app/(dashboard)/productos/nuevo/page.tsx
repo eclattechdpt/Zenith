@@ -1,10 +1,8 @@
 "use client"
 
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { motion } from "motion/react"
 
-import { Button } from "@/components/ui/button"
 import { ProductForm } from "@/features/productos/components/product-form"
 
 const containerVariants = {
@@ -26,6 +24,7 @@ const itemVariants = {
 }
 
 export default function NuevoProductoPage() {
+  const router = useRouter()
   return (
     <motion.div
       variants={containerVariants}
@@ -45,19 +44,10 @@ export default function NuevoProductoPage() {
             Agrega un producto al catalogo
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          nativeButton={false}
-          render={<Link href="/productos" />}
-        >
-          <ArrowLeft className="mr-1.5 size-3.5" />
-          Volver
-        </Button>
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <ProductForm />
+        <ProductForm onBack={() => router.push("/productos")} />
       </motion.div>
     </motion.div>
   )

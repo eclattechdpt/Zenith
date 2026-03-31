@@ -1,11 +1,9 @@
 "use client"
 
 import { use } from "react"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { motion } from "motion/react"
 
-import { Button } from "@/components/ui/button"
 import { TableSkeleton } from "@/components/shared/loading-skeleton"
 import { EmptyState } from "@/components/shared/empty-state"
 import { ProductForm } from "@/features/productos/components/product-form"
@@ -48,11 +46,12 @@ function productToFormValues(
       sku: v.sku,
       price: v.price,
       stock: v.stock,
+      is_active: v.is_active,
     })),
   }
 }
 
-function EditProductContent({ id }: { id: string }) {
+function EditProductContent({ id, onBack }: { id: string; onBack: () => void }) {
   const { data: product, isLoading } = useProduct(id)
 
   if (isLoading) return <TableSkeleton />
@@ -67,7 +66,7 @@ function EditProductContent({ id }: { id: string }) {
   }
 
   return (
-    <ProductForm productId={id} defaultValues={productToFormValues(product)} />
+    <ProductForm productId={id} defaultValues={productToFormValues(product)} onBack={onBack} />
   )
 }
 
@@ -77,6 +76,7 @@ export default function EditProductoPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const router = useRouter()
 
   return (
     <motion.div
@@ -94,19 +94,10 @@ export default function EditProductoPage({
             Editar producto
           </h1>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          nativeButton={false}
-          render={<Link href="/productos" />}
-        >
-          <ArrowLeft className="mr-1.5 size-3.5" />
-          Volver
-        </Button>
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <EditProductContent id={id} />
+        <EditProductContent id={id} onBack={() => router.push("/productos")} />
       </motion.div>
     </motion.div>
   )

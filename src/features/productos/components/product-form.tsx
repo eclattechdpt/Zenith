@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
-import { Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -40,9 +40,10 @@ function slugify(text: string) {
 interface ProductFormProps {
   productId?: string
   defaultValues?: Partial<CreateProductInput>
+  onBack?: () => void
 }
 
-export function ProductForm({ productId, defaultValues }: ProductFormProps) {
+export function ProductForm({ productId, defaultValues, onBack }: ProductFormProps) {
   const isEditing = !!productId
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -68,7 +69,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       is_active: true,
       has_variants: false,
       is_bundle: false,
-      variants: [{ name: "", sku: "", price: 0, stock: 0 }],
+      variants: [{ name: "", sku: "", price: 0, stock: 0, is_active: true }],
       bundle_items: [],
       ...defaultValues,
     },
@@ -122,7 +123,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
   /** Update a single field on variants[0] using fresh state (avoids stale closures) */
   function updateSingleVariant(field: keyof VariantInput, value: unknown) {
     const current = getValues("variants")
-    const base = current[0] ?? { name: "", sku: "", price: 0, stock: 0 }
+    const base = current[0] ?? { name: "", sku: "", price: 0, stock: 0, is_active: true }
     setValue("variants", [{ ...base, [field]: value }], { shouldDirty: true })
   }
 
@@ -174,6 +175,21 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       })}
       className="flex flex-col gap-6"
     >
+      {/* Back button */}
+      {onBack && (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => guardedNavigate(onBack)}
+          >
+            <ArrowLeft className="mr-1.5 size-3.5" />
+            Volver
+          </Button>
+        </div>
+      )}
+
       {/* Product Info */}
       <Card>
         <CardHeader>
@@ -269,8 +285,10 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
                 disabled={isBundle}
                 onCheckedChange={(checked) => {
                   setValue("has_variants", checked, { shouldDirty: true })
-                  if (!checked && variants.length > 1) {
-                    setValue("variants", [variants[0]], { shouldDirty: true })
+                  if (!checked) {
+                    const current = getValues("variants")
+                    const first = current[0] ?? { name: "", sku: "", price: 0, stock: 0 }
+                    setValue("variants", [{ ...first, name: "" }], { shouldDirty: true })
                   }
                 }}
               />
@@ -303,7 +321,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
             <CardContent>
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs">SKU</Label>
+                  <Label className="text-xs">Codigo</Label>
                   <Input
                     placeholder="Ej: X-0000"
                     value={variants[0]?.sku ?? ""}
@@ -383,7 +401,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
               <>
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div className="flex flex-col gap-1.5">
-                    <Label className="text-xs">SKU</Label>
+                    <Label className="text-xs">Codigo</Label>
                     <Input
                       placeholder="Ej: X-0000"
                       value={variants[0]?.sku ?? ""}
@@ -432,7 +450,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => guardedNavigate(() => router.back())}
+          onClick={() => guardedNavigate(onBack ?? (() => router.back()))}
         >
           Cancelar
         </Button>

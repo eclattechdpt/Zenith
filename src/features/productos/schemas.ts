@@ -59,8 +59,9 @@ export const productSchema = z.object({
 export const variantSchema = z.object({
   name: z.string().max(100).optional().nullable(),
   sku: z.string().max(50).optional().nullable(),
-  price: z.coerce.number().min(0, "El precio debe ser positivo"),
+  price: z.coerce.number().gt(0, "El precio debe ser mayor a $0"),
   stock: z.coerce.number().int().default(0),
+  is_active: z.boolean().default(true),
 })
 
 // --- BUNDLES (COFRES) ---

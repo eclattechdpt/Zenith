@@ -30,13 +30,23 @@ export function ProductTable() {
     parseAsString.withDefault("")
   )
 
+  const { data: categories = [] } = useCategories()
+
+  // Resolve selected category + its children for filtering
+  const categoryIds = useMemo(() => {
+    if (!categoryId) return undefined
+    const children = categories
+      .filter((c) => c.parent_id === categoryId)
+      .map((c) => c.id)
+    return [categoryId, ...children]
+  }, [categoryId, categories])
+
   const { data: products = [], isLoading, isFetched, isFetching } = useProducts({
     search: search || undefined,
-    categoryId: categoryId || undefined,
+    categoryIds,
   })
   const hasLoadedOnce = useRef(false)
   if (isFetched) hasLoadedOnce.current = true
-  const { data: categories = [] } = useCategories()
 
   // Delete confirmation state
   const [deleteTarget, setDeleteTarget] = useState<ProductWithDetails | null>(
@@ -76,7 +86,7 @@ export function ProductTable() {
             <div className="relative flex-1 sm:max-w-sm">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
               <Input
-                placeholder="Buscar producto, marca o SKU..."
+                placeholder="Buscar producto, marca o codigo..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value || null)}
                 className="pl-9"

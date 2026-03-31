@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { EmptyState } from "@/components/shared/empty-state"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 
 import { useProducts } from "../queries"
 import type { BundleItemInput } from "../schemas"
@@ -48,6 +49,7 @@ function NumericInput({
 export function BundleManager({ items, onChange }: BundleManagerProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [showSearch, setShowSearch] = useState(false)
+  const [deleteVariantId, setDeleteVariantId] = useState<string | null>(null)
 
   const { data: products = [] } = useProducts({
     search: searchQuery || undefined,
@@ -145,7 +147,7 @@ export function BundleManager({ items, onChange }: BundleManagerProps) {
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  onClick={() => removeItem(item.product_variant_id)}
+                  onClick={() => setDeleteVariantId(item.product_variant_id)}
                 >
                   <Trash2 className="size-3.5 text-neutral-400" />
                 </Button>
@@ -245,6 +247,22 @@ export function BundleManager({ items, onChange }: BundleManagerProps) {
           Agregar producto al cofre
         </Button>
       )}
+
+      <ConfirmDialog
+        open={deleteVariantId !== null}
+        onOpenChange={(open) => !open && setDeleteVariantId(null)}
+        title="Quitar producto del cofre"
+        description={`Se quitara "${deleteVariantId ? (getVariantInfo(deleteVariantId)?.productName ?? "este producto") : ""}" del cofre.`}
+        confirmLabel="Quitar"
+        cancelLabel="Cancelar"
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteVariantId) {
+            removeItem(deleteVariantId)
+            setDeleteVariantId(null)
+          }
+        }}
+      />
     </div>
   )
 }

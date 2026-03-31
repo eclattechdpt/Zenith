@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 
 /** Input that keeps a local string while typing, commits a number on blur. */
 export function NumericInput({
@@ -95,11 +97,13 @@ function emptyVariant(): VariantInput {
     sku: "",
     price: 0,
     stock: 0,
+    is_active: true,
   }
 }
 
 export function VariantManager({ variants, onChange, errors }: VariantManagerProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
 
   function addVariant() {
     const updated = [...variants, emptyVariant()]
@@ -137,7 +141,7 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
         return (
           <div
             key={index}
-            className="rounded-lg border border-input"
+            className={`rounded-lg border border-input ${variant.is_active === false ? "opacity-50" : ""}`}
           >
             {/* Header */}
             <button
@@ -150,6 +154,11 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
                 {variant.sku && (
                   <Badge variant="secondary" className="text-[10px]">
                     {variant.sku}
+                  </Badge>
+                )}
+                {variant.is_active === false && (
+                  <Badge variant="outline" className="text-[10px] text-neutral-400">
+                    Inactiva
                   </Badge>
                 )}
               </div>
@@ -180,7 +189,7 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
                 </div>
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div className="flex flex-col gap-1.5">
-                    <Label className="text-xs">SKU</Label>
+                    <Label className="text-xs">Codigo</Label>
                     <Input
                       placeholder="Ej: X-0000"
                       value={variant.sku ?? ""}
@@ -225,13 +234,25 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
                   </div>
                 )}
 
-                {/* Delete button */}
-                <div className="mt-4 flex justify-end">
+                {/* Actions */}
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id={`variant-active-${index}`}
+                      checked={variant.is_active !== false}
+                      onCheckedChange={(checked) =>
+                        updateVariant(index, { is_active: checked })
+                      }
+                    />
+                    <Label htmlFor={`variant-active-${index}`} className="text-xs text-neutral-500">
+                      Activa
+                    </Label>
+                  </div>
                   <Button
                     type="button"
                     variant="destructive"
                     size="xs"
-                    onClick={() => removeVariant(index)}
+                    onClick={() => setDeleteIndex(index)}
                   >
                     <Trash2 className="mr-1 size-3" />
                     Eliminar
@@ -247,6 +268,22 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
         <Plus className="mr-1.5 size-3.5" />
         Agregar variante
       </Button>
+
+      <ConfirmDialog
+        open={deleteIndex !== null}
+        onOpenChange={(open) => !open && setDeleteIndex(null)}
+        title="Eliminar variante"
+        description={`Se eliminara la variante "${deleteIndex !== null ? getVariantLabel(variants[deleteIndex]) : ""}". Esta accion no se puede deshacer.`}
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteIndex !== null) {
+            removeVariant(deleteIndex)
+            setDeleteIndex(null)
+          }
+        }}
+      />
     </div>
   )
 }

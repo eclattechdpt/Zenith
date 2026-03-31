@@ -75,6 +75,21 @@ export async function updateCategory(id: string, input: CategoryInput) {
 export async function deleteCategory(id: string) {
   const supabase = await createServerClient()
 
+  // Check for active subcategories
+  const { count: childCount } = await supabase
+    .from("categories")
+    .select("*", { count: "exact", head: true })
+    .eq("parent_id", id)
+    .is("deleted_at", null)
+
+  if (childCount && childCount > 0) {
+    return {
+      error: {
+        _form: ["No se puede eliminar: tiene subcategorias activas"],
+      },
+    }
+  }
+
   // Check for active products in this category
   const { count } = await supabase
     .from("products")
@@ -208,7 +223,7 @@ export async function createProduct(input: CreateProductInput) {
   const uniqueSkus = new Set(skus)
   if (uniqueSkus.size < skus.length) {
     const dupes = skus.filter((s, i) => skus.indexOf(s) !== i)
-    return { error: { _form: [`SKU duplicado en las variantes: "${dupes[0]}"`] } }
+    return { error: { _form: [`Codigo duplicado en las variantes: "${dupes[0]}"`] } }
   }
 
   // 2. Validate SKUs don't already exist in the database
@@ -221,7 +236,7 @@ export async function createProduct(input: CreateProductInput) {
       .in("sku", [...uniqueSkus])
 
     if (existing && existing.length > 0) {
-      return { error: { _form: [`El SKU "${existing[0].sku}" ya esta en uso por otra variante`] } }
+      return { error: { _form: [`El codigo "${existing[0].sku}" ya esta en uso por otra variante`] } }
     }
   }
 
@@ -276,6 +291,7 @@ export async function createProduct(input: CreateProductInput) {
     sku: v.sku ?? null,
     price: v.price,
     stock: v.stock,
+    is_active: v.is_active ?? true,
     tenant_id: TENANT_ID,
     created_by: userId,
   }))
@@ -289,7 +305,7 @@ export async function createProduct(input: CreateProductInput) {
     // Rollback: delete the product
     await supabase.from("products").delete().eq("id", product.id)
     const msg = variantsError.message.includes("product_variants_tenant_id_sku_key")
-      ? `El SKU ya esta en uso por otra variante`
+      ? `El codigo ya esta en uso por otra variante`
       : variantsError.message
     return { error: { _form: [msg] } }
   }
@@ -333,7 +349,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
   const uniqueSkus = new Set(skus)
   if (uniqueSkus.size < skus.length) {
     const dupes = skus.filter((s, i) => skus.indexOf(s) !== i)
-    return { error: { _form: [`SKU duplicado en las variantes: "${dupes[0]}"`] } }
+    return { error: { _form: [`Codigo duplicado en las variantes: "${dupes[0]}"`] } }
   }
 
   // 2. Validate SKUs don't exist on OTHER products
@@ -347,7 +363,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
       .in("sku", [...uniqueSkus])
 
     if (existing && existing.length > 0) {
-      return { error: { _form: [`El SKU "${existing[0].sku}" ya esta en uso por otro producto`] } }
+      return { error: { _form: [`El codigo "${existing[0].sku}" ya esta en uso por otro producto`] } }
     }
   }
 
@@ -391,6 +407,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
           sku: variant.sku ?? null,
           price: variant.price,
           stock: variant.stock,
+          is_active: variant.is_active ?? true,
         })
         .eq("id", existingId)
 
@@ -403,6 +420,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
         sku: variant.sku ?? null,
         price: variant.price,
         stock: variant.stock,
+        is_active: variant.is_active ?? true,
         tenant_id: TENANT_ID,
         created_by: userId,
       })
