@@ -224,6 +224,29 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
+**Sprint 4 — POS (Punto de venta): EN PROGRESO** (actualizado 2026-03-31)
+
+### Sprint 4 — Completado
+- Zustand cart store (`pos/store.ts`): items (add/remove/quantity/discount/price), customer, globalDiscount, notes, computed totals (subtotal, itemsDiscount, total, itemCount), clear
+- resolvePrice + resolvePrices (`pos/utils.ts`): prioridad especifico > descuento % > base, batch query para recalcular carrito al cambiar cliente
+- Zod schemas (`pos/schemas.ts`): cartItemSchema, paymentSchema, createSaleSchema, createQuoteSchema
+- Types (`pos/types.ts`): CartItem, CartCustomer, CartPayment, Sale, SaleItem, SalePayment
+- POS terminal layout (`pos/components/pos-terminal.tsx`): split screen (busqueda izquierda, carrito derecha), realtime sync
+- Product search (`pos/components/product-search.tsx`, `pos/queries.ts`): debounce 250ms, busqueda por nombre/marca/codigo, limit 20, solo productos activos
+- Variant selector: producto simple = agregar directo, multiples variantes = expandible con nombre/sku/precio/stock
+- Customer picker (`pos/components/customer-picker.tsx`): busqueda de clientes, badge descuento, recalcula todos los precios del carrito al seleccionar/deseleccionar cliente
+- Cart panel (`pos/components/cart-panel.tsx`): items con +/-, precio unitario, descuento por item, line total, stock bajo warning, subtotal/descuento/total, boton Cobrar, boton Guardar cotizacion, Vaciar
+- Payment dialog (`pos/components/payment-dialog.tsx`): botones rapidos Efectivo/Tarjeta, montos editables, split payments (agregar metodos), referencia para transferencias, calculo de cambio/faltante, validacion pagos >= total
+- createSale server action (`pos/actions.ts`): genera sale_number secuencial (V-0001), crea sale + sale_items + sale_payments, descuenta stock, crea inventory_movements, revalidate paths
+- createQuote server action: genera quote_number (C-0001), crea sale con status='quote' + expires_at, NO descuenta stock, NO crea payments/movements
+- Receipt printing (`pos/components/sale-receipt.tsx`): formato 80mm termica, header negocio, datos venta, items con descuento, totales, pagos, cambio, react-to-print
+- Realtime sync (`hooks/use-realtime.ts`): suscripcion a product_variants y sales, invalida queries automaticamente para sync multi-dispositivo
+- useDebounce hook (`hooks/use-debounce.ts`): hook generico con delay configurable
+
+### Sprint 4 — Pendiente
+- Listar cotizaciones y convertir cotizacion a venta
+- Testing visual y edge cases
+
 **Sprint 3 — Clientes y precios: COMPLETO** (actualizado 2026-03-31)
 
 ### Sprint 3 — Completado

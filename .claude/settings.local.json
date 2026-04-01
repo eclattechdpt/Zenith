@@ -45,7 +45,8 @@
       "mcp__playwright__browser_type",
       "mcp__playwright__browser_run_code",
       "mcp__playwright__browser_handle_dialog",
-      "Bash(npx @anthropic-ai/mcp-playwright@latest --help)"
+      "Bash(npx @anthropic-ai/mcp-playwright@latest --help)",
+      "Bash(npm ls:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
