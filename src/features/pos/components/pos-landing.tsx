@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useMemo } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { Plus, CalendarDays } from "lucide-react"
+import { Plus, CalendarDays, Flame, Clock } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { useReactToPrint } from "react-to-print"
@@ -175,17 +175,17 @@ export function POSLanding() {
             className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
-              <h1 className="text-xl font-extrabold tracking-tight text-stone-800 sm:text-2xl">
+              <h1 className="font-display text-[28px] font-medium tracking-[-0.5px] text-neutral-950">
                 Punto de venta
               </h1>
-              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-stone-500">
+              <p className="mt-0.5 flex items-center gap-1.5 text-xs font-medium text-neutral-500">
                 <CalendarDays className="h-3.5 w-3.5" />
                 {todayLabel}
               </p>
             </div>
             <Button
               onClick={openNewSale}
-              className="h-9 gap-1.5 bg-rose-600 text-sm font-semibold text-white shadow-sm hover:bg-rose-700"
+              className="h-9 gap-1.5 bg-rose-500 text-sm font-semibold text-white shadow-sm hover:bg-rose-600"
             >
               <Plus className="h-4 w-4" />
               Nueva venta
@@ -202,7 +202,7 @@ export function POSLanding() {
           {topProducts && topProducts.length > 0 && (
             <POSProductCarousel
               title="Mas vendidos"
-              icon="🔥"
+              icon={<Flame className="h-4 w-4" />}
               products={topProducts}
               onAdd={handleAddProduct}
             />
@@ -212,7 +212,7 @@ export function POSLanding() {
           {recentProducts && recentProducts.length > 0 && (
             <POSProductCarousel
               title="Vendidos recientemente"
-              icon="🕐"
+              icon={<Clock className="h-4 w-4" />}
               products={recentProducts}
               onAdd={handleAddProduct}
             />

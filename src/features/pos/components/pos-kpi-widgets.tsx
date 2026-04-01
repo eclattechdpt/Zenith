@@ -12,46 +12,46 @@ export function POSKpiWidgets() {
       label: "Ventas hoy",
       value: formatCurrency(stats?.todayRevenue ?? 0),
       sub: `${stats?.todayTransactions ?? 0} transacciones`,
-      gradient: "from-rose-50 to-rose-100",
-      textColor: "text-rose-900",
-      labelColor: "text-rose-700",
-      subColor: "text-rose-500",
+      bg: "bg-rose-50",
+      border: "border-l-rose-500",
+      textColor: "text-neutral-900",
+      subColor: "text-neutral-500",
     },
     {
       label: "Productos vendidos",
       value: String(stats?.todayUnitsSold ?? 0),
       sub: "unidades hoy",
-      gradient: "from-teal-50 to-teal-100",
-      textColor: "text-teal-900",
-      labelColor: "text-teal-700",
-      subColor: "text-teal-600",
+      bg: "bg-teal-50",
+      border: "border-l-teal-500",
+      textColor: "text-neutral-900",
+      subColor: "text-neutral-500",
     },
     {
       label: "Ticket promedio",
       value: formatCurrency(stats?.avgTicket ?? 0),
       sub: stats?.revenueVsYesterday
         ? `${stats.revenueVsYesterday > 0 ? "+" : ""}${Math.round(stats.revenueVsYesterday)}% vs ayer`
-        : "—",
-      gradient: "from-amber-50 to-amber-100",
-      textColor: "text-amber-900",
-      labelColor: "text-amber-700",
-      subColor: "text-amber-600",
+        : "",
+      bg: "bg-blush-50",
+      border: "border-l-blush-500",
+      textColor: "text-neutral-900",
+      subColor: "text-neutral-500",
     },
   ]
 
   return (
-    <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
       {kpis.map((kpi, i) => (
         <motion.div
           key={kpi.label}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
-          className={`rounded-xl bg-gradient-to-br ${kpi.gradient} p-4`}
+          className={`rounded-xl border-l-[3px] ${kpi.border} ${kpi.bg} p-4`}
         >
-          <p className={`text-[10px] font-semibold uppercase tracking-wider ${kpi.labelColor}`}>{kpi.label}</p>
-          <p className={`text-2xl font-extrabold ${kpi.textColor}`}>{kpi.value}</p>
-          <p className={`text-xs ${kpi.subColor}`}>{kpi.sub}</p>
+          <p className="text-[10px] font-bold uppercase tracking-[2.5px] text-neutral-500">{kpi.label}</p>
+          <p className={`font-display text-[28px] font-medium tracking-[-0.5px] ${kpi.textColor}`}>{kpi.value}</p>
+          {kpi.sub && <p className={`text-xs font-medium ${kpi.subColor}`}>{kpi.sub}</p>}
         </motion.div>
       ))}
     </div>

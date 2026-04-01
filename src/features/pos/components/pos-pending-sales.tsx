@@ -22,15 +22,15 @@ export function POSPendingSales({ onComplete }: POSPendingSalesProps) {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-4 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 p-3"
+      className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-3"
     >
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="flex items-center gap-1.5 text-sm font-bold text-amber-800">
-          <Clock className="h-4 w-4" />
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-amber-800">
+          <Clock className="h-4 w-4 text-amber-500" />
           Ventas pendientes ({pendingSales.length})
         </h2>
-        <Link href="/ventas?status=pending" className="text-xs text-amber-700 underline hover:text-amber-900">
-          Ver todas →
+        <Link href="/ventas?status=pending" className="text-xs font-medium text-amber-700 underline hover:text-amber-900">
+          Ver todas
         </Link>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
@@ -38,19 +38,19 @@ export function POSPendingSales({ onComplete }: POSPendingSalesProps) {
           <div key={sale.id} className="min-w-[220px] flex-shrink-0 rounded-lg border border-amber-200 bg-white p-3">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs font-semibold text-stone-800">
-                  {sale.sale_number}{sale.customer ? ` • ${sale.customer.name}` : ""}
+                <p className="text-[11px] font-semibold tracking-[0.3px] text-neutral-800">
+                  {sale.sale_number}{sale.customer ? ` - ${sale.customer.name}` : ""}
                 </p>
-                <p className="text-[10px] text-stone-500">
-                  {sale.items.length} producto{sale.items.length !== 1 ? "s" : ""} •{" "}
+                <p className="text-xs font-medium text-neutral-500">
+                  {sale.items.length} producto{sale.items.length !== 1 ? "s" : ""} -{" "}
                   {formatDistanceToNow(new Date(sale.created_at), { addSuffix: true, locale: es })}
                 </p>
               </div>
-              <p className="text-sm font-extrabold text-rose-600">{formatCurrency(sale.total)}</p>
+              <p className="font-extrabold tabular-nums text-rose-600">{formatCurrency(sale.total)}</p>
             </div>
             <button
               onClick={() => onComplete(sale)}
-              className="mt-2 w-full rounded-md bg-rose-600 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-rose-700"
+              className="mt-2 w-full rounded-md bg-rose-500 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-rose-600"
             >
               Completar pago
             </button>
