@@ -27,7 +27,7 @@
 | 3 | Clientes y precios | Complete | CRUD clientes, descuentos personalizados, precios por variante, unsaved guard, 43 tests |
 | 4 | POS | Complete | Punto de venta, carrito, cobro, pagos, ticket, cotizaciones, ventas, realtime, 34 tests, 11 bugs fixed |
 | 5 | Inventario | Complete | Tres inventarios (Fisico/Transito/Carga Inicial), hub con totales, ajustes, entradas, historial, overrides, transit mensual, 48 tests, 10 bugs fixed |
-| 6 | Devoluciones y creditos | Not started | Returns, credit notes |
+| 6 | Devoluciones y creditos | Complete | Returns (partial/full), credit notes, sale cancellation, POS credit note payment, 20 tests, 10 bugs fixed |
 | 7 | Dashboard y reportes | Not started | KPIs, graficas, exportaciones |
 | 8 | Polish | Not started | UX, performance, deploy |
 

@@ -57,7 +57,8 @@
       "mcp__playwright__browser_network_requests",
       "Bash(npx supabase:*)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
-      "mcp__supabase__list_migrations"
+      "mcp__supabase__list_migrations",
+      "Bash(grep:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

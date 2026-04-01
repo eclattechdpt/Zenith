@@ -26,6 +26,7 @@ const STATUS_TABS = [
   { value: "", label: "Todos" },
   { value: "quote", label: "Cotizaciones" },
   { value: "completed", label: "Ventas" },
+  { value: "returned", label: "Devoluciones" },
   { value: "cancelled", label: "Canceladas" },
 ] as const
 

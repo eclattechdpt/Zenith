@@ -317,7 +317,7 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
 
                 {/* Return items */}
                 <div className="space-y-1.5">
-                  {ret.return_items.map((ri) => (
+                  {(ret.return_items ?? []).map((ri) => (
                     <div
                       key={ri.id}
                       className="flex items-center justify-between text-xs"
@@ -341,9 +341,9 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
                 </div>
 
                 {/* Credit notes from this return */}
-                {ret.credit_notes.length > 0 && (
+                {(ret.credit_notes ?? []).length > 0 && (
                   <div className="mt-3 pt-3 border-t border-neutral-100">
-                    {ret.credit_notes.map((cn) => (
+                    {(ret.credit_notes ?? []).map((cn) => (
                       <div
                         key={cn.id}
                         className="flex items-center justify-between text-xs"

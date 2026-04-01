@@ -224,6 +224,29 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
+**Sprint 6 — Devoluciones y creditos: COMPLETO** (actualizado 2026-04-01)
+
+### Sprint 6 — Completado
+- Flujo de devolucion completo: ReturnDialog con seleccion de items, spinners de cantidad, toggle de restock, motivo opcional, preview de nota de credito
+- RPC atomico `create_return_transaction`: over-return guard, validacion de ownership (sale_item pertenece a la venta), restock condicional, generacion automatica de nota de credito, actualizacion de status de venta (partially_returned/fully_returned)
+- RPC `create_sale_transaction` extendido: redencion de notas de credito con `FOR UPDATE` lock, validacion de saldo suficiente, status automatico a 'redeemed' cuando saldo llega a 0
+- Cancelacion de ventas: `cancelSale` action con validacion de status, check de devoluciones existentes, reversa de stock con inventory_movements, validacion de items query
+- Pagina de detalle de venta (`/ventas/[id]`): items, pagos, timeline de devoluciones con return_items y notas de credito vinculadas, botones de accion contextuales
+- Modulo notas de credito (`src/features/notas-credito/`): types, queries, DataTable con search, filtros por status (Todas/Activas/Aplicadas/Expiradas), mobile cards
+- Pagina notas de credito (`/notas-credito`): teal color scheme, nav link en sidebar + mobile nav
+- POS credit note integration: picker en payment dialog muestra notas activas del cliente, monto capped a remaining_amount, loading state, badge "Agregada" para duplicados
+- Sales table extendido: acciones Devolver/Ver detalle/Cancelar venta para ventas completadas, tab "Devoluciones" para filtrar partially_returned + fully_returned
+- Mobile cards actualizados con acciones de devolucion/cancelacion, status badges para todos los estados
+- Cart discount display (Option A): strikethrough precio base + precio con descuento + badge -X% en teal, `basePrice` almacenado en CartItem, `customer-picker` simplificado sin re-fetch de DB
+- Schemas: returnItemSchema, createReturnSchema (unit_price `.positive()`), cancelSaleSchema
+- Types: ReturnRow, ReturnItemRow, CreditNoteRow, SaleDetail, SaleDetailItem, ReturnWithItems, SaleWithSummary extendido con returns
+- Queries: useSaleDetail, useSales extendido con returns (status + deleted_at), useCustomerCreditNotes, useCreditNotes
+- Actions: createReturn, cancelSale con error handling completo
+- Hardening: 10 bugs encontrados y corregidos via 2 code audits + 1 user behavior audit: hasReturns status filter, RPC sale ownership validation, max_returnable clamp, returnItemSchema validation, credit note amount cap, items query error handling, defensive null checks (return_items/credit_notes ?? []), error state en ReturnDialog, credit notes loading state en payment dialog, dialog state reset on reopen
+- Testing: 20 tests totales (16 automated SQL+Playwright + 4 manual). Cobertura: over-return protection, credit note over-redemption, wrong sale item, full return → fully_returned, cancel sale with/without returns, restock toggle OFF, credit note full redemption → redeemed, Devoluciones tab filter, basePrice with specific price override
+- Mobile responsive: return dialog sizing (85vh + p-4 sm:p-6), sale detail back arrow spacing (pl-12 sm:pl-0)
+- Skills actualizados: /commit lightweight (sin tracking files), /push con tracking, git commit -F pattern para Windows
+
 **Sprint 5 — Inventario: COMPLETO** (actualizado 2026-04-01)
 
 ### Sprint 5 — Completado

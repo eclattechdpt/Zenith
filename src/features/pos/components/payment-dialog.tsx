@@ -71,9 +71,8 @@ export function PaymentDialog({
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Credit notes for current customer
-  const { data: creditNotes = [] } = useCustomerCreditNotes(
-    customer?.id ?? null
-  )
+  const { data: creditNotes = [], isLoading: isLoadingCredits } =
+    useCustomerCreditNotes(customer?.id ?? null)
   const hasCreditNotes = creditNotes.length > 0
 
   // Reset payments to full cash whenever the dialog opens or total changes
@@ -254,6 +253,12 @@ export function PaymentDialog({
         </div>
 
         {/* Credit notes available */}
+        {customer && isLoadingCredits && (
+          <div className="text-xs text-teal-600 flex items-center gap-1.5 py-2">
+            <Loader2 className="size-3 animate-spin" />
+            Cargando notas de credito...
+          </div>
+        )}
         {hasCreditNotes && (
           <div className="border border-teal-100 rounded-lg p-3 bg-teal-50/30">
             <p className="text-xs text-teal-700 font-medium mb-2 flex items-center gap-1.5">

@@ -30,7 +30,11 @@ export function useSales(filters?: SalesFilters) {
         .order("created_at", { ascending: false })
 
       if (filters?.status) {
-        query = query.eq("status", filters.status)
+        if (filters.status === "returned") {
+          query = query.in("status", ["partially_returned", "fully_returned"])
+        } else {
+          query = query.eq("status", filters.status)
+        }
       }
 
       if (filters?.search) {

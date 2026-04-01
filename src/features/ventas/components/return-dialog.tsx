@@ -49,7 +49,7 @@ export function ReturnDialog({
   onReturned,
 }: ReturnDialogProps) {
   const queryClient = useQueryClient()
-  const { data: sale, isLoading } = useSaleDetail(saleId)
+  const { data: sale, isLoading, isError } = useSaleDetail(saleId)
 
   const [items, setItems] = useState<ReturnItemState[]>([])
   const [reason, setReason] = useState("")
@@ -83,11 +83,13 @@ export function ReturnDialog({
     })
   }, [sale])
 
-  // Reset items when sale changes
+  // Reset items when dialog opens (saleId changes from null to a value)
+  // or when sale data changes (e.g., after a return was processed)
   useEffect(() => {
     setItems(returnableItems)
     setReason("")
-  }, [returnableItems])
+    setIsSubmitting(false)
+  }, [saleId, returnableItems])
 
   const selectedItems = items.filter((i) => i.quantity > 0)
   const totalRefund = selectedItems.reduce(
@@ -171,6 +173,10 @@ export function ReturnDialog({
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="size-6 animate-spin text-neutral-400" />
+          </div>
+        ) : isError ? (
+          <div className="text-center py-8 text-sm text-neutral-500">
+            Error al cargar la venta. Intenta de nuevo.
           </div>
         ) : sale ? (
           <>
