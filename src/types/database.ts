@@ -7,8 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
@@ -457,6 +455,7 @@ export type Database = {
           name: string | null
           price: number
           product_id: string
+          reserved_stock: number
           sku: string | null
           stock: number
           stock_min: number
@@ -476,6 +475,7 @@ export type Database = {
           name?: string | null
           price?: number
           product_id: string
+          reserved_stock?: number
           sku?: string | null
           stock?: number
           stock_min?: number
@@ -495,6 +495,7 @@ export type Database = {
           name?: string | null
           price?: number
           product_id?: string
+          reserved_stock?: number
           sku?: string | null
           stock?: number
           stock_min?: number
@@ -521,6 +522,7 @@ export type Database = {
           description: string | null
           has_variants: boolean
           id: string
+          image_url: string | null
           is_active: boolean
           is_bundle: boolean
           name: string
@@ -537,6 +539,7 @@ export type Database = {
           description?: string | null
           has_variants?: boolean
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_bundle?: boolean
           name: string
@@ -553,6 +556,7 @@ export type Database = {
           description?: string | null
           has_variants?: boolean
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_bundle?: boolean
           name?: string
@@ -899,7 +903,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           label?: string | null
-          month: number
+          month?: number
           notes?: string | null
           tenant_id: string
           total_value?: number
@@ -1041,6 +1045,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_pending_sale: {
+        Args: { p_sale_id: string; p_tenant_id: string }
+        Returns: Json
+      }
+      complete_pending_sale: {
+        Args: {
+          p_created_by?: string
+          p_payments?: Json
+          p_sale_id: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
+      create_pending_sale: {
+        Args: {
+          p_created_by?: string
+          p_customer_id?: string
+          p_discount_amount?: number
+          p_items?: Json
+          p_notes?: string
+          p_subtotal?: number
+          p_tenant_id: string
+          p_total?: number
+        }
+        Returns: Json
+      }
       create_sale_transaction: {
         Args: {
           p_created_by: string

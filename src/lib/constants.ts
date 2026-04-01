@@ -1,6 +1,7 @@
 // ── Sale statuses ──
 
 export const SALE_STATUSES = {
+  pending: "Pendiente",
   quote: "Cotización",
   completed: "Completada",
   partially_returned: "Devolución parcial",
