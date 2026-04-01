@@ -36,6 +36,14 @@ export function ProductSearch() {
       return
     }
 
+    const existingItem = usePOSStore.getState().items.find(
+      (i) => i.variantId === variant.id
+    )
+    if (existingItem && existingItem.quantity >= variant.stock) {
+      toast.error(`Stock maximo alcanzado (${variant.stock})`)
+      return
+    }
+
     const price = await resolvePrice(
       variant.id,
       Number(variant.price),
