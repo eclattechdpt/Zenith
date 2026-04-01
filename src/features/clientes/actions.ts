@@ -6,8 +6,10 @@ import { createServerClient } from "@/lib/supabase/server"
 
 import {
   customerSchema,
+  customerPriceSchema,
   priceListSchema,
   type CustomerInput,
+  type CustomerPriceInput,
   type PriceListInput,
 } from "./schemas"
 
@@ -130,7 +132,12 @@ export async function createPriceList(input: PriceListInput) {
     .select()
     .single()
 
-  if (error) return { error: { _form: [error.message] } }
+  if (error) {
+    if (error.code === "23505") {
+      return { error: { _form: [`Ya existe un descuento con el nombre "${parsed.data.name}"`] } }
+    }
+    return { error: { _form: [error.message] } }
+  }
 
   revalidatePath("/configuracion")
   return { data }
@@ -154,7 +161,12 @@ export async function updatePriceList(id: string, input: PriceListInput) {
     .select()
     .single()
 
-  if (error) return { error: { _form: [error.message] } }
+  if (error) {
+    if (error.code === "23505") {
+      return { error: { _form: [`Ya existe un descuento con el nombre "${parsed.data.name}"`] } }
+    }
+    return { error: { _form: [error.message] } }
+  }
 
   revalidatePath("/configuracion")
   return { data }
@@ -173,7 +185,7 @@ export async function deletePriceList(id: string) {
   if (count && count > 0) {
     return {
       error: {
-        _form: ["No se puede eliminar: hay clientes usando esta lista de precios"],
+        _form: ["No se puede eliminar: hay clientes usando este descuento"],
       },
     }
   }
@@ -181,6 +193,50 @@ export async function deletePriceList(id: string) {
   const { error } = await supabase
     .from("price_lists")
     .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/configuracion")
+  return { data: { success: true } }
+}
+
+// --- CUSTOMER PRICES ---
+
+export async function setCustomerPrice(input: CustomerPriceInput) {
+  const parsed = customerPriceSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const supabase = await createServerClient()
+  const userId = await getUserId()
+
+  const { data, error } = await supabase
+    .from("customer_prices")
+    .upsert(
+      {
+        price_list_id: parsed.data.price_list_id,
+        product_variant_id: parsed.data.product_variant_id,
+        price: parsed.data.price,
+        tenant_id: TENANT_ID,
+        created_by: userId,
+      },
+      { onConflict: "price_list_id,product_variant_id" }
+    )
+    .select()
+    .single()
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/configuracion")
+  return { data }
+}
+
+export async function removeCustomerPrice(id: string) {
+  const supabase = await createServerClient()
+
+  const { error } = await supabase
+    .from("customer_prices")
+    .delete()
     .eq("id", id)
 
   if (error) return { error: { _form: [error.message] } }

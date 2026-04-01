@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
@@ -19,6 +19,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+
+import { useUnsavedGuard } from "@/hooks/use-unsaved-guard"
 
 import { customerSchema, type CustomerInput } from "../schemas"
 import { usePriceLists } from "../queries"
@@ -55,30 +57,9 @@ export function CustomerForm({ customerId, defaultValues, onBack }: CustomerForm
     },
   })
 
-  // Unsaved changes guard
-  const submittedRef = useRef(false)
-  const [pendingNav, setPendingNav] = useState<(() => void) | null>(null)
-
-  useEffect(() => {
-    function handleBeforeUnload(e: BeforeUnloadEvent) {
-      if (isDirty && !submittedRef.current) {
-        e.preventDefault()
-      }
-    }
-    window.addEventListener("beforeunload", handleBeforeUnload)
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
-  }, [isDirty])
-
-  const guardedNavigate = useCallback(
-    (navigate: () => void) => {
-      if (isDirty && !submittedRef.current) {
-        setPendingNav(() => navigate)
-      } else {
-        navigate()
-      }
-    },
-    [isDirty]
-  )
+  // Unsaved changes guard (covers sidebar links, Volver/Cancelar, and tab close)
+  const { guardedNavigate, markSubmitted, pendingNav, confirmNav, cancelNav } =
+    useUnsavedGuard(isDirty)
 
   async function onSubmit(data: CustomerInput) {
     setIsSubmitting(true)
@@ -98,7 +79,7 @@ export function CustomerForm({ customerId, defaultValues, onBack }: CustomerForm
       return
     }
 
-    submittedRef.current = true
+    markSubmitted()
     toast.success(
       isEditing ? "Cliente actualizado" : "Cliente creado exitosamente"
     )
@@ -170,7 +151,7 @@ export function CustomerForm({ customerId, defaultValues, onBack }: CustomerForm
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="price_list_id">Lista de precios</Label>
+            <Label htmlFor="price_list_id">Descuento</Label>
             <select
               id="price_list_id"
               {...register("price_list_id", {
@@ -178,7 +159,7 @@ export function CustomerForm({ customerId, defaultValues, onBack }: CustomerForm
               })}
               className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <option value="">Sin lista (precio base)</option>
+              <option value="">Sin descuento (precio base)</option>
               {priceLists.map((pl) => (
                 <option key={pl.id} value={pl.id}>
                   {pl.name}
@@ -226,18 +207,14 @@ export function CustomerForm({ customerId, defaultValues, onBack }: CustomerForm
 
       {/* Unsaved changes dialog */}
       <ConfirmDialog
-        open={!!pendingNav}
-        onOpenChange={(open) => !open && setPendingNav(null)}
+        open={pendingNav}
+        onOpenChange={(open) => !open && cancelNav()}
         title="Cambios sin guardar"
         description="Algunos cambios no han sido guardados. ¿Seguro que quieres salir?"
         confirmLabel="Salir sin guardar"
         cancelLabel="Seguir editando"
         variant="destructive"
-        onConfirm={() => {
-          const nav = pendingNav
-          setPendingNav(null)
-          nav?.()
-        }}
+        onConfirm={confirmNav}
       />
     </form>
   )

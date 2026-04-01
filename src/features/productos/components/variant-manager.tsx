@@ -16,6 +16,8 @@ export function NumericInput({
   onChange,
   decimal = false,
   prefix,
+  min: _min,
+  max: _max,
   ...props
 }: Omit<React.ComponentProps<typeof Input>, "value" | "onChange"> & {
   value: number
@@ -23,6 +25,10 @@ export function NumericInput({
   decimal?: boolean
   prefix?: string
 }) {
+  // Extract min/max so they don't reach the HTML input (prevents browser tooltips).
+  // Validation is handled by Zod schemas which show styled Spanish error messages.
+  void _min, _max
+
   const [focused, setFocused] = useState(false)
   const [display, setDisplay] = useState(String(value))
 
@@ -39,12 +45,22 @@ export function NumericInput({
     setDisplay(isNaN(raw) ? "" : String(raw))
   }
 
-  function handleBlur() {
-    setFocused(false)
+  function commit() {
     const parsed = decimal ? parseFloat(display) : parseInt(display)
     const final = isNaN(parsed) ? 0 : Math.max(0, parsed)
     onChange(final)
     setDisplay(decimal ? final.toFixed(2) : String(final))
+  }
+
+  function handleBlur() {
+    setFocused(false)
+    commit()
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") {
+      commit()
+    }
   }
 
   if (prefix) {
@@ -60,6 +76,7 @@ export function NumericInput({
           onChange={(e) => setDisplay(e.target.value)}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
           onWheel={(e) => e.currentTarget.blur()}
           className="!pl-7"
         />
@@ -75,6 +92,7 @@ export function NumericInput({
       onChange={(e) => setDisplay(e.target.value)}
       onFocus={handleFocus}
       onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
       onWheel={(e) => e.currentTarget.blur()}
     />
   )

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { createClient } from "@/lib/supabase/client"
 
-import type { CustomerWithPriceList, PriceList } from "./types"
+import type { CustomerPriceWithDetails, CustomerWithPriceList, PriceList } from "./types"
 
 // --- CUSTOMERS ---
 
@@ -83,5 +83,33 @@ export function usePriceLists() {
       if (error) throw error
       return (data ?? []) as PriceList[]
     },
+  })
+}
+
+// --- CUSTOMER PRICES ---
+
+export function useCustomerPrices(priceListId: string | null) {
+  return useQuery({
+    queryKey: ["customer-prices", priceListId],
+    queryFn: async (): Promise<CustomerPriceWithDetails[]> => {
+      if (!priceListId) return []
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("customer_prices")
+        .select(
+          `*,
+          product_variants:product_variants(
+            id, sku, name, price,
+            products:products(name, brand)
+          )`
+        )
+        .eq("price_list_id", priceListId)
+        .order("created_at", { ascending: false })
+
+      if (error) throw error
+      return (data ?? []) as unknown as CustomerPriceWithDetails[]
+    },
+    enabled: !!priceListId,
   })
 }

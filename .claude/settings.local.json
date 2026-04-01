@@ -39,7 +39,13 @@
       "Bash(ls \"C:\\\\Users\\\\grupo\\\\Documents\\\\Abbx\\\\EclatInv\\\\Zenith\\\\src\\\\app\\\\\\(dashboard\\)\\\\clientes\")",
       "Bash(ls \"C:\\\\Users\\\\grupo\\\\Documents\\\\Abbx\\\\EclatInv\\\\Zenith\\\\src\\\\app\\\\\\(dashboard\\)\\\\clientes\\\\nuevo\")",
       "Bash(ls -la /c/Users/grupo/Documents/Abbx/EclatInv/Zenith/src/app/\\\\\\(dashboard\\\\\\)/clientes/)",
-      "Bash(ls -la /c/Users/grupo/Documents/Abbx/EclatInv/Zenith/src/app/\\\\\\(dashboard\\\\\\)/configuracion/)"
+      "Bash(ls -la /c/Users/grupo/Documents/Abbx/EclatInv/Zenith/src/app/\\\\\\(dashboard\\\\\\)/configuracion/)",
+      "Bash(xargs grep:*)",
+      "Bash(npx eslint:*)",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_run_code",
+      "mcp__playwright__browser_handle_dialog",
+      "Bash(npx @anthropic-ai/mcp-playwright@latest --help)"
     ]
   },
   "enableAllProjectMcpServers": true,

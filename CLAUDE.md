@@ -224,15 +224,20 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
-**Sprint 3 — Clientes y precios: EN PROGRESO** (actualizado 2026-03-30)
+**Sprint 3 — Clientes y precios: COMPLETO** (actualizado 2026-03-31)
 
 ### Sprint 3 — Completado
-- Modulo clientes: schemas (customerSchema, priceListSchema), types (CustomerWithPriceList), queries (useCustomers con search, useCustomer, usePriceLists), actions (CRUD customers + price lists con validaciones de integridad)
-- Pagina de clientes (`/clientes`): DataTable con busqueda (nombre/telefono/email), columnas (nombre, telefono, email, lista de precios con badge descuento, acciones), delete con confirmacion + check de ventas activas, teal color scheme
-- Crear/editar cliente (`/clientes/nuevo`, `/clientes/[id]`): formulario con RHF+Zod, campos (nombre, telefono, email, direccion, notas, lista de precios dropdown), unsaved changes guard, Volver/Cancelar con guardedNavigate
-- Config: PriceListManager con CRUD (nombre, descripcion, descuento %), delete bloqueado si hay clientes usando la lista, badge "Precio base" o "-X%"
+- Modulo clientes: schemas (customerSchema, priceListSchema, customerPriceSchema), types (CustomerWithPriceList, CustomerPriceWithDetails), queries (useCustomers con search, useCustomer, usePriceLists, useCustomerPrices), actions (CRUD customers + price lists + customer prices con validaciones de integridad)
+- Pagina de clientes (`/clientes`): DataTable con busqueda (nombre/telefono/email), columnas (nombre, telefono, email, descuento con badge, acciones), delete con confirmacion + check de ventas activas, teal color scheme
+- Crear/editar cliente (`/clientes/nuevo`, `/clientes/[id]`): formulario con RHF+Zod, campos (nombre, telefono, email, direccion, notas, descuento dropdown), unsaved changes guard en sidebar/Volver/Cancelar/tab close
+- Config: PriceListManager con CRUD (nombre, descripcion, descuento %), delete bloqueado si hay clientes usando el descuento, badge "Precio base" o "-X%", error amigable en nombre duplicado
+- Precios por variante: CustomerPriceEditor dialog (tag icon en cada descuento), busqueda de productos, agregar/editar/eliminar precios especificos por variante, precio sugerido basado en descuento %, exclusion de variantes ya sobrescritas en busqueda, UPSERT con onConflict
 - Design system: teal para clientes (table border, action button, hover shadows), neutral para config, animaciones consistentes (stagger + blur)
 - Mobile responsive: card layout en mobile para productos y clientes (cards con info completa en <640px, DataTable en desktop), DataTable con overflow-x-auto y minWidth para scroll horizontal
+- UI rename: "Lista de precios" renombrado a "Descuento personalizado" en toda la UI (labels, buttons, dialogs, columnas, descriptions)
+- useUnsavedGuard hook: hook reutilizable que intercepta navegacion client-side (click en links/sidebar), beforeunload (tab close), y guardedNavigate (botones Volver/Cancelar). Usado en customer-form y product-form
+- NumericInput mejorado: commit-on-Enter (no solo blur), useRef para evitar stale state al hacer click en botones, min/max extraidos del HTML para evitar tooltips nativos del navegador (validacion via Zod en español)
+- Edge case testing & hardening: 43 tests (19 automated Playwright + 14 edge cases + 12 manual user tests). 5 bugs encontrados y corregidos: NumericInput stale state en blur/click, NumericInput no commit en Enter, tooltip nativo del navegador en inputs numericos, unsaved changes guard no interceptaba sidebar nav, error crudo de Supabase en nombre duplicado de descuento
 
 **Sprint 2 — Catalogo de productos: COMPLETO** (actualizado 2026-03-30, Supabase connected)
 

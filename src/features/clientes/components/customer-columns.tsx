@@ -70,7 +70,7 @@ export function getCustomerColumns({
       id: "price_list",
       size: 160,
       minSize: 120,
-      header: "Lista de precios",
+      header: "Descuento",
       cell: ({ row }) => {
         const list = row.original.price_lists
         if (!list) return <span className="text-neutral-400">—</span>

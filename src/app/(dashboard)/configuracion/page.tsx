@@ -42,7 +42,7 @@ export default function ConfiguracionPage() {
       <motion.div variants={itemVariants}>
         <PageHeader
           title="Configuracion"
-          description="Categorias, subcategorias y listas de precios"
+          description="Categorias, subcategorias y descuentos personalizados"
         />
       </motion.div>
 
@@ -62,9 +62,9 @@ export default function ConfiguracionPage() {
       <motion.div variants={itemVariants}>
         <Card>
           <CardHeader>
-            <CardTitle>Listas de precios</CardTitle>
+            <CardTitle>Descuentos personalizados</CardTitle>
             <CardDescription>
-              Define niveles de precios para diferentes tipos de clientes
+              Define descuentos para diferentes tipos de clientes
             </CardDescription>
           </CardHeader>
           <CardContent>

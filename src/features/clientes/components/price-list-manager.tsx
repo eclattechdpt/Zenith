@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
+import { Plus, Pencil, Trash2, Loader2, Tag } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -25,6 +25,8 @@ import { NumericInput } from "@/features/productos/components/variant-manager"
 import { priceListSchema, type PriceListInput } from "../schemas"
 import { usePriceLists } from "../queries"
 import { createPriceList, updatePriceList, deletePriceList } from "../actions"
+import type { PriceList } from "../types"
+import { CustomerPriceEditor } from "./customer-price-editor"
 
 export function PriceListManager() {
   const queryClient = useQueryClient()
@@ -34,6 +36,7 @@ export function PriceListManager() {
   const [editId, setEditId] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [priceEditorTarget, setPriceEditorTarget] = useState<PriceList | null>(null)
 
   const {
     register,
@@ -122,6 +125,14 @@ export function PriceListManager() {
             <Button
               variant="ghost"
               size="icon-xs"
+              onClick={() => setPriceEditorTarget(pl as PriceList)}
+              title="Precios por variante"
+            >
+              <Tag className="size-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-xs"
               onClick={() =>
                 openEdit({
                   id: pl.id,
@@ -146,7 +157,7 @@ export function PriceListManager() {
 
       <Button variant="outline" size="sm" onClick={openCreate}>
         <Plus className="mr-1.5 size-3.5" />
-        Nueva lista de precios
+        Nuevo descuento personalizado
       </Button>
 
       {/* Create/Edit dialog */}
@@ -154,7 +165,7 @@ export function PriceListManager() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editId ? "Editar lista de precios" : "Nueva lista de precios"}
+              {editId ? "Editar descuento" : "Nuevo descuento personalizado"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
@@ -192,8 +203,8 @@ export function PriceListManager() {
               )}
               <p className="text-xs text-neutral-500">
                 {Number(discountPercent) === 0
-                  ? "Los clientes con esta lista pagaran el precio base"
-                  : `Los clientes con esta lista obtendran ${discountPercent}% de descuento`}
+                  ? "Los clientes con este descuento pagaran el precio base"
+                  : `Los clientes con este descuento obtendran ${discountPercent}% de descuento`}
               </p>
             </div>
             <DialogFooter>
@@ -217,13 +228,22 @@ export function PriceListManager() {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Eliminar lista de precios"
-        description={`Se eliminara "${deleteTarget?.name}". Los clientes con esta lista pasaran a precio base.`}
+        title="Eliminar descuento"
+        description={`Se eliminara "${deleteTarget?.name}". Los clientes con este descuento pasaran a precio base.`}
         confirmLabel="Eliminar"
         variant="destructive"
         isLoading={isDeleting}
         onConfirm={handleDelete}
       />
+
+      {/* Customer price editor */}
+      {priceEditorTarget && (
+        <CustomerPriceEditor
+          priceList={priceEditorTarget}
+          open={!!priceEditorTarget}
+          onOpenChange={(open) => !open && setPriceEditorTarget(null)}
+        />
+      )}
     </div>
   )
 }

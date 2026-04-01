@@ -21,5 +21,12 @@ export const priceListSchema = z.object({
   discount_percent: z.coerce.number().min(0, "Minimo 0%").max(100, "Maximo 100%"),
 })
 
+export const customerPriceSchema = z.object({
+  price_list_id: z.string().uuid(),
+  product_variant_id: z.string().uuid(),
+  price: z.coerce.number().gt(0, "El precio debe ser mayor a $0"),
+})
+
 export type CustomerInput = z.infer<typeof customerSchema>
 export type PriceListInput = z.infer<typeof priceListSchema>
+export type CustomerPriceInput = z.infer<typeof customerPriceSchema>

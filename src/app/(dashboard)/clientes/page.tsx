@@ -42,7 +42,7 @@ export default function ClientesPage() {
             Clientes
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Gestion de clientes y listas de precios
+            Gestion de clientes y descuentos
           </p>
         </div>
         <motion.div

@@ -24,7 +24,7 @@
 |--------|------|--------|-------------|
 | 1 | Fundacion | Complete | Auth, layout, providers, shared components, collapsible sidebar |
 | 2 | Catalogo de productos | Complete | CRUD productos, variantes, categorias, cofres, validaciones, UX polish |
-| 3 | Clientes y precios | In progress | CRUD clientes, listas de precios en config, teal design |
+| 3 | Clientes y precios | Complete | CRUD clientes, descuentos personalizados, precios por variante, unsaved guard, 43 tests |
 | 4 | POS | Not started | Punto de venta, carrito, cobro |
 | 5 | Inventario | Not started | Stock, movimientos, ajustes |
 | 6 | Devoluciones y creditos | Not started | Returns, credit notes |

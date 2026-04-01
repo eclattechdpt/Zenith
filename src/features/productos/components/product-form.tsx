@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
@@ -27,6 +27,7 @@ import { createProduct, updateProduct } from "../actions"
 import { VariantManager } from "./variant-manager"
 import { BundleManager } from "./bundle-manager"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import { useUnsavedGuard } from "@/hooks/use-unsaved-guard"
 
 function slugify(text: string) {
   return text
@@ -75,30 +76,9 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
     },
   })
 
-  // Unsaved changes guard
-  const submittedRef = useRef(false)
-  const [pendingNav, setPendingNav] = useState<(() => void) | null>(null)
-
-  useEffect(() => {
-    function handleBeforeUnload(e: BeforeUnloadEvent) {
-      if (isDirty && !submittedRef.current) {
-        e.preventDefault()
-      }
-    }
-    window.addEventListener("beforeunload", handleBeforeUnload)
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
-  }, [isDirty])
-
-  const guardedNavigate = useCallback(
-    (navigate: () => void) => {
-      if (isDirty && !submittedRef.current) {
-        setPendingNav(() => navigate)
-      } else {
-        navigate()
-      }
-    },
-    [isDirty]
-  )
+  // Unsaved changes guard (covers sidebar links, Volver/Cancelar, and tab close)
+  const { guardedNavigate, markSubmitted, pendingNav, confirmNav, cancelNav } =
+    useUnsavedGuard(isDirty)
 
   const isActive = watch("is_active")
   const hasVariants = watch("has_variants") ?? false
@@ -145,7 +125,7 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
       return
     }
 
-    submittedRef.current = true
+    markSubmitted()
     toast.success(
       isEditing ? "Producto actualizado" : "Producto creado exitosamente"
     )
@@ -462,18 +442,14 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
 
       {/* Unsaved changes dialog */}
       <ConfirmDialog
-        open={!!pendingNav}
-        onOpenChange={(open) => !open && setPendingNav(null)}
+        open={pendingNav}
+        onOpenChange={(open) => !open && cancelNav()}
         title="Cambios sin guardar"
         description="Algunos cambios no han sido guardados. ¿Seguro que quieres salir?"
         confirmLabel="Salir sin guardar"
         cancelLabel="Seguir editando"
         variant="destructive"
-        onConfirm={() => {
-          const nav = pendingNav
-          setPendingNav(null)
-          nav?.()
-        }}
+        onConfirm={confirmNav}
       />
     </form>
   )
