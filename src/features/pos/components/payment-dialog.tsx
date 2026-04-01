@@ -5,6 +5,7 @@ import {
   Banknote,
   CreditCard,
   ArrowRightLeft,
+  FileText,
   Plus,
   Trash2,
   Loader2,
@@ -29,6 +30,7 @@ import { NumericInput } from "@/features/productos/components/variant-manager"
 
 import { usePOSStore } from "../store"
 import { createSale } from "../actions"
+import { useCustomerCreditNotes } from "../queries"
 import type { CartPayment } from "../types"
 import type { ReceiptData } from "./sale-receipt"
 
@@ -36,6 +38,7 @@ const PAYMENT_ICONS: Record<string, React.ReactNode> = {
   cash: <Banknote className="size-4" />,
   card: <CreditCard className="size-4" />,
   transfer: <ArrowRightLeft className="size-4" />,
+  credit_note: <FileText className="size-4" />,
 }
 
 const QUICK_METHODS: PaymentMethod[] = ["cash", "card", "transfer"]
@@ -67,6 +70,12 @@ export function PaymentDialog({
   const [payments, setPayments] = useState<CartPayment[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Credit notes for current customer
+  const { data: creditNotes = [] } = useCustomerCreditNotes(
+    customer?.id ?? null
+  )
+  const hasCreditNotes = creditNotes.length > 0
+
   // Reset payments to full cash whenever the dialog opens or total changes
   useEffect(() => {
     if (open) {
@@ -92,7 +101,17 @@ export function PaymentDialog({
 
   function updatePaymentAmount(index: number, amount: number) {
     setPayments((prev) =>
-      prev.map((p, i) => (i === index ? { ...p, amount } : p))
+      prev.map((p, i) => {
+        if (i !== index) return p
+        // Cap credit note payments to remaining_amount
+        if (p.method === "credit_note" && p.reference) {
+          const cn = creditNotes.find((c) => c.id === p.reference)
+          if (cn) {
+            amount = Math.min(amount, Number(cn.remaining_amount))
+          }
+        }
+        return { ...p, amount }
+      })
     )
   }
 
@@ -110,6 +129,14 @@ export function PaymentDialog({
 
   function setFullCard() {
     setPayments([{ method: "card", amount: total, reference: null }])
+  }
+
+  function addCreditNotePayment(creditNoteId: string, maxAmount: number) {
+    const amount = Math.min(maxAmount, remaining > 0 ? remaining : total)
+    setPayments((prev) => [
+      ...prev,
+      { method: "credit_note", amount, reference: creditNoteId },
+    ])
   }
 
   async function handleConfirm() {
@@ -177,6 +204,7 @@ export function PaymentDialog({
     queryClient.invalidateQueries({ queryKey: ["sales"] })
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
     queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+    queryClient.invalidateQueries({ queryKey: ["credit-notes"] })
 
     clear()
     onOpenChange(false)
@@ -225,14 +253,71 @@ export function PaymentDialog({
           </Button>
         </div>
 
+        {/* Credit notes available */}
+        {hasCreditNotes && (
+          <div className="border border-teal-100 rounded-lg p-3 bg-teal-50/30">
+            <p className="text-xs text-teal-700 font-medium mb-2 flex items-center gap-1.5">
+              <FileText className="size-3.5" />
+              Notas de credito disponibles
+            </p>
+            <div className="space-y-1.5">
+              {creditNotes.map((cn) => {
+                const alreadyUsed = payments.some(
+                  (p) =>
+                    p.method === "credit_note" && p.reference === cn.id
+                )
+                return (
+                  <button
+                    key={cn.id}
+                    onClick={() =>
+                      addCreditNotePayment(
+                        cn.id,
+                        Number(cn.remaining_amount)
+                      )
+                    }
+                    disabled={alreadyUsed || remaining <= 0}
+                    className="w-full flex items-center justify-between text-xs p-2 rounded-md hover:bg-teal-100/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <span className="font-medium text-teal-800">
+                      {cn.credit_number}
+                      {alreadyUsed && (
+                        <Badge
+                          variant="outline"
+                          className="ml-1.5 text-[9px] py-0 px-1"
+                        >
+                          Agregada
+                        </Badge>
+                      )}
+                    </span>
+                    <span className="tabular-nums text-teal-600">
+                      {formatCurrency(Number(cn.remaining_amount))}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Payment lines */}
         <div className="flex flex-col gap-3">
-          {payments.map((payment, index) => (
+          {payments.map((payment, index) => {
+            const cnInfo =
+              payment.method === "credit_note"
+                ? creditNotes.find((cn) => cn.id === payment.reference)
+                : null
+
+            return (
             <div key={index} className="flex items-end gap-2">
               <div className="flex-1">
                 <Label className="text-xs text-neutral-500">
                   {PAYMENT_ICONS[payment.method]}{" "}
                   {PAYMENT_METHODS[payment.method]}
+                  {cnInfo && (
+                    <span className="ml-1 text-teal-600">
+                      ({cnInfo.credit_number})
+                    </span>
+                  )}
                 </Label>
                 <NumericInput
                   decimal
@@ -268,7 +353,8 @@ export function PaymentDialog({
                 </Button>
               )}
             </div>
-          ))}
+            )
+          })}
 
           {/* Add split payment */}
           {remaining > 0 && (

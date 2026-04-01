@@ -4,8 +4,18 @@ import { revalidatePath } from "next/cache"
 
 import { createServerClient } from "@/lib/supabase/server"
 
-import { convertQuoteSchema, cancelQuoteSchema } from "./schemas"
-import type { ConvertQuoteInput, CancelQuoteInput } from "./schemas"
+import {
+  convertQuoteSchema,
+  cancelQuoteSchema,
+  createReturnSchema,
+  cancelSaleSchema,
+} from "./schemas"
+import type {
+  ConvertQuoteInput,
+  CancelQuoteInput,
+  CreateReturnInput,
+  CancelSaleInput,
+} from "./schemas"
 
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
 
@@ -148,4 +158,176 @@ export async function cancelQuote(input: CancelQuoteInput) {
   revalidatePath("/ventas")
 
   return { data }
+}
+
+export async function createReturn(input: CreateReturnInput) {
+  const parsed = createReturnSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const { sale_id, reason, items } = parsed.data
+
+  const supabase = await createServerClient()
+
+  // Verify the sale is returnable
+  const { data: sale, error: saleError } = await supabase
+    .from("sales")
+    .select("id, customer_id, status")
+    .eq("id", sale_id)
+    .is("deleted_at", null)
+    .single()
+
+  if (saleError || !sale) {
+    return { error: { _form: ["Venta no encontrada"] } }
+  }
+
+  if (sale.status !== "completed" && sale.status !== "partially_returned") {
+    return {
+      error: { _form: ["Solo se pueden devolver ventas completadas"] },
+    }
+  }
+
+  const userId = await getUserId()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: resultJson, error: rpcError } = await (supabase.rpc as any)(
+    "create_return_transaction",
+    {
+      p_tenant_id: TENANT_ID,
+      p_sale_id: sale_id,
+      p_customer_id: sale.customer_id ?? null,
+      p_reason: reason ?? null,
+      p_created_by: userId,
+      p_items: items.map((item) => ({
+        sale_item_id: item.sale_item_id,
+        product_variant_id: item.product_variant_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        restock: item.restock,
+      })),
+    }
+  )
+
+  if (rpcError) {
+    return { error: { _form: [(rpcError as { message: string }).message] } }
+  }
+
+  revalidatePath("/ventas")
+  revalidatePath("/pos")
+  revalidatePath("/")
+  revalidatePath("/inventario")
+
+  return {
+    data: resultJson as {
+      return_id: string
+      return_number: string
+      total_refund: number
+      credit_note_id: string | null
+      credit_note_number: string | null
+      sale_status: string
+    },
+  }
+}
+
+export async function cancelSale(input: CancelSaleInput) {
+  const parsed = cancelSaleSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const supabase = await createServerClient()
+
+  // Verify sale exists and is completed
+  const { data: sale, error: saleError } = await supabase
+    .from("sales")
+    .select("id, sale_number, status")
+    .eq("id", parsed.data.sale_id)
+    .is("deleted_at", null)
+    .single()
+
+  if (saleError || !sale) {
+    return { error: { _form: ["Venta no encontrada"] } }
+  }
+
+  if (sale.status !== "completed") {
+    return { error: { _form: ["Solo se pueden cancelar ventas completadas"] } }
+  }
+
+  // Check no returns exist
+  const { count } = await supabase
+    .from("returns")
+    .select("id", { count: "exact", head: true })
+    .eq("sale_id", parsed.data.sale_id)
+    .eq("status", "completed")
+    .is("deleted_at", null)
+
+  if (count && count > 0) {
+    return {
+      error: {
+        _form: ["No se puede cancelar una venta que tiene devoluciones"],
+      },
+    }
+  }
+
+  // Fetch sale items to reverse stock
+  const { data: items, error: itemsError } = await supabase
+    .from("sale_items")
+    .select("product_variant_id, quantity, product_name")
+    .eq("sale_id", parsed.data.sale_id)
+
+  if (itemsError || !items || items.length === 0) {
+    return {
+      error: { _form: ["No se pudieron obtener los productos de la venta"] },
+    }
+  }
+
+  const userId = await getUserId()
+
+  // Reverse stock for each item
+  for (const item of items) {
+      const { data: variant } = await supabase
+        .from("product_variants")
+        .select("stock")
+        .eq("id", item.product_variant_id)
+        .single()
+
+      if (variant) {
+        const stockBefore = variant.stock
+        const stockAfter = stockBefore + item.quantity
+
+        await supabase
+          .from("product_variants")
+          .update({ stock: stockAfter })
+          .eq("id", item.product_variant_id)
+
+        await supabase.from("inventory_movements").insert({
+          tenant_id: TENANT_ID,
+          product_variant_id: item.product_variant_id,
+          type: "adjustment",
+          quantity: item.quantity,
+          stock_before: stockBefore,
+          stock_after: stockAfter,
+          reason: `Cancelacion de venta ${sale.sale_number}`,
+          created_by: userId,
+          inventory_source: "physical",
+        })
+      }
+    }
+
+  // Mark sale as cancelled
+  // Note: stock reversal + status update are not atomic (no RPC).
+  // For MVP single-user, this is acceptable. If status update fails
+  // after stock reversal, manual correction is needed.
+  const { error: updateError } = await supabase
+    .from("sales")
+    .update({ status: "cancelled" })
+    .eq("id", parsed.data.sale_id)
+
+  if (updateError) {
+    return { error: { _form: [updateError.message] } }
+  }
+
+  revalidatePath("/ventas")
+  revalidatePath("/pos")
+  revalidatePath("/")
+  revalidatePath("/inventario")
+
+  return { data: { success: true } }
 }

@@ -12,6 +12,7 @@ export interface CartItem {
   variantLabel: string
   sku: string | null
   quantity: number
+  basePrice: number
   unitPrice: number
   unitCost: number
   discount: number

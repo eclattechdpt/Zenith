@@ -193,6 +193,11 @@ function CartItemRow({ item }: { item: CartItem }) {
 
   const lineTotal = item.unitPrice * item.quantity - item.discount
   const isLowStock = item.quantity > item.stock
+  const hasCustomerDiscount =
+    item.basePrice > 0 && item.unitPrice < item.basePrice
+  const discountPercent = hasCustomerDiscount
+    ? Math.round((1 - item.unitPrice / item.basePrice) * 100)
+    : 0
 
   return (
     <div className="flex items-start gap-3 px-4 py-3">
@@ -204,9 +209,26 @@ function CartItemRow({ item }: { item: CartItem }) {
           <p className="text-xs text-neutral-500 truncate">{item.variantLabel}</p>
         )}
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-neutral-400">
-            {formatCurrency(item.unitPrice)} c/u
-          </span>
+          {hasCustomerDiscount ? (
+            <>
+              <span className="text-xs text-neutral-400 line-through">
+                {formatCurrency(item.basePrice)}
+              </span>
+              <span className="text-xs text-teal-600 font-medium">
+                {formatCurrency(item.unitPrice)} c/u
+              </span>
+              <Badge
+                variant="secondary"
+                className="text-[9px] py-0 px-1 bg-teal-50 text-teal-700 border-teal-200"
+              >
+                -{discountPercent}%
+              </Badge>
+            </>
+          ) : (
+            <span className="text-xs text-neutral-400">
+              {formatCurrency(item.unitPrice)} c/u
+            </span>
+          )}
           {item.discount > 0 && (
             <span className="text-xs text-rose-500">
               -{formatCurrency(item.discount)}

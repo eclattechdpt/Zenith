@@ -73,3 +73,41 @@ export function usePOSProducts(search: string) {
     placeholderData: (prev) => prev,
   })
 }
+
+export interface ActiveCreditNote {
+  id: string
+  credit_number: string
+  remaining_amount: number
+  expires_at: string | null
+  customers: { name: string }
+}
+
+export function useCustomerCreditNotes(customerId: string | null) {
+  return useQuery({
+    queryKey: ["credit-notes", "active", customerId],
+    queryFn: async (): Promise<ActiveCreditNote[]> => {
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("credit_notes")
+        .select(
+          `id, credit_number, remaining_amount, expires_at,
+          customers:customers!credit_notes_customer_id_fkey(name)`
+        )
+        .eq("customer_id", customerId!)
+        .eq("status", "active")
+        .gt("remaining_amount", 0)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: true })
+
+      if (error) throw error
+
+      // Filter out expired ones client-side
+      const now = new Date()
+      return ((data ?? []) as unknown as ActiveCreditNote[]).filter(
+        (cn) => !cn.expires_at || new Date(cn.expires_at) > now
+      )
+    },
+    enabled: !!customerId,
+  })
+}

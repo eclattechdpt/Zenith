@@ -13,6 +13,7 @@ import {
   Warehouse,
   Users,
   Receipt,
+  FileText,
   Settings,
   HelpCircle,
   LogOut,
@@ -86,6 +87,7 @@ const navItems = [
   { href: "/inventario", label: "Inventario", icon: Warehouse },
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/ventas", label: "Ventas", icon: Receipt },
+  { href: "/notas-credito", label: "Notas de credito", icon: FileText },
   { href: "/configuracion", label: "Configuracion", icon: Settings },
 ]
 

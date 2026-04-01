@@ -44,65 +44,29 @@ export function CustomerPicker() {
 
     // Recalculate all cart prices with the new customer's price list
     if (items.length > 0) {
-      const variants = items.map((i) => ({
+      const basePrices = items.map((i) => ({
         variantId: i.variantId,
-        basePrice: i.unitPrice, // Will be re-resolved from DB
+        basePrice: i.basePrice,
       }))
 
-      // We need the original base prices, not the current cart prices
-      // Fetch them from the product_variants table
-      const { createClient } = await import("@/lib/supabase/client")
-      const supabase = createClient()
-      const { data: variantData } = await supabase
-        .from("product_variants")
-        .select("id, price")
-        .in(
-          "id",
-          items.map((i) => i.variantId)
-        )
+      const resolved = await resolvePrices(
+        basePrices,
+        c.priceListId,
+        c.discountPercent
+      )
 
-      if (variantData) {
-        const basePrices = variants.map((v) => {
-          const dbVariant = variantData.find((d) => d.id === v.variantId)
-          return {
-            variantId: v.variantId,
-            basePrice: dbVariant ? Number(dbVariant.price) : v.basePrice,
-          }
-        })
-
-        const resolved = await resolvePrices(
-          basePrices,
-          c.priceListId,
-          c.discountPercent
-        )
-
-        for (const [variantId, price] of resolved) {
-          updateItemPrice(variantId, price)
-        }
+      for (const [variantId, price] of resolved) {
+        updateItemPrice(variantId, price)
       }
     }
   }
 
-  async function handleClear() {
+  function handleClear() {
     setCustomer(null)
 
-    // Reset all prices to base
-    if (items.length > 0) {
-      const { createClient } = await import("@/lib/supabase/client")
-      const supabase = createClient()
-      const { data: variantData } = await supabase
-        .from("product_variants")
-        .select("id, price")
-        .in(
-          "id",
-          items.map((i) => i.variantId)
-        )
-
-      if (variantData) {
-        for (const v of variantData) {
-          updateItemPrice(v.id, Number(v.price))
-        }
-      }
+    // Reset all prices to base (stored in each cart item)
+    for (const item of items) {
+      updateItemPrice(item.variantId, item.basePrice)
     }
   }
 

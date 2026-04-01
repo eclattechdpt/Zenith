@@ -6,6 +6,8 @@ import {
   MoreHorizontal,
   ShoppingCart,
   XCircle,
+  RotateCcw,
+  Eye,
 } from "lucide-react"
 import { formatDistanceToNow, isPast } from "date-fns"
 import { es } from "date-fns/locale"
@@ -34,11 +36,17 @@ const STATUS_COLORS: Record<string, string> = {
 interface SalesColumnsOptions {
   onConvert?: (sale: SaleWithSummary) => void
   onCancel?: (sale: SaleWithSummary) => void
+  onReturn?: (sale: SaleWithSummary) => void
+  onCancelSale?: (sale: SaleWithSummary) => void
+  onViewDetail?: (sale: SaleWithSummary) => void
 }
 
 export function getSalesColumns({
   onConvert,
   onCancel,
+  onReturn,
+  onCancelSale,
+  onViewDetail,
 }: SalesColumnsOptions = {}): ColumnDef<SaleWithSummary>[] {
   return [
     {
@@ -181,11 +189,35 @@ export function getSalesColumns({
       header: "",
       cell: ({ row }) => {
         const sale = row.original
-        const isQuote = sale.status === "quote"
+        const status = sale.status as string
+        const isQuote = status === "quote"
         const isExpired =
           isQuote && sale.expires_at && isPast(new Date(sale.expires_at))
+        const isCompleted = status === "completed"
+        const isPartiallyReturned = status === "partially_returned"
+        const isReturnable = isCompleted || isPartiallyReturned
+        const hasReturns = (sale.returns ?? []).some(
+          (r) => r.status === "completed" && !r.deleted_at
+        )
 
-        if (!isQuote) return null
+        // Show actions for quotes and completed/partially returned sales
+        if (!isQuote && !isReturnable) {
+          // For fully_returned sales, just show "Ver detalle"
+          if (status === "fully_returned" && onViewDetail) {
+            return (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="size-8 p-0"
+                onClick={() => onViewDetail(sale)}
+              >
+                <Eye className="size-4 text-neutral-400" />
+                <span className="sr-only">Ver detalle</span>
+              </Button>
+            )
+          }
+          return null
+        }
 
         return (
           <DropdownMenu>
@@ -198,19 +230,42 @@ export function getSalesColumns({
               <span className="sr-only">Acciones</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {!isExpired && onConvert && (
+              {/* Quote actions */}
+              {isQuote && !isExpired && onConvert && (
                 <DropdownMenuItem onClick={() => onConvert(sale)}>
                   <ShoppingCart className="mr-2 size-3.5" />
                   Convertir a venta
                 </DropdownMenuItem>
               )}
-              {onCancel && (
+              {isQuote && onCancel && (
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => onCancel(sale)}
                 >
                   <XCircle className="mr-2 size-3.5" />
                   Cancelar cotizacion
+                </DropdownMenuItem>
+              )}
+              {/* Completed/partially returned sale actions */}
+              {isReturnable && onViewDetail && (
+                <DropdownMenuItem onClick={() => onViewDetail(sale)}>
+                  <Eye className="mr-2 size-3.5" />
+                  Ver detalle
+                </DropdownMenuItem>
+              )}
+              {isReturnable && onReturn && (
+                <DropdownMenuItem onClick={() => onReturn(sale)}>
+                  <RotateCcw className="mr-2 size-3.5" />
+                  Devolver
+                </DropdownMenuItem>
+              )}
+              {isCompleted && !hasReturns && onCancelSale && (
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => onCancelSale(sale)}
+                >
+                  <XCircle className="mr-2 size-3.5" />
+                  Cancelar venta
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>

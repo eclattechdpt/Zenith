@@ -12,5 +12,28 @@ export const cancelQuoteSchema = z.object({
   quote_id: z.string().regex(uuidPattern, "UUID invalido"),
 })
 
+export const returnItemSchema = z.object({
+  sale_item_id: z.string().regex(uuidPattern, "UUID invalido"),
+  product_variant_id: z.string().regex(uuidPattern, "UUID invalido"),
+  quantity: z.number().int().positive("La cantidad debe ser positiva"),
+  unit_price: z.number().positive("El precio debe ser mayor a 0"),
+  restock: z.boolean().default(true),
+})
+
+export const createReturnSchema = z.object({
+  sale_id: z.string().regex(uuidPattern, "UUID invalido"),
+  reason: z.string().max(500).optional().nullable(),
+  items: z
+    .array(returnItemSchema)
+    .min(1, "Selecciona al menos un producto a devolver"),
+})
+
+export const cancelSaleSchema = z.object({
+  sale_id: z.string().regex(uuidPattern, "UUID invalido"),
+})
+
 export type ConvertQuoteInput = z.infer<typeof convertQuoteSchema>
 export type CancelQuoteInput = z.infer<typeof cancelQuoteSchema>
+export type ReturnItemInput = z.infer<typeof returnItemSchema>
+export type CreateReturnInput = z.infer<typeof createReturnSchema>
+export type CancelSaleInput = z.infer<typeof cancelSaleSchema>

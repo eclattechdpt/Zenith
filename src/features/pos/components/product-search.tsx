@@ -88,6 +88,7 @@ export function ProductSearch() {
       productName: product.name,
       variantLabel: variant.name ?? product.name,
       sku: variant.sku,
+      basePrice: Number(variant.price),
       unitPrice: price,
       unitCost: Number(variant.cost),
       stock: variant.stock,
