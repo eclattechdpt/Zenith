@@ -224,6 +224,24 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
+**Sprint 5 — Inventario: COMPLETO** (actualizado 2026-04-01)
+
+### Sprint 5 — Completado
+- Tres inventarios independientes: Fisico (stock ventas), En Transito (control semanal), Carga Inicial (referencia historica)
+- Hub page (`/inventario`): 3 cards con iconos + valor total combinado, grand total via `get_inventory_summary` RPC con override prices
+- Inventario Fisico (`/inventario/fisico`): tabla con search (producto/marca/codigo), filtro por categoria con clear option, filtro stock bajo, adjust stock, entrada de mercancia, historial de movimientos con pills de fecha (Todo/Hoy/Esta semana/Este mes/Fecha custom via popover)
+- Inventario Carga Inicial (`/inventario/carga-inicial`): misma tabla UI, stock independiente (`initial_stock` column), override de nombre y precio via `initial_load_overrides` table, badge "editado", edit dialog unificado (nombre + precio + stock en una accion), total usa override prices
+- Inventario en Transito (`/inventario/transito`): jerarquia Meses → Semanas → Productos, chart mensual de barras horizontales, grid de 12 meses siempre visible, year selector con flechas, drill-down a semanas (1-5 por mes), detalle de productos por semana, auto-suggest semana siguiente, edit week dialog, soft-delete semanas
+- DB: `initial_stock` en product_variants, `inventory_source` en inventory_movements (physical/initial_load), `transit_weeks` + `transit_week_items` tables con `month` column, `initial_load_overrides` table, `get_inventory_summary` RPC, partial unique index excluyendo soft-deleted
+- Schemas: stockAdjustmentSchema, stockEntrySchema, initialLoadOverrideSchema, createTransitWeekSchema (con month), updateTransitWeekSchema, transitWeekItemSchema, updateTransitWeekItemSchema
+- Actions: adjustStock, addStock (Physical), adjustInitialStock, addInitialStock (Initial Load), upsertInitialLoadOverride, createTransitWeek, updateTransitWeek, deleteTransitWeek (soft), addTransitWeekItem, updateTransitWeekItem, deleteTransitWeekItem, recalcWeekTotal con error handling
+- Queries: useInventory, useInitialLoadInventory (con overrides merge), useMovements (con inventory_source filter), useLowStockAlerts, useTransitWeeks (con enabled guard), useTransitWeekDetail (con deleted_at filter), useTransitMonthSummary, useInventorySummary
+- Components parametrizados: InventoryTable acepta `inventoryType` prop, columns/dialogs/mobile cards switchean entre Physical e Initial Load automaticamente
+- POS mejorado: catalogo de productos visible inmediatamente sin buscar, stock guards funcionando
+- Dashboard: alertas de inventario wired a datos reales via Supabase query con override prices
+- Mobile responsive: card layout en todas las paginas de inventario, transit grid 3 columnas
+- Edge case testing & hardening: 48 tests (19 automated + 22 manual + 7 edge cases). 2 code audits. 10 bugs encontrados y corregidos: PostgREST search con joined tables, base-ui Select mostrando UUID, error swallowing en upsertInitialLoadOverride, hard DELETE en transit weeks, product picker deselect bypass, queries innecesarias ejecutandose, mobile missing overrides, transit month summary no invalidandose, unique constraint incluyendo soft-deleted rows, RPC usando catalog price en vez de override price
+
 **Sprint 4 — POS (Punto de venta): COMPLETO** (actualizado 2026-04-01)
 
 ### Sprint 4 — Completado
