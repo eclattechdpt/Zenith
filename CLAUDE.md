@@ -224,28 +224,30 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
-**Sprint 4 — POS (Punto de venta): EN PROGRESO** (actualizado 2026-03-31)
+**Sprint 4 — POS (Punto de venta): COMPLETO** (actualizado 2026-04-01)
 
 ### Sprint 4 — Completado
 - Zustand cart store (`pos/store.ts`): items (add/remove/quantity/discount/price), customer, globalDiscount, notes, computed totals (subtotal, itemsDiscount, total, itemCount), clear
 - resolvePrice + resolvePrices (`pos/utils.ts`): prioridad especifico > descuento % > base, batch query para recalcular carrito al cambiar cliente
-- Zod schemas (`pos/schemas.ts`): cartItemSchema, paymentSchema, createSaleSchema, createQuoteSchema
+- Zod schemas (`pos/schemas.ts`): cartItemSchema, paymentSchema, createSaleSchema, createQuoteSchema con UUID regex flexible
 - Types (`pos/types.ts`): CartItem, CartCustomer, CartPayment, Sale, SaleItem, SalePayment
 - POS terminal layout (`pos/components/pos-terminal.tsx`): split screen (busqueda izquierda, carrito derecha), realtime sync
-- Product search (`pos/components/product-search.tsx`, `pos/queries.ts`): debounce 250ms, busqueda por nombre/marca/codigo, limit 20, solo productos activos
+- Product search (`pos/components/product-search.tsx`, `pos/queries.ts`): debounce 250ms, busqueda por nombre/marca/codigo, limit 20, solo productos activos, bloqueo de stock=0 y stock maximo
 - Variant selector: producto simple = agregar directo, multiples variantes = expandible con nombre/sku/precio/stock
 - Customer picker (`pos/components/customer-picker.tsx`): busqueda de clientes, badge descuento, recalcula todos los precios del carrito al seleccionar/deseleccionar cliente
-- Cart panel (`pos/components/cart-panel.tsx`): items con +/-, precio unitario, descuento por item, line total, stock bajo warning, subtotal/descuento/total, boton Cobrar, boton Guardar cotizacion, Vaciar
+- Cart panel (`pos/components/cart-panel.tsx`): items con +/-, precio unitario, descuento por item, line total, stock bajo warning, subtotal/descuento/total, boton Cobrar, boton Guardar cotizacion (con double-submit guard), Vaciar, boton + deshabilitado al alcanzar stock
 - Payment dialog (`pos/components/payment-dialog.tsx`): botones rapidos Efectivo/Tarjeta, montos editables, split payments (agregar metodos), referencia para transferencias, calculo de cambio/faltante, validacion pagos >= total
-- createSale server action (`pos/actions.ts`): genera sale_number secuencial (V-0001), crea sale + sale_items + sale_payments, descuenta stock, crea inventory_movements, revalidate paths
-- createQuote server action: genera quote_number (C-0001), crea sale con status='quote' + expires_at, NO descuenta stock, NO crea payments/movements
-- Receipt printing (`pos/components/sale-receipt.tsx`): formato 80mm termica, header negocio, datos venta, items con descuento, totales, pagos, cambio, react-to-print
+- createSale server action (`pos/actions.ts`): genera sale_number secuencial (V-0001), crea sale + sale_items + sale_payments via RPC atomico, descuenta stock con validacion (RAISE si stock < 0), crea inventory_movements, line_total clamped a >= 0
+- createQuote server action: genera quote_number (C-0001), crea sale con status='quote' + expires_at, NO descuenta stock, NO crea payments/movements, line_total clamped a >= 0
+- Receipt (`pos/components/sale-receipt.tsx`): diseño branded con logo Zenith, gradiente rose en total, tipografia Plus Jakarta Sans, inline styles para compatibilidad con react-to-print, info negocio (nombre, telefono, ubicacion), folio + fecha lado a lado, card de cliente, tabla de items con header, pagos en card gris, cambio en teal, footer "Powered by Zenith POS"
 - Realtime sync (`hooks/use-realtime.ts`): suscripcion a product_variants y sales, invalida queries automaticamente para sync multi-dispositivo
 - useDebounce hook (`hooks/use-debounce.ts`): hook generico con delay configurable
-
-### Sprint 4 — Pendiente
-- Listar cotizaciones y convertir cotizacion a venta
-- Testing visual y edge cases
+- Modulo ventas (`ventas/`): types (SaleWithSummary, SaleWithItems), schemas (convertQuoteSchema, cancelQuoteSchema), queries (useSales con filtros, useQuoteDetail), actions (convertQuoteToSale via RPC atomico, cancelQuote)
+- Pagina ventas (`/ventas`): DataTable con busqueda por numero, tabs filtro (Todos/Cotizaciones/Ventas/Canceladas), columnas (numero, estado con badges de color, cliente, total, pago, fecha, vencimiento relativo, acciones), mobile card layout, rose color scheme
+- Convertir cotizacion: ConvertQuoteDialog con preview de items, pagos (cash/card/split), double-submit guard, confirm deshabilitado durante carga, reutiliza create_sale_transaction RPC, marca cotizacion original como cancelada, nota "Convertida de cotizacion C-XXXX"
+- Cancelar cotizacion: ConfirmDialog, actualiza status a cancelled, validacion server-side
+- Cotizaciones expiradas: badge "Expirada" en tabla, boton "Convertir a venta" oculto para expiradas, validacion server-side de expires_at
+- Edge case testing & hardening: 34 tests (27 automated Playwright + 7 manual). 11 bugs encontrados y corregidos: UUID strict validation, double-submit en save quote y convert quote, cart qty > stock via + button, cart qty > stock via search re-add, negative line_total con descuentos excesivos, RPC permite oversell (stock negativo), zero-total quote bloqueado por schema, confirm button activo durante carga, empty payments en quote no-zero, stock=0 producto agregable al carrito
 
 **Sprint 3 — Clientes y precios: COMPLETO** (actualizado 2026-03-31)
 
