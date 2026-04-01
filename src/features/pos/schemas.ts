@@ -38,3 +38,18 @@ export type CartItemInput = z.infer<typeof cartItemSchema>
 export type PaymentInput = z.infer<typeof paymentSchema>
 export type CreateSaleInput = z.infer<typeof createSaleSchema>
 export type CreateQuoteInput = z.infer<typeof createQuoteSchema>
+
+export const createPendingSaleSchema = z.object({
+  customer_id: z.string().regex(uuidPattern).optional().nullable(),
+  items: z.array(cartItemSchema).min(1),
+  discount_amount: z.number().min(0).default(0),
+  notes: z.string().max(2000).optional().nullable(),
+})
+
+export const completePendingSaleSchema = z.object({
+  sale_id: z.string().regex(uuidPattern),
+  payments: z.array(paymentSchema).min(1),
+})
+
+export type CreatePendingSaleInput = z.infer<typeof createPendingSaleSchema>
+export type CompletePendingSaleInput = z.infer<typeof completePendingSaleSchema>
