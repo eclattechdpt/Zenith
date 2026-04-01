@@ -349,17 +349,27 @@ export async function upsertInitialLoadOverride(input: InitialLoadOverrideInput)
 // ── In Transit Inventory ──
 
 async function recalcWeekTotal(supabase: Awaited<ReturnType<typeof createServerClient>>, weekId: string) {
-  const { data: items } = await supabase
+  const { data: items, error: readError } = await supabase
     .from("transit_week_items")
     .select("line_total")
     .eq("transit_week_id", weekId)
 
+  if (readError) {
+    console.error("recalcWeekTotal read error:", readError.message)
+    return
+  }
+
   const total = (items ?? []).reduce((sum, i) => sum + Number(i.line_total), 0)
 
-  await supabase
+  const { error: updateError } = await supabase
     .from("transit_weeks")
     .update({ total_value: total })
     .eq("id", weekId)
+    .is("deleted_at", null)
+
+  if (updateError) {
+    console.error("recalcWeekTotal update error:", updateError.message)
+  }
 }
 
 export async function createTransitWeek(input: CreateTransitWeekInput) {

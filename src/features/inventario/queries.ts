@@ -355,6 +355,7 @@ export function useTransitWeekDetail(weekId: string | null) {
           )`
         )
         .eq("id", weekId!)
+        .is("deleted_at", null)
         .single()
 
       if (error) throw error
