@@ -3,6 +3,7 @@ import { es } from "date-fns/locale"
 
 import { createServerClient } from "@/lib/supabase/server"
 import mockData from "@/features/dashboard/mock-data.json"
+import type { InventoryAlert } from "@/features/dashboard/components/inventory-alerts-grid"
 
 import { GreetingSection } from "@/features/dashboard/components/greeting-section"
 import { QuickActions } from "@/features/dashboard/components/quick-actions"
@@ -29,6 +30,43 @@ export default async function DashboardPage() {
 
   const today = new Date()
   const formattedDate = format(today, "d 'de' MMMM, yyyy", { locale: es })
+
+  // Fetch real low-stock alerts
+  const { data: lowStockVariants } = await supabase
+    .from("product_variants")
+    .select(
+      `id, sku, name, stock, stock_min, is_active,
+      products!inner(name, brand, deleted_at)`
+    )
+    .is("deleted_at", null)
+    .is("products.deleted_at", null)
+    .eq("is_active", true)
+
+  const inventoryAlerts: InventoryAlert[] = (lowStockVariants ?? [])
+    .filter(
+      (v: { stock: number; stock_min: number }) => v.stock_min > 0 && v.stock <= v.stock_min
+    )
+    .sort(
+      (a: { stock: number; stock_min: number }, b: { stock: number; stock_min: number }) =>
+        a.stock - a.stock_min - (b.stock - b.stock_min)
+    )
+    .map(
+      (v: {
+        stock: number
+        stock_min: number
+        name: string | null
+        sku: string | null
+        products: { name: string; brand: string | null }
+      }) => ({
+        nombre: v.products.name,
+        variante: v.name || v.sku || "—",
+        stockActual: v.stock,
+        stockMinimo: v.stock_min,
+        estado: (v.stock <= v.stock_min * 0.3 ? "critico" : "bajo") as
+          | "critico"
+          | "bajo",
+      })
+    )
 
   const kpiData = {
     ventasDelDia: mockData.kpis.ventasDelDia,
@@ -90,7 +128,7 @@ export default async function DashboardPage() {
         <DashboardItem>
           <div className="grid min-w-0 gap-5 xl:grid-cols-2">
             <TopProductsGrid products={mockData.topProductos} />
-            <InventoryAlertsGrid alerts={mockData.alertasInventario} />
+            <InventoryAlertsGrid alerts={inventoryAlerts} />
           </div>
         </DashboardItem>
       </DashboardShell>
