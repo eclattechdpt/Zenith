@@ -7,8 +7,16 @@ import { createServerClient } from "@/lib/supabase/server"
 import {
   stockAdjustmentSchema,
   stockEntrySchema,
+  createTransitWeekSchema,
+  updateTransitWeekSchema,
+  transitWeekItemSchema,
+  updateTransitWeekItemSchema,
   type StockAdjustmentInput,
   type StockEntryInput,
+  type CreateTransitWeekInput,
+  type UpdateTransitWeekInput,
+  type TransitWeekItemInput,
+  type UpdateTransitWeekItemInput,
 } from "./schemas"
 
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
@@ -21,6 +29,15 @@ async function getUserId() {
   return user?.id ?? null
 }
 
+function revalidateInventory() {
+  revalidatePath("/inventario")
+  revalidatePath("/inventario/fisico")
+  revalidatePath("/inventario/carga-inicial")
+  revalidatePath("/")
+}
+
+// ── Physical Inventory ──
+
 export async function adjustStock(input: StockAdjustmentInput) {
   const parsed = stockAdjustmentSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
@@ -30,7 +47,6 @@ export async function adjustStock(input: StockAdjustmentInput) {
   const supabase = await createServerClient()
   const userId = await getUserId()
 
-  // Read current stock
   const { data: variant, error: readError } = await supabase
     .from("product_variants")
     .select("stock")
@@ -48,7 +64,6 @@ export async function adjustStock(input: StockAdjustmentInput) {
     return { error: { _form: ["El stock nuevo es igual al actual"] } }
   }
 
-  // Update stock
   const { error: updateError } = await supabase
     .from("product_variants")
     .update({ stock: new_stock })
@@ -58,7 +73,6 @@ export async function adjustStock(input: StockAdjustmentInput) {
     return { error: { _form: [updateError.message] } }
   }
 
-  // Create movement record
   const { data: movement, error: movementError } = await supabase
     .from("inventory_movements")
     .insert({
@@ -70,6 +84,7 @@ export async function adjustStock(input: StockAdjustmentInput) {
       stock_after: new_stock,
       reason,
       created_by: userId,
+      inventory_source: "physical",
     })
     .select()
     .single()
@@ -78,8 +93,7 @@ export async function adjustStock(input: StockAdjustmentInput) {
     return { error: { _form: [movementError.message] } }
   }
 
-  revalidatePath("/inventario")
-  revalidatePath("/")
+  revalidateInventory()
   return { data: { movement, new_stock } }
 }
 
@@ -92,7 +106,6 @@ export async function addStock(input: StockEntryInput) {
   const supabase = await createServerClient()
   const userId = await getUserId()
 
-  // Read current stock
   const { data: variant, error: readError } = await supabase
     .from("product_variants")
     .select("stock")
@@ -106,7 +119,6 @@ export async function addStock(input: StockEntryInput) {
   const currentStock = variant.stock
   const newStock = currentStock + quantity
 
-  // Update stock
   const { error: updateError } = await supabase
     .from("product_variants")
     .update({ stock: newStock })
@@ -116,7 +128,6 @@ export async function addStock(input: StockEntryInput) {
     return { error: { _form: [updateError.message] } }
   }
 
-  // Create movement record
   const { data: movement, error: movementError } = await supabase
     .from("inventory_movements")
     .insert({
@@ -128,6 +139,7 @@ export async function addStock(input: StockEntryInput) {
       stock_after: newStock,
       reason: reason ?? null,
       created_by: userId,
+      inventory_source: "physical",
     })
     .select()
     .single()
@@ -136,7 +148,293 @@ export async function addStock(input: StockEntryInput) {
     return { error: { _form: [movementError.message] } }
   }
 
-  revalidatePath("/inventario")
-  revalidatePath("/")
+  revalidateInventory()
   return { data: { movement, new_stock: newStock } }
+}
+
+// ── Initial Load Inventory ──
+
+export async function adjustInitialStock(input: StockAdjustmentInput) {
+  const parsed = stockAdjustmentSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const { product_variant_id, new_stock, reason } = parsed.data
+
+  const supabase = await createServerClient()
+  const userId = await getUserId()
+
+  const { data: variant, error: readError } = await supabase
+    .from("product_variants")
+    .select("initial_stock")
+    .eq("id", product_variant_id)
+    .single()
+
+  if (readError || !variant) {
+    return { error: { _form: ["No se encontró la variante"] } }
+  }
+
+  const currentStock = variant.initial_stock
+  const difference = new_stock - currentStock
+
+  if (difference === 0) {
+    return { error: { _form: ["El stock nuevo es igual al actual"] } }
+  }
+
+  const { error: updateError } = await supabase
+    .from("product_variants")
+    .update({ initial_stock: new_stock })
+    .eq("id", product_variant_id)
+
+  if (updateError) {
+    return { error: { _form: [updateError.message] } }
+  }
+
+  const { data: movement, error: movementError } = await supabase
+    .from("inventory_movements")
+    .insert({
+      tenant_id: TENANT_ID,
+      product_variant_id,
+      type: "adjustment",
+      quantity: difference,
+      stock_before: currentStock,
+      stock_after: new_stock,
+      reason,
+      created_by: userId,
+      inventory_source: "initial_load",
+    })
+    .select()
+    .single()
+
+  if (movementError) {
+    return { error: { _form: [movementError.message] } }
+  }
+
+  revalidateInventory()
+  return { data: { movement, new_stock } }
+}
+
+export async function addInitialStock(input: StockEntryInput) {
+  const parsed = stockEntrySchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const { product_variant_id, quantity, reason } = parsed.data
+
+  const supabase = await createServerClient()
+  const userId = await getUserId()
+
+  const { data: variant, error: readError } = await supabase
+    .from("product_variants")
+    .select("initial_stock")
+    .eq("id", product_variant_id)
+    .single()
+
+  if (readError || !variant) {
+    return { error: { _form: ["No se encontró la variante"] } }
+  }
+
+  const currentStock = variant.initial_stock
+  const newStock = currentStock + quantity
+
+  const { error: updateError } = await supabase
+    .from("product_variants")
+    .update({ initial_stock: newStock })
+    .eq("id", product_variant_id)
+
+  if (updateError) {
+    return { error: { _form: [updateError.message] } }
+  }
+
+  const { data: movement, error: movementError } = await supabase
+    .from("inventory_movements")
+    .insert({
+      tenant_id: TENANT_ID,
+      product_variant_id,
+      type: "purchase",
+      quantity,
+      stock_before: currentStock,
+      stock_after: newStock,
+      reason: reason ?? null,
+      created_by: userId,
+      inventory_source: "initial_load",
+    })
+    .select()
+    .single()
+
+  if (movementError) {
+    return { error: { _form: [movementError.message] } }
+  }
+
+  revalidateInventory()
+  return { data: { movement, new_stock: newStock } }
+}
+
+// ── In Transit Inventory ──
+
+async function recalcWeekTotal(supabase: Awaited<ReturnType<typeof createServerClient>>, weekId: string) {
+  const { data: items } = await supabase
+    .from("transit_week_items")
+    .select("line_total")
+    .eq("transit_week_id", weekId)
+
+  const total = (items ?? []).reduce((sum, i) => sum + Number(i.line_total), 0)
+
+  await supabase
+    .from("transit_weeks")
+    .update({ total_value: total })
+    .eq("id", weekId)
+}
+
+export async function createTransitWeek(input: CreateTransitWeekInput) {
+  const parsed = createTransitWeekSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const { year, week_number, label, notes } = parsed.data
+
+  const supabase = await createServerClient()
+  const userId = await getUserId()
+
+  const { data, error } = await supabase
+    .from("transit_weeks")
+    .insert({
+      tenant_id: TENANT_ID,
+      year,
+      week_number,
+      label: label ?? null,
+      notes: notes ?? null,
+      created_by: userId,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    if (error.code === "23505") {
+      return { error: { _form: [`Ya existe una semana ${week_number} para el año ${year}`] } }
+    }
+    return { error: { _form: [error.message] } }
+  }
+
+  revalidatePath("/inventario")
+  revalidatePath("/inventario/transito")
+  return { data }
+}
+
+export async function updateTransitWeek(input: UpdateTransitWeekInput) {
+  const parsed = updateTransitWeekSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const { id, label, notes } = parsed.data
+
+  const supabase = await createServerClient()
+
+  const { data, error } = await supabase
+    .from("transit_weeks")
+    .update({ label: label ?? null, notes: notes ?? null })
+    .eq("id", id)
+    .select()
+    .single()
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/inventario/transito")
+  return { data }
+}
+
+export async function deleteTransitWeek(weekId: string) {
+  const supabase = await createServerClient()
+
+  const { error } = await supabase
+    .from("transit_weeks")
+    .delete()
+    .eq("id", weekId)
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/inventario")
+  revalidatePath("/inventario/transito")
+  return { data: { success: true } }
+}
+
+export async function addTransitWeekItem(input: TransitWeekItemInput) {
+  const parsed = transitWeekItemSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const { transit_week_id, product_variant_id, quantity, unit_price } = parsed.data
+  const line_total = quantity * unit_price
+
+  const supabase = await createServerClient()
+
+  const { data, error } = await supabase
+    .from("transit_week_items")
+    .insert({
+      transit_week_id,
+      product_variant_id,
+      quantity,
+      unit_price,
+      line_total,
+    })
+    .select()
+    .single()
+
+  if (error) return { error: { _form: [error.message] } }
+
+  await recalcWeekTotal(supabase, transit_week_id)
+
+  revalidatePath("/inventario/transito")
+  return { data }
+}
+
+export async function updateTransitWeekItem(input: UpdateTransitWeekItemInput) {
+  const parsed = updateTransitWeekItemSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const { id, quantity, unit_price } = parsed.data
+  const line_total = quantity * unit_price
+
+  const supabase = await createServerClient()
+
+  const { data: item, error: readError } = await supabase
+    .from("transit_week_items")
+    .select("transit_week_id")
+    .eq("id", id)
+    .single()
+
+  if (readError || !item) return { error: { _form: ["No se encontró el item"] } }
+
+  const { data, error } = await supabase
+    .from("transit_week_items")
+    .update({ quantity, unit_price, line_total })
+    .eq("id", id)
+    .select()
+    .single()
+
+  if (error) return { error: { _form: [error.message] } }
+
+  await recalcWeekTotal(supabase, item.transit_week_id)
+
+  revalidatePath("/inventario/transito")
+  return { data }
+}
+
+export async function deleteTransitWeekItem(itemId: string) {
+  const supabase = await createServerClient()
+
+  const { data: item, error: readError } = await supabase
+    .from("transit_week_items")
+    .select("transit_week_id")
+    .eq("id", itemId)
+    .single()
+
+  if (readError || !item) return { error: { _form: ["No se encontró el item"] } }
+
+  const { error } = await supabase
+    .from("transit_week_items")
+    .delete()
+    .eq("id", itemId)
+
+  if (error) return { error: { _form: [error.message] } }
+
+  await recalcWeekTotal(supabase, item.transit_week_id)
+
+  revalidatePath("/inventario/transito")
+  return { data: { success: true } }
 }

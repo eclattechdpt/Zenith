@@ -4,9 +4,47 @@ import { useQuery } from "@tanstack/react-query"
 
 import { createClient } from "@/lib/supabase/client"
 
-import type { InventoryVariant, MovementWithDetails } from "./types"
+import type {
+  InventoryVariant,
+  MovementWithDetails,
+  InventoryType,
+  TransitWeekWithItems,
+  InventorySummary,
+} from "./types"
 
-// ── Inventory list ──
+// ── Shared variant select ──
+
+const VARIANT_SELECT = `id, sku, name, price, stock, initial_stock, stock_min, is_active, product_id,
+  products!inner(
+    id, name, brand, category_id, has_variants,
+    categories(id, name)
+  )`
+
+// ── Search helpers ──
+
+async function findMatchingIds(supabase: ReturnType<typeof createClient>, search: string) {
+  const q = search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
+
+  const { data: productMatches } = await supabase
+    .from("products")
+    .select("id")
+    .is("deleted_at", null)
+    .or(`name.ilike.%${q}%,brand.ilike.%${q}%`)
+
+  const productIds = (productMatches ?? []).map((m) => m.id)
+
+  const { data: skuMatches } = await supabase
+    .from("product_variants")
+    .select("id")
+    .ilike("sku", `%${q}%`)
+    .is("deleted_at", null)
+
+  const skuVariantIds = (skuMatches ?? []).map((m) => m.id)
+
+  return { productIds, skuVariantIds }
+}
+
+// ── Physical Inventory ──
 
 interface InventoryFilters {
   search?: string
@@ -17,44 +55,19 @@ interface InventoryFilters {
 
 export function useInventory(filters?: InventoryFilters) {
   return useQuery({
-    queryKey: ["inventory", filters],
+    queryKey: ["inventory", "physical", filters],
     queryFn: async (): Promise<InventoryVariant[]> => {
       const supabase = createClient()
 
       let query = supabase
         .from("product_variants")
-        .select(
-          `id, sku, name, price, stock, stock_min, is_active, product_id,
-          products!inner(
-            id, name, brand, category_id, has_variants,
-            categories(id, name)
-          )`
-        )
+        .select(VARIANT_SELECT)
         .is("deleted_at", null)
         .is("products.deleted_at", null)
 
       if (filters?.search) {
-        const q = filters.search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
+        const { productIds, skuVariantIds } = await findMatchingIds(supabase, filters.search)
 
-        // Find product IDs matching name/brand
-        const { data: productMatches } = await supabase
-          .from("products")
-          .select("id")
-          .is("deleted_at", null)
-          .or(`name.ilike.%${q}%,brand.ilike.%${q}%`)
-
-        const productIds = (productMatches ?? []).map((m) => m.id)
-
-        // Find variant IDs matching SKU
-        const { data: skuMatches } = await supabase
-          .from("product_variants")
-          .select("id")
-          .ilike("sku", `%${q}%`)
-          .is("deleted_at", null)
-
-        const skuVariantIds = (skuMatches ?? []).map((m) => m.id)
-
-        // Combine: variants whose product matches OR whose SKU matches
         if (productIds.length > 0 && skuVariantIds.length > 0) {
           query = query.or(
             `product_id.in.(${productIds.join(",")}),id.in.(${skuVariantIds.join(",")})`
@@ -64,7 +77,6 @@ export function useInventory(filters?: InventoryFilters) {
         } else if (skuVariantIds.length > 0) {
           query = query.in("id", skuVariantIds)
         } else {
-          // No matches — return empty
           query = query.in("id", ["00000000-0000-0000-0000-000000000000"])
         }
       }
@@ -83,8 +95,6 @@ export function useInventory(filters?: InventoryFilters) {
 
       let results = (data ?? []) as unknown as InventoryVariant[]
 
-      // Filter low stock client-side (stock <= stock_min) since we can't
-      // reference another column in a PostgREST filter
       if (filters?.lowStockOnly) {
         results = results.filter((v) => v.stock <= v.stock_min)
       }
@@ -95,7 +105,54 @@ export function useInventory(filters?: InventoryFilters) {
   })
 }
 
-// ── Movement history for a variant ──
+// ── Initial Load Inventory ──
+
+export function useInitialLoadInventory(filters?: InventoryFilters) {
+  return useQuery({
+    queryKey: ["inventory", "initial_load", filters],
+    queryFn: async (): Promise<InventoryVariant[]> => {
+      const supabase = createClient()
+
+      let query = supabase
+        .from("product_variants")
+        .select(VARIANT_SELECT)
+        .is("deleted_at", null)
+        .is("products.deleted_at", null)
+
+      if (filters?.search) {
+        const { productIds, skuVariantIds } = await findMatchingIds(supabase, filters.search)
+
+        if (productIds.length > 0 && skuVariantIds.length > 0) {
+          query = query.or(
+            `product_id.in.(${productIds.join(",")}),id.in.(${skuVariantIds.join(",")})`
+          )
+        } else if (productIds.length > 0) {
+          query = query.in("product_id", productIds)
+        } else if (skuVariantIds.length > 0) {
+          query = query.in("id", skuVariantIds)
+        } else {
+          query = query.in("id", ["00000000-0000-0000-0000-000000000000"])
+        }
+      }
+
+      if (filters?.categoryId) {
+        query = query.eq("products.category_id", filters.categoryId)
+      }
+
+      if (filters?.isActive !== undefined) {
+        query = query.eq("is_active", filters.isActive)
+      }
+
+      const { data, error } = await query.order("initial_stock", { ascending: true })
+
+      if (error) throw error
+      return (data ?? []) as unknown as InventoryVariant[]
+    },
+    placeholderData: (prev) => prev,
+  })
+}
+
+// ── Movement history ──
 
 interface MovementFilters {
   dateFrom?: string
@@ -105,10 +162,11 @@ interface MovementFilters {
 
 export function useMovements(
   variantId: string | null,
+  inventorySource: InventoryType = "physical",
   filters?: MovementFilters
 ) {
   return useQuery({
-    queryKey: ["movements", variantId, filters],
+    queryKey: ["movements", inventorySource, variantId, filters],
     queryFn: async (): Promise<MovementWithDetails[]> => {
       const supabase = createClient()
 
@@ -120,6 +178,7 @@ export function useMovements(
           returns(return_number)`
         )
         .eq("product_variant_id", variantId!)
+        .eq("inventory_source", inventorySource)
         .order("created_at", { ascending: false })
 
       if (filters?.dateFrom) {
@@ -143,7 +202,7 @@ export function useMovements(
   })
 }
 
-// ── Low stock alerts (for dashboard) ──
+// ── Low stock alerts (for dashboard — Physical only) ──
 
 export function useLowStockAlerts() {
   return useQuery({
@@ -153,25 +212,124 @@ export function useLowStockAlerts() {
 
       const { data, error } = await supabase
         .from("product_variants")
-        .select(
-          `id, sku, name, price, stock, stock_min, is_active, product_id,
-          products!inner(
-            id, name, brand, category_id, has_variants,
-            categories(id, name)
-          )`
-        )
+        .select(VARIANT_SELECT)
         .is("deleted_at", null)
         .is("products.deleted_at", null)
         .eq("is_active", true)
 
       if (error) throw error
 
-      // Filter where stock <= stock_min and sort by deficit (most urgent first)
       const lowStock = ((data ?? []) as unknown as InventoryVariant[])
         .filter((v) => v.stock <= v.stock_min)
         .sort((a, b) => (a.stock - a.stock_min) - (b.stock - b.stock_min))
 
       return lowStock
+    },
+  })
+}
+
+// ── Transit weeks ──
+
+interface TransitWeekFilters {
+  year?: number
+}
+
+export function useTransitWeeks(filters?: TransitWeekFilters) {
+  return useQuery({
+    queryKey: ["transit-weeks", filters],
+    queryFn: async (): Promise<TransitWeekWithItems[]> => {
+      const supabase = createClient()
+
+      let query = supabase
+        .from("transit_weeks")
+        .select(
+          `*,
+          transit_week_items(
+            *,
+            product_variants(
+              id, sku, name, price,
+              products(id, name, brand)
+            )
+          )`
+        )
+        .is("deleted_at", null)
+        .order("year", { ascending: false })
+        .order("week_number", { ascending: false })
+
+      if (filters?.year) {
+        query = query.eq("year", filters.year)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+      return (data ?? []) as unknown as TransitWeekWithItems[]
+    },
+    placeholderData: (prev) => prev,
+  })
+}
+
+export function useTransitWeekDetail(weekId: string | null) {
+  return useQuery({
+    queryKey: ["transit-week", weekId],
+    queryFn: async (): Promise<TransitWeekWithItems> => {
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("transit_weeks")
+        .select(
+          `*,
+          transit_week_items(
+            *,
+            product_variants(
+              id, sku, name, price,
+              products(id, name, brand)
+            )
+          )`
+        )
+        .eq("id", weekId!)
+        .single()
+
+      if (error) throw error
+      return data as unknown as TransitWeekWithItems
+    },
+    enabled: !!weekId,
+  })
+}
+
+// ── Inventory summary (for hub page) ──
+
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
+
+export function useInventorySummary() {
+  return useQuery({
+    queryKey: ["inventory-summary"],
+    queryFn: async (): Promise<InventorySummary> => {
+      const supabase = createClient()
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase.rpc as any)(
+        "get_inventory_summary",
+        { p_tenant_id: TENANT_ID }
+      )
+
+      if (error) throw error
+
+      const result = data as {
+        physical_total: number
+        initial_load_total: number
+        transit_total: number
+      }
+
+      return {
+        physical_total: Number(result.physical_total),
+        initial_load_total: Number(result.initial_load_total),
+        transit_total: Number(result.transit_total),
+        grand_total:
+          Number(result.physical_total) +
+          Number(result.initial_load_total) +
+          Number(result.transit_total),
+      }
     },
   })
 }

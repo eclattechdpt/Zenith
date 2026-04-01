@@ -16,10 +16,11 @@ import {
 } from "@/components/ui/select"
 import { DataTable } from "@/components/shared/data-table"
 import { EmptyState } from "@/components/shared/empty-state"
+import { formatCurrency } from "@/lib/utils"
 
-import { useInventory } from "../queries"
+import { useInventory, useInitialLoadInventory } from "../queries"
 import { useCategories } from "@/features/productos/queries"
-import type { InventoryVariant } from "../types"
+import type { InventoryVariant, InventoryType } from "../types"
 import { getInventoryColumns } from "./inventory-columns"
 import { InventoryCardMobile } from "./inventory-card-mobile"
 import { StockAdjustmentDialog } from "./stock-adjustment-dialog"
@@ -31,7 +32,13 @@ const LOW_STOCK_TABS = [
   { value: "low", label: "Stock bajo" },
 ] as const
 
-export function InventoryTable() {
+interface InventoryTableProps {
+  inventoryType?: InventoryType
+}
+
+export function InventoryTable({
+  inventoryType = "physical",
+}: InventoryTableProps) {
   const [search, setSearch] = useQueryState("q", parseAsString.withDefault(""))
   const [categoryFilter, setCategoryFilter] = useQueryState(
     "cat",
@@ -42,20 +49,29 @@ export function InventoryTable() {
     parseAsString.withDefault("")
   )
 
-  const {
-    data: variants = [],
-    isLoading,
-    isFetched,
-    isFetching,
-  } = useInventory({
+  const filters = {
     search: search || undefined,
     categoryId: categoryFilter || undefined,
     lowStockOnly: lowStockFilter === "low",
-  })
+  }
+
+  const physicalQuery = useInventory(
+    inventoryType === "physical" ? filters : undefined
+  )
+  const initialLoadQuery = useInitialLoadInventory(
+    inventoryType === "initial_load" ? filters : undefined
+  )
+
+  const activeQuery =
+    inventoryType === "physical" ? physicalQuery : initialLoadQuery
+
+  const variants = activeQuery.data ?? []
+  const isLoading = activeQuery.isLoading
+  const isFetched = activeQuery.isFetched
+  const isFetching = activeQuery.isFetching
 
   const { data: categories = [] } = useCategories()
 
-  // isFetched stays true once the first fetch completes — safe to use directly
   const hasLoadedOnce = isFetched
 
   // Dialog state
@@ -69,11 +85,12 @@ export function InventoryTable() {
         onAdjust: setAdjustTarget,
         onAddStock: setEntryTarget,
         onHistory: setHistoryTarget,
+        inventoryType,
       }),
-    []
+    [inventoryType]
   )
 
-  // Build category options (parent + children grouped)
+  // Build category options
   const categoryOptions = useMemo(() => {
     const parents = categories.filter((c) => !c.parent_id)
     const children = categories.filter((c) => c.parent_id)
@@ -89,13 +106,39 @@ export function InventoryTable() {
     return options
   }, [categories])
 
+  // Calculate total value
+  const totalValue = useMemo(() => {
+    return variants.reduce((sum, v) => {
+      const stock =
+        inventoryType === "initial_load" ? v.initial_stock : v.stock
+      return sum + stock * v.price
+    }, 0)
+  }, [variants, inventoryType])
+
+  const borderColor =
+    inventoryType === "initial_load" ? "border-slate-200" : "border-amber-100"
+  const bgGradient =
+    inventoryType === "initial_load"
+      ? "from-white to-slate-50/30"
+      : "from-white to-amber-50/30"
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: hasLoadedOnce ? 1 : 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="space-y-4 overflow-hidden rounded-2xl border border-amber-100 bg-gradient-to-b from-white to-amber-50/30 p-4 shadow-sm sm:p-6"
+      className={`space-y-4 overflow-hidden rounded-2xl border ${borderColor} bg-gradient-to-b ${bgGradient} p-4 shadow-sm sm:p-6`}
     >
+      {/* Total value */}
+      {hasLoadedOnce && (
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-neutral-500">Valor total del inventario</span>
+          <span className="text-lg font-bold text-neutral-950 tabular-nums">
+            {formatCurrency(totalValue)}
+          </span>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1 sm:max-w-sm">
@@ -128,19 +171,21 @@ export function InventoryTable() {
           </SelectContent>
         </Select>
 
-        <div className="flex gap-1">
-          {LOW_STOCK_TABS.map((tab) => (
-            <Button
-              key={tab.value}
-              variant={lowStockFilter === tab.value ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setLowStockFilter(tab.value || null)}
-              className="text-xs"
-            >
-              {tab.label}
-            </Button>
-          ))}
-        </div>
+        {inventoryType === "physical" && (
+          <div className="flex gap-1">
+            {LOW_STOCK_TABS.map((tab) => (
+              <Button
+                key={tab.value}
+                variant={lowStockFilter === tab.value ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setLowStockFilter(tab.value || null)}
+                className="text-xs"
+              >
+                {tab.label}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -155,6 +200,7 @@ export function InventoryTable() {
               <InventoryCardMobile
                 key={v.id}
                 variant={v}
+                inventoryType={inventoryType}
                 onAdjust={setAdjustTarget}
                 onAddStock={setEntryTarget}
                 onHistory={setHistoryTarget}
@@ -202,14 +248,17 @@ export function InventoryTable() {
       {/* Dialogs */}
       <StockAdjustmentDialog
         variant={adjustTarget}
+        inventoryType={inventoryType}
         onOpenChange={(open) => !open && setAdjustTarget(null)}
       />
       <StockEntryDialog
         variant={entryTarget}
+        inventoryType={inventoryType}
         onOpenChange={(open) => !open && setEntryTarget(null)}
       />
       <MovementHistoryDialog
         variant={historyTarget}
+        inventoryType={inventoryType}
         onOpenChange={(open) => !open && setHistoryTarget(null)}
       />
     </motion.div>

@@ -18,22 +18,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-import { addStock } from "../actions"
-import type { InventoryVariant } from "../types"
+import { addStock, addInitialStock } from "../actions"
+import type { InventoryVariant, InventoryType } from "../types"
 
 interface StockEntryDialogProps {
   variant: InventoryVariant | null
+  inventoryType?: InventoryType
   onOpenChange: (open: boolean) => void
 }
 
 export function StockEntryDialog({
   variant,
+  inventoryType = "physical",
   onOpenChange,
 }: StockEntryDialogProps) {
   return (
     <Dialog open={!!variant} onOpenChange={onOpenChange}>
       {variant && (
-        <StockEntryForm variant={variant} onOpenChange={onOpenChange} />
+        <StockEntryForm
+          variant={variant}
+          inventoryType={inventoryType}
+          onOpenChange={onOpenChange}
+        />
       )}
     </Dialog>
   )
@@ -41,26 +47,31 @@ export function StockEntryDialog({
 
 function StockEntryForm({
   variant,
+  inventoryType,
   onOpenChange,
 }: {
   variant: InventoryVariant
+  inventoryType: InventoryType
   onOpenChange: (open: boolean) => void
 }) {
+  const currentStock =
+    inventoryType === "initial_load" ? variant.initial_stock : variant.stock
   const [quantity, setQuantity] = useState("")
   const [reason, setReason] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const queryClient = useQueryClient()
 
-  const currentStock = variant.stock
   const parsedQty = parseInt(quantity, 10)
   const isValidQty = !isNaN(parsedQty) && parsedQty > 0
   const canSubmit = isValidQty
+
+  const action = inventoryType === "initial_load" ? addInitialStock : addStock
 
   async function handleSubmit() {
     if (!canSubmit) return
     setIsSubmitting(true)
 
-    const result = await addStock({
+    const result = await action({
       product_variant_id: variant.id,
       quantity: parsedQty,
       reason: reason.trim() || null,
@@ -80,6 +91,7 @@ function StockEntryForm({
       `Entrada registrada: +${parsedQty} unidades (${currentStock} → ${currentStock + parsedQty})`
     )
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
+    queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
     queryClient.invalidateQueries({ queryKey: ["movements"] })
     queryClient.invalidateQueries({ queryKey: ["products"] })
     onOpenChange(false)
@@ -95,7 +107,6 @@ function StockEntryForm({
       </DialogHeader>
 
       <div className="space-y-4">
-        {/* Current stock */}
         <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-4 py-3">
           <span className="text-sm text-neutral-500">Stock actual</span>
           <span className="font-semibold text-neutral-950 tabular-nums">
@@ -103,7 +114,6 @@ function StockEntryForm({
           </span>
         </div>
 
-        {/* Quantity to add */}
         <div className="space-y-2">
           <Label htmlFor="entry-quantity">Cantidad a agregar</Label>
           <Input
@@ -119,7 +129,6 @@ function StockEntryForm({
           />
         </div>
 
-        {/* New stock preview */}
         {isValidQty && (
           <div className="flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-3 text-emerald-700">
             <span className="text-sm">Stock resultante</span>
@@ -129,7 +138,6 @@ function StockEntryForm({
           </div>
         )}
 
-        {/* Reason (optional) */}
         <div className="space-y-2">
           <Label htmlFor="entry-reason">Referencia (opcional)</Label>
           <Textarea

@@ -18,22 +18,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-import { adjustStock } from "../actions"
-import type { InventoryVariant } from "../types"
+import { adjustStock, adjustInitialStock } from "../actions"
+import type { InventoryVariant, InventoryType } from "../types"
 
 interface StockAdjustmentDialogProps {
   variant: InventoryVariant | null
+  inventoryType?: InventoryType
   onOpenChange: (open: boolean) => void
 }
 
 export function StockAdjustmentDialog({
   variant,
+  inventoryType = "physical",
   onOpenChange,
 }: StockAdjustmentDialogProps) {
   return (
     <Dialog open={!!variant} onOpenChange={onOpenChange}>
       {variant && (
-        <StockAdjustmentForm variant={variant} onOpenChange={onOpenChange} />
+        <StockAdjustmentForm
+          variant={variant}
+          inventoryType={inventoryType}
+          onOpenChange={onOpenChange}
+        />
       )}
     </Dialog>
   )
@@ -41,27 +47,33 @@ export function StockAdjustmentDialog({
 
 function StockAdjustmentForm({
   variant,
+  inventoryType,
   onOpenChange,
 }: {
   variant: InventoryVariant
+  inventoryType: InventoryType
   onOpenChange: (open: boolean) => void
 }) {
-  const [newStock, setNewStock] = useState(String(variant.stock))
+  const currentStock =
+    inventoryType === "initial_load" ? variant.initial_stock : variant.stock
+  const [newStock, setNewStock] = useState(String(currentStock))
   const [reason, setReason] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const queryClient = useQueryClient()
 
-  const currentStock = variant.stock
   const parsedNew = parseInt(newStock, 10)
   const isValidStock = !isNaN(parsedNew) && parsedNew >= 0
   const difference = isValidStock ? parsedNew - currentStock : 0
   const canSubmit = isValidStock && difference !== 0 && reason.trim().length > 0
 
+  const action =
+    inventoryType === "initial_load" ? adjustInitialStock : adjustStock
+
   async function handleSubmit() {
-    if (!variant || !canSubmit) return
+    if (!canSubmit) return
     setIsSubmitting(true)
 
-    const result = await adjustStock({
+    const result = await action({
       product_variant_id: variant.id,
       new_stock: parsedNew,
       reason: reason.trim(),
@@ -81,6 +93,7 @@ function StockAdjustmentForm({
       `Stock ajustado: ${currentStock} → ${parsedNew} (${difference > 0 ? "+" : ""}${difference})`
     )
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
+    queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
     queryClient.invalidateQueries({ queryKey: ["movements"] })
     queryClient.invalidateQueries({ queryKey: ["products"] })
     onOpenChange(false)
@@ -90,81 +103,77 @@ function StockAdjustmentForm({
 
   return (
     <DialogContent showCloseButton={false}>
-        <DialogHeader>
-          <DialogTitle>Ajustar stock</DialogTitle>
-          <DialogDescription>{productLabel}</DialogDescription>
-        </DialogHeader>
+      <DialogHeader>
+        <DialogTitle>Ajustar stock</DialogTitle>
+        <DialogDescription>{productLabel}</DialogDescription>
+      </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Current stock */}
-          <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-4 py-3">
-            <span className="text-sm text-neutral-500">Stock actual</span>
-            <span className="font-semibold text-neutral-950 tabular-nums">
-              {currentStock}
-            </span>
-          </div>
-
-          {/* New stock */}
-          <div className="space-y-2">
-            <Label htmlFor="new-stock">Stock nuevo</Label>
-            <Input
-              id="new-stock"
-              type="number"
-              min={0}
-              step={1}
-              value={newStock}
-              onChange={(e) => setNewStock(e.target.value)}
-              className="tabular-nums"
-              autoFocus
-            />
-          </div>
-
-          {/* Difference preview */}
-          {isValidStock && difference !== 0 && (
-            <div
-              className={`flex items-center justify-between rounded-lg px-4 py-3 ${
-                difference > 0
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-rose-50 text-rose-700"
-              }`}
-            >
-              <span className="text-sm">Diferencia</span>
-              <span className="font-semibold tabular-nums">
-                {difference > 0 ? "+" : ""}
-                {difference}
-              </span>
-            </div>
-          )}
-
-          {/* Reason */}
-          <div className="space-y-2">
-            <Label htmlFor="reason">
-              Motivo <span className="text-rose-500">*</span>
-            </Label>
-            <Textarea
-              id="reason"
-              placeholder="Ej: Conteo fisico, producto danado, error en registro..."
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              maxLength={500}
-              rows={3}
-            />
-          </div>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-4 py-3">
+          <span className="text-sm text-neutral-500">Stock actual</span>
+          <span className="font-semibold text-neutral-950 tabular-nums">
+            {currentStock}
+          </span>
         </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            disabled={isSubmitting}
-            onClick={() => onOpenChange(false)}
+        <div className="space-y-2">
+          <Label htmlFor="new-stock">Stock nuevo</Label>
+          <Input
+            id="new-stock"
+            type="number"
+            min={0}
+            step={1}
+            value={newStock}
+            onChange={(e) => setNewStock(e.target.value)}
+            className="tabular-nums"
+            autoFocus
+          />
+        </div>
+
+        {isValidStock && difference !== 0 && (
+          <div
+            className={`flex items-center justify-between rounded-lg px-4 py-3 ${
+              difference > 0
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-rose-50 text-rose-700"
+            }`}
           >
-            Cancelar
-          </Button>
-          <Button disabled={!canSubmit || isSubmitting} onClick={handleSubmit}>
-            {isSubmitting && <Loader2 className="animate-spin" />}
-            Ajustar stock
-          </Button>
-        </DialogFooter>
+            <span className="text-sm">Diferencia</span>
+            <span className="font-semibold tabular-nums">
+              {difference > 0 ? "+" : ""}
+              {difference}
+            </span>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="reason">
+            Motivo <span className="text-rose-500">*</span>
+          </Label>
+          <Textarea
+            id="reason"
+            placeholder="Ej: Conteo fisico, producto danado, error en registro..."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            maxLength={500}
+            rows={3}
+          />
+        </div>
+      </div>
+
+      <DialogFooter>
+        <Button
+          variant="outline"
+          disabled={isSubmitting}
+          onClick={() => onOpenChange(false)}
+        >
+          Cancelar
+        </Button>
+        <Button disabled={!canSubmit || isSubmitting} onClick={handleSubmit}>
+          {isSubmitting && <Loader2 className="animate-spin" />}
+          Ajustar stock
+        </Button>
+      </DialogFooter>
     </DialogContent>
   )
 }

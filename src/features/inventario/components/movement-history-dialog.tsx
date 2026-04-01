@@ -27,7 +27,7 @@ import { MOVEMENT_TYPES } from "@/lib/constants"
 import { EmptyState } from "@/components/shared/empty-state"
 
 import { useMovements } from "../queries"
-import type { InventoryVariant, MovementWithDetails } from "../types"
+import type { InventoryVariant, InventoryType, MovementWithDetails } from "../types"
 
 const TYPE_COLORS: Record<string, string> = {
   sale: "bg-rose-50 text-rose-700 border-rose-200",
@@ -40,11 +40,13 @@ const TYPE_COLORS: Record<string, string> = {
 
 interface MovementHistoryDialogProps {
   variant: InventoryVariant | null
+  inventoryType?: InventoryType
   onOpenChange: (open: boolean) => void
 }
 
 export function MovementHistoryDialog({
   variant,
+  inventoryType = "physical",
   onOpenChange,
 }: MovementHistoryDialogProps) {
   const [typeFilter, setTypeFilter] = useState<string>("")
@@ -53,6 +55,7 @@ export function MovementHistoryDialog({
 
   const { data: movements = [], isLoading } = useMovements(
     variant?.id ?? null,
+    inventoryType,
     {
       type: typeFilter || undefined,
       dateFrom: dateFrom || undefined,

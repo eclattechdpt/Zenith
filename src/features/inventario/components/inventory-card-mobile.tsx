@@ -17,10 +17,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { formatCurrency } from "@/lib/utils"
 
-import type { InventoryVariant } from "../types"
+import type { InventoryVariant, InventoryType } from "../types"
 
 interface InventoryCardMobileProps {
   variant: InventoryVariant
+  inventoryType?: InventoryType
   onAdjust?: (variant: InventoryVariant) => void
   onAddStock?: (variant: InventoryVariant) => void
   onHistory?: (variant: InventoryVariant) => void
@@ -50,10 +51,12 @@ function StockBadgeMobile({ stock, stockMin }: { stock: number; stockMin: number
 
 export function InventoryCardMobile({
   variant: v,
+  inventoryType = "physical",
   onAdjust,
   onAddStock,
   onHistory,
 }: InventoryCardMobileProps) {
+  const stockValue = inventoryType === "initial_load" ? v.initial_stock : v.stock
   const variantLabel = v.name || v.sku
 
   return (
@@ -64,7 +67,7 @@ export function InventoryCardMobile({
             <span className="font-semibold text-neutral-950 truncate">
               {v.products.name}
             </span>
-            <StockBadgeMobile stock={v.stock} stockMin={v.stock_min} />
+            <StockBadgeMobile stock={stockValue} stockMin={v.stock_min} />
           </div>
           {v.products.brand && (
             <p className="text-xs text-neutral-500 mt-0.5">{v.products.brand}</p>
@@ -109,7 +112,7 @@ export function InventoryCardMobile({
 
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-3 text-xs text-neutral-500 tabular-nums">
-          <span>Stock: <strong className="text-neutral-950">{v.stock}</strong></span>
+          <span>Stock: <strong className="text-neutral-950">{stockValue}</strong></span>
           <span>Min: {v.stock_min}</span>
         </div>
         <span className="font-semibold text-neutral-950 tabular-nums">

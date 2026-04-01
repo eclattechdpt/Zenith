@@ -21,10 +21,17 @@ import { formatCurrency } from "@/lib/utils"
 
 import type { InventoryVariant } from "../types"
 
+import type { InventoryType } from "../types"
+
 interface InventoryColumnsOptions {
   onAdjust?: (variant: InventoryVariant) => void
   onAddStock?: (variant: InventoryVariant) => void
   onHistory?: (variant: InventoryVariant) => void
+  inventoryType?: InventoryType
+}
+
+function getStockValue(v: InventoryVariant, type: InventoryType = "physical") {
+  return type === "initial_load" ? v.initial_stock : v.stock
 }
 
 function StockBadge({ stock, stockMin }: { stock: number; stockMin: number }) {
@@ -53,6 +60,7 @@ export function getInventoryColumns({
   onAdjust,
   onAddStock,
   onHistory,
+  inventoryType = "physical",
 }: InventoryColumnsOptions = {}): ColumnDef<InventoryVariant>[] {
   return [
     {
@@ -131,7 +139,8 @@ export function getInventoryColumns({
       ),
     },
     {
-      accessorKey: "stock",
+      id: "stock_value",
+      accessorFn: (row) => getStockValue(row, inventoryType),
       size: 80,
       minSize: 70,
       header: ({ column }) => (
@@ -147,7 +156,7 @@ export function getInventoryColumns({
       ),
       cell: ({ row }) => (
         <span className="font-semibold text-neutral-950 tabular-nums">
-          {row.original.stock}
+          {getStockValue(row.original, inventoryType)}
         </span>
       ),
     },
@@ -169,7 +178,7 @@ export function getInventoryColumns({
       header: "Estado",
       cell: ({ row }) => (
         <StockBadge
-          stock={row.original.stock}
+          stock={getStockValue(row.original, inventoryType)}
           stockMin={row.original.stock_min}
         />
       ),

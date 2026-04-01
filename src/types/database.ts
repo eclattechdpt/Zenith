@@ -269,6 +269,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          inventory_source: string
           product_variant_id: string
           quantity: number
           reason: string | null
@@ -283,6 +284,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          inventory_source?: string
           product_variant_id: string
           quantity: number
           reason?: string | null
@@ -297,6 +299,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          inventory_source?: string
           product_variant_id?: string
           quantity?: number
           reason?: string | null
@@ -411,6 +414,7 @@ export type Database = {
           deleted_at: string | null
           expires_at: string | null
           id: string
+          initial_stock: number
           is_active: boolean
           name: string | null
           price: number
@@ -429,6 +433,7 @@ export type Database = {
           deleted_at?: string | null
           expires_at?: string | null
           id?: string
+          initial_stock?: number
           is_active?: boolean
           name?: string | null
           price?: number
@@ -447,6 +452,7 @@ export type Database = {
           deleted_at?: string | null
           expires_at?: string | null
           id?: string
+          initial_stock?: number
           is_active?: boolean
           name?: string | null
           price?: number
@@ -789,6 +795,93 @@ export type Database = {
           },
         ]
       }
+      transit_week_items: {
+        Row: {
+          created_at: string
+          id: string
+          line_total: number
+          product_variant_id: string
+          quantity: number
+          transit_week_id: string
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          line_total: number
+          product_variant_id: string
+          quantity: number
+          transit_week_id: string
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          line_total?: number
+          product_variant_id?: string
+          quantity?: number
+          transit_week_id?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transit_week_items_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transit_week_items_transit_week_id_fkey"
+            columns: ["transit_week_id"]
+            isOneToOne: false
+            referencedRelation: "transit_weeks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transit_weeks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          label: string | null
+          notes: string | null
+          tenant_id: string
+          total_value: number
+          updated_at: string
+          week_number: number
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          label?: string | null
+          notes?: string | null
+          tenant_id: string
+          total_value?: number
+          updated_at?: string
+          week_number: number
+          year: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          label?: string | null
+          notes?: string | null
+          tenant_id?: string
+          total_value?: number
+          updated_at?: string
+          week_number?: number
+          year?: number
+        }
+        Relationships: []
+      }
       variant_option_assignments: {
         Row: {
           id: string
@@ -907,6 +1000,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_sale_transaction: {
+        Args: {
+          p_created_by: string
+          p_customer_id: string
+          p_discount_amount: number
+          p_items: Json
+          p_notes: string
+          p_payments: Json
+          p_subtotal: number
+          p_tenant_id: string
+          p_total: number
+        }
+        Returns: Json
+      }
       generate_sequential_number: {
         Args: {
           p_column: string
@@ -916,6 +1023,7 @@ export type Database = {
         }
         Returns: string
       }
+      get_inventory_summary: { Args: { p_tenant_id: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never
