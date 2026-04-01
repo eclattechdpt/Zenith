@@ -1,28 +1,35 @@
 "use client"
 
-import { memo } from "react"
+import { memo, useState, useCallback, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Plus, Pencil } from "lucide-react"
-import { motion } from "motion/react"
-import { Button } from "@/components/ui/button"
+import { Plus, Pencil, AlertCircle, Check } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
 import { formatCurrency } from "@/lib/utils"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import type { POSProductWithImage } from "../queries"
 
 interface POSProductCardProps {
   product: POSProductWithImage
   onAdd: (product: POSProductWithImage) => void
+  /** Compact mode for carousel cards */
+  compact?: boolean
 }
 
 function getInitials(name: string) {
-  return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
 }
 
 const INITIAL_COLORS = [
-  { bg: "from-rose-100 to-rose-200", text: "text-rose-400" },
-  { bg: "from-teal-100 to-teal-200", text: "text-teal-500" },
-  { bg: "from-blush-100 to-blush-200", text: "text-blush-500" },
-  { bg: "from-neutral-100 to-neutral-200", text: "text-neutral-500" },
+  { bg: "bg-rose-50", text: "text-rose-200" },
+  { bg: "bg-teal-50", text: "text-teal-200" },
+  { bg: "bg-blush-50", text: "text-blush-200" },
+  { bg: "bg-amber-50", text: "text-amber-200" },
 ]
 
 function getColorIndex(name: string) {
@@ -32,7 +39,10 @@ function getColorIndex(name: string) {
 }
 
 function getAvailableStock(product: POSProductWithImage) {
-  return product.product_variants.reduce((sum, v) => sum + (v.stock - v.reserved_stock), 0)
+  return product.product_variants.reduce(
+    (sum, v) => sum + (v.stock - v.reserved_stock),
+    0
+  )
 }
 
 function getDisplayPrice(product: POSProductWithImage) {
@@ -43,46 +53,142 @@ function getDisplayPrice(product: POSProductWithImage) {
   return `${formatCurrency(min)} - ${formatCurrency(max)}`
 }
 
-export const POSProductCard = memo(function POSProductCard({ product, onAdd }: POSProductCardProps) {
+export const POSProductCard = memo(function POSProductCard({
+  product,
+  onAdd,
+  compact = false,
+}: POSProductCardProps) {
   const available = getAvailableStock(product)
   const outOfStock = available <= 0
+  const lowStock = available > 0 && available <= 5
 
   const colorIdx = getColorIndex(product.name)
-  const initColor = INITIAL_COLORS[colorIdx]
+  const palette = INITIAL_COLORS[colorIdx]
+
+  // ── Add-to-cart feedback ──
+  const [justAdded, setJustAdded] = useState(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleAdd = useCallback(() => {
+    if (outOfStock || justAdded) return
+    onAdd(product)
+    setJustAdded(true)
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(() => setJustAdded(false), 1000)
+  }, [onAdd, product, outOfStock, justAdded])
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`group relative rounded-xl border border-neutral-200 bg-white p-3 shadow-xs transition-shadow hover:shadow-md ${outOfStock ? "opacity-50" : ""}`}
+      whileHover={outOfStock ? undefined : { y: -3, transition: { type: "spring", stiffness: 300, damping: 20 } }}
+      whileTap={outOfStock ? undefined : { scale: 0.98 }}
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-transparent bg-white shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-rose-200 hover:shadow-md hover:shadow-rose-500/8 ${
+        outOfStock ? "opacity-50 grayscale-[30%]" : ""
+      }`}
     >
+      {/* Edit link */}
       <Link
         href={`/productos/${product.id}`}
-        className="absolute right-2 top-2 z-10 rounded-md p-1 text-neutral-400 opacity-0 transition-opacity hover:text-neutral-600 group-hover:opacity-100"
+        className="absolute right-2.5 top-2.5 z-10 rounded-lg bg-white/80 p-1.5 text-neutral-400 opacity-0 backdrop-blur-sm transition-all hover:text-neutral-600 group-hover:opacity-100"
       >
-        <Pencil className="h-3.5 w-3.5" />
+        <Pencil className="h-3 w-3" />
       </Link>
 
-      <div className={`mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-lg bg-gradient-to-br ${initColor.bg} sm:h-20 sm:w-20`}>
+      {/* Low stock badge */}
+      {lowStock && (
+        <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-600">
+          <AlertCircle className="h-3 w-3" />
+          {available}
+        </span>
+      )}
+
+      {/* Visual area — dominant */}
+      <div
+        className={`flex items-center justify-center ${palette.bg} ${
+          compact ? "h-36 sm:h-40" : "h-40 sm:h-48"
+        }`}
+      >
         {product.image_url ? (
-          <Image src={product.image_url} alt={product.name} width={80} height={80} className="h-full w-full rounded-lg object-cover" />
+          <Image
+            src={product.image_url}
+            alt={product.name}
+            width={200}
+            height={200}
+            className="h-full w-full object-cover"
+          />
         ) : (
-          <span className={`text-lg font-bold ${initColor.text} sm:text-xl`}>{getInitials(product.name)}</span>
+          <span
+            className={`select-none font-black tracking-tight ${palette.text} ${
+              compact ? "text-[42px] sm:text-[48px]" : "text-[52px] sm:text-[60px]"
+            }`}
+          >
+            {getInitials(product.name)}
+          </span>
         )}
       </div>
 
-      <p className="truncate text-center text-[11px] font-semibold tracking-[0.3px] text-neutral-800">{product.name}</p>
-      <p className="text-center text-sm font-extrabold tabular-nums tracking-[-0.5px] text-rose-600">{getDisplayPrice(product)}</p>
+      {/* Info — minimal */}
+      <div className="flex flex-1 flex-col p-4 pt-3.5">
+        <p className="truncate text-[13px] font-semibold leading-tight text-neutral-800">
+          {product.name}
+        </p>
+        {product.brand && (
+          <p className="mt-0.5 truncate text-[11px] font-medium text-neutral-400">
+            {product.brand}
+          </p>
+        )}
 
-      <Button
-        size="sm"
-        disabled={outOfStock}
-        onClick={() => onAdd(product)}
-        className="mt-2 h-7 w-full bg-rose-500 text-xs font-semibold text-white hover:bg-rose-600 disabled:opacity-40"
-      >
-        <Plus className="mr-1 h-3 w-3" />
-        {outOfStock ? "Agotado" : "Agregar"}
-      </Button>
+        <div className="mt-auto flex items-end justify-between gap-2 pt-4">
+          <p className="text-[16px] font-extrabold tabular-nums tracking-[-0.3px] text-rose-600">
+            {getDisplayPrice(product)}
+          </p>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  disabled={outOfStock}
+                  onClick={handleAdd}
+                  className={`relative flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl transition-colors active:scale-[0.95] disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-300 ${
+                    justAdded
+                      ? "bg-emerald-100 text-emerald-600"
+                      : "bg-rose-100 text-rose-500 hover:bg-rose-200"
+                  }`}
+                />
+              }
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {justAdded ? (
+                  <motion.span
+                    key="check"
+                    initial={{ scale: 0, rotate: -90 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: 90 }}
+                    transition={{ type: "spring", stiffness: 700, damping: 22 }}
+                    className="flex items-center justify-center"
+                  >
+                    <Check className="h-4 w-4" />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="plus"
+                    initial={{ scale: 0, rotate: 90 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: -90 }}
+                    transition={{ type: "spring", stiffness: 700, damping: 22 }}
+                    className="flex items-center justify-center"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={6}>
+              {outOfStock ? "Agotado" : justAdded ? "Agregado" : "Agregar al carrito"}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
     </motion.div>
   )
 })

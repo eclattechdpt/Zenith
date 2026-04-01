@@ -43,6 +43,16 @@ Los archivos de spec están en `/docs/spec/`. SIEMPRE léelos antes de implement
 - `06-SEED-DATA.sql` — Datos iniciales (ya ejecutado en Supabase)
 - `07-API-SPEC.md` — Server Actions, Zod schemas, Supabase queries, constantes
 
+## Contexto de diseño
+
+Los archivos en `/Context/` definen el toolbox visual del sistema. Consultarlos al construir cualquier componente UI:
+
+- `zenith-design-system.xml` — Tokens: colores, tipografía, spacing, shadows, motion, radii, z-index, breakpoints
+- `iconography.xml` — Catálogo de íconos Lucide con mapeo concepto → nombre
+- `ui-copy.md` — Tono, microcopy, glosario del dominio, formatos de datos
+
+**Estos archivos definen QUÉ herramientas existen, no DÓNDE usarlas.** Usar los tokens creativamente — no aplicar colores o íconos de forma mecánica ni predecible.
+
 ## Comandos
 
 ```bash

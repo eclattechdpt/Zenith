@@ -162,6 +162,7 @@ export function Sidebar() {
                 alt="enith"
                 width={95}
                 height={31}
+                priority
                 className="shrink-0"
               />
             </motion.span>
@@ -178,56 +179,56 @@ export function Sidebar() {
                   ? pathname === "/"
                   : pathname.startsWith(item.href)
 
-              const link = (
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "group relative flex items-center gap-3 py-3 pl-3 pr-4 text-[13px] transition-colors duration-[200ms]",
-                    isActive
-                      ? "font-semibold"
-                      : "font-medium text-neutral-500 hover:text-neutral-800"
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="sidebar-active"
-                      className="absolute inset-0 rounded-l-[22px] bg-white"
-                      style={{ overflow: "visible", filter: "drop-shadow(2px 0 3px rgba(0,0,0,0.06))" }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 32,
-                        mass: 0.8,
-                      }}
-                    >
-                      <ScoopTop />
-                      <ScoopBottom />
-                    </motion.div>
-                  )}
-
-                  <span className="relative z-10 flex items-center gap-3">
-                    <Icon
-                      className={cn(
-                        "size-[17px] shrink-0 transition-colors duration-[200ms]",
-                        isActive ? "text-rose-500" : "text-neutral-400 group-hover:text-neutral-600"
-                      )}
-                      strokeWidth={isActive ? 2 : 1.5}
-                    />
-                    <motion.span
-                      data-sidebar-text
-                      animate={{ opacity: collapsed ? 0 : 1 }}
-                      transition={textFade}
-                      className={cn("whitespace-nowrap", isActive ? "text-neutral-900" : undefined)}
-                    >
-                      {item.label}
-                    </motion.span>
-                  </span>
-                </Link>
-              )
-
               return (
                 <SidebarTooltip key={item.href} collapsed={collapsed}>
-                  <TooltipTrigger render={link} />
+                  <TooltipTrigger
+                    render={
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "group relative flex items-center gap-3 py-3 pl-3 pr-4 text-[13px] transition-colors duration-[200ms]",
+                          isActive
+                            ? "font-semibold"
+                            : "font-medium text-neutral-500 hover:text-neutral-800"
+                        )}
+                      >
+                        {isActive && (
+                          <motion.div
+                            layoutId="sidebar-active"
+                            className="absolute inset-0 rounded-l-[22px] bg-white"
+                            style={{ overflow: "visible", filter: "drop-shadow(2px 0 3px rgba(0,0,0,0.06))" }}
+                            transition={{
+                              type: "spring",
+                              stiffness: 300,
+                              damping: 32,
+                              mass: 0.8,
+                            }}
+                          >
+                            <ScoopTop />
+                            <ScoopBottom />
+                          </motion.div>
+                        )}
+
+                        <span className="relative z-10 flex items-center gap-3">
+                          <Icon
+                            className={cn(
+                              "size-[17px] shrink-0 transition-colors duration-[200ms]",
+                              isActive ? "text-rose-500" : "text-neutral-400 group-hover:text-neutral-600"
+                            )}
+                            strokeWidth={isActive ? 2 : 1.5}
+                          />
+                          <motion.span
+                            data-sidebar-text
+                            animate={{ opacity: collapsed ? 0 : 1 }}
+                            transition={textFade}
+                            className={cn("whitespace-nowrap", isActive ? "text-neutral-900" : undefined)}
+                          >
+                            {item.label}
+                          </motion.span>
+                        </span>
+                      </Link>
+                    }
+                  />
                   <TooltipContent side="right" sideOffset={12}>
                     {item.label}
                   </TooltipContent>

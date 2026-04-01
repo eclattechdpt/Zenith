@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ZENITH Design System v2.0
-  AI-readable token reference for LLM code generation.
-  When generating UI for ZENITH, use ONLY these tokens.
+  AI-readable token reference.
   CSS variable names follow the pattern: --{category}-{step}
 -->
 
@@ -34,8 +33,7 @@
   <!-- ════════════════════════════════════════════ -->
   <color>
 
-    <!-- ROSE — Primary brand color. CTAs, buttons, links, active states, prices, focus rings, badges. -->
-    <palette name="rose" role="primary">
+    <palette name="rose">
       <swatch step="50"  hex="#FFF0F3" hsb="348/6/100"  var="--rose-50"  on="dark-text"/>
       <swatch step="100" hex="#FFE0E8" hsb="345/12/100" var="--rose-100" on="dark-text"/>
       <swatch step="200" hex="#FFC2D4" hsb="343/24/100" var="--rose-200" on="dark-text"/>
@@ -49,8 +47,7 @@
       <swatch step="950" hex="#4C0519" hsb="340/93/30"  var="--rose-950" on="white-text"/>
     </palette>
 
-    <!-- TEAL — Secondary. Navbar, sidebar, headers, primary text, charts accent, secondary buttons. -->
-    <palette name="teal" role="secondary">
+    <palette name="teal">
       <swatch step="50"  hex="#EFFCFC" hsb="180/4/99"   var="--teal-50"  on="dark-text"/>
       <swatch step="100" hex="#D6F6F8" hsb="184/14/97"  var="--teal-100" on="dark-text"/>
       <swatch step="200" hex="#B2ECF0" hsb="184/26/94"  var="--teal-200" on="dark-text"/>
@@ -64,8 +61,8 @@
       <swatch step="950" hex="#0F2830" hsb="195/68/19"  var="--teal-950" on="white-text"/>
     </palette>
 
-    <!-- NEUTRAL — Warm grays (subtone ~H25-30°). Backgrounds, borders, text, placeholders, disabled states. -->
-    <palette name="neutral" role="foundation">
+    <!-- Warm grays · subtone ~H25-30° -->
+    <palette name="neutral">
       <swatch step="50"  hex="#FDFBFA" hsb="20/2/99"   var="--neutral-50"  on="dark-text"/>
       <swatch step="100" hex="#F7F3F0" hsb="26/4/97"   var="--neutral-100" on="dark-text"/>
       <swatch step="200" hex="#EDE7E2" hsb="27/5/93"   var="--neutral-200" on="dark-text"/>
@@ -79,8 +76,7 @@
       <swatch step="950" hex="#1A1714" hsb="30/23/10"  var="--neutral-950" on="white-text"/>
     </palette>
 
-    <!-- BLUSH — Decorative accent. Promo banners, featured cards, overlays, soft selected states. -->
-    <palette name="blush" role="accent">
+    <palette name="blush">
       <swatch step="50"  hex="#FFF8F9" hsb="350/3/100"  var="--blush-50"  on="dark-text"/>
       <swatch step="100" hex="#FFF0F2" hsb="349/6/100"  var="--blush-100" on="dark-text"/>
       <swatch step="200" hex="#FFDDE3" hsb="349/13/100" var="--blush-200" on="dark-text"/>
@@ -93,24 +89,24 @@
       <swatch step="900" hex="#7A3A4C" hsb="343/52/48"  var="--blush-900" on="white-text"/>
     </palette>
 
-    <!-- SEMANTIC — System states. Each has 3 variants: light (bg), default (icon/border), dark (text). -->
+    <!-- SEMANTIC — 3 variants per state: light, default, dark -->
     <semantic>
-      <state name="success" use="Payment completed, stock OK, confirmations">
+      <state name="success">
         <variant role="light" hex="#F0FDF4" var="--success-light"/>
         <variant role="default" hex="#16A34A" var="--success"/>
         <variant role="dark" hex="#166534" var="--success-dark"/>
       </state>
-      <state name="warning" use="Low stock, expiring discounts, alerts">
+      <state name="warning">
         <variant role="light" hex="#FEFCE8" var="--warning-light"/>
         <variant role="default" hex="#CA8A04" var="--warning"/>
         <variant role="dark" hex="#854D0E" var="--warning-dark"/>
       </state>
-      <state name="error" use="Payment rejected, invalid data, out of stock">
+      <state name="error">
         <variant role="light" hex="#FEF2F2" var="--error-light"/>
         <variant role="default" hex="#DC2626" var="--error"/>
         <variant role="dark" hex="#991B1B" var="--error-dark"/>
       </state>
-      <state name="info" use="Active promotions, tips, neutral notifications">
+      <state name="info">
         <variant role="light" hex="#EFF6FF" var="--info-light"/>
         <variant role="default" hex="#2563EB" var="--info"/>
         <variant role="dark" hex="#1E40AF" var="--info-dark"/>
@@ -124,13 +120,13 @@
   <!-- ════════════════════════════════════════════ -->
   <typography>
 
-    <!-- DISPLAY — Zodiak. For hero headlines, feature titles, branding moments. -->
+    <!-- DISPLAY — Zodiak -->
     <style name="display-xl" font="Zodiak" weight="500" size="64px" line-height="68px" tracking="-2px"/>
     <style name="display-lg" font="Zodiak" weight="500" size="48px" line-height="52px" tracking="-1.5px"/>
     <style name="display-md" font="Zodiak" weight="500" size="36px" line-height="40px" tracking="-1px"/>
     <style name="display-sm" font="Zodiak" weight="500" size="28px" line-height="34px" tracking="-0.5px"/>
 
-    <!-- HEADINGS — Plus Jakarta Sans. For section headers, card titles, UI structure. -->
+    <!-- HEADINGS — Plus Jakarta Sans -->
     <style name="h1" font="Plus Jakarta Sans" weight="700" size="30px" line-height="38px" tracking="-0.5px"/>
     <style name="h2" font="Plus Jakarta Sans" weight="700" size="24px" line-height="32px" tracking="-0.3px"/>
     <style name="h3" font="Plus Jakarta Sans" weight="600" size="20px" line-height="28px" tracking="0"/>
@@ -138,14 +134,14 @@
     <style name="h5" font="Plus Jakarta Sans" weight="600" size="14px" line-height="20px" tracking="0"/>
     <style name="h6" font="Plus Jakarta Sans" weight="600" size="12px" line-height="18px" tracking="0.2px"/>
 
-    <!-- BODY — Plus Jakarta Sans. For paragraph text, descriptions, content. -->
+    <!-- BODY — Plus Jakarta Sans -->
     <style name="body-lg" font="Plus Jakarta Sans" weight="400" size="16px" line-height="26px" tracking="0"/>
     <style name="body-md" font="Plus Jakarta Sans" weight="400" size="14px" line-height="22px" tracking="0"/>
     <style name="body-sm" font="Plus Jakarta Sans" weight="400" size="13px" line-height="20px" tracking="0"/>
 
-    <!-- UI ELEMENTS — Plus Jakarta Sans. For labels, captions, overlines, badges, buttons. -->
-    <style name="caption"  font="Plus Jakarta Sans" weight="500" size="12px" line-height="16px" tracking="0" color="--neutral-600"/>
-    <style name="overline" font="Plus Jakarta Sans" weight="700" size="10px" line-height="14px" tracking="2.5px" transform="uppercase" color="--neutral-500"/>
+    <!-- UI ELEMENTS — Plus Jakarta Sans -->
+    <style name="caption"  font="Plus Jakarta Sans" weight="500" size="12px" line-height="16px" tracking="0"/>
+    <style name="overline" font="Plus Jakarta Sans" weight="700" size="10px" line-height="14px" tracking="2.5px" transform="uppercase"/>
     <style name="label"    font="Plus Jakarta Sans" weight="600" size="11px" line-height="14px" tracking="0.3px"/>
     <style name="badge"    font="Plus Jakarta Sans" weight="700" size="10px" line-height="10px" tracking="0.5px"/>
     <style name="price"    font="Plus Jakarta Sans" weight="800" size="24px" line-height="24px" tracking="-0.5px"/>
@@ -225,16 +221,16 @@
   <!-- ════════════════════════════════════════════ -->
   <motion>
     <easing>
-      <curve name="ease-default" value="cubic-bezier(0.4, 0, 0.2, 1)" var="--ease-default" use="General transitions"/>
-      <curve name="ease-in"      value="cubic-bezier(0.4, 0, 1, 1)"   var="--ease-in"      use="Elements exiting view"/>
-      <curve name="ease-out"     value="cubic-bezier(0, 0, 0.2, 1)"   var="--ease-out"      use="Elements entering view"/>
-      <curve name="ease-bounce"  value="cubic-bezier(0.34, 1.56, 0.64, 1)" var="--ease-bounce" use="Playful feedback, toast entry"/>
+      <curve name="ease-default" value="cubic-bezier(0.4, 0, 0.2, 1)" var="--ease-default"/>
+      <curve name="ease-in"      value="cubic-bezier(0.4, 0, 1, 1)"   var="--ease-in"/>
+      <curve name="ease-out"     value="cubic-bezier(0, 0, 0.2, 1)"   var="--ease-out"/>
+      <curve name="ease-bounce"  value="cubic-bezier(0.34, 1.56, 0.64, 1)" var="--ease-bounce"/>
     </easing>
     <duration>
-      <token name="duration-fast"   value="100ms" var="--duration-fast"   use="Hover color, opacity"/>
-      <token name="duration-normal" value="200ms" var="--duration-normal" use="Button press, toggle, tooltip"/>
-      <token name="duration-slow"   value="350ms" var="--duration-slow"   use="Expand/collapse, slide panel"/>
-      <token name="duration-slower" value="500ms" var="--duration-slower" use="Page transition, modal entry"/>
+      <token name="duration-fast"   value="100ms" var="--duration-fast"/>
+      <token name="duration-normal" value="200ms" var="--duration-normal"/>
+      <token name="duration-slow"   value="350ms" var="--duration-slow"/>
+      <token name="duration-slower" value="500ms" var="--duration-slower"/>
     </duration>
   </motion>
 

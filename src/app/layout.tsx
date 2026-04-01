@@ -21,6 +21,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Zenith POS",
   description: "Sistema de punto de venta inteligente",
+  icons: {
+    icon: "/PinkIcon.svg",
+  },
 }
 
 export default function RootLayout({

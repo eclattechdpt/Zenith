@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ZENITH Iconography v1.0
-  Consultar cuando: se necesite usar un ícono en cualquier parte de la UI.
   Librería base: Lucide Icons (https://lucide.dev)
-  Todos los íconos heredan currentColor salvo excepciones documentadas.
 -->
 
 <zenith_iconography version="1.0" product="POS Cosmetics" brand="ZENITH">
@@ -16,56 +14,30 @@
     url="https://lucide.dev"
     package="lucide-react"
     version="latest"
-    license="ISC">
-    <justification>
-      Lucide es la librería de íconos más popular y activa del ecosistema React (2026).
-      Estilo limpio de trazo consistente que complementa la tipografía Plus Jakarta Sans de ZENITH.
-      Más de 1,600 íconos con tree-shaking nativo — solo se incluyen los íconos usados.
-      Es el default de shadcn/ui, lo que facilita integración si se usa ese sistema de componentes.
-      Soporte para personalizar color, tamaño y stroke-width via props.
-    </justification>
-  </library>
+    license="ISC"/>
 
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- ESTILO DE TRAZO                                          -->
   <!-- ════════════════════════════════════════════════════════ -->
   <stroke>
-    <weight default="1.75" range="1.5-2.5" note="1.75 para UI general. 2 para emphasis (nav activa). 1.5 para íconos decorativos grandes."/>
+    <weight default="1.75" range="1.5-2.5"/>
     <line-cap value="round"/>
     <line-join value="round"/>
-    <fill value="none" note="Nunca usar fill en íconos UI. Solo stroke."/>
+    <fill value="none"/>
   </stroke>
 
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- TAMAÑOS                                                  -->
   <!-- ════════════════════════════════════════════════════════ -->
   <sizes grid="24px">
-    <size name="xs" value="14px" use="Dentro de badges, indicadores pequeños"/>
-    <size name="sm" value="16px" use="Dentro de botones sm, inputs sm, tabla compacta"/>
-    <size name="md" value="18px" use="Dentro de botones md, inputs md, nav items. Tamaño por defecto."/>
-    <size name="lg" value="20px" use="Dentro de botones lg, encabezados, cards"/>
-    <size name="xl" value="24px" use="Íconos standalone, nav principal, cards de stat"/>
-    <size name="2xl" value="32px" use="Empty states, onboarding, íconos hero"/>
-    <size name="3xl" value="48px" use="Empty states grandes, errores de página completa"/>
+    <size name="xs" value="14px"/>
+    <size name="sm" value="16px"/>
+    <size name="md" value="18px" default="true"/>
+    <size name="lg" value="20px"/>
+    <size name="xl" value="24px"/>
+    <size name="2xl" value="32px"/>
+    <size name="3xl" value="48px"/>
   </sizes>
-
-  <!-- ════════════════════════════════════════════════════════ -->
-  <!-- COLORES                                                  -->
-  <!-- ════════════════════════════════════════════════════════ -->
-  <colors>
-    <rule name="inherit" default="true">
-      Los íconos heredan el color del texto de su contexto via currentColor.
-      No asignar color directamente al ícono salvo excepciones.
-    </rule>
-    <exception context="nav-item-active" color="#FFFFFF"/>
-    <exception context="stat-card-icon" color="--rose-500"/>
-    <exception context="success-toast" color="--success"/>
-    <exception context="warning-toast" color="--warning"/>
-    <exception context="error-toast" color="--error"/>
-    <exception context="info-toast" color="--info"/>
-    <exception context="empty-state" color="--neutral-300"/>
-    <exception context="color-swatch" note="No aplica — el swatch usa shade_hex del ProductVariant"/>
-  </colors>
 
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- CATÁLOGO POS — Mapeo concepto → ícono Lucide             -->
@@ -88,14 +60,14 @@
 
   <!-- PRODUCTO -->
   <category name="producto">
-    <icon concept="producto"        lucide="sparkles"          aliases="cosmético, lipstick" note="Sparkles evoca belleza/cosméticos sin ser literal."/>
+    <icon concept="producto"        lucide="sparkles"          aliases="cosmético, lipstick"/>
     <icon concept="categoría"       lucide="layers"            aliases="category, grupo"/>
     <icon concept="etiqueta"        lucide="tag"               aliases="label, marca"/>
     <icon concept="código de barras" lucide="scan-barcode"     aliases="barcode, escanear"/>
     <icon concept="imagen"          lucide="image"             aliases="foto, picture"/>
     <icon concept="color/tono"      lucide="palette"           aliases="shade, swatch"/>
     <icon concept="variante"        lucide="copy"              aliases="variant, duplicado"/>
-    <icon concept="acabado"         lucide="droplets"          aliases="finish, textura" note="Evoca acabados como matte, shimmer, gloss."/>
+    <icon concept="acabado"         lucide="droplets"          aliases="finish, textura"/>
   </category>
 
   <!-- CARRITO / VENTA -->
@@ -164,7 +136,7 @@
     <icon concept="error"           lucide="x-circle"          aliases="fail, fallo"/>
     <icon concept="información"     lucide="info"              aliases="info, ayuda"/>
     <icon concept="en progreso"     lucide="clock"             aliases="pending, esperando"/>
-    <icon concept="cargando"        lucide="loader-2"          aliases="loading, spinner" note="Usar con animación rotate continua."/>
+    <icon concept="cargando"        lucide="loader-2"          aliases="loading, spinner"/>
   </category>
 
   <!-- DASHBOARD / REPORTES -->
@@ -203,29 +175,5 @@
     <icon concept="salida efectivo" lucide="arrow-up-circle"   aliases="cash-out"/>
     <icon concept="caja"            lucide="landmark"          aliases="register, caja-registradora"/>
   </category>
-
-  <!-- ════════════════════════════════════════════════════════ -->
-  <!-- USO EN CÓDIGO                                            -->
-  <!-- ════════════════════════════════════════════════════════ -->
-  <usage lang="jsx">
-    <![CDATA[
-import { ShoppingCart, Search, Plus } from 'lucide-react';
-
-// Uso básico — hereda color del contexto
-<Search size={18} strokeWidth={1.75} />
-
-// Con color explícito (solo en excepciones documentadas)
-<CheckCircle size={20} strokeWidth={1.75} className="text-success" />
-
-// Dentro de un botón
-<Button variant="primary" size="md">
-  <ShoppingCart size={18} strokeWidth={1.75} />
-  Cobrar $1,805
-</Button>
-
-// Spinner de carga (loading state)
-<Loader2 size={18} strokeWidth={1.75} className="animate-spin" />
-    ]]>
-  </usage>
 
 </zenith_iconography>

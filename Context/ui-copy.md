@@ -1,8 +1,5 @@
 # ZENITH — UI Copy & Microcopy
 
-> **Consultar cuando**: se escriba cualquier texto visible en la interfaz.
-> Este archivo es fuente de verdad para todo el copy del sistema. Nada de texto en la UI se inventa — se busca aquí primero.
-
 ---
 
 ## 1. Tono general
@@ -157,7 +154,7 @@ Se reintegrará $1,805.00 y el stock se actualizará.
 
 ## 3. Glosario de términos del dominio
 
-Estos son los términos que se usan en la UI. Si un término no está aquí, no se usa.
+Términos del dominio en la UI.
 
 | Concepto | Término en UI | Nunca usar |
 |----------|---------------|------------|
