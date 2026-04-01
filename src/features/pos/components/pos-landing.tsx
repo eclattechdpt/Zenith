@@ -141,13 +141,17 @@ export function POSLanding() {
   }, [])
 
   // ── Print trigger from wizard ──
-  const triggerPrint = useCallback(() => {
-    // The wizard's confirmation step calls this after sale is complete.
-    // We give a small delay so the receipt ref is painted in the DOM.
-    setTimeout(() => {
-      handlePrint()
-    }, 200)
-  }, [handlePrint])
+  const triggerPrint = useCallback(
+    (data: ReceiptData) => {
+      // Set receipt data so the hidden SaleReceipt renders,
+      // then give a small delay so the receipt ref is painted in the DOM.
+      setReceiptData(data)
+      setTimeout(() => {
+        handlePrint()
+      }, 200)
+    },
+    [handlePrint]
+  )
 
   // ── Today's date ──
   const todayLabel = useMemo(

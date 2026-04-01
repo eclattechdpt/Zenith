@@ -17,6 +17,7 @@ import { usePOSStore } from "../store"
 import { createSale, createPendingSale, completePendingSale } from "../actions"
 import type { PendingSaleWithSummary, CartPayment } from "../types"
 
+import type { ReceiptData } from "./sale-receipt"
 import { WizardCustomerStep } from "./wizard-customer-step"
 import { WizardPaymentStep } from "./wizard-payment-step"
 import { WizardConfirmationStep } from "./wizard-confirmation-step"
@@ -32,7 +33,7 @@ interface POSSaleWizardProps {
   onClose: () => void
   mode: WizardMode
   pendingSale?: PendingSaleWithSummary | null
-  onPrint?: () => void
+  onPrint?: (data: ReceiptData) => void
 }
 
 // ── Step definitions per mode ──
@@ -72,6 +73,7 @@ export function POSSaleWizard({
   const globalDiscount = usePOSStore((s) => s.globalDiscount)
   const notes = usePOSStore((s) => s.notes)
   const getTotal = usePOSStore((s) => s.getTotal)
+  const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const clear = usePOSStore((s) => s.clear)
 
   const steps = STEPS_BY_MODE[mode]
@@ -226,8 +228,54 @@ export function POSSaleWizard({
   // ── Print ──
 
   const handlePrint = useCallback(() => {
-    onPrint?.()
-  }, [onPrint])
+    if (!saleResult || !onPrint) return
+
+    const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
+
+    if (mode === "complete-pending" && pendingSale) {
+      // Build receipt from pending sale data
+      onPrint({
+        saleNumber: saleResult.sale_number,
+        date: new Date().toISOString(),
+        customerName: pendingSale.customer?.name ?? null,
+        items: pendingSale.items.map((i) => ({
+          product_name: i.product_name,
+          variant_label: i.variant_label,
+          quantity: i.quantity,
+          unit_price: i.unit_price,
+          discount: i.discount,
+          line_total: i.line_total,
+        })),
+        payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
+        subtotal: pendingSale.subtotal,
+        discountAmount: pendingSale.discount_amount,
+        total: pendingSale.total,
+        change: Math.max(0, paymentTotal - pendingSale.total),
+      })
+    } else {
+      // Build receipt from cart data
+      const subtotal = getTotal() + getItemsDiscount() + globalDiscount
+      const totalVal = getTotal()
+      onPrint({
+        saleNumber: saleResult.sale_number,
+        date: new Date().toISOString(),
+        customerName: customer?.name ?? null,
+        items: items.map((i) => ({
+          product_name: i.productName,
+          variant_label: i.variantLabel,
+          quantity: i.quantity,
+          unit_price: i.unitPrice,
+          discount: i.discount,
+          line_total: Math.max(0, i.unitPrice * i.quantity - i.discount),
+        })),
+        payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
+        subtotal,
+        discountAmount: getItemsDiscount() + globalDiscount,
+        total: totalVal,
+        change: Math.max(0, paymentTotal - totalVal),
+      })
+    }
+  }, [onPrint, saleResult, mode, pendingSale, payments, items, customer, globalDiscount, getTotal, getItemsDiscount])
 
   // ── Close & reset ──
 
