@@ -1,7 +1,7 @@
 "use client"
 
-import { POSTerminal } from "@/features/pos/components/pos-terminal"
+import { POSLanding } from "@/features/pos/components/pos-landing"
 
 export default function POSPage() {
-  return <POSTerminal />
+  return <POSLanding />
 }
