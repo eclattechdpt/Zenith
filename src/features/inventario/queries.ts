@@ -54,9 +54,10 @@ interface InventoryFilters {
   isActive?: boolean
 }
 
-export function useInventory(filters?: InventoryFilters) {
+export function useInventory(filters?: InventoryFilters, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["inventory", "physical", filters],
+    enabled: options?.enabled ?? true,
     queryFn: async (): Promise<InventoryVariant[]> => {
       const supabase = createClient()
 
@@ -108,9 +109,10 @@ export function useInventory(filters?: InventoryFilters) {
 
 // ── Initial Load Inventory ──
 
-export function useInitialLoadInventory(filters?: InventoryFilters) {
+export function useInitialLoadInventory(filters?: InventoryFilters, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["inventory", "initial_load", filters],
+    enabled: options?.enabled ?? true,
     queryFn: async (): Promise<InventoryVariant[]> => {
       const supabase = createClient()
 
@@ -264,6 +266,7 @@ interface TransitWeekFilters {
 export function useTransitWeeks(filters?: TransitWeekFilters) {
   return useQuery({
     queryKey: ["transit-weeks", filters],
+    enabled: !!filters,
     queryFn: async (): Promise<TransitWeekWithItems[]> => {
       const supabase = createClient()
 
@@ -296,7 +299,6 @@ export function useTransitWeeks(filters?: TransitWeekFilters) {
       if (error) throw error
       return (data ?? []) as unknown as TransitWeekWithItems[]
     },
-    placeholderData: (prev) => prev,
   })
 }
 

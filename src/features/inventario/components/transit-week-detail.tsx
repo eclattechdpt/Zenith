@@ -279,6 +279,11 @@ function AddTransitItemForm({
             setSelectedVariant(variant)
             setUnitPrice(String(variant.price))
           }}
+          onClear={() => {
+            setSelectedVariant(null)
+            setUnitPrice("")
+            setQuantity("")
+          }}
           selected={selectedVariant}
         />
 

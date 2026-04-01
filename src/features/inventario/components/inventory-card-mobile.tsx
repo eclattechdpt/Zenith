@@ -25,6 +25,7 @@ interface InventoryCardMobileProps {
   onAdjust?: (variant: InventoryVariant) => void
   onAddStock?: (variant: InventoryVariant) => void
   onHistory?: (variant: InventoryVariant) => void
+  onEdit?: (variant: InventoryVariant) => void
 }
 
 function StockBadgeMobile({ stock, stockMin }: { stock: number; stockMin: number }) {
@@ -55,8 +56,11 @@ export function InventoryCardMobile({
   onAdjust,
   onAddStock,
   onHistory,
+  onEdit,
 }: InventoryCardMobileProps) {
   const stockValue = inventoryType === "initial_load" ? v.initial_stock : v.stock
+  const displayName = (inventoryType === "initial_load" && v.override_name) || v.products.name
+  const displayPrice = (inventoryType === "initial_load" && v.override_price != null) ? v.override_price : v.price
   const variantLabel = v.name || v.sku
 
   return (
@@ -65,7 +69,7 @@ export function InventoryCardMobile({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-neutral-950 truncate">
-              {v.products.name}
+              {displayName}
             </span>
             <StockBadgeMobile stock={stockValue} stockMin={v.stock_min} />
           </div>
@@ -88,6 +92,12 @@ export function InventoryCardMobile({
             <MoreHorizontal className="size-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {onEdit && (
+              <DropdownMenuItem onClick={() => onEdit(v)}>
+                <ClipboardEdit className="mr-2 size-3.5" />
+                Editar producto
+              </DropdownMenuItem>
+            )}
             {onAdjust && (
               <DropdownMenuItem onClick={() => onAdjust(v)}>
                 <ClipboardEdit className="mr-2 size-3.5" />
@@ -116,7 +126,7 @@ export function InventoryCardMobile({
           <span>Min: {v.stock_min}</span>
         </div>
         <span className="font-semibold text-neutral-950 tabular-nums">
-          {formatCurrency(v.price)}
+          {formatCurrency(displayPrice)}
         </span>
       </div>
     </div>

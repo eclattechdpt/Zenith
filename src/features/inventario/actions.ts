@@ -300,31 +300,45 @@ export async function upsertInitialLoadOverride(input: InitialLoadOverrideInput)
 
   // Update stock if provided
   if (new_stock !== undefined && new_stock !== null) {
-    const { data: variant } = await supabase
+    const { data: variant, error: readError } = await supabase
       .from("product_variants")
       .select("initial_stock")
       .eq("id", product_variant_id)
       .single()
 
-    if (variant && variant.initial_stock !== new_stock) {
+    if (readError || !variant) {
+      return { error: { _form: ["No se encontró la variante"] } }
+    }
+
+    if (variant.initial_stock !== new_stock) {
       const difference = new_stock - variant.initial_stock
 
-      await supabase
+      const { error: updateError } = await supabase
         .from("product_variants")
         .update({ initial_stock: new_stock })
         .eq("id", product_variant_id)
 
-      await supabase.from("inventory_movements").insert({
-        tenant_id: TENANT_ID,
-        product_variant_id,
-        type: "adjustment",
-        quantity: difference,
-        stock_before: variant.initial_stock,
-        stock_after: new_stock,
-        reason: "Edicion de carga inicial",
-        created_by: userId,
-        inventory_source: "initial_load",
-      })
+      if (updateError) {
+        return { error: { _form: [updateError.message] } }
+      }
+
+      const { error: movementError } = await supabase
+        .from("inventory_movements")
+        .insert({
+          tenant_id: TENANT_ID,
+          product_variant_id,
+          type: "adjustment",
+          quantity: difference,
+          stock_before: variant.initial_stock,
+          stock_after: new_stock,
+          reason: "Edicion de carga inicial",
+          created_by: userId,
+          inventory_source: "initial_load",
+        })
+
+      if (movementError) {
+        return { error: { _form: [movementError.message] } }
+      }
     }
   }
 
@@ -409,7 +423,7 @@ export async function deleteTransitWeek(weekId: string) {
 
   const { error } = await supabase
     .from("transit_weeks")
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq("id", weekId)
 
   if (error) return { error: { _form: [error.message] } }

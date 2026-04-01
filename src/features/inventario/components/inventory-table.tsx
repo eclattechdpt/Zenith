@@ -57,10 +57,12 @@ export function InventoryTable({
   }
 
   const physicalQuery = useInventory(
-    inventoryType === "physical" ? filters : undefined
+    filters,
+    { enabled: inventoryType === "physical" }
   )
   const initialLoadQuery = useInitialLoadInventory(
-    inventoryType === "initial_load" ? filters : undefined
+    filters,
+    { enabled: inventoryType === "initial_load" }
   )
 
   const activeQuery =
@@ -211,6 +213,7 @@ export function InventoryTable({
                 onAdjust={setAdjustTarget}
                 onAddStock={setEntryTarget}
                 onHistory={setHistoryTarget}
+                onEdit={inventoryType === "initial_load" ? setEditTarget : undefined}
               />
             ))
           ) : (

@@ -10,12 +10,14 @@ import { usePOSProducts, type POSProduct } from "@/features/pos/queries"
 interface TransitProductPickerProps {
   excludeVariantIds?: string[]
   onSelect: (variant: { id: string; name: string; price: number }) => void
+  onClear?: () => void
   selected: { id: string; name: string; price: number } | null
 }
 
 export function TransitProductPicker({
   excludeVariantIds = [],
   onSelect,
+  onClear,
   selected,
 }: TransitProductPickerProps) {
   const [search, setSearch] = useState("")
@@ -33,7 +35,7 @@ export function TransitProductPicker({
           <button
             type="button"
             onClick={() => {
-              onSelect({ id: "", name: "", price: 0 })
+              onClear?.()
               setSearch("")
             }}
             className="text-xs text-blue-600 hover:text-blue-800"
