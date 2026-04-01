@@ -440,6 +440,25 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
               style={{ height: "12px", opacity: 0.5 }}
             />
           </div>
+          <div
+            style={{
+              fontSize: "8px",
+              color: "#ccc",
+              marginTop: "6px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "3px",
+            }}
+          >
+            Desarrollado por
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/abbrixLogo.svg"
+              alt="Abbrix"
+              style={{ height: "8px", opacity: 0.4 }}
+            />
+          </div>
         </div>
       </div>
     )
