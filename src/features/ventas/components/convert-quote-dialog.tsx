@@ -90,7 +90,7 @@ export function ConvertQuoteDialog({
   }
 
   async function handleConfirm() {
-    if (!quoteId) return
+    if (!quoteId || isSubmitting) return
     setIsSubmitting(true)
 
     const result = await convertQuoteToSale({
@@ -268,7 +268,7 @@ export function ConvertQuoteDialog({
             {/* Confirm */}
             <Button
               onClick={handleConfirm}
-              disabled={!isValid || isSubmitting}
+              disabled={!isValid || isSubmitting || isLoading}
               size="lg"
               className="w-full"
             >

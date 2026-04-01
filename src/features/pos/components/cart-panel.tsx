@@ -40,6 +40,7 @@ export function CartPanel({
   const itemCount = getItemCount()
 
   async function handleSaveQuote() {
+    if (isSavingQuote) return
     setIsSavingQuote(true)
 
     const result = await createQuote({
@@ -235,6 +236,7 @@ function CartItemRow({ item }: { item: CartItem }) {
           variant="outline"
           size="icon-xs"
           onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+          disabled={item.quantity >= item.stock}
         >
           <Plus className="size-3" />
         </Button>

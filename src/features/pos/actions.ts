@@ -161,7 +161,7 @@ export async function createQuote(input: CreateQuoteInput) {
 
   // Create sale items (snapshot only, no stock changes)
   for (const item of items) {
-    const lineTotal = item.unit_price * item.quantity - item.discount
+    const lineTotal = Math.max(0, item.unit_price * item.quantity - item.discount)
 
     const { error: itemError } = await supabase.from("sale_items").insert({
       sale_id: quote.id,

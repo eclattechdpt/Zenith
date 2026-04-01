@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Search, Package, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -30,6 +31,11 @@ export function ProductSearch() {
     product: POSProduct,
     variant: POSProduct["product_variants"][number]
   ) {
+    if (variant.stock <= 0) {
+      toast.error("Sin stock disponible")
+      return
+    }
+
     const price = await resolvePrice(
       variant.id,
       Number(variant.price),
@@ -129,11 +135,12 @@ function ProductResultItem({
 
   if (isSingleVariant) {
     const variant = activeVariants[0]
+    const outOfStock = variant.stock <= 0
     return (
       <button
         type="button"
         onClick={() => onSelectProduct(product)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-neutral-50"
+        className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors ${outOfStock ? "opacity-50 cursor-not-allowed" : "hover:bg-neutral-50"}`}
       >
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-neutral-950 truncate">

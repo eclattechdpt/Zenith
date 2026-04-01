@@ -5,7 +5,7 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
 
 export const convertQuoteSchema = z.object({
   quote_id: z.string().regex(uuidPattern, "UUID invalido"),
-  payments: z.array(paymentSchema).min(1, "Registra al menos un pago"),
+  payments: z.array(paymentSchema),
 })
 
 export const cancelQuoteSchema = z.object({

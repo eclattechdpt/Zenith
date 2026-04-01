@@ -57,6 +57,9 @@ export async function convertQuoteToSale(input: ConvertQuoteInput) {
 
   // Validate payments cover the total
   const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
+  if (Number(quote.total) > 0 && payments.length === 0) {
+    return { error: { _form: ["Registra al menos un pago"] } }
+  }
   if (Number(quote.total) > 0 && paymentTotal < Number(quote.total)) {
     return {
       error: {
