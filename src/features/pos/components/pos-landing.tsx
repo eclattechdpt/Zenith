@@ -3,11 +3,11 @@
 import { useState, useCallback, useRef, useMemo } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { Plus, CalendarDays, Flame, Clock } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { useReactToPrint } from "react-to-print"
 
-import { Button } from "@/components/ui/button"
 import { useRealtimeSync } from "@/hooks/use-realtime"
 
 import { usePOSStore } from "../store"
@@ -94,12 +94,16 @@ export function POSLanding() {
 
       let price = variant.price
       if (customer) {
-        price = await resolvePrice(
-          variant.id,
-          variant.price,
-          customer.priceListId,
-          customer.discountPercent
-        )
+        try {
+          price = await resolvePrice(
+            variant.id,
+            variant.price,
+            customer.priceListId,
+            customer.discountPercent
+          )
+        } catch {
+          // Fall back to base price
+        }
       }
 
       addItem({
@@ -143,8 +147,6 @@ export function POSLanding() {
   // ── Print trigger from wizard ──
   const triggerPrint = useCallback(
     (data: ReceiptData) => {
-      // Set receipt data so the hidden SaleReceipt renders,
-      // then give a small delay so the receipt ref is painted in the DOM.
       setReceiptData(data)
       setTimeout(() => {
         handlePrint()
@@ -163,33 +165,46 @@ export function POSLanding() {
     []
   )
 
+  const hasCarousels =
+    (topProducts && topProducts.length > 0) ||
+    (recentProducts && recentProducts.length > 0)
+
   return (
     <>
       <div className="flex h-full gap-4">
         {/* ── Main content ── */}
-        <div className="min-w-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
-          {/* Header */}
+        <div className="min-w-0 flex-1 space-y-8 overflow-y-auto p-5 sm:p-8">
+          {/* ── Hero header ── */}
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+            className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
           >
             <div>
-              <h1 className="font-display text-[28px] font-medium tracking-[-0.5px] text-neutral-950">
-                Punto de venta
-              </h1>
-              <p className="mt-0.5 flex items-center gap-1.5 text-xs font-medium text-neutral-500">
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[2px] text-neutral-400">
                 <CalendarDays className="h-3.5 w-3.5" />
                 {todayLabel}
               </p>
+              <h1 className="mt-1 font-display text-[38px] font-semibold leading-none tracking-[-1.5px] text-neutral-950 sm:text-[48px]">
+                Punto de venta
+              </h1>
             </div>
-            <Button
-              onClick={openNewSale}
-              className="h-9 gap-1.5 bg-rose-500 text-sm font-semibold text-white shadow-sm hover:bg-rose-600"
+
+            {/* Hero CTA */}
+            <motion.div
+              whileHover={{ scale: 1.03, y: -1 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <Plus className="h-4 w-4" />
-              Nueva venta
-            </Button>
+              <Button
+                onClick={openNewSale}
+                className="group h-11 gap-2 rounded-xl bg-rose-500 px-6 text-sm font-bold text-white transition-colors hover:bg-rose-600 sm:h-12 sm:px-7"
+              >
+                <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
+                Nueva venta
+              </Button>
+            </motion.div>
           </motion.div>
 
           {/* KPI widgets */}
@@ -198,27 +213,39 @@ export function POSLanding() {
           {/* Pending sales */}
           <POSPendingSales onComplete={openCompletePending} />
 
-          {/* Top-selling carousel */}
-          {topProducts && topProducts.length > 0 && (
-            <POSProductCarousel
-              title="Mas vendidos"
-              icon={<Flame className="h-4 w-4" />}
-              products={topProducts}
-              onAdd={handleAddProduct}
-            />
+          {/* ── Carousels card: Mas vendidos + Vendidos recientemente ── */}
+          {hasCarousels && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="rounded-2xl border border-neutral-200/60 bg-neutral-50 p-5 shadow-sm shadow-neutral-900/[0.03] sm:p-7"
+            >
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                {/* Top selling */}
+                {topProducts && topProducts.length > 0 && (
+                  <POSProductCarousel
+                    title="Mas vendidos"
+                    icon={<Flame className="h-4 w-4" />}
+                    products={topProducts}
+                    onAdd={handleAddProduct}
+                  />
+                )}
+
+                {/* Recently sold */}
+                {recentProducts && recentProducts.length > 0 && (
+                  <POSProductCarousel
+                    title="Vendidos recientemente"
+                    icon={<Clock className="h-4 w-4" />}
+                    products={recentProducts}
+                    onAdd={handleAddProduct}
+                  />
+                )}
+              </div>
+            </motion.div>
           )}
 
-          {/* Recently sold carousel */}
-          {recentProducts && recentProducts.length > 0 && (
-            <POSProductCarousel
-              title="Vendidos recientemente"
-              icon={<Clock className="h-4 w-4" />}
-              products={recentProducts}
-              onAdd={handleAddProduct}
-            />
-          )}
-
-          {/* Full product grid */}
+          {/* ── Full product grid (in card) ── */}
           <POSProductGrid onAdd={handleAddProduct} />
         </div>
 

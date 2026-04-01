@@ -17,12 +17,30 @@ import {
 
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
 
-async function getUserId() {
+async function requireUserId(): Promise<string> {
   const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  return user?.id ?? null
+  if (!user) throw new Error("NO_AUTH")
+  return user.id
+}
+
+function extractError(error: unknown, fallback: string): { error: { _form: string[] } } {
+  if (error && typeof error === "object" && "message" in error) {
+    const msg = (error as { message: string }).message
+    if (msg.includes("sales_status_check")) {
+      return { error: { _form: ["El estado de la venta no permite esta operacion."] } }
+    }
+    if (msg.includes("check_stock_positive")) {
+      return { error: { _form: ["Stock insuficiente para uno o mas productos."] } }
+    }
+    if (msg.includes("duplicate key")) {
+      return { error: { _form: ["Operacion duplicada. Intenta de nuevo."] } }
+    }
+    return { error: { _form: [msg] } }
+  }
+  return { error: { _form: [fallback] } }
 }
 
 export async function createSale(input: CreateSaleInput) {
@@ -54,8 +72,14 @@ export async function createSale(input: CreateSaleInput) {
     }
   }
 
+  let userId: string
+  try {
+    userId = await requireUserId()
+  } catch {
+    return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
 
   // Execute entire sale as a single atomic transaction
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,9 +110,7 @@ export async function createSale(input: CreateSaleInput) {
     }
   )
 
-  if (error) {
-    return { error: { _form: [(error as { message: string }).message] } }
-  }
+  if (error) return extractError(error, "Error al crear la venta")
 
   const sale = saleJson as unknown as {
     id: string
@@ -119,8 +141,14 @@ export async function createQuote(input: CreateQuoteInput) {
   const itemsDiscount = items.reduce((sum, item) => sum + item.discount, 0)
   const total = Math.max(0, subtotal - itemsDiscount - discount_amount)
 
+  let userId: string
+  try {
+    userId = await requireUserId()
+  } catch {
+    return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
 
   // Generate quote number with "C" prefix
   const { data: quoteNumber } = await supabase.rpc(
@@ -159,9 +187,7 @@ export async function createQuote(input: CreateQuoteInput) {
     .select()
     .single()
 
-  if (quoteError) {
-    return { error: { _form: [quoteError.message] } }
-  }
+  if (quoteError) return extractError(quoteError, "Error al crear la cotizacion")
 
   // Create sale items (snapshot only, no stock changes)
   for (const item of items) {
@@ -194,10 +220,14 @@ export async function createPendingSale(input: CreatePendingSaleInput) {
   const parsed = createPendingSaleSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  let userId: string
+  try {
+    userId = await requireUserId()
+  } catch {
+    return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  }
+
   const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
 
   const items = parsed.data.items
   const subtotal = items.reduce(
@@ -218,11 +248,19 @@ export async function createPendingSale(input: CreatePendingSaleInput) {
     p_discount_amount: parsed.data.discount_amount + itemsDiscount,
     p_total: total,
     p_notes: parsed.data.notes ?? null,
-    p_created_by: user?.id ?? null,
-    p_items: JSON.stringify(items),
+    p_created_by: userId,
+    p_items: items.map((i) => ({
+      product_variant_id: i.product_variant_id,
+      product_name: i.product_name,
+      variant_label: i.variant_label,
+      quantity: i.quantity,
+      unit_price: i.unit_price,
+      unit_cost: i.unit_cost,
+      discount: i.discount,
+    })),
   })
 
-  if (error) return { error: { _form: [error.message] } }
+  if (error) return extractError(error, "Error al guardar venta pendiente")
 
   revalidatePath("/pos")
   revalidatePath("/ventas")
@@ -233,20 +271,28 @@ export async function completePendingSale(input: CompletePendingSaleInput) {
   const parsed = completePendingSaleSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  let userId: string
+  try {
+    userId = await requireUserId()
+  } catch {
+    return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  }
+
   const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.rpc as any)("complete_pending_sale", {
     p_sale_id: parsed.data.sale_id,
     p_tenant_id: TENANT_ID,
-    p_payments: JSON.stringify(parsed.data.payments),
-    p_created_by: user?.id ?? null,
+    p_payments: parsed.data.payments.map((p) => ({
+      method: p.method,
+      amount: p.amount,
+      reference: p.reference ?? null,
+    })),
+    p_created_by: userId,
   })
 
-  if (error) return { error: { _form: [error.message] } }
+  if (error) return extractError(error, "Error al completar venta pendiente")
 
   revalidatePath("/pos")
   revalidatePath("/ventas")
@@ -256,6 +302,16 @@ export async function completePendingSale(input: CompletePendingSaleInput) {
 }
 
 export async function cancelPendingSale(saleId: string) {
+  let userId: string
+  try {
+    userId = await requireUserId()
+  } catch {
+    return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  }
+
+  // userId available for future audit logging
+  void userId
+
   const supabase = await createServerClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -264,7 +320,7 @@ export async function cancelPendingSale(saleId: string) {
     p_tenant_id: TENANT_ID,
   })
 
-  if (error) return { error: { _form: [error.message] } }
+  if (error) return extractError(error, "Error al cancelar venta pendiente")
 
   revalidatePath("/pos")
   revalidatePath("/ventas")
