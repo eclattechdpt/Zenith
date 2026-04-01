@@ -142,7 +142,7 @@ export default function InventarioTransitoPage() {
         </div>
       </motion.div>
 
-      {/* Monthly chart */}
+      {/* Monthly chart (only when there's data) */}
       {monthSummary.length > 0 && (
         <motion.div
           variants={itemVariants}
@@ -156,6 +156,62 @@ export default function InventarioTransitoPage() {
               setSelectedWeekId(null)
             }}
           />
+        </motion.div>
+      )}
+
+      {/* Month cards grid — always visible */}
+      {!selectedMonth && (
+        <motion.div
+          variants={itemVariants}
+          className="grid grid-cols-3 gap-3 sm:grid-cols-4 xl:grid-cols-6"
+        >
+          {MONTH_NAMES.map((name, i) => {
+            const monthNum = i + 1
+            const summary = monthSummary.find((m) => m.month === monthNum)
+            const hasData = !!summary
+            const isCurrentMonth =
+              selectedYear === new Date().getFullYear() &&
+              monthNum === new Date().getMonth() + 1
+
+            return (
+              <button
+                key={monthNum}
+                type="button"
+                onClick={() => {
+                  setSelectedMonth(monthNum)
+                  setSelectedWeekId(null)
+                }}
+                className={`group rounded-xl border p-3 text-left transition-all duration-200 ${
+                  hasData
+                    ? "border-blue-200 bg-white hover:border-blue-300 hover:shadow-sm"
+                    : "border-neutral-100 bg-neutral-50/50 hover:border-neutral-200 hover:bg-white"
+                } ${isCurrentMonth ? "ring-1 ring-blue-300" : ""}`}
+              >
+                <p
+                  className={`text-xs font-semibold ${
+                    hasData ? "text-neutral-950" : "text-neutral-400"
+                  }`}
+                >
+                  {name}
+                </p>
+                {hasData ? (
+                  <>
+                    <p className="mt-1 text-sm font-bold text-blue-600 tabular-nums">
+                      {formatCurrency(summary.total_value)}
+                    </p>
+                    <p className="text-[10px] text-neutral-400">
+                      {summary.week_count}{" "}
+                      {summary.week_count === 1 ? "sem" : "sem"}
+                    </p>
+                  </>
+                ) : (
+                  <p className="mt-1 text-[10px] text-neutral-300">
+                    Sin registros
+                  </p>
+                )}
+              </button>
+            )
+          })}
         </motion.div>
       )}
 
@@ -235,22 +291,7 @@ export default function InventarioTransitoPage() {
             </div>
           )}
         </motion.div>
-      ) : monthSummary.length === 0 ? (
-        <motion.div variants={itemVariants}>
-          <EmptyState
-            icon={Truck}
-            title="Sin registros en {selectedYear}"
-            description="Selecciona un mes del chart o crea una semana para comenzar."
-          />
-        </motion.div>
-      ) : (
-        <motion.div
-          variants={itemVariants}
-          className="flex h-32 items-center justify-center rounded-2xl border border-dashed border-neutral-200 text-sm text-neutral-400"
-        >
-          Selecciona un mes en el chart para ver sus semanas
-        </motion.div>
-      )}
+      ) : null}
 
       {/* Create week dialog */}
       <CreateTransitWeekDialog
