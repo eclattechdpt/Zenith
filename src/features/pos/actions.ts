@@ -7,8 +7,12 @@ import { createServerClient } from "@/lib/supabase/server"
 import {
   createSaleSchema,
   createQuoteSchema,
+  createPendingSaleSchema,
+  completePendingSaleSchema,
   type CreateSaleInput,
   type CreateQuoteInput,
+  type CreatePendingSaleInput,
+  type CompletePendingSaleInput,
 } from "./schemas"
 
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
@@ -184,4 +188,85 @@ export async function createQuote(input: CreateQuoteInput) {
   revalidatePath("/pos")
 
   return { data: quote }
+}
+
+export async function createPendingSale(input: CreatePendingSaleInput) {
+  const parsed = createPendingSaleSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const items = parsed.data.items
+  const subtotal = items.reduce(
+    (sum, i) => sum + i.unit_price * i.quantity,
+    0
+  )
+  const itemsDiscount = items.reduce((sum, i) => sum + i.discount, 0)
+  const total = Math.max(
+    subtotal - itemsDiscount - parsed.data.discount_amount,
+    0
+  )
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)("create_pending_sale", {
+    p_tenant_id: TENANT_ID,
+    p_customer_id: parsed.data.customer_id ?? null,
+    p_subtotal: subtotal,
+    p_discount_amount: parsed.data.discount_amount + itemsDiscount,
+    p_total: total,
+    p_notes: parsed.data.notes ?? null,
+    p_created_by: user?.id ?? null,
+    p_items: JSON.stringify(items),
+  })
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/pos")
+  revalidatePath("/ventas")
+  return { data: data as { id: string; sale_number: string; created_at: string } }
+}
+
+export async function completePendingSale(input: CompletePendingSaleInput) {
+  const parsed = completePendingSaleSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)("complete_pending_sale", {
+    p_sale_id: parsed.data.sale_id,
+    p_tenant_id: TENANT_ID,
+    p_payments: JSON.stringify(parsed.data.payments),
+    p_created_by: user?.id ?? null,
+  })
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/pos")
+  revalidatePath("/ventas")
+  revalidatePath("/")
+  revalidatePath("/inventario")
+  return { data: data as { id: string; sale_number: string; completed_at: string } }
+}
+
+export async function cancelPendingSale(saleId: string) {
+  const supabase = await createServerClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)("cancel_pending_sale", {
+    p_sale_id: saleId,
+    p_tenant_id: TENANT_ID,
+  })
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/pos")
+  revalidatePath("/ventas")
+  return { data: data as { id: string; sale_number: string; cancelled_at: string } }
 }
