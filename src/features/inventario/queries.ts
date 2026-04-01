@@ -9,6 +9,7 @@ import type {
   MovementWithDetails,
   InventoryType,
   TransitWeekWithItems,
+  TransitMonthSummary,
   InventorySummary,
 } from "./types"
 
@@ -257,6 +258,7 @@ export function useLowStockAlerts() {
 
 interface TransitWeekFilters {
   year?: number
+  month?: number
 }
 
 export function useTransitWeeks(filters?: TransitWeekFilters) {
@@ -278,11 +280,15 @@ export function useTransitWeeks(filters?: TransitWeekFilters) {
           )`
         )
         .is("deleted_at", null)
-        .order("year", { ascending: false })
-        .order("week_number", { ascending: false })
+        .order("month", { ascending: true })
+        .order("week_number", { ascending: true })
 
       if (filters?.year) {
         query = query.eq("year", filters.year)
+      }
+
+      if (filters?.month) {
+        query = query.eq("month", filters.month)
       }
 
       const { data, error } = await query
@@ -291,6 +297,40 @@ export function useTransitWeeks(filters?: TransitWeekFilters) {
       return (data ?? []) as unknown as TransitWeekWithItems[]
     },
     placeholderData: (prev) => prev,
+  })
+}
+
+export function useTransitMonthSummary(year: number) {
+  return useQuery({
+    queryKey: ["transit-month-summary", year],
+    queryFn: async (): Promise<TransitMonthSummary[]> => {
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("transit_weeks")
+        .select("month, total_value")
+        .eq("year", year)
+        .is("deleted_at", null)
+
+      if (error) throw error
+
+      // Group by month
+      const monthMap = new Map<number, { total: number; count: number }>()
+      for (const row of data ?? []) {
+        const existing = monthMap.get(row.month) ?? { total: 0, count: 0 }
+        existing.total += Number(row.total_value)
+        existing.count += 1
+        monthMap.set(row.month, existing)
+      }
+
+      return Array.from(monthMap.entries())
+        .map(([month, { total, count }]) => ({
+          month,
+          total_value: total,
+          week_count: count,
+        }))
+        .sort((a, b) => a.month - b.month)
+    },
   })
 }
 

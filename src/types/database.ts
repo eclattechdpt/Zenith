@@ -885,6 +885,7 @@ export type Database = {
           deleted_at: string | null
           id: string
           label: string | null
+          month: number
           notes: string | null
           tenant_id: string
           total_value: number
@@ -898,6 +899,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           label?: string | null
+          month: number
           notes?: string | null
           tenant_id: string
           total_value?: number
@@ -911,6 +913,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           label?: string | null
+          month?: number
           notes?: string | null
           tenant_id?: string
           total_value?: number

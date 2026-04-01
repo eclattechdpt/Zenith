@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
-import { getISOWeek } from "date-fns"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,52 +19,61 @@ import {
 } from "@/components/ui/dialog"
 
 import { createTransitWeek } from "../actions"
+import { MONTH_NAMES } from "./transit-monthly-chart"
 
 interface CreateTransitWeekDialogProps {
   open: boolean
+  year: number
+  month: number
   onOpenChange: (open: boolean) => void
 }
 
 export function CreateTransitWeekDialog({
   open,
+  year,
+  month,
   onOpenChange,
 }: CreateTransitWeekDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {open && <CreateWeekForm onOpenChange={onOpenChange} />}
+      {open && (
+        <CreateWeekForm
+          year={year}
+          month={month}
+          onOpenChange={onOpenChange}
+        />
+      )}
     </Dialog>
   )
 }
 
 function CreateWeekForm({
+  year,
+  month,
   onOpenChange,
 }: {
+  year: number
+  month: number
   onOpenChange: (open: boolean) => void
 }) {
-  const now = new Date()
-  const [year, setYear] = useState(String(now.getFullYear()))
-  const [weekNumber, setWeekNumber] = useState(String(getISOWeek(now)))
+  const [weekNumber, setWeekNumber] = useState("1")
   const [label, setLabel] = useState("")
   const [notes, setNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const queryClient = useQueryClient()
 
-  const parsedYear = parseInt(year, 10)
   const parsedWeek = parseInt(weekNumber, 10)
-  const isValid =
-    !isNaN(parsedYear) &&
-    parsedYear >= 2020 &&
-    parsedYear <= 2099 &&
-    !isNaN(parsedWeek) &&
-    parsedWeek >= 1 &&
-    parsedWeek <= 53
+  const isValid = !isNaN(parsedWeek) && parsedWeek >= 1 && parsedWeek <= 5
+
+  const monthName = MONTH_NAMES[month - 1]
 
   async function handleSubmit() {
     if (!isValid) return
     setIsSubmitting(true)
 
     const result = await createTransitWeek({
-      year: parsedYear,
+      year,
+      month,
       week_number: parsedWeek,
       label: label.trim() || null,
       notes: notes.trim() || null,
@@ -81,8 +89,9 @@ function CreateWeekForm({
       return
     }
 
-    toast.success(`Semana ${parsedWeek} del ${parsedYear} creada`)
+    toast.success(`Semana ${parsedWeek} de ${monthName} ${year} creada`)
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
+    queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
     onOpenChange(false)
   }
@@ -92,44 +101,30 @@ function CreateWeekForm({
       <DialogHeader>
         <DialogTitle>Nueva semana</DialogTitle>
         <DialogDescription>
-          Registra una nueva semana de inventario en transito
+          {monthName} {year} — Agregar semana al inventario en transito
         </DialogDescription>
       </DialogHeader>
 
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <Label htmlFor="transit-year">Ano</Label>
-            <Input
-              id="transit-year"
-              type="number"
-              min={2020}
-              max={2099}
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              className="tabular-nums"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="transit-week">Semana</Label>
-            <Input
-              id="transit-week"
-              type="number"
-              min={1}
-              max={53}
-              value={weekNumber}
-              onChange={(e) => setWeekNumber(e.target.value)}
-              className="tabular-nums"
-              autoFocus
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="transit-week">Numero de semana (1-5)</Label>
+          <Input
+            id="transit-week"
+            type="number"
+            min={1}
+            max={5}
+            value={weekNumber}
+            onChange={(e) => setWeekNumber(e.target.value)}
+            className="tabular-nums"
+            autoFocus
+          />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="transit-label">Etiqueta (opcional)</Label>
           <Input
             id="transit-label"
-            placeholder="Ej: Pedido proveedor X, Reposicion abril..."
+            placeholder="Ej: Pedido proveedor X, Reposicion..."
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             maxLength={100}

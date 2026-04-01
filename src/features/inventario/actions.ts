@@ -352,7 +352,7 @@ export async function createTransitWeek(input: CreateTransitWeekInput) {
   const parsed = createTransitWeekSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  const { year, week_number, label, notes } = parsed.data
+  const { year, month, week_number, label, notes } = parsed.data
 
   const supabase = await createServerClient()
   const userId = await getUserId()
@@ -362,6 +362,7 @@ export async function createTransitWeek(input: CreateTransitWeekInput) {
     .insert({
       tenant_id: TENANT_ID,
       year,
+      month,
       week_number,
       label: label ?? null,
       notes: notes ?? null,
@@ -372,7 +373,7 @@ export async function createTransitWeek(input: CreateTransitWeekInput) {
 
   if (error) {
     if (error.code === "23505") {
-      return { error: { _form: [`Ya existe una semana ${week_number} para el año ${year}`] } }
+      return { error: { _form: [`Ya existe la semana ${week_number} del mes ${month}, año ${year}`] } }
     }
     return { error: { _form: [error.message] } }
   }

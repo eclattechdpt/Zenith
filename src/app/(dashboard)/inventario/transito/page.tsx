@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Plus, Truck } from "lucide-react"
+import { ArrowLeft, Plus, Truck, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion } from "motion/react"
 
 import { Button } from "@/components/ui/button"
@@ -12,9 +12,12 @@ import { formatCurrency } from "@/lib/utils"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 
-import { useTransitWeeks } from "@/features/inventario/queries"
+import {
+  useTransitWeeks,
+  useTransitMonthSummary,
+} from "@/features/inventario/queries"
 import { deleteTransitWeek } from "@/features/inventario/actions"
-import { TransitWeeklyChart } from "@/features/inventario/components/transit-weekly-chart"
+import { TransitMonthlyChart, MONTH_NAMES } from "@/features/inventario/components/transit-monthly-chart"
 import { TransitWeekCard } from "@/features/inventario/components/transit-week-card"
 import { CreateTransitWeekDialog } from "@/features/inventario/components/create-transit-week-dialog"
 import { TransitWeekDetail } from "@/features/inventario/components/transit-week-detail"
@@ -38,16 +41,28 @@ const itemVariants = {
 }
 
 export default function InventarioTransitoPage() {
-  const { data: weeks = [] } = useTransitWeeks()
-  const [showCreate, setShowCreate] = useState(false)
+  const currentYear = new Date().getFullYear()
+  const [selectedYear, setSelectedYear] = useState(currentYear)
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
   const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null)
+  const [showCreate, setShowCreate] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string
+    label: string
+  } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const queryClient = useQueryClient()
 
-  const totalValue = weeks.reduce((sum, w) => sum + Number(w.total_value), 0)
+  const { data: monthSummary = [] } = useTransitMonthSummary(selectedYear)
+  const { data: monthWeeks = [] } = useTransitWeeks(
+    selectedMonth
+      ? { year: selectedYear, month: selectedMonth }
+      : undefined
+  )
 
-  async function handleDelete() {
+  const yearTotal = monthSummary.reduce((sum, m) => sum + m.total_value, 0)
+
+  async function handleDeleteWeek() {
     if (!deleteTarget) return
     setIsDeleting(true)
     const result = await deleteTransitWeek(deleteTarget.id)
@@ -59,11 +74,10 @@ export default function InventarioTransitoPage() {
       return
     }
 
-    if (selectedWeekId === deleteTarget.id) {
-      setSelectedWeekId(null)
-    }
+    if (selectedWeekId === deleteTarget.id) setSelectedWeekId(null)
     toast.success("Semana eliminada")
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
+    queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
   }
 
@@ -93,85 +107,156 @@ export default function InventarioTransitoPage() {
           <p className="mt-1 text-sm text-neutral-500">
             Reposiciones semanales — valor total:{" "}
             <strong className="text-neutral-700">
-              {formatCurrency(totalValue)}
+              {formatCurrency(yearTotal)}
             </strong>
           </p>
         </div>
-        <Button onClick={() => setShowCreate(true)}>
-          <Plus className="size-4" />
-          Nueva semana
-        </Button>
+
+        {/* Year selector */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedYear((y) => y - 1)
+              setSelectedMonth(null)
+              setSelectedWeekId(null)
+            }}
+          >
+            <ChevronLeft className="size-4" />
+          </Button>
+          <span className="min-w-16 text-center font-semibold text-neutral-950 tabular-nums">
+            {selectedYear}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedYear((y) => y + 1)
+              setSelectedMonth(null)
+              setSelectedWeekId(null)
+            }}
+          >
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
       </motion.div>
 
-      {weeks.length === 0 ? (
+      {/* Monthly chart */}
+      {monthSummary.length > 0 && (
+        <motion.div
+          variants={itemVariants}
+          className="overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-b from-white to-blue-50/30 p-4 shadow-sm sm:p-6"
+        >
+          <TransitMonthlyChart
+            months={monthSummary}
+            selectedMonth={selectedMonth}
+            onSelectMonth={(m) => {
+              setSelectedMonth(m)
+              setSelectedWeekId(null)
+            }}
+          />
+        </motion.div>
+      )}
+
+      {/* Month detail or empty state */}
+      {selectedMonth ? (
+        <motion.div variants={itemVariants} className="space-y-4">
+          {/* Month header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedMonth(null)
+                  setSelectedWeekId(null)
+                }}
+              >
+                <ArrowLeft className="size-3.5" />
+              </Button>
+              <div>
+                <h2 className="font-semibold text-neutral-950">
+                  {MONTH_NAMES[selectedMonth - 1]} {selectedYear}
+                </h2>
+                <p className="text-xs text-neutral-500">
+                  {monthWeeks.length}{" "}
+                  {monthWeeks.length === 1 ? "semana" : "semanas"}
+                </p>
+              </div>
+            </div>
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus className="size-4" />
+              Agregar semana
+            </Button>
+          </div>
+
+          {/* Weeks + detail */}
+          {monthWeeks.length === 0 ? (
+            <EmptyState
+              icon={Truck}
+              title="Sin semanas"
+              description="Agrega una semana para registrar productos en transito."
+            />
+          ) : (
+            <div className="grid gap-4 xl:grid-cols-5">
+              {/* Week list */}
+              <div className="space-y-2 xl:col-span-2">
+                {monthWeeks.map((week) => (
+                  <TransitWeekCard
+                    key={week.id}
+                    week={week}
+                    isSelected={week.id === selectedWeekId}
+                    onSelect={() => setSelectedWeekId(week.id)}
+                    onEdit={() => setSelectedWeekId(week.id)}
+                    onDelete={() =>
+                      setDeleteTarget({
+                        id: week.id,
+                        label: `Semana ${week.week_number}, ${MONTH_NAMES[selectedMonth - 1]} ${selectedYear}`,
+                      })
+                    }
+                  />
+                ))}
+              </div>
+
+              {/* Week detail */}
+              <div className="xl:col-span-3">
+                {selectedWeekId ? (
+                  <TransitWeekDetail
+                    weekId={selectedWeekId}
+                    onClose={() => setSelectedWeekId(null)}
+                  />
+                ) : (
+                  <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-neutral-200 text-sm text-neutral-400">
+                    Selecciona una semana para ver sus productos
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </motion.div>
+      ) : monthSummary.length === 0 ? (
         <motion.div variants={itemVariants}>
           <EmptyState
             icon={Truck}
-            title="Sin semanas registradas"
-            description="Crea una nueva semana para registrar los productos en transito."
+            title="Sin registros en {selectedYear}"
+            description="Selecciona un mes del chart o crea una semana para comenzar."
           />
         </motion.div>
       ) : (
-        <>
-          {/* Chart */}
-          <motion.div
-            variants={itemVariants}
-            className="overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-b from-white to-blue-50/30 p-4 shadow-sm sm:p-6"
-          >
-            <TransitWeeklyChart
-              weeks={weeks}
-              selectedWeekId={selectedWeekId}
-              onSelectWeek={setSelectedWeekId}
-            />
-          </motion.div>
-
-          {/* Week list + detail */}
-          <motion.div
-            variants={itemVariants}
-            className="grid gap-4 xl:grid-cols-5"
-          >
-            {/* Week list */}
-            <div className="space-y-2 xl:col-span-2">
-              <p className="text-xs font-medium uppercase tracking-wider text-neutral-400 px-1">
-                Semanas ({weeks.length})
-              </p>
-              {weeks.map((week) => (
-                <TransitWeekCard
-                  key={week.id}
-                  week={week}
-                  isSelected={week.id === selectedWeekId}
-                  onSelect={() => setSelectedWeekId(week.id)}
-                  onEdit={() => setSelectedWeekId(week.id)}
-                  onDelete={() =>
-                    setDeleteTarget({
-                      id: week.id,
-                      label: `Semana ${week.week_number}, ${week.year}`,
-                    })
-                  }
-                />
-              ))}
-            </div>
-
-            {/* Detail panel */}
-            <div className="xl:col-span-3">
-              {selectedWeekId ? (
-                <TransitWeekDetail
-                  weekId={selectedWeekId}
-                  onClose={() => setSelectedWeekId(null)}
-                />
-              ) : (
-                <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-neutral-200 text-sm text-neutral-400">
-                  Selecciona una semana para ver sus productos
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </>
+        <motion.div
+          variants={itemVariants}
+          className="flex h-32 items-center justify-center rounded-2xl border border-dashed border-neutral-200 text-sm text-neutral-400"
+        >
+          Selecciona un mes en el chart para ver sus semanas
+        </motion.div>
       )}
 
       {/* Create week dialog */}
       <CreateTransitWeekDialog
         open={showCreate}
+        year={selectedYear}
+        month={selectedMonth ?? new Date().getMonth() + 1}
         onOpenChange={setShowCreate}
       />
 
@@ -184,7 +269,7 @@ export default function InventarioTransitoPage() {
         confirmLabel="Eliminar"
         variant="destructive"
         isLoading={isDeleting}
-        onConfirm={handleDelete}
+        onConfirm={handleDeleteWeek}
       />
     </motion.div>
   )

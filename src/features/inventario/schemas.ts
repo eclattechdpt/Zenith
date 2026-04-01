@@ -32,7 +32,8 @@ export type InitialLoadOverrideInput = z.infer<typeof initialLoadOverrideSchema>
 
 export const createTransitWeekSchema = z.object({
   year: z.coerce.number().int().min(2020).max(2099),
-  week_number: z.coerce.number().int().min(1).max(53),
+  month: z.coerce.number().int().min(1).max(12),
+  week_number: z.coerce.number().int().min(1).max(5),
   label: z.string().max(100).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
 })

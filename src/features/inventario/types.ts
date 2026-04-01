@@ -51,6 +51,13 @@ export interface TransitWeekWithItems extends TransitWeek {
   transit_week_items: TransitWeekItemWithProduct[]
 }
 
+/** Monthly summary for transit chart */
+export interface TransitMonthSummary {
+  month: number
+  total_value: number
+  week_count: number
+}
+
 /** Summary totals for the hub page */
 export interface InventorySummary {
   physical_total: number
