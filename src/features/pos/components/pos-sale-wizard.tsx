@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { X } from "lucide-react"
+import { X, Check } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { useOnlineStatus } from "@/hooks/use-online-status"
 
 import {
   Dialog,
@@ -19,13 +20,13 @@ import type { PendingSaleWithSummary, CartPayment } from "../types"
 
 import type { ReceiptData } from "./sale-receipt"
 import { WizardCustomerStep } from "./wizard-customer-step"
+import { WizardProductsStep } from "./wizard-products-step"
 import { WizardPaymentStep } from "./wizard-payment-step"
 import { WizardConfirmationStep } from "./wizard-confirmation-step"
 
 // ── Types ──
 
 type WizardMode = "from-cart" | "new-sale" | "complete-pending"
-
 type StepKey = "customer" | "products" | "payment" | "confirmation"
 
 interface POSSaleWizardProps {
@@ -35,8 +36,6 @@ interface POSSaleWizardProps {
   pendingSale?: PendingSaleWithSummary | null
   onPrint?: (data: ReceiptData) => void
 }
-
-// ── Step definitions per mode ──
 
 const STEPS_BY_MODE: Record<WizardMode, StepKey[]> = {
   "from-cart": ["customer", "payment", "confirmation"],
@@ -67,6 +66,7 @@ export function POSSaleWizard({
   )
 
   const queryClient = useQueryClient()
+  const isOnline = useOnlineStatus()
 
   const items = usePOSStore((s) => s.items)
   const customer = usePOSStore((s) => s.customer)
@@ -79,12 +79,13 @@ export function POSSaleWizard({
   const steps = STEPS_BY_MODE[mode]
   const currentStep = steps[stepIndex]
 
-  const total = useMemo(() => {
-    if (mode === "complete-pending" && pendingSale) {
-      return pendingSale.total
-    }
-    return getTotal()
-  }, [mode, pendingSale, getTotal])
+  // No useMemo — getTotal() is a stable Zustand function ref that reads
+  // current store state on each call.  Memoizing it would cache a stale
+  // value because the ref itself never changes when cart items change.
+  const total =
+    mode === "complete-pending" && pendingSale
+      ? pendingSale.total
+      : getTotal()
 
   // ── Navigation ──
 
@@ -107,30 +108,87 @@ export function POSSaleWizard({
   // ── Sale completion ──
 
   const handleCompleteSale = useCallback(async () => {
-    if (mode === "complete-pending" && pendingSale) {
-      const result = await completePendingSale({
-        sale_id: pendingSale.id,
-        payments: payments.map((p) => ({
-          method: p.method,
-          amount: p.amount,
-          reference: p.reference,
-        })),
+    if (!isOnline) {
+      toast.error("Sin conexion", {
+        description: "Revisa tu conexion a internet e intenta de nuevo.",
       })
-
-      if (result.error) {
-        const errorMsg =
-          "_form" in result.error
-            ? (result.error._form as string[])[0]
-            : "Error al completar la venta"
-        toast.error(errorMsg)
-        return
+      return
+    }
+    try {
+      if (mode === "complete-pending" && pendingSale) {
+        const result = await completePendingSale({
+          sale_id: pendingSale.id,
+          payments: payments.map((p) => ({
+            method: p.method,
+            amount: p.amount,
+            reference: p.reference,
+          })),
+        })
+        if (result.error) {
+          const msg =
+            "_form" in result.error
+              ? (result.error._form as string[])[0]
+              : "Error al completar la venta"
+          toast.error(msg)
+          return
+        }
+        setSaleResult({ sale_number: result.data!.sale_number })
+        toast.success(`Venta ${result.data!.sale_number} completada`)
+      } else {
+        const saleItems = items.map((item) => ({
+          product_variant_id: item.variantId,
+          product_name: item.productName,
+          variant_label: item.variantLabel,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          unit_cost: item.unitCost,
+          discount: item.discount,
+        }))
+        const result = await createSale({
+          customer_id: customer?.id ?? null,
+          items: saleItems,
+          payments: payments.map((p) => ({
+            method: p.method,
+            amount: p.amount,
+            reference: p.reference,
+          })),
+          discount_amount: globalDiscount,
+          notes: notes || null,
+        })
+        if (result.error) {
+          const msg =
+            "_form" in result.error
+              ? (result.error._form as string[])[0]
+              : "Error al crear la venta"
+          toast.error(msg)
+          return
+        }
+        setSaleResult({ sale_number: result.data!.sale_number })
+        toast.success(`Venta ${result.data!.sale_number} completada`)
+        clear()
       }
-
-      setSaleResult({
-        sale_number: result.data!.sale_number,
+      queryClient.invalidateQueries({ queryKey: ["sales"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["pos"] })
+      queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
+    } catch {
+      toast.error("Error de conexion", {
+        description: "No se pudo conectar con el servidor. Intenta de nuevo.",
       })
-    } else {
-      // from-cart or new-sale
+    }
+  }, [mode, pendingSale, items, customer, globalDiscount, notes, payments, clear, queryClient, isOnline])
+
+  // ── Pending sale ──
+
+  const handlePendingSale = useCallback(async () => {
+    if (!isOnline) {
+      toast.error("Sin conexion", {
+        description: "Revisa tu conexion a internet e intenta de nuevo.",
+      })
+      return
+    }
+    try {
       const saleItems = items.map((item) => ({
         product_variant_id: item.variantId,
         product_name: item.productName,
@@ -140,100 +198,42 @@ export function POSSaleWizard({
         unit_cost: item.unitCost,
         discount: item.discount,
       }))
-
-      const result = await createSale({
+      const result = await createPendingSale({
         customer_id: customer?.id ?? null,
         items: saleItems,
-        payments: payments.map((p) => ({
-          method: p.method,
-          amount: p.amount,
-          reference: p.reference,
-        })),
         discount_amount: globalDiscount,
         notes: notes || null,
       })
-
       if (result.error) {
-        const errorMsg =
+        const msg =
           "_form" in result.error
             ? (result.error._form as string[])[0]
-            : "Error al crear la venta"
-        toast.error(errorMsg)
+            : "Error al guardar venta pendiente"
+        toast.error(msg)
         return
       }
-
-      setSaleResult({
-        sale_number: result.data!.sale_number,
+      setSaleResult({ sale_number: result.data!.sale_number })
+      toast.success("Venta guardada como pendiente", {
+        description: "Recuerda cobrar esta venta desde la seccion de ventas pendientes.",
       })
       clear()
+      queryClient.invalidateQueries({ queryKey: ["sales"] })
+      queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
+      queryClient.invalidateQueries({ queryKey: ["pos"] })
+    } catch {
+      toast.error("Error de conexion", {
+        description: "No se pudo conectar con el servidor. Intenta de nuevo.",
+      })
     }
-
-    // Invalidate relevant queries
-    queryClient.invalidateQueries({ queryKey: ["sales"] })
-    queryClient.invalidateQueries({ queryKey: ["inventory"] })
-    queryClient.invalidateQueries({ queryKey: ["dashboard"] })
-    queryClient.invalidateQueries({ queryKey: ["pos"] })
-    queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
-  }, [
-    mode,
-    pendingSale,
-    items,
-    customer,
-    globalDiscount,
-    notes,
-    payments,
-    clear,
-    queryClient,
-  ])
-
-  // ── Pending sale (save for later) ──
-
-  const handlePendingSale = useCallback(async () => {
-    const saleItems = items.map((item) => ({
-      product_variant_id: item.variantId,
-      product_name: item.productName,
-      variant_label: item.variantLabel,
-      quantity: item.quantity,
-      unit_price: item.unitPrice,
-      unit_cost: item.unitCost,
-      discount: item.discount,
-    }))
-
-    const result = await createPendingSale({
-      customer_id: customer?.id ?? null,
-      items: saleItems,
-      discount_amount: globalDiscount,
-      notes: notes || null,
-    })
-
-    if (result.error) {
-      const errorMsg =
-        "_form" in result.error
-          ? (result.error._form as string[])[0]
-          : "Error al guardar venta pendiente"
-      toast.error(errorMsg)
-      return
-    }
-
-    setSaleResult({
-      sale_number: result.data!.sale_number,
-    })
-    clear()
-
-    queryClient.invalidateQueries({ queryKey: ["sales"] })
-    queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
-    queryClient.invalidateQueries({ queryKey: ["pos"] })
-  }, [items, customer, globalDiscount, notes, clear, queryClient])
+  }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline])
 
   // ── Print ──
 
   const handlePrint = useCallback(() => {
     if (!saleResult || !onPrint) return
-
     const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
 
     if (mode === "complete-pending" && pendingSale) {
-      // Build receipt from pending sale data
       onPrint({
         saleNumber: saleResult.sale_number,
         date: new Date().toISOString(),
@@ -253,7 +253,6 @@ export function POSSaleWizard({
         change: Math.max(0, paymentTotal - pendingSale.total),
       })
     } else {
-      // Build receipt from cart data
       const subtotal = getTotal() + getItemsDiscount() + globalDiscount
       const totalVal = getTotal()
       onPrint({
@@ -288,7 +287,10 @@ export function POSSaleWizard({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto p-0 sm:rounded-2xl">
+      <DialogContent
+        showCloseButton={false}
+        className="flex h-[85vh] w-[95vw] flex-col gap-0 overflow-hidden bg-neutral-50 p-0 sm:max-w-6xl sm:rounded-2xl"
+      >
         <DialogTitle className="sr-only">
           {mode === "complete-pending"
             ? "Completar venta pendiente"
@@ -297,81 +299,90 @@ export function POSSaleWizard({
               : "Cobrar"}
         </DialogTitle>
 
-        {/* Step progress indicator */}
+        {/* ── Header: step progress + close ── */}
         {!saleResult && (
-          <div className="flex items-center gap-1 border-b border-stone-100 px-6 pt-5 pb-4">
-            {steps.map((step, index) => (
-              <div key={step} className="flex flex-1 items-center gap-1">
-                <div className="flex flex-1 flex-col items-center gap-1">
-                  <div
+          <div className="flex flex-shrink-0 items-center justify-between border-b border-neutral-100 bg-white px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] sm:px-8">
+            <nav className="flex items-center">
+              {steps.map((step, index) => (
+                <div key={step} className="flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => index < stepIndex && setStepIndex(index)}
+                    disabled={index >= stepIndex}
                     className={cn(
-                      "flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors",
+                      "flex items-center gap-2.5 transition-opacity",
                       index < stepIndex
-                        ? "bg-teal-500 text-white"
-                        : index === stepIndex
-                          ? "bg-rose-600 text-white"
-                          : "bg-stone-100 text-stone-400"
+                        ? "cursor-pointer opacity-100 hover:opacity-80"
+                        : "cursor-default"
                     )}
                   >
-                    {index + 1}
-                  </div>
-                  <span
-                    className={cn(
-                      "text-[11px] font-medium transition-colors",
-                      index === stepIndex
-                        ? "text-stone-800"
-                        : "text-stone-400"
-                    )}
-                  >
-                    {STEP_LABELS[step]}
-                  </span>
+                    <div
+                      className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors",
+                        index < stepIndex
+                          ? "bg-teal-500 text-white"
+                          : index === stepIndex
+                            ? "bg-rose-500 text-white"
+                            : "bg-neutral-100 text-neutral-400"
+                      )}
+                    >
+                      {index < stepIndex ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        index + 1
+                      )}
+                    </div>
+                    <span
+                      className={cn(
+                        "hidden text-sm font-semibold sm:inline",
+                        index === stepIndex
+                          ? "text-neutral-800"
+                          : index < stepIndex
+                            ? "text-teal-600"
+                            : "text-neutral-400"
+                      )}
+                    >
+                      {STEP_LABELS[step]}
+                    </span>
+                  </button>
+                  {index < steps.length - 1 && (
+                    <div
+                      className={cn(
+                        "mx-3 h-px w-6 rounded-full sm:mx-5 sm:w-10",
+                        index < stepIndex ? "bg-teal-400" : "bg-neutral-200"
+                      )}
+                    />
+                  )}
                 </div>
-                {index < steps.length - 1 && (
-                  <div
-                    className={cn(
-                      "mb-4 h-0.5 flex-1 rounded-full transition-colors",
-                      index < stepIndex ? "bg-teal-500" : "bg-stone-100"
-                    )}
-                  />
-                )}
-              </div>
-            ))}
+              ))}
+            </nav>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
         )}
 
-        {/* Close button */}
-        {!saleResult && (
-          <button
-            type="button"
-            onClick={handleClose}
-            className="absolute right-4 top-4 rounded-md p-1 text-stone-400 transition-colors hover:text-stone-600"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-
-        {/* Step content */}
-        <div className="px-6 pb-6">
+        {/* ── Step content ── */}
+        <div className="min-h-0 flex-1">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep + (saleResult ? "-done" : "")}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="h-full"
             >
               {currentStep === "customer" && (
                 <WizardCustomerStep onNext={goNext} />
               )}
-
               {currentStep === "products" && (
-                <div className="flex flex-col items-center gap-4 py-8">
-                  <p className="text-sm text-stone-500">
-                    Agrega productos al carrito desde el POS
-                  </p>
-                </div>
+                <WizardProductsStep onNext={goNext} onBack={goBack} />
               )}
-
               {currentStep === "payment" && (
                 <WizardPaymentStep
                   total={total}
@@ -379,7 +390,6 @@ export function POSSaleWizard({
                   onBack={goBack}
                 />
               )}
-
               {currentStep === "confirmation" && (
                 <WizardConfirmationStep
                   payments={payments}
@@ -387,6 +397,7 @@ export function POSSaleWizard({
                   onPendingSale={handlePendingSale}
                   onPrint={handlePrint}
                   onBack={goBack}
+                  onClose={handleClose}
                   saleResult={saleResult}
                 />
               )}
