@@ -17,6 +17,17 @@ export const stockEntrySchema = z.object({
 export type StockAdjustmentInput = z.infer<typeof stockAdjustmentSchema>
 export type StockEntryInput = z.infer<typeof stockEntrySchema>
 
+// ── Initial Load override schema ──
+
+export const initialLoadOverrideSchema = z.object({
+  product_variant_id: z.string().regex(uuidPattern, "UUID inválido"),
+  override_name: z.string().max(200).optional().nullable(),
+  override_price: z.coerce.number().min(0).optional().nullable(),
+  new_stock: z.coerce.number().int().min(0, "El stock no puede ser negativo").optional(),
+})
+
+export type InitialLoadOverrideInput = z.infer<typeof initialLoadOverrideSchema>
+
 // ── Transit week schemas ──
 
 export const createTransitWeekSchema = z.object({

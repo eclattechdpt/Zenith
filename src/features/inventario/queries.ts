@@ -146,7 +146,32 @@ export function useInitialLoadInventory(filters?: InventoryFilters) {
       const { data, error } = await query.order("initial_stock", { ascending: true })
 
       if (error) throw error
-      return (data ?? []) as unknown as InventoryVariant[]
+
+      const variants = (data ?? []) as unknown as InventoryVariant[]
+
+      // Fetch overrides for all variants
+      const variantIds = variants.map((v) => v.id)
+      if (variantIds.length > 0) {
+        const { data: overrides } = await supabase
+          .from("initial_load_overrides")
+          .select("product_variant_id, override_name, override_price")
+          .in("product_variant_id", variantIds)
+
+        if (overrides && overrides.length > 0) {
+          const overrideMap = new Map(
+            overrides.map((o) => [o.product_variant_id, o])
+          )
+          for (const v of variants) {
+            const ov = overrideMap.get(v.id)
+            if (ov) {
+              v.override_name = ov.override_name
+              v.override_price = ov.override_price
+            }
+          }
+        }
+      }
+
+      return variants
     },
     placeholderData: (prev) => prev,
   })

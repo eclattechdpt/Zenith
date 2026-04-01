@@ -7,12 +7,14 @@ import { createServerClient } from "@/lib/supabase/server"
 import {
   stockAdjustmentSchema,
   stockEntrySchema,
+  initialLoadOverrideSchema,
   createTransitWeekSchema,
   updateTransitWeekSchema,
   transitWeekItemSchema,
   updateTransitWeekItemSchema,
   type StockAdjustmentInput,
   type StockEntryInput,
+  type InitialLoadOverrideInput,
   type CreateTransitWeekInput,
   type UpdateTransitWeekInput,
   type TransitWeekItemInput,
@@ -266,6 +268,68 @@ export async function addInitialStock(input: StockEntryInput) {
 
   revalidateInventory()
   return { data: { movement, new_stock: newStock } }
+}
+
+// ── Initial Load Override (name/price + stock in one action) ──
+
+export async function upsertInitialLoadOverride(input: InitialLoadOverrideInput) {
+  const parsed = initialLoadOverrideSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const { product_variant_id, override_name, override_price, new_stock } = parsed.data
+
+  const supabase = await createServerClient()
+  const userId = await getUserId()
+
+  // Upsert override row
+  const { error: overrideError } = await supabase
+    .from("initial_load_overrides")
+    .upsert(
+      {
+        tenant_id: TENANT_ID,
+        product_variant_id,
+        override_name: override_name ?? null,
+        override_price: override_price ?? null,
+      },
+      { onConflict: "tenant_id,product_variant_id" }
+    )
+
+  if (overrideError) {
+    return { error: { _form: [overrideError.message] } }
+  }
+
+  // Update stock if provided
+  if (new_stock !== undefined && new_stock !== null) {
+    const { data: variant } = await supabase
+      .from("product_variants")
+      .select("initial_stock")
+      .eq("id", product_variant_id)
+      .single()
+
+    if (variant && variant.initial_stock !== new_stock) {
+      const difference = new_stock - variant.initial_stock
+
+      await supabase
+        .from("product_variants")
+        .update({ initial_stock: new_stock })
+        .eq("id", product_variant_id)
+
+      await supabase.from("inventory_movements").insert({
+        tenant_id: TENANT_ID,
+        product_variant_id,
+        type: "adjustment",
+        quantity: difference,
+        stock_before: variant.initial_stock,
+        stock_after: new_stock,
+        reason: "Edicion de carga inicial",
+        created_by: userId,
+        inventory_source: "initial_load",
+      })
+    }
+  }
+
+  revalidateInventory()
+  return { data: { success: true } }
 }
 
 // ── In Transit Inventory ──

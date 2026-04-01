@@ -7,6 +7,7 @@ import {
   ClipboardEdit,
   PackagePlus,
   History,
+  Pencil,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -27,6 +28,7 @@ interface InventoryColumnsOptions {
   onAdjust?: (variant: InventoryVariant) => void
   onAddStock?: (variant: InventoryVariant) => void
   onHistory?: (variant: InventoryVariant) => void
+  onEdit?: (variant: InventoryVariant) => void
   inventoryType?: InventoryType
 }
 
@@ -60,6 +62,7 @@ export function getInventoryColumns({
   onAdjust,
   onAddStock,
   onHistory,
+  onEdit,
   inventoryType = "physical",
 }: InventoryColumnsOptions = {}): ColumnDef<InventoryVariant>[] {
   return [
@@ -81,11 +84,20 @@ export function getInventoryColumns({
       accessorFn: (row) => row.products.name,
       cell: ({ row }) => {
         const v = row.original
+        const displayName = (inventoryType === "initial_load" && v.override_name) || v.products.name
+        const isOverridden = inventoryType === "initial_load" && v.override_name
         return (
           <div className="min-w-0">
-            <p className="font-semibold text-neutral-950 truncate">
-              {v.products.name}
-            </p>
+            <div className="flex items-center gap-1.5">
+              <p className="font-semibold text-neutral-950 truncate">
+                {displayName}
+              </p>
+              {isOverridden && (
+                <Badge variant="outline" className="bg-slate-50 text-slate-500 border-slate-200 text-[9px] shrink-0">
+                  editado
+                </Badge>
+              )}
+            </div>
             {v.products.brand && (
               <p className="text-xs text-neutral-500 truncate">{v.products.brand}</p>
             )}
@@ -132,11 +144,17 @@ export function getInventoryColumns({
       size: 100,
       minSize: 80,
       header: () => <span className="block text-right">Precio</span>,
-      cell: ({ row }) => (
-        <span className="block text-right text-sm text-neutral-700 tabular-nums">
-          {formatCurrency(row.original.price)}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const v = row.original
+        const displayPrice = (inventoryType === "initial_load" && v.override_price != null)
+          ? v.override_price
+          : v.price
+        return (
+          <span className="block text-right text-sm text-neutral-700 tabular-nums">
+            {formatCurrency(displayPrice)}
+          </span>
+        )
+      },
     },
     {
       id: "stock_value",
@@ -201,6 +219,12 @@ export function getInventoryColumns({
               <span className="sr-only">Acciones</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {onEdit && inventoryType === "initial_load" && (
+                <DropdownMenuItem onClick={() => onEdit(variant)}>
+                  <Pencil className="mr-2 size-3.5" />
+                  Editar producto
+                </DropdownMenuItem>
+              )}
               {onAdjust && (
                 <DropdownMenuItem onClick={() => onAdjust(variant)}>
                   <ClipboardEdit className="mr-2 size-3.5" />

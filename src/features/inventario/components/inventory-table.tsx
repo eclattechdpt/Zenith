@@ -26,6 +26,7 @@ import { InventoryCardMobile } from "./inventory-card-mobile"
 import { StockAdjustmentDialog } from "./stock-adjustment-dialog"
 import { StockEntryDialog } from "./stock-entry-dialog"
 import { MovementHistoryDialog } from "./movement-history-dialog"
+import { InitialLoadEditDialog } from "./initial-load-edit-dialog"
 
 const LOW_STOCK_TABS = [
   { value: "", label: "Todos" },
@@ -78,6 +79,7 @@ export function InventoryTable({
   const [adjustTarget, setAdjustTarget] = useState<InventoryVariant | null>(null)
   const [entryTarget, setEntryTarget] = useState<InventoryVariant | null>(null)
   const [historyTarget, setHistoryTarget] = useState<InventoryVariant | null>(null)
+  const [editTarget, setEditTarget] = useState<InventoryVariant | null>(null)
 
   const columns = useMemo(
     () =>
@@ -85,6 +87,7 @@ export function InventoryTable({
         onAdjust: setAdjustTarget,
         onAddStock: setEntryTarget,
         onHistory: setHistoryTarget,
+        onEdit: inventoryType === "initial_load" ? setEditTarget : undefined,
         inventoryType,
       }),
     [inventoryType]
@@ -111,7 +114,11 @@ export function InventoryTable({
     return variants.reduce((sum, v) => {
       const stock =
         inventoryType === "initial_load" ? v.initial_stock : v.stock
-      return sum + stock * v.price
+      const price =
+        inventoryType === "initial_load" && v.override_price != null
+          ? v.override_price
+          : v.price
+      return sum + stock * price
     }, 0)
   }, [variants, inventoryType])
 
@@ -261,6 +268,12 @@ export function InventoryTable({
         inventoryType={inventoryType}
         onOpenChange={(open) => !open && setHistoryTarget(null)}
       />
+      {inventoryType === "initial_load" && (
+        <InitialLoadEditDialog
+          variant={editTarget}
+          onOpenChange={(open) => !open && setEditTarget(null)}
+        />
+      )}
     </motion.div>
   )
 }

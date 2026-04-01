@@ -264,6 +264,44 @@ export type Database = {
           },
         ]
       }
+      initial_load_overrides: {
+        Row: {
+          created_at: string
+          id: string
+          override_name: string | null
+          override_price: number | null
+          product_variant_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          override_name?: string | null
+          override_price?: number | null
+          product_variant_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          override_name?: string | null
+          override_price?: number | null
+          product_variant_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "initial_load_overrides_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_movements: {
         Row: {
           created_at: string

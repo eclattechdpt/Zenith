@@ -25,6 +25,9 @@ export interface InventoryVariant {
     has_variants: boolean
     categories: { id: string; name: string } | null
   }
+  // Initial Load overrides (only present when querying initial_load inventory)
+  override_name?: string | null
+  override_price?: number | null
 }
 
 /** Movement with optional sale/return number for history view */
