@@ -3,10 +3,12 @@
 import { useState, useRef, useEffect } from "react"
 import { Search, Package, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { useQuery } from "@tanstack/react-query"
 
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency } from "@/lib/utils"
+import { createClient } from "@/lib/supabase/client"
 import { useDebounce } from "@/hooks/use-debounce"
 
 import { usePOSProducts, type POSProduct } from "../queries"
@@ -14,10 +16,39 @@ import { usePOSStore } from "../store"
 import { resolvePrice } from "../utils"
 import type { CartCustomer } from "../types"
 
+function useAllPOSProducts() {
+  return useQuery({
+    queryKey: ["pos-all-products"],
+    queryFn: async (): Promise<POSProduct[]> => {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          `id, name, brand, has_variants,
+          product_variants:product_variants!product_variants_product_id_fkey(
+            id, sku, name, price, cost, stock, is_active
+          )`
+        )
+        .is("deleted_at", null)
+        .eq("is_active", true)
+        .is("product_variants.deleted_at", null)
+        .order("name")
+      if (error) throw error
+      return (data ?? []) as unknown as POSProduct[]
+    },
+  })
+}
+
 export function ProductSearch() {
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebounce(search, 250)
-  const { data: products = [], isLoading } = usePOSProducts(debouncedSearch)
+  const searchQuery = usePOSProducts(debouncedSearch)
+  const allQuery = useAllPOSProducts()
+
+  const isSearching = debouncedSearch.trim().length > 0
+  const products = isSearching ? searchQuery.data ?? [] : allQuery.data ?? []
+  const isLoading = isSearching ? searchQuery.isLoading : allQuery.isLoading
+
   const customer = usePOSStore((s) => s.customer)
   const addItem = usePOSStore((s) => s.addItem)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -96,32 +127,35 @@ export function ProductSearch() {
       </div>
 
       {/* Results */}
-      {search.trim() && (
-        <div className="max-h-[calc(100vh-280px)] overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
-          {products.length === 0 && !isLoading ? (
-            <div className="flex flex-col items-center gap-2 py-8 text-center">
-              <Package className="size-8 text-neutral-300" />
-              <p className="text-sm text-neutral-500">
-                No se encontraron productos
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-neutral-100">
-              {products.map((product) => (
-                <ProductResultItem
-                  key={product.id}
-                  product={product}
-                  customer={customer}
-                  onSelectProduct={handleSelectProduct}
-                  onSelectVariant={(variant) =>
-                    handleSelectVariant(product, variant)
-                  }
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <div className="max-h-[calc(100vh-280px)] overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
+        {isLoading ? (
+          <div className="flex flex-col items-center gap-2 py-8 text-center">
+            <Loader2 className="size-6 text-neutral-300 animate-spin" />
+            <p className="text-sm text-neutral-400">Cargando productos...</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-8 text-center">
+            <Package className="size-8 text-neutral-300" />
+            <p className="text-sm text-neutral-500">
+              {isSearching ? "No se encontraron productos" : "Sin productos disponibles"}
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-neutral-100">
+            {products.map((product) => (
+              <ProductResultItem
+                key={product.id}
+                product={product}
+                customer={customer}
+                onSelectProduct={handleSelectProduct}
+                onSelectVariant={(variant) =>
+                  handleSelectVariant(product, variant)
+                }
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
