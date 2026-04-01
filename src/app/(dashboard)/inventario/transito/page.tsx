@@ -298,6 +298,7 @@ export default function InventarioTransitoPage() {
         open={showCreate}
         year={selectedYear}
         month={selectedMonth ?? new Date().getMonth() + 1}
+        existingWeekNumbers={monthWeeks.map((w) => w.week_number)}
         onOpenChange={setShowCreate}
       />
 

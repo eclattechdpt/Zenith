@@ -25,6 +25,7 @@ interface CreateTransitWeekDialogProps {
   open: boolean
   year: number
   month: number
+  existingWeekNumbers?: number[]
   onOpenChange: (open: boolean) => void
 }
 
@@ -32,6 +33,7 @@ export function CreateTransitWeekDialog({
   open,
   year,
   month,
+  existingWeekNumbers = [],
   onOpenChange,
 }: CreateTransitWeekDialogProps) {
   return (
@@ -40,6 +42,7 @@ export function CreateTransitWeekDialog({
         <CreateWeekForm
           year={year}
           month={month}
+          existingWeekNumbers={existingWeekNumbers}
           onOpenChange={onOpenChange}
         />
       )}
@@ -50,13 +53,18 @@ export function CreateTransitWeekDialog({
 function CreateWeekForm({
   year,
   month,
+  existingWeekNumbers,
   onOpenChange,
 }: {
   year: number
   month: number
+  existingWeekNumbers: number[]
   onOpenChange: (open: boolean) => void
 }) {
-  const [weekNumber, setWeekNumber] = useState("1")
+  const nextWeek = existingWeekNumbers.length > 0
+    ? Math.min(Math.max(...existingWeekNumbers) + 1, 5)
+    : 1
+  const [weekNumber, setWeekNumber] = useState(String(nextWeek))
   const [label, setLabel] = useState("")
   const [notes, setNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)

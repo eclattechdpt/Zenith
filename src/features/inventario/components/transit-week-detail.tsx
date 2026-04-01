@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Trash2, Loader2 } from "lucide-react"
+import { Plus, Trash2, Pencil, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 
@@ -61,6 +61,7 @@ export function TransitWeekDetail({ weekId }: TransitWeekDetailProps) {
     toast.success("Producto eliminado de la semana")
     queryClient.invalidateQueries({ queryKey: ["transit-week"] })
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
+    queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
   }
 
@@ -127,19 +128,19 @@ export function TransitWeekDetail({ weekId }: TransitWeekDetailProps) {
                     </p>
                   </div>
 
-                  <div className="flex shrink-0 gap-1">
+                  <div className="flex shrink-0 gap-1.5">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="size-7 p-0 text-neutral-400 hover:text-neutral-700"
+                      className="size-8 p-0 text-neutral-400 hover:text-neutral-700"
                       onClick={() => setEditItem(item)}
                     >
-                      <span className="text-xs">Editar</span>
+                      <Pencil className="size-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="size-7 p-0 text-neutral-400 hover:text-rose-600"
+                      className="size-8 p-0 text-neutral-400 hover:text-rose-600"
                       onClick={() => setDeleteTarget(item)}
                     >
                       <Trash2 className="size-3.5" />
@@ -259,6 +260,7 @@ function AddTransitItemForm({
     toast.success("Producto agregado")
     queryClient.invalidateQueries({ queryKey: ["transit-week"] })
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
+    queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
     onOpenChange(false)
   }
@@ -405,6 +407,7 @@ function EditTransitItemForm({
     toast.success("Producto actualizado")
     queryClient.invalidateQueries({ queryKey: ["transit-week"] })
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
+    queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
     onOpenChange(false)
   }

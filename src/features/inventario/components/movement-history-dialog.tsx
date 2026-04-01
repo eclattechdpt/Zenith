@@ -1,14 +1,13 @@
 "use client"
 
-import { useState } from "react"
-import { format } from "date-fns"
+import { useState, useRef } from "react"
+import { format, startOfDay, startOfWeek, startOfMonth, endOfDay } from "date-fns"
 import { es } from "date-fns/locale"
-import { ArrowDown, ArrowUp, History } from "lucide-react"
+import { ArrowDown, ArrowUp, History, X } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -16,6 +15,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
@@ -38,6 +42,33 @@ const TYPE_COLORS: Record<string, string> = {
   initial: "bg-neutral-100 text-neutral-600 border-neutral-200",
 }
 
+const DATE_PRESETS = [
+  { value: "", label: "Todo" },
+  { value: "today", label: "Hoy" },
+  { value: "week", label: "Esta semana" },
+  { value: "month", label: "Este mes" },
+] as const
+
+function getDateRange(preset: string, customDate?: string): { from: string; to: string } | null {
+  if (!preset) return null
+  const now = new Date()
+  const todayEnd = `${format(now, "yyyy-MM-dd")}T23:59:59`
+  if (preset === "today") {
+    return { from: startOfDay(now).toISOString(), to: todayEnd }
+  }
+  if (preset === "week") {
+    return { from: startOfWeek(now, { weekStartsOn: 1 }).toISOString(), to: todayEnd }
+  }
+  if (preset === "month") {
+    return { from: startOfMonth(now).toISOString(), to: todayEnd }
+  }
+  if (preset === "custom" && customDate) {
+    const date = new Date(customDate)
+    return { from: startOfDay(date).toISOString(), to: endOfDay(date).toISOString() }
+  }
+  return null
+}
+
 interface MovementHistoryDialogProps {
   variant: InventoryVariant | null
   inventoryType?: InventoryType
@@ -50,16 +81,20 @@ export function MovementHistoryDialog({
   onOpenChange,
 }: MovementHistoryDialogProps) {
   const [typeFilter, setTypeFilter] = useState<string>("")
-  const [dateFrom, setDateFrom] = useState("")
-  const [dateTo, setDateTo] = useState("")
+  const [datePreset, setDatePreset] = useState<string>("")
+  const [customDate, setCustomDate] = useState<string>("")
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
+  const dateInputRef = useRef<HTMLInputElement>(null)
+
+  const dateRange = getDateRange(datePreset, customDate)
 
   const { data: movements = [], isLoading } = useMovements(
     variant?.id ?? null,
     inventoryType,
     {
       type: typeFilter || undefined,
-      dateFrom: dateFrom || undefined,
-      dateTo: dateTo ? `${dateTo}T23:59:59` : undefined,
+      dateFrom: dateRange?.from || undefined,
+      dateTo: dateRange?.to || undefined,
     }
   )
 
@@ -73,8 +108,9 @@ export function MovementHistoryDialog({
       onOpenChange={(open) => {
         if (!open) {
           setTypeFilter("")
-          setDateFrom("")
-          setDateTo("")
+          setDatePreset("")
+          setCustomDate("")
+          setDatePickerOpen(false)
         }
         onOpenChange(open)
       }}
@@ -86,54 +122,95 @@ export function MovementHistoryDialog({
         </DialogHeader>
 
         {/* Filters */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="space-y-1.5 sm:w-40">
-            <Label className="text-xs">Tipo</Label>
-            <Select value={typeFilter || null} onValueChange={(v) => setTypeFilter(v ?? "")}>
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder="Todos" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(MOVEMENT_TYPES).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Type select */}
+          <Select value={typeFilter || "all"} onValueChange={(v) => setTypeFilter(v === "all" ? "" : (v ?? ""))}>
+            <SelectTrigger className="h-8 w-auto gap-1 rounded-full border-neutral-200 px-3 text-xs">
+              <SelectValue>
+                {typeFilter
+                  ? MOVEMENT_TYPES[typeFilter as keyof typeof MOVEMENT_TYPES] ?? typeFilter
+                  : "Todos los tipos"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent side="bottom">
+              <SelectItem value="all">Todos los tipos</SelectItem>
+              {Object.entries(MOVEMENT_TYPES).map(([key, label]) => (
+                <SelectItem key={key} value={key}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Date preset pills */}
+          <div className="flex gap-1">
+            {DATE_PRESETS.map((preset) => (
+              <Button
+                key={preset.value}
+                variant={datePreset === preset.value ? "default" : "ghost"}
+                size="sm"
+                className="h-7 rounded-full px-3 text-[11px]"
+                onClick={() => {
+                  setDatePreset(preset.value)
+                  setCustomDate("")
+                  setDatePickerOpen(false)
+                }}
+              >
+                {preset.label}
+              </Button>
+            ))}
+
+            {/* Custom date pill */}
+            {datePreset === "custom" && customDate ? (
+              <Button
+                variant="default"
+                size="sm"
+                className="h-7 rounded-full px-3 text-[11px] gap-1"
+                onClick={() => {
+                  setDatePreset("")
+                  setCustomDate("")
+                }}
+              >
+                {format(new Date(customDate), "d MMM yyyy", { locale: es })}
+                <X className="size-3" />
+              </Button>
+            ) : (
+              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                <PopoverTrigger
+                  render={
+                    <Button
+                      variant={datePreset === "custom" ? "default" : "ghost"}
+                      size="sm"
+                      className="h-7 rounded-full px-3 text-[11px]"
+                    />
+                  }
+                >
+                  Fecha
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto p-3"
+                  side="bottom"
+                  align="start"
+                >
+                  <Input
+                    ref={dateInputRef}
+                    type="date"
+                    value={customDate}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      if (val) {
+                        setCustomDate(val)
+                        setDatePreset("custom")
+                        setDatePickerOpen(false)
+                      }
+                    }}
+                    className="h-9"
+                    autoFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Desde</Label>
-            <Input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="h-9 w-36"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Hasta</Label>
-            <Input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="h-9 w-36"
-            />
-          </div>
-          {(typeFilter || dateFrom || dateTo) && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 text-xs"
-              onClick={() => {
-                setTypeFilter("")
-                setDateFrom("")
-                setDateTo("")
-              }}
-            >
-              Limpiar
-            </Button>
-          )}
         </div>
 
         {/* Movement list */}

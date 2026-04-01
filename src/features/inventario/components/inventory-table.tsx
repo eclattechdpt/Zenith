@@ -161,13 +161,18 @@ export function InventoryTable({
         </div>
 
         <Select
-          value={categoryFilter || null}
-          onValueChange={(v) => setCategoryFilter(v)}
+          value={categoryFilter || "all"}
+          onValueChange={(v) => setCategoryFilter(v === "all" ? null : v)}
         >
           <SelectTrigger className="w-full sm:w-44">
-            <SelectValue placeholder="Todas las categorias" />
+            <SelectValue placeholder="Todas las categorias">
+              {categoryFilter
+                ? categoryOptions.find((o) => o.value === categoryFilter)?.label ?? categoryFilter
+                : "Todas las categorias"}
+            </SelectValue>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent side="bottom">
+            <SelectItem value="all">Todas las categorias</SelectItem>
             {categoryOptions.map((opt) => (
               <SelectItem
                 key={opt.value}

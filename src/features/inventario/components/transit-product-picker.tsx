@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Search, Check } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
+import { useQuery } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
 import { useDebounce } from "@/hooks/use-debounce"
 import { usePOSProducts, type POSProduct } from "@/features/pos/queries"
 
@@ -23,7 +25,35 @@ export function TransitProductPicker({
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebounce(search, 250)
 
-  const { data: products = [], isLoading } = usePOSProducts(debouncedSearch)
+  const searchQuery = usePOSProducts(debouncedSearch)
+
+  // Fetch initial product list when no search
+  const allProductsQuery = useQuery({
+    queryKey: ["transit-all-products"],
+    queryFn: async (): Promise<POSProduct[]> => {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          `id, name, brand, has_variants,
+          product_variants:product_variants!product_variants_product_id_fkey(
+            id, sku, name, price, cost, stock, is_active
+          )`
+        )
+        .is("deleted_at", null)
+        .eq("is_active", true)
+        .is("product_variants.deleted_at", null)
+        .order("name")
+        .limit(30)
+      if (error) throw error
+      return (data ?? []) as unknown as POSProduct[]
+    },
+    enabled: !debouncedSearch.trim(),
+  })
+
+  const isSearching = debouncedSearch.trim().length > 0
+  const products = isSearching ? searchQuery.data ?? [] : allProductsQuery.data ?? []
+  const isLoading = isSearching ? searchQuery.isLoading : allProductsQuery.isLoading
 
   return (
     <div className="space-y-2">
@@ -56,17 +86,16 @@ export function TransitProductPicker({
             />
           </div>
 
-          {debouncedSearch.trim().length > 0 && (
-            <div className="max-h-48 overflow-y-auto rounded-lg border border-neutral-100 bg-white">
-              {isLoading ? (
-                <div className="px-3 py-4 text-center text-xs text-neutral-400">
-                  Buscando...
-                </div>
-              ) : products.length === 0 ? (
-                <div className="px-3 py-4 text-center text-xs text-neutral-400">
-                  Sin resultados
-                </div>
-              ) : (
+          <div className="max-h-48 overflow-y-auto rounded-lg border border-neutral-100 bg-white">
+            {isLoading ? (
+              <div className="px-3 py-4 text-center text-xs text-neutral-400">
+                {isSearching ? "Buscando..." : "Cargando productos..."}
+              </div>
+            ) : products.length === 0 ? (
+              <div className="px-3 py-4 text-center text-xs text-neutral-400">
+                Sin resultados
+              </div>
+            ) : (
                 products.map((product) => (
                   <ProductVariantList
                     key={product.id}
@@ -76,8 +105,7 @@ export function TransitProductPicker({
                   />
                 ))
               )}
-            </div>
-          )}
+          </div>
         </>
       )}
     </div>
