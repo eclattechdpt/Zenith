@@ -20,7 +20,9 @@ import { deleteTransitWeek } from "@/features/inventario/actions"
 import { TransitMonthlyChart, MONTH_NAMES } from "@/features/inventario/components/transit-monthly-chart"
 import { TransitWeekCard } from "@/features/inventario/components/transit-week-card"
 import { CreateTransitWeekDialog } from "@/features/inventario/components/create-transit-week-dialog"
+import { EditTransitWeekDialog } from "@/features/inventario/components/edit-transit-week-dialog"
 import { TransitWeekDetail } from "@/features/inventario/components/transit-week-detail"
+import type { TransitWeekWithItems } from "@/features/inventario/types"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -46,6 +48,7 @@ export default function InventarioTransitoPage() {
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
   const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null)
   const [showCreate, setShowCreate] = useState(false)
+  const [editWeekTarget, setEditWeekTarget] = useState<TransitWeekWithItems | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<{
     id: string
     label: string
@@ -264,7 +267,7 @@ export default function InventarioTransitoPage() {
                     week={week}
                     isSelected={week.id === selectedWeekId}
                     onSelect={() => setSelectedWeekId(week.id)}
-                    onEdit={() => setSelectedWeekId(week.id)}
+                    onEdit={() => setEditWeekTarget(week)}
                     onDelete={() =>
                       setDeleteTarget({
                         id: week.id,
@@ -300,6 +303,12 @@ export default function InventarioTransitoPage() {
         month={selectedMonth ?? new Date().getMonth() + 1}
         existingWeekNumbers={monthWeeks.map((w) => w.week_number)}
         onOpenChange={setShowCreate}
+      />
+
+      {/* Edit week dialog */}
+      <EditTransitWeekDialog
+        week={editWeekTarget}
+        onOpenChange={(open) => !open && setEditWeekTarget(null)}
       />
 
       {/* Delete confirmation */}
