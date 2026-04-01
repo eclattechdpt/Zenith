@@ -19,7 +19,7 @@ export const paymentSchema = z.object({
 export const createSaleSchema = z.object({
   customer_id: z.string().uuid().optional().nullable(),
   items: z.array(cartItemSchema).min(1, "Agrega al menos un producto"),
-  payments: z.array(paymentSchema).min(1, "Registra al menos un pago"),
+  payments: z.array(paymentSchema),
   discount_amount: z.number().min(0).default(0),
   notes: z.string().max(2000).optional().nullable(),
 })

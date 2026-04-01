@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency } from "@/lib/utils"
 
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+
 import { usePOSStore } from "../store"
 import { createQuote } from "../actions"
 import type { CartItem } from "../types"
@@ -30,6 +32,7 @@ export function CartPanel({
   const clear = usePOSStore((s) => s.clear)
 
   const [isSavingQuote, setIsSavingQuote] = useState(false)
+  const [confirmClear, setConfirmClear] = useState(false)
 
   const subtotal = getSubtotal()
   const itemsDiscount = getItemsDiscount()
@@ -99,7 +102,7 @@ export function CartPanel({
         <Button
           variant="ghost"
           size="sm"
-          onClick={clear}
+          onClick={() => setConfirmClear(true)}
           className="text-xs text-neutral-500 hover:text-destructive"
         >
           Vaciar
@@ -166,6 +169,19 @@ export function CartPanel({
           Guardar cotizacion
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={confirmClear}
+        onOpenChange={setConfirmClear}
+        title="Vaciar carrito"
+        description="Se eliminaran todos los productos del carrito. Esta accion no se puede deshacer."
+        confirmLabel="Vaciar"
+        variant="destructive"
+        onConfirm={() => {
+          clear()
+          setConfirmClear(false)
+        }}
+      />
     </div>
   )
 }

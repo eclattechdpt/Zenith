@@ -37,7 +37,10 @@ export async function createSale(input: CreateSaleInput) {
 
   // Validate payments cover the total
   const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
-  if (paymentTotal < total) {
+  if (total > 0 && payments.length === 0) {
+    return { error: { _form: ["Registra al menos un pago"] } }
+  }
+  if (total > 0 && paymentTotal < total) {
     return {
       error: {
         _form: [
@@ -50,118 +53,44 @@ export async function createSale(input: CreateSaleInput) {
   const supabase = await createServerClient()
   const userId = await getUserId()
 
-  // Generate sale number
-  const { data: saleNumber } = await supabase.rpc(
-    "generate_sequential_number",
+  // Execute entire sale as a single atomic transaction
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: saleJson, error } = await (supabase.rpc as any)(
+    "create_sale_transaction",
     {
       p_tenant_id: TENANT_ID,
-      p_prefix: "V",
-      p_column: "sale_number",
-      p_table: "sales",
+      p_customer_id: customer_id ?? null,
+      p_subtotal: subtotal,
+      p_discount_amount: itemsDiscount + discount_amount,
+      p_total: total,
+      p_notes: notes ?? null,
+      p_created_by: userId,
+      p_items: items.map((item) => ({
+        product_variant_id: item.product_variant_id,
+        product_name: item.product_name,
+        variant_label: item.variant_label,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        unit_cost: item.unit_cost,
+        discount: item.discount,
+      })),
+      p_payments: payments.map((p) => ({
+        method: p.method,
+        amount: p.amount,
+        reference: p.reference ?? null,
+      })),
     }
   )
 
-  if (!saleNumber) {
-    return { error: { _form: ["Error al generar numero de venta"] } }
+  if (error) {
+    return { error: { _form: [(error as { message: string }).message] } }
   }
 
-  // Create sale record
-  const { data: sale, error: saleError } = await supabase
-    .from("sales")
-    .insert({
-      sale_number: saleNumber,
-      tenant_id: TENANT_ID,
-      customer_id: customer_id ?? null,
-      subtotal,
-      discount_amount: itemsDiscount + discount_amount,
-      total,
-      status: "completed",
-      notes: notes ?? null,
-      created_by: userId,
-    })
-    .select()
-    .single()
-
-  if (saleError) {
-    return { error: { _form: [saleError.message] } }
-  }
-
-  // Create sale items + deduct stock + create inventory movements
-  for (const item of items) {
-    const lineTotal =
-      item.unit_price * item.quantity - item.discount
-
-    // Insert sale item
-    const { error: itemError } = await supabase.from("sale_items").insert({
-      sale_id: sale.id,
-      product_variant_id: item.product_variant_id,
-      product_name: item.product_name,
-      variant_label: item.variant_label,
-      quantity: item.quantity,
-      unit_price: item.unit_price,
-      unit_cost: item.unit_cost,
-      discount: item.discount,
-      line_total: lineTotal,
-    })
-
-    if (itemError) {
-      return { error: { _form: [`Error en item "${item.product_name}": ${itemError.message}`] } }
-    }
-
-    // Get current stock
-    const { data: variant } = await supabase
-      .from("product_variants")
-      .select("stock")
-      .eq("id", item.product_variant_id)
-      .single()
-
-    const stockBefore = variant?.stock ?? 0
-    const stockAfter = stockBefore - item.quantity
-
-    // Deduct stock
-    const { error: stockError } = await supabase
-      .from("product_variants")
-      .update({ stock: stockAfter })
-      .eq("id", item.product_variant_id)
-
-    if (stockError) {
-      return { error: { _form: [`Error al descontar stock: ${stockError.message}`] } }
-    }
-
-    // Create inventory movement
-    const { error: movementError } = await supabase
-      .from("inventory_movements")
-      .insert({
-        tenant_id: TENANT_ID,
-        product_variant_id: item.product_variant_id,
-        type: "sale",
-        quantity: -item.quantity,
-        stock_before: stockBefore,
-        stock_after: stockAfter,
-        sale_id: sale.id,
-        reason: `Venta ${saleNumber}`,
-        created_by: userId,
-      })
-
-    if (movementError) {
-      return { error: { _form: [`Error en movimiento de inventario: ${movementError.message}`] } }
-    }
-  }
-
-  // Create sale payments
-  for (const payment of payments) {
-    const { error: paymentError } = await supabase
-      .from("sale_payments")
-      .insert({
-        sale_id: sale.id,
-        method: payment.method,
-        amount: payment.amount,
-        reference: payment.reference ?? null,
-      })
-
-    if (paymentError) {
-      return { error: { _form: [`Error en pago: ${paymentError.message}`] } }
-    }
+  const sale = saleJson as unknown as {
+    id: string
+    sale_number: string
+    created_at: string
+    [key: string]: unknown
   }
 
   revalidatePath("/ventas")

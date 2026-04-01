@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Banknote,
   CreditCard,
@@ -64,15 +64,20 @@ export function PaymentDialog({
   const subtotal = getSubtotal()
   const itemsDiscount = getItemsDiscount()
   const total = getTotal()
-  const [payments, setPayments] = useState<CartPayment[]>([
-    { method: "cash", amount: total, reference: null },
-  ])
+  const [payments, setPayments] = useState<CartPayment[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Reset payments to full cash whenever the dialog opens or total changes
+  useEffect(() => {
+    if (open) {
+      setPayments([{ method: "cash", amount: total, reference: null }])
+    }
+  }, [open, total])
 
   const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
   const remaining = Math.max(0, total - paymentTotal)
   const change = Math.max(0, paymentTotal - total)
-  const isValid = paymentTotal >= total && payments.every((p) => p.amount > 0)
+  const isValid = total === 0 || (paymentTotal >= total && payments.every((p) => p.amount > 0))
 
   function addPayment(method: PaymentMethod) {
     setPayments((prev) => [
@@ -121,7 +126,7 @@ export function PaymentDialog({
         unit_cost: item.unitCost,
         discount: item.discount,
       })),
-      payments: payments.map((p) => ({
+      payments: total === 0 ? [] : payments.map((p) => ({
         method: p.method,
         amount: p.amount,
         reference: p.reference,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Search, UserRound, X } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
@@ -21,6 +21,19 @@ export function CustomerPicker() {
 
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    if (!open) return
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [open])
   const debouncedSearch = useDebounce(search, 250)
   const { data: customers = [] } = useCustomers({ search: debouncedSearch })
 
@@ -118,7 +131,7 @@ export function CustomerPicker() {
   }
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div ref={containerRef} className="flex flex-col gap-1.5">
       <div className="relative">
         <UserRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
         <Input
