@@ -112,6 +112,7 @@ export function POSLanding() {
         productName: product.name,
         variantLabel: variant.name ?? product.name,
         sku: variant.sku,
+        basePrice: variant.price,
         unitPrice: price,
         unitCost: variant.cost,
         stock: availableStock,

@@ -58,7 +58,10 @@
       "Bash(npx supabase:*)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
       "mcp__supabase__list_migrations",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(rm .git/COMMIT_MSG_TMP)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

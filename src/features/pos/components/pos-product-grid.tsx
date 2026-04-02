@@ -56,7 +56,7 @@ const pillItemVariants = {
   visible: {
     opacity: 1,
     filter: "blur(0px)",
-    transition: { duration: 0.2, ease: "easeOut" },
+    transition: { duration: 0.2, ease: "easeOut" as const },
   },
 }
 
