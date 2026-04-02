@@ -14,6 +14,7 @@ import {
   Users,
   Receipt,
   FileText,
+  BarChart3,
   Settings,
   HelpCircle,
   LogOut,
@@ -88,6 +89,7 @@ const navItems = [
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/ventas", label: "Ventas", icon: Receipt },
   { href: "/notas-credito", label: "Notas de credito", icon: FileText },
+  { href: "/reportes", label: "Reportes", icon: BarChart3 },
   { href: "/configuracion", label: "Configuracion", icon: Settings },
 ]
 

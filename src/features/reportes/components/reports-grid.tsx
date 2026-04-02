@@ -1,0 +1,95 @@
+"use client"
+
+import {
+  Receipt,
+  Package,
+  Users,
+  ShoppingBag,
+  TrendingUp,
+  Warehouse,
+} from "lucide-react"
+
+import { ExportCard } from "./export-card"
+import {
+  exportSalesExcel,
+  exportInventoryExcel,
+  exportCustomersExcel,
+  exportProductsExcel,
+} from "./excel-generators"
+
+export function ReportsGrid() {
+  // PDF generators use dynamic import to avoid SSR issues with @react-pdf/renderer
+  async function handleSalesPdf() {
+    const { exportSalesPdf } = await import("./pdf-generators")
+    await exportSalesPdf()
+  }
+
+  async function handleInventoryPdf() {
+    const { exportInventoryPdf } = await import("./pdf-generators")
+    await exportInventoryPdf()
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Excel exports */}
+      <div>
+        <h2 className="text-sm font-semibold text-neutral-950 mb-4">
+          Exportar a Excel
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <ExportCard
+            title="Ventas"
+            description="Historial completo de ventas con pagos y clientes"
+            icon={Receipt}
+            format="excel"
+            onExport={exportSalesExcel}
+          />
+          <ExportCard
+            title="Inventario"
+            description="Productos con stock actual, minimo y estado"
+            icon={Package}
+            format="excel"
+            onExport={exportInventoryExcel}
+          />
+          <ExportCard
+            title="Clientes"
+            description="Lista de clientes con datos de contacto"
+            icon={Users}
+            format="excel"
+            onExport={exportCustomersExcel}
+          />
+          <ExportCard
+            title="Productos"
+            description="Catalogo completo con variantes y precios"
+            icon={ShoppingBag}
+            format="excel"
+            onExport={exportProductsExcel}
+          />
+        </div>
+      </div>
+
+      {/* PDF reports */}
+      <div>
+        <h2 className="text-sm font-semibold text-neutral-950 mb-4">
+          Reportes PDF
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <ExportCard
+            title="Reporte de ventas"
+            description="Resumen del mes con metricas y detalle de transacciones"
+            icon={TrendingUp}
+            format="pdf"
+            onExport={handleSalesPdf}
+          />
+          <ExportCard
+            title="Reporte de inventario"
+            description="Inventario completo con alertas de stock"
+            icon={Warehouse}
+            format="pdf"
+            onExport={handleInventoryPdf}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
