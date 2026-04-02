@@ -59,7 +59,7 @@ export async function exportSalesExcel() {
   downloadWorkbook(wb, `ventas-${today()}.xlsx`)
 }
 
-// ── Inventory Export ──
+// ── Inventory Fisico Export ──
 
 export async function exportInventoryExcel() {
   const supabase = createClient()
@@ -113,8 +113,8 @@ export async function exportInventoryExcel() {
 
   const ws = XLSX.utils.json_to_sheet(rows)
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, "Inventario")
-  downloadWorkbook(wb, `inventario-${today()}.xlsx`)
+  XLSX.utils.book_append_sheet(wb, ws, "Inventario Fisico")
+  downloadWorkbook(wb, `inventario-fisico-${today()}.xlsx`)
 }
 
 // ── Customers Export ──
@@ -228,4 +228,163 @@ export async function exportProductsExcel() {
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Productos")
   downloadWorkbook(wb, `productos-${today()}.xlsx`)
+}
+
+// ── Inventory Transito Export ──
+
+export async function exportTransitExcel() {
+  const supabase = createClient()
+
+  const { data: weeks, error } = await supabase
+    .from("transit_weeks")
+    .select(
+      `id, year, month, week_number, label, total_value, created_at,
+      transit_week_items(
+        quantity, unit_price, line_total,
+        product_variants!inner(
+          name, sku,
+          products!inner(name, brand)
+        )
+      )`
+    )
+    .is("deleted_at", null)
+    .order("year", { ascending: false })
+    .order("month", { ascending: false })
+    .order("week_number", { ascending: false })
+
+  if (error) throw error
+
+  const MONTH_NAMES = [
+    "",
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ]
+
+  const rows: Record<string, unknown>[] = []
+
+  for (const week of weeks ?? []) {
+    const items = (week.transit_week_items ?? []) as unknown as {
+      quantity: number
+      unit_price: number
+      line_total: number
+      product_variants: {
+        name: string | null
+        sku: string | null
+        products: { name: string; brand: string | null }
+      }
+    }[]
+
+    if (items.length === 0) {
+      rows.push({
+        Año: week.year,
+        Mes: MONTH_NAMES[week.month] ?? week.month,
+        Semana: week.week_number,
+        Etiqueta: week.label ?? "",
+        Producto: "—",
+        Variante: "—",
+        Cantidad: 0,
+        "Precio unitario": 0,
+        "Total linea": 0,
+        "Total semana": Number(week.total_value),
+      })
+    } else {
+      for (const item of items) {
+        const pv = item.product_variants
+        rows.push({
+          Año: week.year,
+          Mes: MONTH_NAMES[week.month] ?? week.month,
+          Semana: week.week_number,
+          Etiqueta: week.label ?? "",
+          Producto: pv?.products?.name ?? "—",
+          Variante: pv?.name ?? pv?.sku ?? "—",
+          Cantidad: item.quantity,
+          "Precio unitario": Number(item.unit_price),
+          "Total linea": Number(item.line_total),
+          "Total semana": Number(week.total_value),
+        })
+      }
+    }
+  }
+
+  const ws = XLSX.utils.json_to_sheet(rows)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, "Inventario Transito")
+  downloadWorkbook(wb, `inventario-transito-${today()}.xlsx`)
+}
+
+// ── Inventory Carga Inicial Export ──
+
+export async function exportInitialLoadExcel() {
+  const supabase = createClient()
+
+  // Fetch variants with initial_stock and their overrides
+  const { data: variants, error: varError } = await supabase
+    .from("product_variants")
+    .select(
+      `id, sku, name, price, initial_stock, is_active,
+      products!inner(name, brand, deleted_at)`
+    )
+    .is("deleted_at", null)
+    .is("products.deleted_at", null)
+
+  if (varError) throw varError
+
+  // Fetch overrides
+  const { data: overrides } = await supabase
+    .from("initial_load_overrides")
+    .select("product_variant_id, override_name, override_price")
+
+  const overrideMap = new Map(
+    (overrides ?? []).map((o) => [o.product_variant_id, o])
+  )
+
+  const rows = (variants ?? [])
+    .filter(
+      (v: { initial_stock: number | null }) =>
+        v.initial_stock !== null && v.initial_stock > 0
+    )
+    .map(
+      (v: {
+        id: string
+        sku: string | null
+        name: string | null
+        price: number
+        initial_stock: number
+        products: { name: string; brand: string | null }
+      }) => {
+        const prod = v.products as unknown as
+          | { name: string }
+          | { name: string }[]
+        const prodName = Array.isArray(prod) ? prod[0]?.name : prod?.name
+        const override = overrideMap.get(v.id)
+
+        return {
+          Producto: override?.override_name ?? prodName ?? "—",
+          Variante: v.name ?? v.sku ?? "—",
+          "Stock inicial": v.initial_stock,
+          Precio: override?.override_price
+            ? Number(override.override_price)
+            : Number(v.price),
+          "Valor total": (override?.override_price
+            ? Number(override.override_price)
+            : Number(v.price)) * v.initial_stock,
+          Editado: override ? "Si" : "No",
+        }
+      }
+    )
+
+  const ws = XLSX.utils.json_to_sheet(rows)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, "Carga Inicial")
+  downloadWorkbook(wb, `inventario-carga-inicial-${today()}.xlsx`)
 }

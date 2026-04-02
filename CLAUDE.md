@@ -234,6 +234,21 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
+**Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
+
+### Sprint 7 — Completado
+- Dashboard con datos reales: KPIs (ventas del dia, transacciones, productos vendidos, stock bajo), chart de ventas semanales, actividad reciente (ventas + devoluciones), top productos por revenue, alertas de inventario
+- Todas las queries server-side en `src/features/dashboard/queries.ts`: fetchKpiData, fetchSalesChartData, fetchActivityFeed, fetchTopProducts, fetchInventoryAlerts con Promise.all
+- Eliminado mock-data.json — dashboard 100% datos reales de Supabase
+- Pagina de reportes (`/reportes`): hub centralizado de exportaciones
+- Excel exports (6): Ventas, Inventario Fisico, Inventario en Transito, Inventario Carga Inicial, Clientes, Productos — usando SheetJS (xlsx)
+- PDF reports (4): Reporte de ventas (resumen mensual + detalle), Inventario Fisico (stock + alertas), Inventario en Transito (semanas + productos), Inventario Carga Inicial (stock inicial + overrides) — usando @react-pdf/renderer
+- Export cards con loading state, toast feedback, badges Excel/PDF
+- Nav link "Reportes" en sidebar + mobile nav con icono BarChart3
+- Comparaciones vs ayer/mes anterior en KPIs y chart con manejo de division por cero
+- Empty state handling: zero sales → 0s, empty tables → sheets/PDFs vacios sin crash
+- Code audit: sin bugs encontrados — todo read-only, sin riesgo de corrupcion de datos
+
 **Sprint 6 — Devoluciones y creditos: COMPLETO** (actualizado 2026-04-01)
 
 ### Sprint 6 — Completado

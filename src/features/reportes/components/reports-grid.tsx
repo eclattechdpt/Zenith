@@ -7,6 +7,8 @@ import {
   ShoppingBag,
   TrendingUp,
   Warehouse,
+  Truck,
+  Archive,
 } from "lucide-react"
 
 import { ExportCard } from "./export-card"
@@ -15,6 +17,8 @@ import {
   exportInventoryExcel,
   exportCustomersExcel,
   exportProductsExcel,
+  exportTransitExcel,
+  exportInitialLoadExcel,
 } from "./excel-generators"
 
 export function ReportsGrid() {
@@ -29,6 +33,16 @@ export function ReportsGrid() {
     await exportInventoryPdf()
   }
 
+  async function handleTransitPdf() {
+    const { exportTransitPdf } = await import("./pdf-generators")
+    await exportTransitPdf()
+  }
+
+  async function handleInitialLoadPdf() {
+    const { exportInitialLoadPdf } = await import("./pdf-generators")
+    await exportInitialLoadPdf()
+  }
+
   return (
     <div className="space-y-8">
       {/* Excel exports */}
@@ -36,7 +50,7 @@ export function ReportsGrid() {
         <h2 className="text-sm font-semibold text-neutral-950 mb-4">
           Exportar a Excel
         </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <ExportCard
             title="Ventas"
             description="Historial completo de ventas con pagos y clientes"
@@ -45,11 +59,25 @@ export function ReportsGrid() {
             onExport={exportSalesExcel}
           />
           <ExportCard
-            title="Inventario"
-            description="Productos con stock actual, minimo y estado"
+            title="Inventario Fisico"
+            description="Stock actual, minimo y estado por producto"
             icon={Package}
             format="excel"
             onExport={exportInventoryExcel}
+          />
+          <ExportCard
+            title="Inventario en Transito"
+            description="Semanas de transito con productos y valores"
+            icon={Truck}
+            format="excel"
+            onExport={exportTransitExcel}
+          />
+          <ExportCard
+            title="Inventario Carga Inicial"
+            description="Stock inicial con precios y nombres editados"
+            icon={Archive}
+            format="excel"
+            onExport={exportInitialLoadExcel}
           />
           <ExportCard
             title="Clientes"
@@ -73,7 +101,7 @@ export function ReportsGrid() {
         <h2 className="text-sm font-semibold text-neutral-950 mb-4">
           Reportes PDF
         </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <ExportCard
             title="Reporte de ventas"
             description="Resumen del mes con metricas y detalle de transacciones"
@@ -82,11 +110,25 @@ export function ReportsGrid() {
             onExport={handleSalesPdf}
           />
           <ExportCard
-            title="Reporte de inventario"
-            description="Inventario completo con alertas de stock"
+            title="Inventario Fisico"
+            description="Stock actual con alertas y valor total"
             icon={Warehouse}
             format="pdf"
             onExport={handleInventoryPdf}
+          />
+          <ExportCard
+            title="Inventario en Transito"
+            description="Semanas de transito con productos y valores"
+            icon={Truck}
+            format="pdf"
+            onExport={handleTransitPdf}
+          />
+          <ExportCard
+            title="Inventario Carga Inicial"
+            description="Stock inicial con precios editados y valor total"
+            icon={Archive}
+            format="pdf"
+            onExport={handleInitialLoadPdf}
           />
         </div>
       </div>

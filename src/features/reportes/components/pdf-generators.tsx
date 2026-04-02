@@ -229,7 +229,7 @@ export async function exportSalesPdf() {
   downloadBlob(blob, `reporte-ventas-${format(new Date(), "yyyy-MM-dd")}.pdf`)
 }
 
-// ── Inventory Report PDF ──
+// ── Inventory Fisico Report PDF ──
 
 export async function exportInventoryPdf() {
   const supabase = createClient()
@@ -274,7 +274,7 @@ export async function exportInventoryPdf() {
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.title}>
-            {BUSINESS_NAME} — Reporte de Inventario
+            {BUSINESS_NAME} — Inventario Fisico
           </Text>
           <Text style={styles.subtitle}>
             {format(new Date(), "d 'de' MMMM, yyyy", { locale: es })}
@@ -341,6 +341,242 @@ export async function exportInventoryPdf() {
   const blob = await pdf(doc).toBlob()
   downloadBlob(
     blob,
-    `reporte-inventario-${format(new Date(), "yyyy-MM-dd")}.pdf`
+    `inventario-fisico-${format(new Date(), "yyyy-MM-dd")}.pdf`
   )
+}
+
+// ── Transit Inventory Report PDF ──
+
+export async function exportTransitPdf() {
+  const supabase = createClient()
+
+  const { data: weeks } = await supabase
+    .from("transit_weeks")
+    .select(
+      `id, year, month, week_number, label, total_value,
+      transit_week_items(
+        quantity, unit_price, line_total,
+        product_variants!inner(
+          name, sku,
+          products!inner(name)
+        )
+      )`
+    )
+    .is("deleted_at", null)
+    .order("year", { ascending: false })
+    .order("month", { ascending: false })
+    .order("week_number", { ascending: false })
+
+  const weeksList = (weeks ?? []) as unknown as {
+    year: number
+    month: number
+    week_number: number
+    label: string | null
+    total_value: number
+    transit_week_items: {
+      quantity: number
+      unit_price: number
+      line_total: number
+      product_variants: {
+        name: string | null
+        sku: string | null
+        products: { name: string }
+      }
+    }[]
+  }[]
+
+  const MONTH_NAMES = [
+    "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+  ]
+
+  const totalValue = weeksList.reduce(
+    (s, w) => s + Number(w.total_value ?? 0), 0
+  )
+
+  const doc = (
+    <Document>
+      <Page size="LETTER" style={styles.page}>
+        <View style={styles.header}>
+          <Text style={styles.title}>
+            {BUSINESS_NAME} — Inventario en Transito
+          </Text>
+          <Text style={styles.subtitle}>
+            {format(new Date(), "d 'de' MMMM, yyyy", { locale: es })}
+          </Text>
+        </View>
+
+        <Text style={styles.sectionTitle}>Resumen</Text>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Total semanas registradas</Text>
+          <Text style={styles.metricValue}>{weeksList.length}</Text>
+        </View>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Valor total en transito</Text>
+          <Text style={styles.metricValue}>{currency(totalValue)}</Text>
+        </View>
+
+        <Text style={styles.sectionTitle}>Detalle por semana</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.cellBold}>Periodo</Text>
+          <Text style={{ ...styles.cellBold, flex: 2 }}>Producto</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Cant.</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Precio</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Total</Text>
+        </View>
+        {weeksList.slice(0, 40).map((week) => {
+          const items = week.transit_week_items ?? []
+          if (items.length === 0) {
+            return (
+              <View key={`${week.year}-${week.month}-${week.week_number}`} style={styles.row}>
+                <Text style={styles.cell}>
+                  {MONTH_NAMES[week.month]} S{week.week_number} ({week.year})
+                </Text>
+                <Text style={{ ...styles.cell, flex: 2 }}>Sin productos</Text>
+                <Text style={styles.cellRight}>—</Text>
+                <Text style={styles.cellRight}>—</Text>
+                <Text style={styles.cellRight}>{currency(Number(week.total_value))}</Text>
+              </View>
+            )
+          }
+          return items.map((item, i) => (
+            <View key={`${week.year}-${week.month}-${week.week_number}-${i}`} style={styles.row}>
+              <Text style={styles.cell}>
+                {i === 0
+                  ? `${MONTH_NAMES[week.month]} S${week.week_number} (${week.year})`
+                  : ""}
+              </Text>
+              <Text style={{ ...styles.cell, flex: 2 }}>
+                {item.product_variants?.products?.name ?? "—"}{" "}
+                {item.product_variants?.name ? `(${item.product_variants.name})` : ""}
+              </Text>
+              <Text style={styles.cellRight}>{item.quantity}</Text>
+              <Text style={styles.cellRight}>{currency(Number(item.unit_price))}</Text>
+              <Text style={styles.cellRight}>{currency(Number(item.line_total))}</Text>
+            </View>
+          ))
+        })}
+
+        <Text style={styles.footer}>
+          Generado por Zenith POS — {format(new Date(), "dd/MM/yyyy HH:mm")}
+        </Text>
+      </Page>
+    </Document>
+  )
+
+  const blob = await pdf(doc).toBlob()
+  downloadBlob(blob, `inventario-transito-${format(new Date(), "yyyy-MM-dd")}.pdf`)
+}
+
+// ── Initial Load Report PDF ──
+
+export async function exportInitialLoadPdf() {
+  const supabase = createClient()
+
+  const { data: variants } = await supabase
+    .from("product_variants")
+    .select(
+      `id, sku, name, price, initial_stock, is_active,
+      products!inner(name, brand, deleted_at)`
+    )
+    .is("deleted_at", null)
+    .is("products.deleted_at", null)
+
+  const { data: overrides } = await supabase
+    .from("initial_load_overrides")
+    .select("product_variant_id, override_name, override_price")
+
+  const overrideMap = new Map(
+    (overrides ?? []).map((o) => [o.product_variant_id, o])
+  )
+
+  const items = ((variants ?? []) as unknown as {
+    id: string
+    sku: string | null
+    name: string | null
+    price: number
+    initial_stock: number | null
+    products: { name: string; brand: string | null }[]
+  }[])
+    .filter((v) => v.initial_stock !== null && v.initial_stock > 0)
+    .map((v) => {
+      const override = overrideMap.get(v.id)
+      const prodName = override?.override_name ?? v.products[0]?.name ?? "—"
+      const price = override?.override_price
+        ? Number(override.override_price)
+        : Number(v.price)
+      return {
+        producto: prodName,
+        variante: v.name ?? v.sku ?? "—",
+        stock: v.initial_stock!,
+        precio: price,
+        valor: price * v.initial_stock!,
+        editado: !!override,
+      }
+    })
+
+  const totalValue = items.reduce((s, i) => s + i.valor, 0)
+  const totalUnits = items.reduce((s, i) => s + i.stock, 0)
+
+  const doc = (
+    <Document>
+      <Page size="LETTER" style={styles.page}>
+        <View style={styles.header}>
+          <Text style={styles.title}>
+            {BUSINESS_NAME} — Inventario Carga Inicial
+          </Text>
+          <Text style={styles.subtitle}>
+            {format(new Date(), "d 'de' MMMM, yyyy", { locale: es })}
+          </Text>
+        </View>
+
+        <Text style={styles.sectionTitle}>Resumen</Text>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Total productos</Text>
+          <Text style={styles.metricValue}>{items.length}</Text>
+        </View>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Total unidades</Text>
+          <Text style={styles.metricValue}>{totalUnits}</Text>
+        </View>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Valor total</Text>
+          <Text style={styles.metricValue}>{currency(totalValue)}</Text>
+        </View>
+
+        <Text style={styles.sectionTitle}>Detalle</Text>
+        <View style={styles.headerRow}>
+          <Text style={{ ...styles.cellBold, flex: 2 }}>Producto</Text>
+          <Text style={styles.cellBold}>Variante</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Stock</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Precio</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Valor</Text>
+        </View>
+        {items.slice(0, 80).map((item, i) => (
+          <View key={i} style={styles.row}>
+            <Text style={{ ...styles.cell, flex: 2 }}>
+              {item.producto}{item.editado ? " *" : ""}
+            </Text>
+            <Text style={styles.cell}>{item.variante}</Text>
+            <Text style={styles.cellRight}>{item.stock}</Text>
+            <Text style={styles.cellRight}>{currency(item.precio)}</Text>
+            <Text style={styles.cellRight}>{currency(item.valor)}</Text>
+          </View>
+        ))}
+
+        {items.some((i) => i.editado) && (
+          <Text style={{ fontSize: 8, color: "#999", marginTop: 8 }}>
+            * Nombre o precio editado manualmente
+          </Text>
+        )}
+
+        <Text style={styles.footer}>
+          Generado por Zenith POS — {format(new Date(), "dd/MM/yyyy HH:mm")}
+        </Text>
+      </Page>
+    </Document>
+  )
+
+  const blob = await pdf(doc).toBlob()
+  downloadBlob(blob, `carga-inicial-${format(new Date(), "yyyy-MM-dd")}.pdf`)
 }
