@@ -227,11 +227,37 @@ input[type="number"] {
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-blush-300) transparent;
   }
   body {
     @apply bg-background text-foreground;
   }
   html {
     @apply font-sans;
+  }
+
+  /* Webkit (Chrome, Edge, Safari) custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-blush-300);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-rose-400);
+  }
+  ::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
 }

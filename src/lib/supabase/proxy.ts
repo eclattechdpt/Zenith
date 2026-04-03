@@ -29,7 +29,14 @@ export async function updateSession(request: NextRequest) {
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser()
+
+  // If the refresh token is invalid/expired, clear the stale session cookies
+  // so the error doesn't repeat on every subsequent request
+  if (error) {
+    await supabase.auth.signOut()
+  }
 
   return { supabaseResponse, user }
 }

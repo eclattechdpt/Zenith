@@ -64,7 +64,7 @@ export function POSTerminal() {
         </div>
 
         {/* Right — Cart */}
-        <div className="flex w-80 lg:w-96 flex-col pl-4">
+        <div className="flex w-80 lg:w-96 flex-col pl-2 pr-1 py-1">
           <CartPanel onCheckout={() => setCheckoutOpen(true)} />
         </div>
       </div>

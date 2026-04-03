@@ -251,13 +251,13 @@ export function POSLanding() {
         </div>
 
         {/* ── Sliding cart sidebar (desktop) ── */}
-        <AnimatePresence>
-          {items.length > 0 && (
-            <div className="hidden sm:block">
+        <div className="hidden sm:block">
+          <AnimatePresence>
+            {items.length > 0 && (
               <POSSlidingCart onCheckout={openCheckout} />
-            </div>
-          )}
-        </AnimatePresence>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* ── Cart FAB (mobile) ── */}
