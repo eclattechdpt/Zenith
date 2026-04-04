@@ -14,6 +14,8 @@ interface SectionCardProps {
   children: React.ReactNode
   /** Animation delay for stagger entrance */
   delay?: number
+  /** Additional classes for the root element (e.g. grid column spans) */
+  className?: string
 }
 
 const SPRING = { type: "spring" as const, stiffness: 100, damping: 20 }
@@ -26,13 +28,14 @@ export function SectionCard({
   iconColor = "text-neutral-500",
   children,
   delay = 0,
+  className,
 }: SectionCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       transition={{ ...SPRING, delay }}
-      className="rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-sm shadow-neutral-900/[0.03]"
+      className={`rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-sm shadow-neutral-900/[0.03] ${className ?? ""}`}
     >
       {label && (
         <div className="mb-5 flex items-center gap-2">

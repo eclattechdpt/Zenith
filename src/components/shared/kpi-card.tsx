@@ -1,11 +1,17 @@
 "use client"
 
 import { motion } from "motion/react"
+import { ArrowUpRight } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 import { CountUp } from "@/features/pos/components/count-up"
 
 const SPRING = { type: "spring" as const, stiffness: 100, damping: 20 }
+
+interface KpiBadge {
+  label: string
+  trend?: "up" | "down" | "neutral"
+}
 
 interface KpiCardProps {
   title: string
@@ -20,6 +26,10 @@ interface KpiCardProps {
   iconColor?: string
   /** Stagger delay in seconds */
   delay?: number
+  /** Optional trend badge between value and subtitle */
+  badge?: KpiBadge
+  /** Optional children rendered below subtitle (e.g. mini-visualizations) */
+  children?: React.ReactNode
 }
 
 export function KpiCard({
@@ -32,6 +42,8 @@ export function KpiCard({
   iconBg = "bg-neutral-100",
   iconColor = "text-neutral-500",
   delay = 0,
+  badge,
+  children,
 }: KpiCardProps) {
   if (variant === "hero") {
     return (
@@ -58,9 +70,21 @@ export function KpiCard({
           format={formatFn}
           className="mt-2 block font-display text-[36px] font-semibold tracking-[-1px] text-white sm:text-[42px]"
         />
+
+        {badge && (
+          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-[3px] text-[12px] font-medium leading-[16px] text-white">
+            {badge.trend === "up" && (
+              <ArrowUpRight className="h-3 w-3" />
+            )}
+            {badge.label}
+          </span>
+        )}
+
         <p className="mt-1.5 text-[13px] font-medium text-rose-100">
           {subtitle}
         </p>
+
+        {children && <div className="mt-3">{children}</div>}
       </motion.div>
     )
   }
@@ -88,9 +112,27 @@ export function KpiCard({
         format={formatFn}
         className="mt-2 block font-display text-[36px] font-semibold tracking-[-1px] text-neutral-900 sm:text-[42px]"
       />
+
+      {badge && (
+        <span
+          className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-[3px] text-[12px] font-medium leading-[16px] ${
+            badge.trend === "up"
+              ? "bg-rose-50 text-rose-600"
+              : "bg-amber-50 text-amber-600"
+          }`}
+        >
+          {badge.trend === "up" && (
+            <ArrowUpRight className="h-3 w-3" />
+          )}
+          {badge.label}
+        </span>
+      )}
+
       <p className="mt-1.5 text-[13px] font-medium text-neutral-400">
         {subtitle}
       </p>
+
+      {children && <div className="mt-3">{children}</div>}
     </motion.div>
   )
 }

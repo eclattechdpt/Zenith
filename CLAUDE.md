@@ -248,13 +248,21 @@ No saltar sprints. Cada sprint depende del anterior.
   - Server actions: `updateProductImageUrl`, `findOrphanedFiles`, `deleteStorageFiles`, `listStorageFiles` en `src/features/media/actions.ts`
   - Phases C (multi-image gallery) y D (variant images) diferidos a Sprint 9+ — ver `Build/09-IMAGE-HANDLING.md`
 - **Design A standardization** (2026-04-04): sistema de diseño unificado en todas las paginas
-  - 3 shared components: `PageHero` (date pill + Zodiak title + CTA), `KpiCard` (hero/default variants con CountUp), `SectionCard` (labeled content wrapper)
+  - 3 shared components: `PageHero` (date pill + Zodiak title + subtitle + CTA), `KpiCard` (default variant con CountUp, badge, children slot), `SectionCard` (labeled content wrapper con className)
   - Refactored: Productos, POS landing, Configuracion (mismo output visual, menos codigo)
   - Design A aplicado: Clientes (KPIs: total/con descuento/sin descuento), Ventas (KPIs: total ventas/ingresos/ticket promedio), Notas de credito (KPIs: total/saldo activo/aplicadas), Reportes (SectionCards Excel/PDF)
   - Configuracion: tab navigation (Categorias/Descuentos/Imagenes) en vez de secciones apiladas
   - Client create/edit convertido a dialog overlay (mismo patron que Product wizard) — `/clientes/nuevo` y `/clientes/[id]` ahora redirigen a `/clientes`
   - CustomerDialog con icon labels, success animation, auto-close, pre-populated data en edit mode
   - Bug fix: ConvertQuoteDialog null check en sale_items, ReportsGrid split en ExcelExports + PdfExports
+- **Dashboard Design A migration** (2026-04-04): home page migrada a shared Design A components
+  - PageHero con greeting personalizado (hora del dia + nombre) + subtitle
+  - 4 KpiCards default (rose/teal/blush/amber) con mini-visualizations como children (SalesProgress, WeeklyBarChart, PaymentBreakdown, InventoryHealth) y trend badges
+  - SectionCards wrapping SalesChart (3cols), ActivityFeed (2cols), TopProducts, InventoryAlerts
+  - QuickActions rediseñados: white cards con colored icon containers (match Design A)
+  - DashboardContent client wrapper para server/client boundary (icon serialization)
+  - Eliminados: greeting-section, kpi-card (custom), kpi-grid, dashboard-shell (4 files)
+  - SalesProgress con variant light/dark para adaptarse al contexto del card
 
 **Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
 

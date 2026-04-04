@@ -18,55 +18,42 @@ const rankStyles = [
 
 export function TopProductsGrid({ products }: { products: Product[] }) {
   return (
-    <div className="min-w-0 overflow-hidden rounded-2xl border border-teal-100 bg-gradient-to-b from-white to-teal-50/30 p-4 shadow-sm sm:p-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-neutral-900">
-          Productos mas vendidos
-        </h2>
-        <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
-          Este mes
-        </span>
-      </div>
-      <div className="mt-5 space-y-2">
-        {products.map((p, i) => (
-          <div
-            key={p.nombre}
-            className="flex items-center gap-3 rounded-xl border border-neutral-100 bg-neutral-50/50 p-3 "
+    <div className="space-y-2">
+      {products.map((p, i) => (
+        <div
+          key={p.nombre}
+          className="flex items-center gap-3 rounded-xl border border-neutral-100 bg-neutral-50/50 p-3"
+        >
+          <span
+            className={`flex size-7 shrink-0 items-center justify-center rounded-lg border text-[10px] font-extrabold ${
+              rankStyles[Math.min(i, 2)]
+            }`}
           >
-            {/* Rank badge */}
-            <span
-              className={`flex size-7 shrink-0 items-center justify-center rounded-lg border text-[10px] font-extrabold ${
-                rankStyles[Math.min(i, 2)]
-              }`}
-            >
-              {i + 1}
-            </span>
+            {i + 1}
+          </span>
 
-            {/* Product info */}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold text-neutral-800">
-                {p.nombre}
-              </p>
-              <p className="truncate text-[11px] text-neutral-500">
-                {p.variante}
-              </p>
-            </div>
-
-            {/* Stats */}
-            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-              <span className="hidden text-[11px] font-medium tabular-nums text-neutral-500 sm:block">
-                {p.unidades} uds
-              </span>
-              <span className="text-[12px] font-bold tabular-nums text-neutral-900 sm:text-[13px]">
-                {formatCurrency(p.ingresos)}
-              </span>
-              <span className="hidden rounded-full bg-success-light px-2 py-0.5 text-[10px] font-bold text-success-dark sm:block">
-                {p.margen}%
-              </span>
-            </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[13px] font-semibold text-neutral-800">
+              {p.nombre}
+            </p>
+            <p className="truncate text-[11px] text-neutral-500">
+              {p.variante}
+            </p>
           </div>
-        ))}
-      </div>
+
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <span className="hidden text-[11px] font-medium tabular-nums text-neutral-500 sm:block">
+              {p.unidades} uds
+            </span>
+            <span className="text-[12px] font-bold tabular-nums text-neutral-900 sm:text-[13px]">
+              {formatCurrency(p.ingresos)}
+            </span>
+            <span className="hidden rounded-full bg-success-light px-2 py-0.5 text-[10px] font-bold text-success-dark sm:block">
+              {p.margen}%
+            </span>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

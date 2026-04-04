@@ -11,12 +11,13 @@ import { Button } from "@/components/ui/button"
 
 interface PageHeroProps {
   title: string
+  subtitle?: string
   ctaLabel?: string
   onCta?: () => void
   ctaHref?: string
 }
 
-export function PageHero({ title, ctaLabel, onCta, ctaHref }: PageHeroProps) {
+export function PageHero({ title, subtitle, ctaLabel, onCta, ctaHref }: PageHeroProps) {
   const todayLabel = useMemo(
     () =>
       format(new Date(), "EEEE, d 'de' MMMM", { locale: es }).replace(
@@ -41,6 +42,9 @@ export function PageHero({ title, ctaLabel, onCta, ctaHref }: PageHeroProps) {
         <h1 className="mt-1 font-display text-[38px] font-semibold leading-none tracking-[-1.5px] text-neutral-950 sm:text-[48px]">
           {title}
         </h1>
+        {subtitle && (
+          <p className="mt-1.5 text-sm text-neutral-500">{subtitle}</p>
+        )}
       </div>
 
       {ctaLabel && (onCta || ctaHref) && (

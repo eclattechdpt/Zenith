@@ -48,12 +48,18 @@
   - Bulk actions: batch optimize (URL→Supabase), re-compress, orphan cleanup, export audit (Excel)
   - Server actions: updateProductImageUrl, findOrphanedFiles, deleteStorageFiles
 - **Design A standardization** (2026-04-04): Unified design system across all pages
-  - Shared components: PageHero, KpiCard (hero/default), SectionCard
+  - Shared components: PageHero (subtitle), KpiCard (badge, children), SectionCard (className)
   - Applied to: Productos, POS, Clientes, Ventas, Notas de credito, Reportes, Configuracion
   - KPI rows: Clientes (total/descuento/sin), Ventas (total/ingresos/ticket), Notas (total/saldo/aplicadas)
   - Configuracion: tab navigation (Categorias/Descuentos/Imagenes)
   - Client create/edit: converted from pages to dialog overlay (matches Product wizard)
   - Bug fixes: ConvertQuoteDialog null check, ReportsGrid composability
+- **Dashboard Design A migration** (2026-04-04): Home page fully migrated to shared components
+  - PageHero with personalized greeting + subtitle, 4 uniform KpiCards with mini-visualizations + badges
+  - SectionCards wrapping SalesChart, ActivityFeed, TopProducts, InventoryAlerts
+  - QuickActions redesigned: white cards with colored icon containers
+  - DashboardContent client wrapper for server/client boundary
+  - Deleted 4 custom dashboard components (greeting-section, kpi-card, kpi-grid, dashboard-shell)
 
 ### Pending
 - Design A for Inventario hub + Inventario Fisico
