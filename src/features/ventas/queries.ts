@@ -51,6 +51,19 @@ export function useSales(filters?: SalesFilters) {
   })
 }
 
+// --- SALES STATS (for KPI widgets) ---
+
+export function useSalesStats() {
+  const { data: sales } = useSales()
+
+  const completed = (sales ?? []).filter((s) => s.status === "completed" || s.status === "partially_returned" || s.status === "fully_returned")
+  const totalSales = completed.length
+  const totalRevenue = completed.reduce((sum, s) => sum + Number(s.total), 0)
+  const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0
+
+  return { totalSales, totalRevenue, averageTicket }
+}
+
 export function useQuoteDetail(quoteId: string | null) {
   return useQuery({
     queryKey: ["sales", quoteId],

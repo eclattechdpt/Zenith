@@ -1,54 +1,37 @@
 "use client"
 
-import { motion } from "motion/react"
+import { FileSpreadsheet, FileText } from "lucide-react"
 
-import { ReportsGrid } from "@/features/reportes/components/reports-grid"
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
-  },
-}
+import { PageHero } from "@/components/shared/page-hero"
+import { SectionCard } from "@/components/shared/section-card"
+import { ExcelExports, PdfExports } from "@/features/reportes/components/reports-grid"
 
 export default function ReportesPage() {
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="flex flex-col gap-6"
-    >
-      {/* Header */}
-      <motion.div
-        variants={itemVariants}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div className="text-center sm:text-left">
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
-            Reportes y Exportaciones
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Descarga reportes en Excel y PDF con los datos de tu negocio
-          </p>
-        </div>
-      </motion.div>
+    <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
+      <PageHero title="Reportes y Exportaciones" />
 
-      {/* Reports grid */}
-      <motion.div variants={itemVariants}>
-        <ReportsGrid />
-      </motion.div>
-    </motion.div>
+      <SectionCard
+        label="Exportar a Excel"
+        description="Descarga datos en formato Excel para analisis"
+        icon={FileSpreadsheet}
+        iconBg="bg-emerald-50"
+        iconColor="text-emerald-500"
+        delay={0.08}
+      >
+        <ExcelExports />
+      </SectionCard>
+
+      <SectionCard
+        label="Reportes PDF"
+        description="Reportes formateados listos para imprimir"
+        icon={FileText}
+        iconBg="bg-rose-50"
+        iconColor="text-rose-400"
+        delay={0.16}
+      >
+        <PdfExports />
+      </SectionCard>
+    </div>
   )
 }

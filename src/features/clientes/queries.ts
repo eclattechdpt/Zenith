@@ -66,6 +66,18 @@ export function useCustomer(id: string) {
   })
 }
 
+// --- CUSTOMER STATS (for KPI widgets) ---
+
+export function useCustomerStats() {
+  const { data: customers } = useCustomers()
+
+  const total = customers?.length ?? 0
+  const withDiscount = customers?.filter((c) => c.price_lists !== null).length ?? 0
+  const withoutDiscount = total - withDiscount
+
+  return { total, withDiscount, withoutDiscount }
+}
+
 // --- PRICE LISTS ---
 
 export function usePriceLists() {
