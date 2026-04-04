@@ -1,10 +1,11 @@
 "use client"
 
 import { motion } from "motion/react"
-import { Settings, FolderTree, Percent } from "lucide-react"
+import { Settings, FolderTree, Percent, ImageIcon } from "lucide-react"
 
 import { CategoryManager } from "@/features/productos/components/category-manager"
 import { PriceListManager } from "@/features/clientes/components/price-list-manager"
+import { MediaManager } from "@/features/media/components/media-manager"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -85,6 +86,27 @@ export default function ConfiguracionPage() {
           </div>
         </div>
         <PriceListManager />
+      </motion.div>
+
+      {/* Media Manager */}
+      <motion.div
+        variants={itemVariants}
+        className="rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-sm shadow-neutral-900/[0.03]"
+      >
+        <div className="mb-5 flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50">
+            <ImageIcon className="h-4 w-4 text-violet-500" />
+          </div>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[2px] text-neutral-400">
+              Imagenes
+            </p>
+            <p className="mt-0.5 text-[11px] text-neutral-400">
+              Administra las imagenes de tus productos
+            </p>
+          </div>
+        </div>
+        <MediaManager />
       </motion.div>
     </motion.div>
   )
