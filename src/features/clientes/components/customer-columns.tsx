@@ -2,7 +2,6 @@
 
 import type { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
-import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -16,10 +15,12 @@ import {
 import type { CustomerWithPriceList } from "../types"
 
 interface CustomerColumnsOptions {
+  onEdit?: (customer: CustomerWithPriceList) => void
   onDelete?: (customer: CustomerWithPriceList) => void
 }
 
 export function getCustomerColumns({
+  onEdit,
   onDelete,
 }: CustomerColumnsOptions = {}): ColumnDef<CustomerWithPriceList>[] {
   return [
@@ -104,13 +105,12 @@ export function getCustomerColumns({
               <span className="sr-only">Acciones</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                nativeButton={false}
-                render={<Link href={`/clientes/${customer.id}`} />}
-              >
-                <Pencil className="mr-2 size-3.5" />
-                Editar
-              </DropdownMenuItem>
+              {onEdit && (
+                <DropdownMenuItem onClick={() => onEdit(customer)}>
+                  <Pencil className="mr-2 size-3.5" />
+                  Editar
+                </DropdownMenuItem>
+              )}
               {onDelete && (
                 <DropdownMenuItem
                   variant="destructive"

@@ -1,7 +1,6 @@
 "use client"
 
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
-import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -16,10 +15,11 @@ import type { CustomerWithPriceList } from "../types"
 
 interface CustomerCardMobileProps {
   customer: CustomerWithPriceList
+  onEdit?: (customer: CustomerWithPriceList) => void
   onDelete?: (customer: CustomerWithPriceList) => void
 }
 
-export function CustomerCardMobile({ customer, onDelete }: CustomerCardMobileProps) {
+export function CustomerCardMobile({ customer, onEdit, onDelete }: CustomerCardMobileProps) {
   const list = customer.price_lists
 
   return (
@@ -40,13 +40,12 @@ export function CustomerCardMobile({ customer, onDelete }: CustomerCardMobilePro
             <MoreHorizontal className="size-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              nativeButton={false}
-              render={<Link href={`/clientes/${customer.id}`} />}
-            >
-              <Pencil className="mr-2 size-3.5" />
-              Editar
-            </DropdownMenuItem>
+            {onEdit && (
+              <DropdownMenuItem onClick={() => onEdit(customer)}>
+                <Pencil className="mr-2 size-3.5" />
+                Editar
+              </DropdownMenuItem>
+            )}
             {onDelete && (
               <DropdownMenuItem
                 variant="destructive"
