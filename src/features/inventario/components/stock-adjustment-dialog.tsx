@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { motion } from "motion/react"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { NumericInput } from "@/features/productos/components/variant-manager"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -56,15 +57,13 @@ function StockAdjustmentForm({
 }) {
   const currentStock =
     inventoryType === "initial_load" ? variant.initial_stock : variant.stock
-  const [newStock, setNewStock] = useState(String(currentStock))
+  const [newStock, setNewStock] = useState(currentStock)
   const [reason, setReason] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const queryClient = useQueryClient()
 
-  const parsedNew = parseInt(newStock, 10)
-  const isValidStock = !isNaN(parsedNew) && parsedNew >= 0
-  const difference = isValidStock ? parsedNew - currentStock : 0
-  const canSubmit = isValidStock && difference !== 0 && reason.trim().length > 0
+  const difference = newStock - currentStock
+  const canSubmit = newStock >= 0 && difference !== 0 && reason.trim().length > 0
 
   const action =
     inventoryType === "initial_load" ? adjustInitialStock : adjustStock
@@ -75,7 +74,7 @@ function StockAdjustmentForm({
 
     const result = await action({
       product_variant_id: variant.id,
-      new_stock: parsedNew,
+      new_stock: newStock,
       reason: reason.trim(),
     })
 
@@ -90,7 +89,7 @@ function StockAdjustmentForm({
     }
 
     toast.success(
-      `Stock ajustado: ${currentStock} → ${parsedNew} (${difference > 0 ? "+" : ""}${difference})`
+      `Stock ajustado: ${currentStock} → ${newStock} (${difference > 0 ? "+" : ""}${difference})`
     )
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
@@ -102,48 +101,53 @@ function StockAdjustmentForm({
   const productLabel = `${variant.products.name}${variant.name ? ` — ${variant.name}` : ""}${variant.sku ? ` (${variant.sku})` : ""}`
 
   return (
-    <DialogContent showCloseButton={false}>
+    <DialogContent showCloseButton={false} className="sm:max-w-md p-6 [&_input]:focus-visible:border-amber-400 [&_input]:focus-visible:ring-amber-500/30 [&_textarea]:focus-visible:border-amber-400 [&_textarea]:focus-visible:ring-amber-500/30 [&_::-webkit-scrollbar-thumb]:bg-amber-200 [&_::-webkit-scrollbar-thumb:hover]:bg-amber-300" style={{ scrollbarColor: "rgb(253 230 138) transparent" }}>
       <DialogHeader>
         <DialogTitle>Ajustar stock</DialogTitle>
         <DialogDescription>{productLabel}</DialogDescription>
       </DialogHeader>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-4 py-3">
-          <span className="text-sm text-neutral-500">Stock actual</span>
-          <span className="font-semibold text-neutral-950 tabular-nums">
+        <div className="rounded-xl border border-neutral-100/80 bg-neutral-50/50 px-4 py-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+            Stock actual
+          </p>
+          <p className="mt-0.5 font-semibold text-neutral-950 tabular-nums">
             {currentStock}
-          </span>
+          </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="new-stock">Stock nuevo</Label>
-          <Input
-            id="new-stock"
-            type="number"
+          <Label>Stock nuevo</Label>
+          <NumericInput
             min={0}
-            step={1}
             value={newStock}
-            onChange={(e) => setNewStock(e.target.value)}
-            className="tabular-nums"
+            onChange={setNewStock}
             autoFocus
           />
         </div>
 
-        {isValidStock && difference !== 0 && (
-          <div
-            className={`flex items-center justify-between rounded-lg px-4 py-3 ${
-              difference > 0
-                ? "bg-emerald-50 text-emerald-700"
-                : "bg-rose-50 text-rose-700"
-            }`}
+        {difference !== 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="overflow-hidden"
           >
-            <span className="text-sm">Diferencia</span>
-            <span className="font-semibold tabular-nums">
-              {difference > 0 ? "+" : ""}
-              {difference}
-            </span>
-          </div>
+            <div
+              className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
+                difference > 0
+                  ? "border-emerald-100/80 bg-emerald-50/50 text-emerald-700"
+                  : "border-rose-100/80 bg-rose-50/50 text-rose-700"
+              }`}
+            >
+              <span className="text-sm">Diferencia</span>
+              <span className="font-semibold tabular-nums">
+                {difference > 0 ? "+" : ""}
+                {difference}
+              </span>
+            </div>
+          </motion.div>
         )}
 
         <div className="space-y-2">

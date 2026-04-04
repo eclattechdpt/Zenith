@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { motion } from "motion/react"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { NumericInput } from "@/features/productos/components/variant-manager"
 import { Label } from "@/components/ui/label"
 import {
   Dialog,
@@ -53,15 +55,13 @@ function InitialLoadEditForm({
   const [overridePrice, setOverridePrice] = useState(
     variant.override_price != null ? String(variant.override_price) : ""
   )
-  const [stock, setStock] = useState(String(variant.initial_stock))
+  const [stock, setStock] = useState(variant.initial_stock)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const queryClient = useQueryClient()
 
   const parsedPrice = overridePrice ? parseFloat(overridePrice) : null
-  const parsedStock = parseInt(stock, 10)
-  const isValidStock = !isNaN(parsedStock) && parsedStock >= 0
   const isValidPrice = parsedPrice === null || (!isNaN(parsedPrice) && parsedPrice >= 0)
-  const canSubmit = isValidStock && isValidPrice
+  const canSubmit = stock >= 0 && isValidPrice
 
   async function handleSubmit() {
     if (!canSubmit) return
@@ -71,7 +71,7 @@ function InitialLoadEditForm({
       product_variant_id: variant.id,
       override_name: overrideName.trim() || null,
       override_price: parsedPrice,
-      new_stock: parsedStock,
+      new_stock: stock,
     })
 
     setIsSubmitting(false)
@@ -94,7 +94,7 @@ function InitialLoadEditForm({
   const variantLabel = variant.name || variant.sku || ""
 
   return (
-    <DialogContent showCloseButton={false}>
+    <DialogContent showCloseButton={false} className="sm:max-w-md p-6 [&_input]:focus-visible:border-slate-400 [&_input]:focus-visible:ring-slate-500/30 [&_textarea]:focus-visible:border-slate-400 [&_textarea]:focus-visible:ring-slate-500/30 [&_::-webkit-scrollbar-thumb]:bg-slate-200 [&_::-webkit-scrollbar-thumb:hover]:bg-slate-300" style={{ scrollbarColor: "rgb(203 213 225) transparent" }}>
       <DialogHeader>
         <DialogTitle>Editar producto — Carga Inicial</DialogTitle>
         <DialogDescription>
@@ -105,8 +105,8 @@ function InitialLoadEditForm({
 
       <div className="space-y-4">
         {/* Reference: catalog values */}
-        <div className="rounded-lg bg-neutral-50 px-4 py-3 space-y-1">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400">
+        <div className="rounded-xl border border-neutral-100/80 bg-neutral-50/50 px-4 py-3 space-y-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
             Valores del catalogo
           </p>
           <div className="flex items-center justify-between text-sm text-neutral-600">
@@ -150,15 +150,11 @@ function InitialLoadEditForm({
 
         {/* Stock */}
         <div className="space-y-2">
-          <Label htmlFor="edit-stock">Stock</Label>
-          <Input
-            id="edit-stock"
-            type="number"
+          <Label>Stock</Label>
+          <NumericInput
             min={0}
-            step={1}
             value={stock}
-            onChange={(e) => setStock(e.target.value)}
-            className="tabular-nums"
+            onChange={setStock}
           />
         </div>
       </div>

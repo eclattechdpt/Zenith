@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, Plus, Truck, ChevronLeft, ChevronRight } from "lucide-react"
-import { motion } from "motion/react"
+import { motion, AnimatePresence } from "motion/react"
 
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/shared/empty-state"
@@ -24,21 +24,55 @@ import { EditTransitWeekDialog } from "@/features/inventario/components/edit-tra
 import { TransitWeekDetail } from "@/features/inventario/components/transit-week-detail"
 import type { TransitWeekWithItems } from "@/features/inventario/types"
 
+// ── Spring configs ──
+
+const SPRING_SNAPPY = { type: "spring" as const, stiffness: 500, damping: 35 }
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+    transition: { staggerChildren: 0.06, delayChildren: 0.05 },
   },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+  hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
+  },
+}
+
+const monthGridContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.04, delayChildren: 0.1 } },
+}
+
+const monthGridItem = {
+  hidden: { opacity: 0, scale: 0.95, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.3, ease: "easeOut" as const },
+  },
+}
+
+const weekListContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.05, delayChildren: 0.08 } },
+}
+
+const weekListItem = {
+  hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   },
 }
 
@@ -89,34 +123,44 @@ export default function InventarioTransitoPage() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-col gap-6"
+      className="min-w-0 flex-1 space-y-8 p-5 sm:p-8"
     >
-      {/* Header */}
+      {/* ── Header ── */}
       <motion.div
         variants={itemVariants}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
       >
         <div className="text-center sm:text-left">
-          <Link
-            href="/inventario"
-            className="mb-2 inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 transition-colors"
+          <motion.div
+            whileHover={{ x: -2 }}
+            transition={SPRING_SNAPPY}
+            className="inline-block"
           >
-            <ArrowLeft className="size-3" />
-            Inventarios
-          </Link>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
+            <Link
+              href="/inventario"
+              className="group mb-3 inline-flex items-center gap-1.5 rounded-md px-2 py-1 -ml-2 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+            >
+              <ArrowLeft className="size-3" />
+              Inventarios
+            </Link>
+          </motion.div>
+          <p className="flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-[2px] text-neutral-400 sm:justify-start">
+            <Truck className="h-3.5 w-3.5 text-blue-400" />
             Inventario en Transito
+          </p>
+          <h1 className="mt-2 font-display text-[38px] font-semibold leading-none tracking-[-1.5px] text-neutral-950 sm:text-[48px]">
+            En Transito
           </h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-neutral-500">
             Reposiciones semanales — valor total:{" "}
-            <strong className="text-neutral-700">
+            <strong className="text-neutral-700 tabular-nums">
               {formatCurrency(yearTotal)}
             </strong>
           </p>
         </div>
 
         {/* Year selector */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-center sm:self-auto">
           <Button
             variant="ghost"
             size="sm"
@@ -128,7 +172,7 @@ export default function InventarioTransitoPage() {
           >
             <ChevronLeft className="size-4" />
           </Button>
-          <span className="min-w-16 text-center font-semibold text-neutral-950 tabular-nums">
+          <span className="min-w-16 text-center text-lg font-bold text-neutral-950 tabular-nums">
             {selectedYear}
           </span>
           <Button
@@ -145,27 +189,31 @@ export default function InventarioTransitoPage() {
         </div>
       </motion.div>
 
-      {/* Monthly chart (only when there's data) */}
+      {/* ── Monthly chart ── */}
       {monthSummary.length > 0 && (
         <motion.div
           variants={itemVariants}
-          className="overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-b from-white to-blue-50/30 p-4 shadow-sm sm:p-6"
+          className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-neutral-50 p-5 shadow-sm shadow-neutral-900/[0.03] sm:p-7"
         >
-          <TransitMonthlyChart
-            months={monthSummary}
-            selectedMonth={selectedMonth}
-            onSelectMonth={(m) => {
-              setSelectedMonth(m)
-              setSelectedWeekId(null)
-            }}
-          />
+          <div className="rounded-xl border border-neutral-100/80 bg-white p-4 sm:p-5">
+            <TransitMonthlyChart
+              months={monthSummary}
+              selectedMonth={selectedMonth}
+              onSelectMonth={(m) => {
+                setSelectedMonth(m)
+                setSelectedWeekId(null)
+              }}
+            />
+          </div>
         </motion.div>
       )}
 
-      {/* Month cards grid — always visible */}
+      {/* ── Month cards grid (when no month selected) ── */}
       {!selectedMonth && (
         <motion.div
-          variants={itemVariants}
+          variants={monthGridContainer}
+          initial="hidden"
+          animate="visible"
           className="grid grid-cols-3 gap-3 sm:grid-cols-4 xl:grid-cols-6"
         >
           {MONTH_NAMES.map((name, i) => {
@@ -177,18 +225,22 @@ export default function InventarioTransitoPage() {
               monthNum === new Date().getMonth() + 1
 
             return (
-              <button
+              <motion.button
                 key={monthNum}
+                variants={monthGridItem}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                transition={SPRING_SNAPPY}
                 type="button"
                 onClick={() => {
                   setSelectedMonth(monthNum)
                   setSelectedWeekId(null)
                 }}
-                className={`group rounded-xl border p-3 text-left transition-all duration-200 ${
+                className={`group rounded-2xl border p-3 text-left transition-[border-color,box-shadow] duration-200 ${
                   hasData
-                    ? "border-blue-200 bg-white hover:border-blue-300 hover:shadow-sm"
+                    ? "border-blue-200/60 bg-white hover:border-blue-300 hover:shadow-md hover:shadow-blue-500/8"
                     : "border-neutral-100 bg-neutral-50/50 hover:border-neutral-200 hover:bg-white"
-                } ${isCurrentMonth ? "ring-1 ring-blue-300" : ""}`}
+                } ${isCurrentMonth ? "border-blue-300 shadow-sm shadow-blue-500/8" : ""}`}
               >
                 <p
                   className={`text-xs font-semibold ${
@@ -212,17 +264,20 @@ export default function InventarioTransitoPage() {
                     Sin registros
                   </p>
                 )}
-              </button>
+              </motion.button>
             )
           })}
         </motion.div>
       )}
 
-      {/* Month detail or empty state */}
+      {/* ── Month detail ── */}
       {selectedMonth ? (
-        <motion.div variants={itemVariants} className="space-y-4">
-          {/* Month header */}
-          <div className="flex items-center justify-between">
+        <motion.div
+          variants={itemVariants}
+          className="rounded-2xl border border-blue-200/40 bg-blue-50/30 p-5 shadow-sm sm:p-6"
+        >
+          {/* Month header bar */}
+          <div className="flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm sm:px-5">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
@@ -235,68 +290,116 @@ export default function InventarioTransitoPage() {
                 <ArrowLeft className="size-3.5" />
               </Button>
               <div>
-                <h2 className="font-semibold text-neutral-950">
+                <h2 className="text-lg font-bold text-neutral-950">
                   {MONTH_NAMES[selectedMonth - 1]} {selectedYear}
                 </h2>
-                <p className="text-xs text-neutral-500">
+                <p className="text-[11px] text-neutral-500">
                   {monthWeeks.length}{" "}
                   {monthWeeks.length === 1 ? "semana" : "semanas"}
                 </p>
               </div>
             </div>
-            <Button onClick={() => setShowCreate(true)}>
-              <Plus className="size-4" />
-              Agregar semana
-            </Button>
+            <motion.div
+              whileHover={{ scale: 1.02, y: -1 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <Button
+                onClick={() => setShowCreate(true)}
+                className="h-11 gap-2 rounded-xl bg-blue-500 px-5 text-[13px] font-bold text-white shadow-sm shadow-blue-500/20 hover:bg-blue-600"
+              >
+                <Plus className="size-4" />
+                Agregar semana
+              </Button>
+            </motion.div>
           </div>
 
           {/* Weeks + detail */}
-          {monthWeeks.length === 0 ? (
-            <EmptyState
-              icon={Truck}
-              title="Sin semanas"
-              description="Agrega una semana para registrar productos en transito."
-            />
-          ) : (
-            <div className="grid gap-4 xl:grid-cols-5">
-              {/* Week list */}
-              <div className="space-y-2 xl:col-span-2">
-                {monthWeeks.map((week) => (
-                  <TransitWeekCard
-                    key={week.id}
-                    week={week}
-                    isSelected={week.id === selectedWeekId}
-                    onSelect={() => setSelectedWeekId(week.id)}
-                    onEdit={() => setEditWeekTarget(week)}
-                    onDelete={() =>
-                      setDeleteTarget({
-                        id: week.id,
-                        label: `Semana ${week.week_number}, ${MONTH_NAMES[selectedMonth - 1]} ${selectedYear}`,
-                      })
-                    }
-                  />
-                ))}
-              </div>
+          <div className="mt-5">
+            {monthWeeks.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex h-48 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white/60"
+              >
+                <motion.div
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Truck className="h-6 w-6 text-blue-300" />
+                </motion.div>
+                <p className="text-sm font-semibold text-neutral-400">Sin semanas</p>
+                <p className="text-xs text-neutral-400/70">
+                  Agrega una semana para registrar productos en transito.
+                </p>
+              </motion.div>
+            ) : (
+              <div className="grid gap-5 xl:grid-cols-5">
+                {/* Week list */}
+                <motion.div
+                  className="space-y-2 xl:col-span-2"
+                  variants={weekListContainer}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-blue-500">
+                    Semanas
+                  </p>
+                  {monthWeeks.map((week) => (
+                    <motion.div key={week.id} variants={weekListItem}>
+                      <TransitWeekCard
+                        week={week}
+                        isSelected={week.id === selectedWeekId}
+                        onSelect={() => setSelectedWeekId(week.id)}
+                        onEdit={() => setEditWeekTarget(week)}
+                        onDelete={() =>
+                          setDeleteTarget({
+                            id: week.id,
+                            label: `Semana ${week.week_number}, ${MONTH_NAMES[selectedMonth - 1]} ${selectedYear}`,
+                          })
+                        }
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
 
-              {/* Week detail */}
-              <div className="xl:col-span-3">
-                {selectedWeekId ? (
-                  <TransitWeekDetail
-                    weekId={selectedWeekId}
-                    onClose={() => setSelectedWeekId(null)}
-                  />
-                ) : (
-                  <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-neutral-200 text-sm text-neutral-400">
-                    Selecciona una semana para ver sus productos
-                  </div>
-                )}
+                {/* Week detail */}
+                <div className="xl:col-span-3">
+                  <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-blue-500">
+                    Detalle
+                  </p>
+                  {selectedWeekId ? (
+                    <TransitWeekDetail
+                      weekId={selectedWeekId}
+                      onClose={() => setSelectedWeekId(null)}
+                    />
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex h-48 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white/60"
+                    >
+                      <motion.div
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <Truck className="h-6 w-6 text-blue-300" />
+                      </motion.div>
+                      <p className="text-sm font-semibold text-neutral-400">
+                        Selecciona una semana
+                      </p>
+                      <p className="text-xs text-neutral-400/70">
+                        Para ver los productos registrados
+                      </p>
+                    </motion.div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </motion.div>
       ) : null}
 
-      {/* Create week dialog */}
+      {/* ── Dialogs ── */}
       <CreateTransitWeekDialog
         open={showCreate}
         year={selectedYear}
@@ -304,14 +407,10 @@ export default function InventarioTransitoPage() {
         existingWeekNumbers={monthWeeks.map((w) => w.week_number)}
         onOpenChange={setShowCreate}
       />
-
-      {/* Edit week dialog */}
       <EditTransitWeekDialog
         week={editWeekTarget}
         onOpenChange={(open) => !open && setEditWeekTarget(null)}
       />
-
-      {/* Delete confirmation */}
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}

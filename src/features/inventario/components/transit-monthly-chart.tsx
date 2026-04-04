@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import { formatCurrency } from "@/lib/utils"
 import type { TransitMonthSummary } from "../types"
 
@@ -11,6 +12,8 @@ const MONTH_NAMES = [
 const BAR_COLORS = [
   "bg-blue-100", "bg-blue-200", "bg-blue-300", "bg-blue-400",
 ]
+
+const SPRING_SNAPPY = { type: "spring" as const, stiffness: 500, damping: 35 }
 
 interface TransitMonthlyChartProps {
   months: TransitMonthSummary[]
@@ -28,9 +31,15 @@ export function TransitMonthlyChart({
   const maxTotal = Math.max(...months.map((m) => m.total_value), 1)
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="flex items-start justify-between">
-        <h2 className="text-sm font-bold text-neutral-900">Valor mensual</h2>
+        <h2 className="text-[13px] font-bold uppercase tracking-[1.5px] text-neutral-400">
+          Valor mensual
+        </h2>
         <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
           {months.length} {months.length === 1 ? "mes" : "meses"}
         </span>
@@ -44,11 +53,14 @@ export function TransitMonthlyChart({
           const monthName = MONTH_NAMES[m.month - 1]
 
           return (
-            <button
+            <motion.button
               key={m.month}
               type="button"
               onClick={() => onSelectMonth?.(m.month)}
-              className="flex w-full items-center gap-2 sm:gap-3 text-left hover:opacity-80 transition-opacity"
+              whileHover={{ x: 2 }}
+              whileTap={{ scale: 0.99 }}
+              transition={SPRING_SNAPPY}
+              className="flex w-full items-center gap-2 sm:gap-3 text-left transition-opacity hover:opacity-90"
             >
               <div className="w-20 shrink-0 text-right sm:w-24">
                 <p
@@ -65,11 +77,17 @@ export function TransitMonthlyChart({
 
               <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2.5">
                 <div className="relative h-8 flex-1 overflow-hidden rounded-lg bg-neutral-50">
-                  <div
-                    className={`h-full rounded-lg transition-all duration-500 ${barColor} ${
+                  <motion.div
+                    className={`h-full rounded-lg ${barColor} ${
                       isSelected ? "ring-1 ring-blue-500" : ""
                     }`}
-                    style={{ width: `${Math.max(pct, 2)}%` }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.max(pct, 2)}%` }}
+                    transition={{
+                      duration: 0.6,
+                      ease: [0.22, 1, 0.36, 1],
+                      delay: i * 0.08,
+                    }}
                   />
                 </div>
                 <span
@@ -80,11 +98,11 @@ export function TransitMonthlyChart({
                   {formatCurrency(m.total_value)}
                 </span>
               </div>
-            </button>
+            </motion.button>
           )
         })}
       </div>
-    </div>
+    </motion.div>
   )
 }
 

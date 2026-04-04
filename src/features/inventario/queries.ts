@@ -17,7 +17,7 @@ import type {
 
 const VARIANT_SELECT = `id, sku, name, price, stock, initial_stock, stock_min, is_active, product_id,
   products!inner(
-    id, name, brand, has_variants,
+    id, name, brand, has_variants, image_url,
     product_categories(categories(id, name))
   )`
 
@@ -49,7 +49,7 @@ async function findMatchingIds(supabase: ReturnType<typeof createClient>, search
 
 interface InventoryFilters {
   search?: string
-  categoryId?: string
+  categoryIds?: string[]
   lowStockOnly?: boolean
   isActive?: boolean
 }
@@ -83,11 +83,11 @@ export function useInventory(filters?: InventoryFilters, options?: { enabled?: b
         }
       }
 
-      if (filters?.categoryId) {
+      if (filters?.categoryIds && filters.categoryIds.length > 0) {
         const { data: matchIds } = await supabase
           .from("product_categories")
           .select("product_id")
-          .eq("category_id", filters.categoryId)
+          .in("category_id", filters.categoryIds)
         const productIds = [...new Set((matchIds ?? []).map((m) => m.product_id))]
         if (productIds.length > 0) {
           query = query.in("product_id", productIds)
@@ -147,11 +147,11 @@ export function useInitialLoadInventory(filters?: InventoryFilters, options?: { 
         }
       }
 
-      if (filters?.categoryId) {
+      if (filters?.categoryIds && filters.categoryIds.length > 0) {
         const { data: matchIds } = await supabase
           .from("product_categories")
           .select("product_id")
-          .eq("category_id", filters.categoryId)
+          .in("category_id", filters.categoryIds)
         const productIds = [...new Set((matchIds ?? []).map((m) => m.product_id))]
         if (productIds.length > 0) {
           query = query.in("product_id", productIds)
@@ -296,7 +296,7 @@ export function useTransitWeeks(filters?: TransitWeekFilters) {
             *,
             product_variants(
               id, sku, name, price,
-              products(id, name, brand)
+              products(id, name, brand, image_url)
             )
           )`
         )
@@ -368,7 +368,7 @@ export function useTransitWeekDetail(weekId: string | null) {
             *,
             product_variants(
               id, sku, name, price,
-              products(id, name, brand)
+              products(id, name, brand, image_url)
             )
           )`
         )

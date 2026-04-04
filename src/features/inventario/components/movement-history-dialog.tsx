@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import { format, startOfDay, startOfWeek, startOfMonth, endOfDay } from "date-fns"
 import { es } from "date-fns/locale"
 import { ArrowDown, ArrowUp, History, X } from "lucide-react"
+import { motion, AnimatePresence } from "motion/react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -28,7 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { MOVEMENT_TYPES } from "@/lib/constants"
-import { EmptyState } from "@/components/shared/empty-state"
 
 import { useMovements } from "../queries"
 import type { InventoryVariant, InventoryType, MovementWithDetails } from "../types"
@@ -48,6 +48,22 @@ const DATE_PRESETS = [
   { value: "week", label: "Esta semana" },
   { value: "month", label: "Este mes" },
 ] as const
+
+// ── Stagger variants ──
+
+const movementListContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.04, delayChildren: 0.06 } },
+}
+const movementListItem = {
+  hidden: { opacity: 0, y: 8, filter: "blur(3px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] as const },
+  },
+}
 
 function getDateRange(preset: string, customDate?: string): { from: string; to: string } | null {
   if (!preset) return null
@@ -115,7 +131,7 @@ export function MovementHistoryDialog({
         onOpenChange(open)
       }}
     >
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col p-6 [&_input]:focus-visible:border-amber-400 [&_input]:focus-visible:ring-amber-500/30 [&_::-webkit-scrollbar-thumb]:bg-amber-200 [&_::-webkit-scrollbar-thumb:hover]:bg-amber-300" style={{ scrollbarColor: "rgb(253 230 138) transparent" }}>
         <DialogHeader>
           <DialogTitle>Historial de movimientos</DialogTitle>
           <DialogDescription>{productLabel}</DialogDescription>
@@ -214,21 +230,47 @@ export function MovementHistoryDialog({
         </div>
 
         {/* Movement list */}
-        <div className="flex-1 overflow-y-auto -mx-6 px-6 space-y-2">
+        <div className="flex-1 overflow-y-auto -mx-6 px-6">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12 text-sm text-neutral-400">
-              Cargando...
+            <div className="space-y-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-16 animate-pulse rounded-xl bg-neutral-100/80"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                />
+              ))}
             </div>
           ) : movements.length === 0 ? (
-            <EmptyState
-              icon={History}
-              title="Sin movimientos"
-              description="No se encontraron movimientos con estos filtros."
-            />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex h-36 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-neutral-200 bg-white/50"
+            >
+              <motion.div
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <History className="h-6 w-6 text-neutral-300" />
+              </motion.div>
+              <p className="text-sm font-semibold text-neutral-400">Sin movimientos</p>
+              <p className="text-xs text-neutral-400/70">
+                No se encontraron movimientos con estos filtros.
+              </p>
+            </motion.div>
           ) : (
-            movements.map((m) => (
-              <MovementRow key={m.id} movement={m} />
-            ))
+            <motion.div
+              className="space-y-2"
+              variants={movementListContainer}
+              initial="hidden"
+              animate="visible"
+            >
+              {movements.map((m) => (
+                <motion.div key={m.id} variants={movementListItem}>
+                  <MovementRow movement={m} />
+                </motion.div>
+              ))}
+            </motion.div>
           )}
         </div>
       </DialogContent>
@@ -243,9 +285,12 @@ function MovementRow({ movement: m }: { movement: MovementWithDetails }) {
     m.sales?.sale_number ?? m.returns?.return_number ?? null
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-neutral-100 bg-white px-4 py-3">
+    <div className="flex items-center gap-3 rounded-xl border border-neutral-100 bg-white px-4 py-3 transition-[border-color] duration-150 hover:border-neutral-200">
       {/* Direction icon */}
-      <div
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 20 }}
         className={`flex size-8 shrink-0 items-center justify-center rounded-full ${
           isPositive
             ? "bg-emerald-50 text-emerald-600"
@@ -257,7 +302,7 @@ function MovementRow({ movement: m }: { movement: MovementWithDetails }) {
         ) : (
           <ArrowUp className="size-4" />
         )}
-      </div>
+      </motion.div>
 
       {/* Info */}
       <div className="min-w-0 flex-1">
@@ -269,13 +314,13 @@ function MovementRow({ movement: m }: { movement: MovementWithDetails }) {
             {MOVEMENT_TYPES[m.type as keyof typeof MOVEMENT_TYPES] ?? m.type}
           </Badge>
           {reference && (
-            <span className="text-xs text-neutral-400 tabular-nums">
+            <span className="text-[11px] text-neutral-400 tabular-nums">
               {reference}
             </span>
           )}
         </div>
         {m.reason && (
-          <p className="mt-0.5 text-xs text-neutral-500 truncate">{m.reason}</p>
+          <p className="mt-0.5 text-[11px] text-neutral-500 truncate">{m.reason}</p>
         )}
       </div>
 
@@ -296,7 +341,7 @@ function MovementRow({ movement: m }: { movement: MovementWithDetails }) {
 
       {/* Date */}
       <div className="shrink-0 text-right">
-        <p className="text-xs text-neutral-500 tabular-nums">
+        <p className="text-[11px] text-neutral-500 tabular-nums">
           {format(new Date(m.created_at), "d MMM yyyy", { locale: es })}
         </p>
         <p className="text-[10px] text-neutral-400 tabular-nums">

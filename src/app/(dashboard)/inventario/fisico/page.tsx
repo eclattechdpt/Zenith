@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Warehouse } from "lucide-react"
 import { motion } from "motion/react"
 
 import { InventoryTable } from "@/features/inventario/components/inventory-table"
@@ -10,17 +10,17 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+    transition: { staggerChildren: 0.06, delayChildren: 0.05 },
   },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+  hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   },
 }
 
@@ -30,30 +30,37 @@ export default function InventarioFisicoPage() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-col gap-6"
+      className="min-w-0 flex-1 space-y-8 p-5 sm:p-8"
     >
-      <motion.div
-        variants={itemVariants}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div className="text-center sm:text-left">
+      <motion.div variants={itemVariants} className="text-center sm:text-left">
+        <motion.div
+          whileHover={{ x: -2 }}
+          transition={{ type: "spring", stiffness: 500, damping: 35 }}
+          className="inline-block"
+        >
           <Link
             href="/inventario"
-            className="mb-2 inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 transition-colors"
+            className="group mb-3 inline-flex items-center gap-1.5 rounded-md px-2 py-1 -ml-2 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
           >
             <ArrowLeft className="size-3" />
             Inventarios
           </Link>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
-            Inventario Fisico
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Stock actual del almacen — se descuenta con ventas
-          </p>
-        </div>
+        </motion.div>
+        <p className="flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-[2px] text-neutral-400 sm:justify-start">
+          <Warehouse className="h-3.5 w-3.5 text-amber-400" />
+          Inventario Fisico
+        </p>
+        <h1 className="mt-2 font-display text-[38px] font-semibold leading-none tracking-[-1.5px] text-neutral-950 sm:text-[48px]">
+          Stock Fisico
+        </h1>
+        <p className="mt-2 text-sm text-neutral-500">
+          Stock actual del almacen — se descuenta con ventas
+        </p>
       </motion.div>
 
-      <InventoryTable inventoryType="physical" />
+      <motion.div variants={itemVariants}>
+        <InventoryTable inventoryType="physical" />
+      </motion.div>
     </motion.div>
   )
 }

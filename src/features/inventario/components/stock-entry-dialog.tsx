@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { motion } from "motion/react"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { NumericInput } from "@/features/productos/components/variant-manager"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -56,14 +57,12 @@ function StockEntryForm({
 }) {
   const currentStock =
     inventoryType === "initial_load" ? variant.initial_stock : variant.stock
-  const [quantity, setQuantity] = useState("")
+  const [quantity, setQuantity] = useState(0)
   const [reason, setReason] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const queryClient = useQueryClient()
 
-  const parsedQty = parseInt(quantity, 10)
-  const isValidQty = !isNaN(parsedQty) && parsedQty > 0
-  const canSubmit = isValidQty
+  const canSubmit = quantity > 0
 
   const action = inventoryType === "initial_load" ? addInitialStock : addStock
 
@@ -73,7 +72,7 @@ function StockEntryForm({
 
     const result = await action({
       product_variant_id: variant.id,
-      quantity: parsedQty,
+      quantity,
       reason: reason.trim() || null,
     })
 
@@ -88,7 +87,7 @@ function StockEntryForm({
     }
 
     toast.success(
-      `Entrada registrada: +${parsedQty} unidades (${currentStock} → ${currentStock + parsedQty})`
+      `Entrada registrada: +${quantity} unidades (${currentStock} → ${currentStock + quantity})`
     )
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
@@ -100,42 +99,47 @@ function StockEntryForm({
   const productLabel = `${variant.products.name}${variant.name ? ` — ${variant.name}` : ""}${variant.sku ? ` (${variant.sku})` : ""}`
 
   return (
-    <DialogContent showCloseButton={false}>
+    <DialogContent showCloseButton={false} className="sm:max-w-md p-6 [&_input]:focus-visible:border-amber-400 [&_input]:focus-visible:ring-amber-500/30 [&_textarea]:focus-visible:border-amber-400 [&_textarea]:focus-visible:ring-amber-500/30 [&_::-webkit-scrollbar-thumb]:bg-amber-200 [&_::-webkit-scrollbar-thumb:hover]:bg-amber-300" style={{ scrollbarColor: "rgb(253 230 138) transparent" }}>
       <DialogHeader>
         <DialogTitle>Entrada de mercancia</DialogTitle>
         <DialogDescription>{productLabel}</DialogDescription>
       </DialogHeader>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-4 py-3">
-          <span className="text-sm text-neutral-500">Stock actual</span>
-          <span className="font-semibold text-neutral-950 tabular-nums">
+        <div className="rounded-xl border border-neutral-100/80 bg-neutral-50/50 px-4 py-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+            Stock actual
+          </p>
+          <p className="mt-0.5 font-semibold text-neutral-950 tabular-nums">
             {currentStock}
-          </span>
+          </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="entry-quantity">Cantidad a agregar</Label>
-          <Input
-            id="entry-quantity"
-            type="number"
+          <Label>Cantidad a agregar</Label>
+          <NumericInput
             min={1}
-            step={1}
             value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
+            onChange={setQuantity}
             placeholder="Ej: 50"
-            className="tabular-nums"
             autoFocus
           />
         </div>
 
-        {isValidQty && (
-          <div className="flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-3 text-emerald-700">
-            <span className="text-sm">Stock resultante</span>
-            <span className="font-semibold tabular-nums">
-              {currentStock + parsedQty}
-            </span>
-          </div>
+        {quantity > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center justify-between rounded-xl border border-emerald-100/80 bg-emerald-50/50 px-4 py-3 text-emerald-700">
+              <span className="text-sm">Stock resultante</span>
+              <span className="font-semibold tabular-nums">
+                {currentStock + quantity}
+              </span>
+            </div>
+          </motion.div>
         )}
 
         <div className="space-y-2">

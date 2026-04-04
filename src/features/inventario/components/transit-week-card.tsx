@@ -33,17 +33,17 @@ export function TransitWeekCard({
 
   return (
     <div
-      className={`group cursor-pointer rounded-xl border bg-white p-4 transition-all duration-200 ${
+      className={`group cursor-pointer rounded-2xl border p-4 transition-[border-color,box-shadow,background-color] duration-200 ${
         isSelected
-          ? "border-blue-300 ring-1 ring-blue-200 shadow-sm"
-          : "border-neutral-100 hover:border-blue-200 hover:shadow-sm"
+          ? "border-blue-400 bg-blue-50/60 shadow-md shadow-blue-500/12"
+          : "border-neutral-100 bg-white hover:border-blue-200/80 hover:bg-blue-50/30 hover:shadow-sm hover:shadow-blue-500/6"
       }`}
       onClick={onSelect}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-neutral-950">
+            <span className="text-[13px] font-semibold text-neutral-950">
               Semana {week.week_number}
             </span>
             <Badge
@@ -54,7 +54,7 @@ export function TransitWeekCard({
             </Badge>
           </div>
           {week.label && (
-            <p className="mt-0.5 text-xs text-neutral-500 truncate">
+            <p className="mt-0.5 text-[11px] text-neutral-500 truncate">
               {week.label}
             </p>
           )}
@@ -102,7 +102,7 @@ export function TransitWeekCard({
       </div>
 
       <div className="mt-3 flex items-center justify-between">
-        <div className="flex items-center gap-3 text-xs text-neutral-500">
+        <div className="flex items-center gap-3 text-[11px] text-neutral-500">
           <span className="flex items-center gap-1">
             <Package className="size-3" />
             {itemCount} {itemCount === 1 ? "producto" : "productos"}
@@ -114,7 +114,7 @@ export function TransitWeekCard({
             </span>
           )}
         </div>
-        <span className="font-bold text-neutral-950 tabular-nums">
+        <span className={`text-[15px] font-bold tabular-nums ${isSelected ? "text-blue-600" : "text-neutral-950"}`}>
           {formatCurrency(Number(week.total_value))}
         </span>
       </div>

@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { NumericInput } from "@/features/productos/components/variant-manager"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -64,14 +65,13 @@ function CreateWeekForm({
   const nextWeek = existingWeekNumbers.length > 0
     ? Math.min(Math.max(...existingWeekNumbers) + 1, 5)
     : 1
-  const [weekNumber, setWeekNumber] = useState(String(nextWeek))
+  const [weekNumber, setWeekNumber] = useState(nextWeek)
   const [label, setLabel] = useState("")
   const [notes, setNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const queryClient = useQueryClient()
 
-  const parsedWeek = parseInt(weekNumber, 10)
-  const isValid = !isNaN(parsedWeek) && parsedWeek >= 1 && parsedWeek <= 5
+  const isValid = weekNumber >= 1 && weekNumber <= 5
 
   const monthName = MONTH_NAMES[month - 1]
 
@@ -82,7 +82,7 @@ function CreateWeekForm({
     const result = await createTransitWeek({
       year,
       month,
-      week_number: parsedWeek,
+      week_number: weekNumber,
       label: label.trim() || null,
       notes: notes.trim() || null,
     })
@@ -97,7 +97,7 @@ function CreateWeekForm({
       return
     }
 
-    toast.success(`Semana ${parsedWeek} de ${monthName} ${year} creada`)
+    toast.success(`Semana ${weekNumber} de ${monthName} ${year} creada`)
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
     queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
@@ -105,7 +105,7 @@ function CreateWeekForm({
   }
 
   return (
-    <DialogContent showCloseButton={false}>
+    <DialogContent showCloseButton={false} className="sm:max-w-md p-6 [&_input]:focus-visible:border-blue-400 [&_input]:focus-visible:ring-blue-500/30 [&_textarea]:focus-visible:border-blue-400 [&_textarea]:focus-visible:ring-blue-500/30">
       <DialogHeader>
         <DialogTitle>Nueva semana</DialogTitle>
         <DialogDescription>
@@ -115,15 +115,12 @@ function CreateWeekForm({
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="transit-week">Numero de semana (1-5)</Label>
-          <Input
-            id="transit-week"
-            type="number"
+          <Label>Numero de semana (1-5)</Label>
+          <NumericInput
             min={1}
             max={5}
             value={weekNumber}
-            onChange={(e) => setWeekNumber(e.target.value)}
-            className="tabular-nums"
+            onChange={setWeekNumber}
             autoFocus
           />
         </div>

@@ -22,6 +22,7 @@ export interface InventoryVariant {
     name: string
     brand: string | null
     has_variants: boolean
+    image_url: string | null
     product_categories: { categories: { id: string; name: string } | null }[]
   }
   // Initial Load overrides (only present when querying initial_load inventory)
@@ -42,7 +43,7 @@ export interface TransitWeekItemWithProduct extends TransitWeekItem {
     sku: string | null
     name: string | null
     price: number
-    products: { id: string; name: string; brand: string | null }
+    products: { id: string; name: string; brand: string | null; image_url: string | null }
   }
 }
 
