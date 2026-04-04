@@ -24,8 +24,9 @@
 /.next/
 /out/
 
-# production
+# production (lowercase only — Build/ is project docs)
 /build
+!/Build
 
 # misc
 .DS_Store
