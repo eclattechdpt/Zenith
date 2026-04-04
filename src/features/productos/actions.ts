@@ -100,12 +100,12 @@ export async function deleteCategory(id: string) {
     }
   }
 
-  // Check for active products in this category
+  // Check for active products in this category (via junction table)
   const { count } = await supabase
-    .from("products")
-    .select("*", { count: "exact", head: true })
+    .from("product_categories")
+    .select("*, products!inner(id)", { count: "exact", head: true })
     .eq("category_id", id)
-    .is("deleted_at", null)
+    .is("products.deleted_at", null)
 
   if (count && count > 0) {
     return {
@@ -258,7 +258,7 @@ export async function createProduct(input: CreateProductInput) {
       slug: parsed.data.slug,
       description: parsed.data.description ?? null,
       brand: parsed.data.brand ?? null,
-      category_id: parsed.data.category_id ?? null,
+      image_url: parsed.data.image_url ?? null,
       is_active: parsed.data.is_active,
       has_variants: parsed.data.has_variants,
       is_bundle: isBundle,
@@ -275,7 +275,25 @@ export async function createProduct(input: CreateProductInput) {
     return { error: { _form: [msg] } }
   }
 
-  // 4. If bundle, insert bundle items
+  // 4. Insert category associations (junction table)
+  const categoryIds = parsed.data.category_ids ?? []
+  if (categoryIds.length > 0) {
+    const catRows = categoryIds.map((catId) => ({
+      product_id: product.id,
+      category_id: catId,
+      tenant_id: TENANT_ID,
+    }))
+    const { error: catError } = await supabase
+      .from("product_categories")
+      .insert(catRows)
+
+    if (catError) {
+      await supabase.from("products").delete().eq("id", product.id)
+      return { error: { _form: [catError.message] } }
+    }
+  }
+
+  // 5. If bundle, insert bundle items
   if (isBundle && parsed.data.bundle_items && parsed.data.bundle_items.length > 0) {
     const bundleRows = parsed.data.bundle_items.map((item) => ({
       bundle_id: product.id,
@@ -385,7 +403,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
       slug: parsed.data.slug,
       description: parsed.data.description ?? null,
       brand: parsed.data.brand ?? null,
-      category_id: parsed.data.category_id ?? null,
+      image_url: parsed.data.image_url ?? null,
       is_active: parsed.data.is_active,
       has_variants: parsed.data.has_variants,
       is_bundle: parsed.data.is_bundle,
@@ -397,7 +415,20 @@ export async function updateProduct(id: string, input: CreateProductInput) {
 
   if (error) return { error: { _form: [error.message] } }
 
-  // 4. Get existing variants
+  // 4. Sync category associations (delete + re-insert)
+  await supabase.from("product_categories").delete().eq("product_id", id)
+  const categoryIds = parsed.data.category_ids ?? []
+  if (categoryIds.length > 0) {
+    await supabase.from("product_categories").insert(
+      categoryIds.map((catId) => ({
+        product_id: id,
+        category_id: catId,
+        tenant_id: TENANT_ID,
+      }))
+    )
+  }
+
+  // 5. Get existing variants
   const { data: existingVariants } = await supabase
     .from("product_variants")
     .select("id")

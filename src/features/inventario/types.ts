@@ -21,9 +21,8 @@ export interface InventoryVariant {
     id: string
     name: string
     brand: string | null
-    category_id: string | null
     has_variants: boolean
-    categories: { id: string; name: string } | null
+    product_categories: { categories: { id: string; name: string } | null }[]
   }
   // Initial Load overrides (only present when querying initial_load inventory)
   override_name?: string | null

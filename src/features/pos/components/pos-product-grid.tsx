@@ -105,9 +105,10 @@ const CategoryPill = memo(function CategoryPill({
 
 interface POSProductGridProps {
   onAdd: (product: POSProductWithImage) => void
+  onEditProduct?: (productId: string) => void
 }
 
-export function POSProductGrid({ onAdd }: POSProductGridProps) {
+export function POSProductGrid({ onAdd, onEditProduct }: POSProductGridProps) {
   const [search, setSearch] = useState("")
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
     new Set()
@@ -441,6 +442,7 @@ export function POSProductGrid({ onAdd }: POSProductGridProps) {
                 key={product.id}
                 product={product}
                 onAdd={onAdd}
+                onEdit={onEditProduct}
               />
             ))}
           </div>

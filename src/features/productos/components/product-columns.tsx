@@ -1,17 +1,11 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { ArrowUpDown, Pencil, Trash2 } from "lucide-react"
 import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Tooltip,
   TooltipContent,
@@ -19,6 +13,7 @@ import {
 } from "@/components/ui/tooltip"
 import { formatCurrency } from "@/lib/utils"
 
+import { getCategoryNames } from "../types"
 import type { ProductWithDetails } from "../types"
 
 function getPriceRange(product: ProductWithDetails) {
@@ -45,7 +40,6 @@ function getLowStockVariants(product: ProductWithDetails) {
   return product.product_variants.filter(
     (v) => v.is_active && v.stock <= v.stock_min
   ).map((v) => {
-    // Only use the first option value (e.g. tone name) for a concise label
     const firstOption = v.variant_option_assignments[0]?.variant_options?.value
     return { label: firstOption || v.sku || "Variante", stock: v.stock }
   })
@@ -67,22 +61,22 @@ export function getProductColumns({
         <Button
           variant="ghost"
           size="sm"
-          className="-ml-3 h-8"
+          className="-ml-3 h-8 text-[11px] font-semibold uppercase tracking-wider text-neutral-400"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Producto
-          <ArrowUpDown className="ml-1 size-3.5" />
+          <ArrowUpDown className="ml-1 size-3" />
         </Button>
       ),
       cell: ({ row }) => {
         const product = row.original
         return (
-          <div className="flex flex-col">
-            <span className="font-medium text-neutral-950">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[13px] font-semibold text-neutral-900">
               {product.name}
             </span>
             {product.brand && (
-              <span className="text-xs text-neutral-500">{product.brand}</span>
+              <span className="text-[11px] text-neutral-400">{product.brand}</span>
             )}
           </div>
         )
@@ -90,15 +84,21 @@ export function getProductColumns({
     },
     {
       id: "category",
-      accessorFn: (row) => row.categories?.name ?? "",
+      accessorFn: (row) => getCategoryNames(row.product_categories) ?? "",
       size: 160,
       minSize: 120,
-      header: "Categoria",
+      header: () => (
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+          Categoria
+        </span>
+      ),
       cell: ({ row }) => {
-        const name = row.original.categories?.name
-        if (!name) return <span className="text-neutral-400">—</span>
+        const name = getCategoryNames(row.original.product_categories)
+        if (!name) return <span className="text-neutral-300">—</span>
         return (
-          <span className="text-sm text-neutral-600">{name}</span>
+          <span className="rounded-md bg-neutral-50 px-2 py-0.5 text-[12px] font-medium text-neutral-500">
+            {name}
+          </span>
         )
       },
     },
@@ -106,27 +106,39 @@ export function getProductColumns({
       id: "price",
       size: 140,
       minSize: 100,
-      header: "Precio",
+      header: () => (
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+          Precio
+        </span>
+      ),
       cell: ({ row }) => {
         const range = getPriceRange(row.original)
-        if (!range) return <span className="text-neutral-400">—</span>
-        return <span className="text-sm tabular-nums">{range}</span>
+        if (!range) return <span className="text-neutral-300">—</span>
+        return (
+          <span className="text-[13px] font-bold tabular-nums text-rose-600">
+            {range}
+          </span>
+        )
       },
     },
     {
       id: "variants",
       size: 100,
       minSize: 80,
-      header: "Variantes",
+      header: () => (
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+          Variantes
+        </span>
+      ),
       cell: ({ row }) => {
         if (!row.original.has_variants) {
-          return <span className="text-neutral-400">—</span>
+          return <span className="text-neutral-300">—</span>
         }
         const count = row.original.product_variants.filter(
           (v) => v.is_active
         ).length
         return (
-          <span className="text-sm text-neutral-600">
+          <span className="text-[13px] font-semibold tabular-nums text-neutral-700">
             {count}
           </span>
         )
@@ -136,20 +148,24 @@ export function getProductColumns({
       id: "stock",
       size: 100,
       minSize: 80,
-      header: "Stock",
+      header: () => (
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+          Stock
+        </span>
+      ),
       cell: ({ row }) => {
         const total = getTotalStock(row.original)
         const lowVariants = getLowStockVariants(row.original)
         return (
           <div className="flex items-center gap-2">
-            <span className="text-sm tabular-nums">{total}</span>
+            <span className="text-[13px] font-bold tabular-nums text-neutral-800">{total}</span>
             {lowVariants.length > 0 && (
               <Tooltip>
                 <TooltipTrigger
                   render={
                     <Badge
                       variant="destructive"
-                      className="cursor-default text-[10px] leading-none"
+                      className="cursor-default rounded-md px-1.5 text-[10px] font-semibold leading-none"
                     />
                   }
                 >
@@ -175,52 +191,45 @@ export function getProductColumns({
       id: "status",
       size: 100,
       minSize: 80,
-      header: "Estado",
+      header: () => (
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+          Estado
+        </span>
+      ),
       cell: ({ row }) => {
         const active = row.original.is_active
-        return (
-          <Badge variant={active ? "secondary" : "outline"}>
-            {active ? "Activo" : "Inactivo"}
-          </Badge>
+        return active ? (
+          <span className="text-[12px] font-semibold text-teal-600">Activo</span>
+        ) : (
+          <span className="text-[12px] font-medium text-neutral-400">Inactivo</span>
         )
       },
     },
     {
       id: "actions",
-      size: 50,
-      minSize: 50,
+      size: 80,
+      minSize: 80,
       header: "",
       cell: ({ row }) => {
         const product = row.original
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button variant="ghost" size="sm" className="size-8 p-0" />
-              }
+          <div className="flex items-center justify-end gap-1">
+            <Link
+              href={`/productos/${product.id}`}
+              className="rounded-lg p-1.5 text-neutral-300 transition-colors hover:bg-neutral-50 hover:text-neutral-600"
             >
-              <MoreHorizontal className="size-4" />
-              <span className="sr-only">Acciones</span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                nativeButton={false}
-                render={<Link href={`/productos/${product.id}`} />}
+              <Pencil className="size-3.5" />
+            </Link>
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(product)}
+                className="rounded-lg p-1.5 text-neutral-300 transition-colors hover:bg-red-50 hover:text-red-500"
               >
-                <Pencil className="mr-2 size-3.5" />
-                Editar
-              </DropdownMenuItem>
-              {onDelete && (
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => onDelete(product)}
-                >
-                  <Trash2 className="mr-2 size-3.5" />
-                  Eliminar
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <Trash2 className="size-3.5" />
+              </button>
+            )}
+          </div>
         )
       },
     },

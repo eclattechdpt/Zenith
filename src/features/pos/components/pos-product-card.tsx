@@ -2,7 +2,6 @@
 
 import { memo, useState, useCallback, useRef } from "react"
 import Image from "next/image"
-import Link from "next/link"
 import { Plus, Pencil, AlertCircle, Check } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { formatCurrency } from "@/lib/utils"
@@ -12,6 +11,7 @@ import type { POSProductWithImage } from "../queries"
 interface POSProductCardProps {
   product: POSProductWithImage
   onAdd: (product: POSProductWithImage) => void
+  onEdit?: (productId: string) => void
   /** Compact mode for carousel cards */
   compact?: boolean
 }
@@ -56,6 +56,7 @@ function getDisplayPrice(product: POSProductWithImage) {
 export const POSProductCard = memo(function POSProductCard({
   product,
   onAdd,
+  onEdit,
   compact = false,
 }: POSProductCardProps) {
   const available = getAvailableStock(product)
@@ -87,13 +88,14 @@ export const POSProductCard = memo(function POSProductCard({
         outOfStock ? "opacity-50 grayscale-[30%]" : ""
       }`}
     >
-      {/* Edit link */}
-      <Link
-        href={`/productos/${product.id}`}
+      {/* Edit button */}
+      <button
+        type="button"
+        onClick={() => onEdit?.(product.id)}
         className="absolute right-2.5 top-2.5 z-10 rounded-lg bg-white/80 p-1.5 text-neutral-400 opacity-0 backdrop-blur-sm transition-all hover:text-neutral-600 group-hover:opacity-100"
       >
         <Pencil className="h-3 w-3" />
-      </Link>
+      </button>
 
       {/* Low stock badge */}
       {lowStock && (

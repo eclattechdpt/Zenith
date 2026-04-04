@@ -433,9 +433,18 @@ export function useAllPOSProducts(search: string, categoryIds: string[] | null) 
         .eq("product_variants.is_active", true)
         .order("name")
 
-      // Filter by category (parent + children)
+      // Filter by category (parent + children) via junction table
       if (categoryIds && categoryIds.length > 0) {
-        query = query.in("category_id", categoryIds)
+        const { data: matchIds } = await supabase
+          .from("product_categories")
+          .select("product_id")
+          .in("category_id", categoryIds)
+        const productIds = [...new Set((matchIds ?? []).map((m) => m.product_id))]
+        if (productIds.length > 0) {
+          query = query.in("id", productIds)
+        } else {
+          return []
+        }
       }
 
       if (search.trim()) {

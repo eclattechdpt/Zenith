@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
@@ -406,6 +408,42 @@ export type Database = {
         }
         Relationships: []
       }
+      product_categories: {
+        Row: {
+          category_id: string
+          id: string
+          product_id: string
+          tenant_id: string
+        }
+        Insert: {
+          category_id: string
+          id?: string
+          product_id: string
+          tenant_id: string
+        }
+        Update: {
+          category_id?: string
+          id?: string
+          product_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_categories_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_images: {
         Row: {
           created_at: string
@@ -515,7 +553,6 @@ export type Database = {
       products: {
         Row: {
           brand: string | null
-          category_id: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
@@ -532,7 +569,6 @@ export type Database = {
         }
         Insert: {
           brand?: string | null
-          category_id?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -549,7 +585,6 @@ export type Database = {
         }
         Update: {
           brand?: string | null
-          category_id?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -564,15 +599,7 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "products_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       return_items: {
         Row: {
@@ -1052,7 +1079,7 @@ export type Database = {
       complete_pending_sale: {
         Args: {
           p_created_by?: string
-          p_payments?: Json
+          p_payments: Json
           p_sale_id: string
           p_tenant_id: string
         }
@@ -1071,17 +1098,28 @@ export type Database = {
         }
         Returns: Json
       }
+      create_return_transaction: {
+        Args: {
+          p_created_by?: string
+          p_customer_id?: string
+          p_items?: Json
+          p_reason?: string
+          p_sale_id: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
       create_sale_transaction: {
         Args: {
-          p_created_by: string
-          p_customer_id: string
-          p_discount_amount: number
-          p_items: Json
-          p_notes: string
-          p_payments: Json
-          p_subtotal: number
+          p_created_by?: string
+          p_customer_id?: string
+          p_discount_amount?: number
+          p_items?: Json
+          p_notes?: string
+          p_payments?: Json
+          p_subtotal?: number
           p_tenant_id: string
-          p_total: number
+          p_total?: number
         }
         Returns: Json
       }

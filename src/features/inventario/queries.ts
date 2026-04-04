@@ -17,8 +17,8 @@ import type {
 
 const VARIANT_SELECT = `id, sku, name, price, stock, initial_stock, stock_min, is_active, product_id,
   products!inner(
-    id, name, brand, category_id, has_variants,
-    categories(id, name)
+    id, name, brand, has_variants,
+    product_categories(categories(id, name))
   )`
 
 // ── Search helpers ──
@@ -84,7 +84,16 @@ export function useInventory(filters?: InventoryFilters, options?: { enabled?: b
       }
 
       if (filters?.categoryId) {
-        query = query.eq("products.category_id", filters.categoryId)
+        const { data: matchIds } = await supabase
+          .from("product_categories")
+          .select("product_id")
+          .eq("category_id", filters.categoryId)
+        const productIds = [...new Set((matchIds ?? []).map((m) => m.product_id))]
+        if (productIds.length > 0) {
+          query = query.in("product_id", productIds)
+        } else {
+          return []
+        }
       }
 
       if (filters?.isActive !== undefined) {
@@ -139,7 +148,16 @@ export function useInitialLoadInventory(filters?: InventoryFilters, options?: { 
       }
 
       if (filters?.categoryId) {
-        query = query.eq("products.category_id", filters.categoryId)
+        const { data: matchIds } = await supabase
+          .from("product_categories")
+          .select("product_id")
+          .eq("category_id", filters.categoryId)
+        const productIds = [...new Set((matchIds ?? []).map((m) => m.product_id))]
+        if (productIds.length > 0) {
+          query = query.in("product_id", productIds)
+        } else {
+          return []
+        }
       }
 
       if (filters?.isActive !== undefined) {

@@ -170,7 +170,7 @@ export async function exportProductsExcel() {
     .from("products")
     .select(
       `name, brand, is_active, has_variants,
-      categories:categories(name),
+      product_categories(categories(name)),
       product_variants(name, sku, price, stock, is_active)`
     )
     .is("deleted_at", null)
@@ -193,8 +193,8 @@ export async function exportProductsExcel() {
     ).filter((v) => v.is_active)
 
     const category = (
-      p.categories as unknown as { name: string } | null
-    )?.name
+      (p.product_categories as unknown as { categories: { name: string } | null }[]) ?? []
+    ).map((pc) => pc.categories?.name).filter(Boolean).join(", ")
 
     if (variants.length <= 1) {
       const v = variants[0]

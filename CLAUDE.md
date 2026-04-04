@@ -234,6 +234,14 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
+**Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-03)
+
+### Sprint 8 — En progreso
+- **Image handling system**: proxy API (`/api/image-proxy`), tiered validation (≤15MB ok, 15-25MB warn, >25MB block), WebP compression (~10KB target), URL choice panel (download+optimize vs direct link), deferred upload en new product wizard, SUPABASE/URL Externa badges, compression size badges
+- Key files: `src/app/api/image-proxy/route.ts`, `src/lib/supabase/storage.ts`, `src/features/productos/components/product-image-picker.tsx`
+- `next.config.ts`: remotePatterns para Supabase storage hostname (fix next/image en POS)
+- Tested: URL download+optimize, direct link, new product deferred upload, POS page rendering, proxy API
+
 **Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
 
 ### Sprint 7 — Completado

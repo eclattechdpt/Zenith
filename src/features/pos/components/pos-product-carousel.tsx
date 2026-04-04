@@ -10,6 +10,7 @@ interface POSProductCarouselProps {
   icon: ReactNode
   products: POSProductWithImage[]
   onAdd: (product: POSProductWithImage) => void
+  onEditProduct?: (productId: string) => void
 }
 
 export function POSProductCarousel({
@@ -17,6 +18,7 @@ export function POSProductCarousel({
   icon,
   products,
   onAdd,
+  onEditProduct,
 }: POSProductCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -74,7 +76,7 @@ export function POSProductCarousel({
         >
           {products.map((product) => (
             <div key={product.id} className="w-[200px] flex-shrink-0">
-              <POSProductCard product={product} onAdd={onAdd} compact />
+              <POSProductCard product={product} onAdd={onAdd} onEdit={onEditProduct} compact />
             </div>
           ))}
           {/* Spacer so last card can peek */}

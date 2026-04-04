@@ -1,54 +1,18 @@
 "use client"
 
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { motion } from "motion/react"
 
-import { ProductForm } from "@/features/productos/components/product-form"
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
-  },
-}
-
+/**
+ * Product creation now happens via the wizard dialog on /productos.
+ * This page redirects there for backwards compatibility (bookmarks, links).
+ */
 export default function NuevoProductoPage() {
   const router = useRouter()
-  return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="flex flex-col gap-6"
-    >
-      <motion.div
-        variants={itemVariants}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div className="text-center sm:text-left">
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
-            Nuevo producto
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Agrega un producto al catalogo
-          </p>
-        </div>
-      </motion.div>
 
-      <motion.div variants={itemVariants}>
-        <ProductForm onBack={() => router.push("/productos")} />
-      </motion.div>
-    </motion.div>
-  )
+  useEffect(() => {
+    router.replace("/productos")
+  }, [router])
+
+  return null
 }

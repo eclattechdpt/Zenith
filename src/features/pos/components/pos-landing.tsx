@@ -27,6 +27,7 @@ import { POSProductGrid } from "./pos-product-grid"
 import { POSSlidingCart, POSCartFAB } from "./pos-sliding-cart"
 import { POSSaleWizard } from "./pos-sale-wizard"
 import { SaleReceipt } from "./sale-receipt"
+import { ProductEditDialog } from "@/features/productos/components/product-edit-dialog"
 
 // ── Types ──
 
@@ -56,6 +57,9 @@ export function POSLanding() {
   const [pendingSale, setPendingSale] = useState<PendingSaleWithSummary | null>(
     null
   )
+
+  // ── Product edit dialog ──
+  const [editProductId, setEditProductId] = useState<string | null>(null)
 
   // ── Receipt printing ──
   const receiptRef = useRef<HTMLDivElement>(null)
@@ -230,6 +234,7 @@ export function POSLanding() {
                     icon={<Flame className="h-4 w-4" />}
                     products={topProducts}
                     onAdd={handleAddProduct}
+                    onEditProduct={setEditProductId}
                   />
                 )}
 
@@ -240,6 +245,7 @@ export function POSLanding() {
                     icon={<Clock className="h-4 w-4" />}
                     products={recentProducts}
                     onAdd={handleAddProduct}
+                    onEditProduct={setEditProductId}
                   />
                 )}
               </div>
@@ -247,7 +253,7 @@ export function POSLanding() {
           )}
 
           {/* ── Full product grid (in card) ── */}
-          <POSProductGrid onAdd={handleAddProduct} />
+          <POSProductGrid onAdd={handleAddProduct} onEditProduct={setEditProductId} />
         </div>
 
         {/* ── Sliding cart sidebar (desktop) ── */}
@@ -280,6 +286,13 @@ export function POSLanding() {
           <SaleReceipt ref={receiptRef} data={receiptData} />
         </div>
       )}
+
+      {/* ── Product edit dialog ── */}
+      <ProductEditDialog
+        open={!!editProductId}
+        productId={editProductId}
+        onClose={() => setEditProductId(null)}
+      />
     </>
   )
 }

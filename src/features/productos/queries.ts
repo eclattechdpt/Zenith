@@ -29,7 +29,7 @@ export function useProducts(filters?: ProductFilters) {
         .from("products")
         .select(
           `*,
-          categories:categories(id, name),
+          product_categories(categories(id, name)),
           product_variants:product_variants!product_variants_product_id_fkey(
             *,
             variant_option_assignments:variant_option_assignments(
@@ -70,7 +70,16 @@ export function useProducts(filters?: ProductFilters) {
       }
 
       if (filters?.categoryIds && filters.categoryIds.length > 0) {
-        query = query.in("category_id", filters.categoryIds)
+        const { data: matchIds } = await supabase
+          .from("product_categories")
+          .select("product_id")
+          .in("category_id", filters.categoryIds)
+        const productIds = [...new Set((matchIds ?? []).map((m) => m.product_id))]
+        if (productIds.length > 0) {
+          query = query.in("id", productIds)
+        } else {
+          return []
+        }
       }
 
       if (filters?.brand) {
@@ -100,7 +109,7 @@ export function useProduct(id: string) {
         .from("products")
         .select(
           `*,
-          categories:categories(id, name),
+          product_categories(categories(id, name)),
           product_variants:product_variants!product_variants_product_id_fkey(
             *,
             variant_option_assignments:variant_option_assignments(
@@ -124,6 +133,56 @@ export function useProduct(id: string) {
   })
 }
 
+// --- PRODUCT STATS (for KPI widgets) ---
+
+interface ProductStats {
+  totalProducts: number
+  inventoryValue: number
+  lowStockCount: number
+}
+
+export function useProductStats() {
+  return useQuery({
+    queryKey: ["product-stats"],
+    queryFn: async (): Promise<ProductStats> => {
+      const supabase = createClient()
+
+      // Fetch all active products with their active variants in one query
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          `id,
+          product_variants!product_variants_product_id_fkey(
+            price, stock, stock_min, is_active, deleted_at
+          )`
+        )
+        .eq("is_active", true)
+        .is("deleted_at", null)
+
+      if (error) throw error
+
+      let totalProducts = 0
+      let inventoryValue = 0
+      let lowStockCount = 0
+
+      for (const product of data ?? []) {
+        totalProducts++
+        const variants = (product.product_variants ?? []).filter(
+          (v: { is_active: boolean; deleted_at: string | null }) =>
+            v.is_active && !v.deleted_at
+        )
+        for (const v of variants) {
+          const vTyped = v as { price: number; stock: number; stock_min: number }
+          inventoryValue += vTyped.price * vTyped.stock
+          if (vTyped.stock <= vTyped.stock_min) lowStockCount++
+        }
+      }
+
+      return { totalProducts, inventoryValue, lowStockCount }
+    },
+  })
+}
+
 // --- CATEGORIES ---
 
 export function useCategories() {
@@ -134,7 +193,7 @@ export function useCategories() {
 
       const { data, error } = await supabase
         .from("categories")
-        .select("*, products(count)")
+        .select("*, product_categories(count)")
         .is("deleted_at", null)
         .order("sort_order")
         .order("name")

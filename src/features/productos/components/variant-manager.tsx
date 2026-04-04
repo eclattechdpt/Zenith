@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react"
+import { NumericFormat, type NumberFormatValues } from "react-number-format"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,90 +11,59 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 
-/** Input that keeps a local string while typing, commits a number on blur. */
+/**
+ * Formatted numeric input with live thousand separators.
+ * Uses react-number-format for correct cursor management.
+ */
 export function NumericInput({
   value,
   onChange,
   decimal = false,
   prefix,
-  min: _min,
-  max: _max,
+  min,
+  max,
+  step: _step,
+  className,
   ...props
-}: Omit<React.ComponentProps<typeof Input>, "value" | "onChange"> & {
+}: Omit<React.ComponentProps<typeof Input>, "value" | "onChange" | "type"> & {
   value: number
   onChange: (value: number) => void
   decimal?: boolean
   prefix?: string
+  min?: number
+  max?: number
+  step?: string
 }) {
-  // Extract min/max so they don't reach the HTML input (prevents browser tooltips).
-  // Validation is handled by Zod schemas which show styled Spanish error messages.
-  void _min, _max
+  void _step // step not needed — handled by decimalScale
 
-  const [focused, setFocused] = useState(false)
-  const [display, setDisplay] = useState(String(value))
-
-  useEffect(() => {
-    if (!focused) {
-      setDisplay(decimal ? value.toFixed(2) : String(value))
-    }
-  }, [value, decimal, focused])
-
-  function handleFocus() {
-    setFocused(true)
-    // Show raw number without trailing zeros when editing
-    const raw = parseFloat(display)
-    setDisplay(isNaN(raw) ? "" : String(raw))
+  function handleValueChange(values: NumberFormatValues) {
+    onChange(values.floatValue ?? 0)
   }
 
-  function commit() {
-    const parsed = decimal ? parseFloat(display) : parseInt(display)
-    const final = isNaN(parsed) ? 0 : Math.max(0, parsed)
-    onChange(final)
-    setDisplay(decimal ? final.toFixed(2) : String(final))
-  }
-
-  function handleBlur() {
-    setFocused(false)
-    commit()
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter") {
-      commit()
-    }
-  }
-
-  if (prefix) {
-    return (
-      <div className="relative">
-        <span className="pointer-events-none absolute left-2.5 top-1/2 z-10 -translate-y-1/2 text-sm text-neutral-400">
-          {prefix}
-        </span>
-        <Input
-          {...props}
-          type="number"
-          value={display}
-          onChange={(e) => setDisplay(e.target.value)}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          onWheel={(e) => e.currentTarget.blur()}
-          className="!pl-7"
-        />
-      </div>
-    )
+  function isAllowed(values: NumberFormatValues) {
+    const { floatValue } = values
+    if (floatValue === undefined) return true
+    if (min !== undefined && floatValue < min) return false
+    if (max !== undefined && floatValue > max) return false
+    return true
   }
 
   return (
-    <Input
+    <NumericFormat
       {...props}
-      type="number"
-      value={display}
-      onChange={(e) => setDisplay(e.target.value)}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      onKeyDown={handleKeyDown}
-      onWheel={(e) => e.currentTarget.blur()}
+      customInput={Input}
+      className={className}
+      value={value || ""}
+      onValueChange={handleValueChange}
+      isAllowed={isAllowed}
+      thousandSeparator=","
+      decimalSeparator="."
+      decimalScale={decimal ? 2 : 0}
+      allowNegative={false}
+      allowLeadingZeros={false}
+      prefix={prefix ? `${prefix} ` : undefined}
+      valueIsNumericString={false}
+      onWheel={(e: React.WheelEvent<HTMLInputElement>) => e.currentTarget.blur()}
     />
   )
 }
@@ -109,10 +79,15 @@ interface VariantManagerProps {
   errors?: FieldErrors<CreateProductInput>["variants"]
 }
 
+function autoSku() {
+  const suffix = String(Math.floor(Math.random() * 9000) + 1000)
+  return `VAR-${suffix}`
+}
+
 function emptyVariant(): VariantInput {
   return {
     name: "",
-    sku: "",
+    sku: autoSku(),
     price: 0,
     stock: 0,
     is_active: true,

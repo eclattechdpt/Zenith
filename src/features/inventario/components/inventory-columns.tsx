@@ -134,9 +134,12 @@ export function getInventoryColumns({
       minSize: 100,
       header: "Categoria",
       cell: ({ row }) => {
-        const cat = row.original.products.categories
-        if (!cat) return <span className="text-neutral-400">—</span>
-        return <span className="text-sm text-neutral-600">{cat.name}</span>
+        const cats = (row.original.products.product_categories ?? [])
+          .map((pc) => pc.categories?.name)
+          .filter(Boolean)
+          .join(", ")
+        if (!cats) return <span className="text-neutral-400">—</span>
+        return <span className="text-sm text-neutral-600">{cats}</span>
       },
     },
     {

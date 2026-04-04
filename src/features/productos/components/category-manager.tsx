@@ -157,7 +157,7 @@ export function CategoryManager() {
                 <span className="text-xs text-neutral-400">
                   {children.length > 0
                     ? `${children.length} sub`
-                    : `${cat.products[0]?.count ?? 0} productos`}
+                    : `${cat.product_categories[0]?.count ?? 0} productos`}
                 </span>
               </button>
               <div className="flex items-center gap-1">
@@ -208,7 +208,7 @@ export function CategoryManager() {
                           {sub.name}
                         </span>
                         <span className="text-xs text-neutral-400">
-                          {sub.products[0]?.count ?? 0}
+                          {sub.product_categories[0]?.count ?? 0}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">

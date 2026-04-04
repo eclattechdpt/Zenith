@@ -10,6 +10,7 @@ export type VariantOption = Tables<"variant_options">
 export type VariantOptionAssignment = Tables<"variant_option_assignments">
 export type ProductImage = Tables<"product_images">
 export type BundleItem = Tables<"bundle_items">
+export type ProductCategory = Tables<"product_categories">
 
 // --- COMPOSITE TYPES (queries with joins) ---
 
@@ -26,15 +27,38 @@ export type ProductVariantWithOptions = ProductVariant & {
 }
 
 export type CategoryWithCount = Category & {
-  products: { count: number }[]
+  product_categories: { count: number }[]
 }
 
 export type VariantTypeWithOptions = VariantType & {
   variant_options: VariantOption[]
 }
 
-export type ProductWithDetails = Product & {
+export type ProductCategoryWithName = {
   categories: Pick<Category, "id" | "name"> | null
+}
+
+export type ProductWithDetails = Product & {
+  product_categories: ProductCategoryWithName[]
   product_variants: ProductVariantWithOptions[]
   product_images: ProductImage[]
+}
+
+// --- HELPERS ---
+
+export function getCategoryNames(
+  productCategories: ProductCategoryWithName[] | undefined
+): string {
+  return (productCategories ?? [])
+    .map((pc) => pc.categories?.name)
+    .filter(Boolean)
+    .join(", ")
+}
+
+export function getCategoryIds(
+  productCategories: ProductCategoryWithName[] | undefined
+): string[] {
+  return (productCategories ?? [])
+    .map((pc) => pc.categories?.id)
+    .filter((id): id is string => !!id)
 }

@@ -52,7 +52,11 @@ export const productSchema = z.object({
     ),
   description: z.string().max(2000).optional().nullable(),
   brand: z.string().max(100).optional().nullable(),
-  category_id: zUuid("Categoria invalida").optional().nullable(),
+  image_url: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+    z.string().max(2000).nullable().optional()
+  ),
+  category_ids: z.array(zUuid("Categoria invalida")).optional().default([]),
   is_active: z.boolean().default(true),
 })
 

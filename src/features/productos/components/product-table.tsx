@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useRef, useState } from "react"
-import { Package, Plus, Search } from "lucide-react"
+import { Package, Plus, Search, ChevronDown, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { useQueryState, parseAsString } from "nuqs"
 import { motion } from "motion/react"
@@ -11,6 +11,12 @@ import { Input } from "@/components/ui/input"
 import { DataTable } from "@/components/shared/data-table"
 import { EmptyState } from "@/components/shared/empty-state"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -93,18 +99,41 @@ export function ProductTable() {
                 className="pl-9"
               />
             </div>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value || null)}
-              className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-neutral-600 outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <option value="">Todas las categorias</option>
-              {topCategories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className="flex h-8 items-center gap-2 rounded-lg border border-input bg-transparent px-2.5 text-sm text-neutral-600 outline-none transition-colors hover:border-rose-200/80 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                <span>
+                  {categoryId
+                    ? topCategories.find((c) => c.id === categoryId)?.name ?? "Todas"
+                    : "Todas las categorias"}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" sideOffset={6} className="min-w-[180px]">
+                <DropdownMenuItem
+                  onClick={() => setCategoryId(null)}
+                  className="gap-2.5"
+                >
+                  Todas las categorias
+                  {!categoryId && (
+                    <CheckCircle2 className="ml-auto h-3.5 w-3.5 text-rose-500" />
+                  )}
+                </DropdownMenuItem>
+                {topCategories.map((cat) => (
+                  <DropdownMenuItem
+                    key={cat.id}
+                    onClick={() => setCategoryId(cat.id)}
+                    className="gap-2.5"
+                  >
+                    {cat.name}
+                    {categoryId === cat.id && (
+                      <CheckCircle2 className="ml-auto h-3.5 w-3.5 text-rose-500" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Content */}
