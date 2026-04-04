@@ -234,13 +234,27 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
-**Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-03)
+**Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-04)
 
 ### Sprint 8 — En progreso
-- **Image handling system**: proxy API (`/api/image-proxy`), tiered validation (≤15MB ok, 15-25MB warn, >25MB block), WebP compression (~10KB target), URL choice panel (download+optimize vs direct link), deferred upload en new product wizard, SUPABASE/URL Externa badges, compression size badges
+- **Image handling system** (2026-04-03): proxy API (`/api/image-proxy`), tiered validation (≤15MB ok, 15-25MB warn, >25MB block), WebP compression (~10KB target), URL choice panel (download+optimize vs direct link), deferred upload en new product wizard, SUPABASE/URL Externa badges, compression size badges
 - Key files: `src/app/api/image-proxy/route.ts`, `src/lib/supabase/storage.ts`, `src/features/productos/components/product-image-picker.tsx`
 - `next.config.ts`: remotePatterns para Supabase storage hostname (fix next/image en POS)
 - Tested: URL download+optimize, direct link, new product deferred upload, POS page rendering, proxy API
+- **Media Manager** (2026-04-04): nueva seccion en `/configuracion` para administrar imagenes de productos
+  - Phase A: StorageOverview (4 KPI cards: total, Supabase, externas, sin imagen) + coverage bar + MediaBrowser (grid/list con filtros por tipo/categoria, sort, search)
+  - Phase B: Bulk actions — batch optimize (URL→Supabase), re-compress, orphan cleanup (scan bucket vs DB), export audit (Excel con 2 sheets)
+  - Selection system: checkboxes en grid/list, select all, violet highlight, BulkActionToolbar con progress tracking
+  - Server actions: `updateProductImageUrl`, `findOrphanedFiles`, `deleteStorageFiles`, `listStorageFiles` en `src/features/media/actions.ts`
+  - Phases C (multi-image gallery) y D (variant images) diferidos a Sprint 9+ — ver `Build/09-IMAGE-HANDLING.md`
+- **Design A standardization** (2026-04-04): sistema de diseño unificado en todas las paginas
+  - 3 shared components: `PageHero` (date pill + Zodiak title + CTA), `KpiCard` (hero/default variants con CountUp), `SectionCard` (labeled content wrapper)
+  - Refactored: Productos, POS landing, Configuracion (mismo output visual, menos codigo)
+  - Design A aplicado: Clientes (KPIs: total/con descuento/sin descuento), Ventas (KPIs: total ventas/ingresos/ticket promedio), Notas de credito (KPIs: total/saldo activo/aplicadas), Reportes (SectionCards Excel/PDF)
+  - Configuracion: tab navigation (Categorias/Descuentos/Imagenes) en vez de secciones apiladas
+  - Client create/edit convertido a dialog overlay (mismo patron que Product wizard) — `/clientes/nuevo` y `/clientes/[id]` ahora redirigen a `/clientes`
+  - CustomerDialog con icon labels, success animation, auto-close, pre-populated data en edit mode
+  - Bug fix: ConvertQuoteDialog null check en sale_items, ReportsGrid split en ExcelExports + PdfExports
 
 **Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
 

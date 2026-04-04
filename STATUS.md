@@ -29,7 +29,7 @@
 | 5 | Inventario | Complete | Tres inventarios (Fisico/Transito/Carga Inicial), hub con totales, ajustes, entradas, historial, overrides, transit mensual, 48 tests, 10 bugs fixed |
 | 6 | Devoluciones y creditos | Complete | Returns (partial/full), credit notes, sale cancellation, POS credit note payment, 20 tests, 10 bugs fixed |
 | 7 | Dashboard y reportes | Complete | Dashboard real data, 6 Excel exports, 4 PDF reports, /reportes page, all queries server-side |
-| 8 | Polish | In progress | Image handling, UX improvements, deploy prep |
+| 8 | Polish | In progress | Image handling, media manager, design standardization, UX improvements, deploy prep |
 
 ## Sprint 8 — Polish (In Progress)
 
@@ -38,15 +38,25 @@
   - Server-side proxy API (`/api/image-proxy`) bypasses CORS to download external images (25MB limit, 15s timeout, Content-Type validation)
   - Tiered file validation: ≤15MB silent, 15-25MB amber warning, >25MB hard block
   - Image compression: WebP output, ~10KB target (maxSizeMB: 0.03, maxWidthOrHeight: 400, initialQuality: 0.7, 1-year cache)
-  - URL paste flow: choice panel with "Descargar y optimizar" (RECOMENDADO) or "Usar enlace directo"
-  - Download & optimize: proxy download → compress → upload to Supabase → SUPABASE badge + compression size badge
-  - Direct link: keeps external URL as-is → URL Externa badge with source domain, "Descargar a Supabase" action available later
-  - New product wizard: deferred upload — image compressed locally, "Pendiente" status, uploads on product creation
-  - File upload: tiered validation with amber/red feedback bars
-  - `next.config.ts`: remotePatterns for Supabase storage hostname (fixes next/image on POS page)
-  - All image tests passed (URL download+optimize, direct link, new product deferred, POS page rendering, proxy API curl)
+  - URL paste flow: choice panel with "Descargar y optimizar" or "Usar enlace directo"
+  - New product wizard: deferred upload — image compressed locally, uploads on product creation
+  - `next.config.ts`: remotePatterns for Supabase storage hostname
+- **Media Manager** (2026-04-04): Image administration in /configuracion
+  - Storage overview: 4 KPI cards + coverage bar with legend
+  - Media browser: grid/list views, filters (hosting type, category), sort, search
+  - Selection system: checkboxes, select all, bulk action toolbar
+  - Bulk actions: batch optimize (URL→Supabase), re-compress, orphan cleanup, export audit (Excel)
+  - Server actions: updateProductImageUrl, findOrphanedFiles, deleteStorageFiles
+- **Design A standardization** (2026-04-04): Unified design system across all pages
+  - Shared components: PageHero, KpiCard (hero/default), SectionCard
+  - Applied to: Productos, POS, Clientes, Ventas, Notas de credito, Reportes, Configuracion
+  - KPI rows: Clientes (total/descuento/sin), Ventas (total/ingresos/ticket), Notas (total/saldo/aplicadas)
+  - Configuracion: tab navigation (Categorias/Descuentos/Imagenes)
+  - Client create/edit: converted from pages to dialog overlay (matches Product wizard)
+  - Bug fixes: ConvertQuoteDialog null check, ReportsGrid composability
 
 ### Pending
+- Design A for Inventario hub + Inventario Fisico
 - Performance optimization
 - Final UX polish pass
 - Vercel deployment
