@@ -25,7 +25,7 @@ export function NumericInput({
   step: _step,
   className,
   ...props
-}: Omit<React.ComponentProps<typeof Input>, "value" | "onChange" | "type"> & {
+}: Omit<React.ComponentProps<typeof Input>, "value" | "onChange" | "type" | "defaultValue"> & {
   value: number
   onChange: (value: number) => void
   decimal?: boolean
@@ -51,7 +51,7 @@ export function NumericInput({
   return (
     <NumericFormat
       {...props}
-      customInput={Input}
+      customInput={Input as React.ComponentType}
       className={className}
       value={value || ""}
       onValueChange={handleValueChange}

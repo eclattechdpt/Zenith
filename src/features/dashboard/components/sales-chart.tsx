@@ -28,28 +28,18 @@ export function SalesChart({ totalMes, cambioMes, semanas }: SalesChartProps) {
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-sm font-bold text-neutral-900">
-            Rendimiento de ventas
-          </h2>
-          <div className="mt-1 flex items-center gap-2.5">
-            <span className="text-2xl font-extrabold tracking-tight text-neutral-950">
-              {formatCurrency(totalMes)}
-            </span>
-            <span className="rounded-full bg-success-light px-2 py-0.5 text-[10px] font-bold text-success-dark">
-              +{cambioMes}%
-            </span>
-          </div>
-        </div>
-        <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
-          Este mes
+      {/* Summary */}
+      <div className="flex items-center gap-2.5">
+        <span className="text-2xl font-extrabold tracking-tight text-neutral-950">
+          {formatCurrency(totalMes)}
+        </span>
+        <span className="rounded-full bg-success-light px-2 py-0.5 text-[10px] font-bold text-success-dark">
+          +{cambioMes}%
         </span>
       </div>
 
       {/* Bars */}
-      <div className="mt-6 space-y-3">
+      <div className="mt-5 space-y-3">
         {semanas.map((semana, i) => {
           const pct = (semana.total / maxTotal) * 100
           const isBest = i === bestWeekIndex

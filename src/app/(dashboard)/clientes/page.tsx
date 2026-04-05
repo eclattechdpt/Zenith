@@ -1,82 +1,92 @@
 "use client"
 
-import { Plus, ArrowUpRight } from "lucide-react"
-import Link from "next/link"
-import { motion } from "motion/react"
+import { useState, useCallback } from "react"
+import { Users, Percent, UserX } from "lucide-react"
 
+import { PageHero } from "@/components/shared/page-hero"
+import { KpiCard } from "@/components/shared/kpi-card"
+import { SectionCard } from "@/components/shared/section-card"
 import { CustomerTable } from "@/features/clientes/components/customer-table"
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
-  },
-}
+import { CustomerDialog } from "@/features/clientes/components/customer-dialog"
+import { useCustomerStats } from "@/features/clientes/queries"
 
 export default function ClientesPage() {
-  return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="flex flex-col gap-6"
-    >
-      {/* Header */}
-      <motion.div
-        variants={itemVariants}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div className="text-center sm:text-left">
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
-            Clientes
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Gestion de clientes y descuentos
-          </p>
-        </div>
-        <motion.div
-          whileHover={{ y: -2 }}
-          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-        >
-          <Link
-            href="/clientes/nuevo"
-            className="group flex items-center gap-3 rounded-2xl border border-teal-200 bg-gradient-to-b from-teal-50 to-teal-100/60 px-4 py-2.5 shadow-sm transition-all duration-200 hover:border-teal-300 hover:shadow-[0_4px_20px_rgba(20,184,166,0.15)]"
-          >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-200/60 transition-colors duration-200 group-hover:bg-teal-200">
-              <Plus
-                className="size-4 text-teal-600"
-                strokeWidth={1.75}
-              />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-neutral-900">
-                Nuevo cliente
-              </p>
-              <p className="text-[11px] text-neutral-500">
-                Agregar al registro
-              </p>
-            </div>
-            <ArrowUpRight
-              className="size-4 shrink-0 text-neutral-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-teal-400"
-              strokeWidth={2}
-            />
-          </Link>
-        </motion.div>
-      </motion.div>
+  const stats = useCustomerStats()
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editCustomerId, setEditCustomerId] = useState<string | null>(null)
 
-      {/* Table */}
-      <CustomerTable />
-    </motion.div>
+  const openCreate = useCallback(() => {
+    setEditCustomerId(null)
+    setDialogOpen(true)
+  }, [])
+
+  const openEdit = useCallback((customer: { id: string }) => {
+    setEditCustomerId(customer.id)
+    setDialogOpen(true)
+  }, [])
+
+  const closeDialog = useCallback(() => {
+    setDialogOpen(false)
+    setEditCustomerId(null)
+  }, [])
+
+  return (
+    <>
+      <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
+        <PageHero
+          title="Clientes"
+          ctaLabel="Nuevo cliente"
+          onCta={openCreate}
+        />
+
+        {/* KPI row */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+          <KpiCard
+            title="Total clientes"
+            value={stats.total}
+            subtitle="clientes registrados"
+            icon={Users}
+            variant="hero"
+          />
+          <KpiCard
+            title="Con descuento"
+            value={stats.withDiscount}
+            subtitle="clientes con descuento"
+            icon={Percent}
+            iconBg="bg-teal-50"
+            iconColor="text-teal-500"
+            delay={0.06}
+          />
+          <KpiCard
+            title="Sin descuento"
+            value={stats.withoutDiscount}
+            subtitle="precio regular"
+            icon={UserX}
+            iconBg="bg-neutral-100"
+            iconColor="text-neutral-400"
+            delay={0.12}
+          />
+        </div>
+
+        {/* Customer table */}
+        <SectionCard
+          label="Directorio"
+          description="Gestion de clientes y descuentos"
+          icon={Users}
+          iconBg="bg-teal-50"
+          iconColor="text-teal-500"
+          delay={0.18}
+        >
+          <CustomerTable onEdit={openEdit} onCreate={openCreate} />
+        </SectionCard>
+      </div>
+
+      {/* Customer create/edit dialog */}
+      <CustomerDialog
+        open={dialogOpen}
+        customerId={editCustomerId}
+        onClose={closeDialog}
+      />
+    </>
   )
 }

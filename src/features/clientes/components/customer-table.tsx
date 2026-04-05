@@ -2,7 +2,6 @@
 
 import { useMemo, useRef, useState } from "react"
 import { Search, Users, Plus } from "lucide-react"
-import Link from "next/link"
 import { useQueryState, parseAsString } from "nuqs"
 import { motion } from "motion/react"
 
@@ -21,7 +20,12 @@ import type { CustomerWithPriceList } from "../types"
 import { getCustomerColumns } from "./customer-columns"
 import { CustomerCardMobile } from "./customer-card-mobile"
 
-export function CustomerTable() {
+interface CustomerTableProps {
+  onEdit?: (customer: CustomerWithPriceList) => void
+  onCreate?: () => void
+}
+
+export function CustomerTable({ onEdit, onCreate }: CustomerTableProps) {
   const [search, setSearch] = useQueryState(
     "q",
     parseAsString.withDefault("")
@@ -37,8 +41,8 @@ export function CustomerTable() {
   const [isDeleting, setIsDeleting] = useState(false)
 
   const columns = useMemo(
-    () => getCustomerColumns({ onDelete: setDeleteTarget }),
-    []
+    () => getCustomerColumns({ onEdit, onDelete: setDeleteTarget }),
+    [onEdit]
   )
 
   const queryClient = useQueryClient()
@@ -59,6 +63,13 @@ export function CustomerTable() {
     toast.success("Cliente eliminado")
     queryClient.invalidateQueries({ queryKey: ["customers"] })
   }
+
+  const emptyAction = onCreate ? (
+    <Button size="sm" onClick={onCreate}>
+      <Plus className="mr-1.5 size-4" />
+      Nuevo cliente
+    </Button>
+  ) : null
 
   return (
     <motion.div
@@ -92,6 +103,7 @@ export function CustomerTable() {
               <CustomerCardMobile
                 key={customer.id}
                 customer={customer}
+                onEdit={onEdit}
                 onDelete={setDeleteTarget}
               />
             ))
@@ -105,12 +117,7 @@ export function CustomerTable() {
                   : "Agrega tu primer cliente para comenzar."
               }
             >
-              {!search && (
-                <Button size="sm" nativeButton={false} render={<Link href="/clientes/nuevo" />}>
-                  <Plus className="mr-1.5 size-4" />
-                  Nuevo cliente
-                </Button>
-              )}
+              {!search && emptyAction}
             </EmptyState>
           )}
         </div>
@@ -135,10 +142,7 @@ export function CustomerTable() {
                   title="No hay clientes"
                   description="Agrega tu primer cliente para comenzar."
                 >
-                  <Button size="sm" nativeButton={false} render={<Link href="/clientes/nuevo" />}>
-                    <Plus className="mr-1.5 size-4" />
-                    Nuevo cliente
-                  </Button>
+                  {emptyAction}
                 </EmptyState>
               )
             }

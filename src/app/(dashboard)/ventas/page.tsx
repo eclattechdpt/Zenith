@@ -1,52 +1,63 @@
 "use client"
 
-import { motion } from "motion/react"
+import { Receipt, DollarSign, TrendingUp } from "lucide-react"
 
+import { PageHero } from "@/components/shared/page-hero"
+import { KpiCard } from "@/components/shared/kpi-card"
+import { SectionCard } from "@/components/shared/section-card"
 import { SalesTable } from "@/features/ventas/components/sales-table"
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
-  },
-}
+import { useSalesStats } from "@/features/ventas/queries"
+import { formatCurrency } from "@/lib/utils"
 
 export default function VentasPage() {
-  return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="flex flex-col gap-6"
-    >
-      {/* Header */}
-      <motion.div
-        variants={itemVariants}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div className="text-center sm:text-left">
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
-            Ventas y Cotizaciones
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Historial de ventas y gestion de cotizaciones
-          </p>
-        </div>
-      </motion.div>
+  const stats = useSalesStats()
 
-      {/* Table */}
-      <SalesTable />
-    </motion.div>
+  return (
+    <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
+      <PageHero title="Ventas y Cotizaciones" />
+
+      {/* KPI row */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+        <KpiCard
+          title="Total ventas"
+          value={stats.totalSales}
+          subtitle="ventas completadas"
+          icon={Receipt}
+          variant="hero"
+        />
+        <KpiCard
+          title="Ingresos"
+          value={stats.totalRevenue}
+          subtitle="ingresos totales"
+          icon={DollarSign}
+          format={formatCurrency}
+          iconBg="bg-teal-50"
+          iconColor="text-teal-500"
+          delay={0.06}
+        />
+        <KpiCard
+          title="Ticket promedio"
+          value={stats.averageTicket}
+          subtitle="por venta"
+          icon={TrendingUp}
+          format={formatCurrency}
+          iconBg="bg-blush-50"
+          iconColor="text-rose-400"
+          delay={0.12}
+        />
+      </div>
+
+      {/* Sales table */}
+      <SectionCard
+        label="Historial"
+        description="Historial de ventas y gestion de cotizaciones"
+        icon={Receipt}
+        iconBg="bg-rose-50"
+        iconColor="text-rose-400"
+        delay={0.18}
+      >
+        <SalesTable />
+      </SectionCard>
+    </div>
   )
 }

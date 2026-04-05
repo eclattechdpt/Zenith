@@ -1,91 +1,97 @@
 "use client"
 
-import { motion } from "motion/react"
-import { Settings, FolderTree, Percent } from "lucide-react"
+import { useState } from "react"
+import { motion, AnimatePresence } from "motion/react"
+import { FolderTree, Percent, ImageIcon } from "lucide-react"
 
+import { PageHero } from "@/components/shared/page-hero"
+import { SectionCard } from "@/components/shared/section-card"
 import { CategoryManager } from "@/features/productos/components/category-manager"
 import { PriceListManager } from "@/features/clientes/components/price-list-manager"
+import { MediaManager } from "@/features/media/components/media-manager"
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+const TABS = [
+  {
+    id: "categorias" as const,
+    label: "Categorias",
+    icon: FolderTree,
+    iconBg: "bg-rose-50",
+    iconColor: "text-rose-400",
+    description: "Organiza tus productos en categorias y subcategorias",
   },
-}
+  {
+    id: "descuentos" as const,
+    label: "Descuentos",
+    icon: Percent,
+    iconBg: "bg-teal-50",
+    iconColor: "text-teal-500",
+    description: "Define descuentos para diferentes tipos de clientes",
+  },
+  {
+    id: "imagenes" as const,
+    label: "Imagenes",
+    icon: ImageIcon,
+    iconBg: "bg-violet-50",
+    iconColor: "text-violet-500",
+    description: "Administra las imagenes de tus productos",
+  },
+] as const
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
-  },
-}
+type TabId = (typeof TABS)[number]["id"]
 
 export default function ConfiguracionPage() {
+  const [activeTab, setActiveTab] = useState<TabId>("categorias")
+
+  const currentTab = TABS.find((t) => t.id === activeTab)!
+
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="min-w-0 flex-1 space-y-8 p-5 sm:p-8"
-    >
-      {/* Hero header */}
-      <motion.div
-        variants={itemVariants}
-      >
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[2px] text-neutral-400">
-          <Settings className="h-3.5 w-3.5" />
-          Ajustes del sistema
-        </p>
-        <h1 className="mt-1 font-display text-[38px] font-semibold leading-none tracking-[-1.5px] text-neutral-950 sm:text-[48px]">
-          Configuracion
-        </h1>
-      </motion.div>
+    <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
+      <PageHero title="Configuracion" />
 
-      {/* Categories */}
-      <motion.div
-        variants={itemVariants}
-        className="rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-sm shadow-neutral-900/[0.03]"
-      >
-        <div className="mb-5 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50">
-            <FolderTree className="h-4 w-4 text-rose-400" />
-          </div>
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[2px] text-neutral-400">
-              Categorias
-            </p>
-            <p className="mt-0.5 text-[11px] text-neutral-400">
-              Organiza tus productos en categorias y subcategorias
-            </p>
-          </div>
-        </div>
-        <CategoryManager />
-      </motion.div>
+      {/* Tab pills */}
+      <div className="flex gap-1.5">
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.id
+          const Icon = tab.icon
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
+                isActive
+                  ? "bg-rose-500 text-white shadow-sm"
+                  : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200/70 hover:text-neutral-700"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
 
-      {/* Discounts */}
-      <motion.div
-        variants={itemVariants}
-        className="rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-sm shadow-neutral-900/[0.03]"
-      >
-        <div className="mb-5 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50">
-            <Percent className="h-4 w-4 text-teal-500" />
-          </div>
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[2px] text-neutral-400">
-              Descuentos personalizados
-            </p>
-            <p className="mt-0.5 text-[11px] text-neutral-400">
-              Define descuentos para diferentes tipos de clientes
-            </p>
-          </div>
-        </div>
-        <PriceListManager />
-      </motion.div>
-    </motion.div>
+      {/* Active section */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <SectionCard
+            label={currentTab.label}
+            description={currentTab.description}
+            icon={currentTab.icon}
+            iconBg={currentTab.iconBg}
+            iconColor={currentTab.iconColor}
+          >
+            {activeTab === "categorias" && <CategoryManager />}
+            {activeTab === "descuentos" && <PriceListManager />}
+            {activeTab === "imagenes" && <MediaManager />}
+          </SectionCard>
+        </motion.div>
+      </AnimatePresence>
+    </div>
   )
 }

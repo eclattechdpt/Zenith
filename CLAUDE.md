@@ -237,16 +237,38 @@ No saltar sprints. Cada sprint depende del anterior.
 **Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-04)
 
 ### Sprint 8 — En progreso
-- **Module-scoped accent colors**: `[data-module]` attribute on `<html>` drives per-route accent theming via CSS variable scopes. Inline blocking script in root layout sets the attribute before first paint (no flash); `ModuleAccentScope` client component syncs on route changes. Dropdowns, popovers, tooltips, scrollbars, and focus rings automatically adopt the right accent via CSS cascade through portals.
+- **Module-scoped accent colors** (2026-04-04): `[data-module]` attribute on `<html>` drives per-route accent theming via CSS variable scopes. Inline blocking script in root layout sets the attribute before first paint (no flash); `ModuleAccentScope` client component syncs on route changes. Dropdowns, popovers, tooltips, scrollbars, and focus rings automatically adopt the right accent via CSS cascade through portals.
 - Module mapping: `/inventario` → amber, `/inventario/transito` → blue, `/inventario/carga-inicial` → slate, `/clientes` + `/notas-credito` → teal, `/reportes` + `/configuracion` → neutral, everything else → rose (brand default). Longer prefixes match first.
 - Amber scrollbar anchored to amber-500 (not amber-300 like other palettes) because amber's scale shifts yellow→orange and the 300 shade diverges from the UI's orange identity.
 - Key files: `src/lib/module-accent.ts` (single source of truth for mapping + inline script generator), `src/components/shared/module-accent-scope.tsx` (route-change sync), `src/app/globals.css` (per-module `[data-module="..."]` scopes with `--accent-*` tokens + shadcn `--accent`/`--ring` overrides)
 - Stripped redundant manual accent overrides from 9 inventario dialog/picker files (scrollbar colors, focus-visible ring colors) — the module scope system now drives them automatically. Same dialog components adopt different accents depending on the sub-module they're opened from.
 - New Tailwind utilities exposed: `bg-accent-50`..`bg-accent-900`, `text-accent-*`, `border-accent-*` — all auto-theme per module.
-- **Image handling system**: proxy API (`/api/image-proxy`), tiered validation (≤15MB ok, 15-25MB warn, >25MB block), WebP compression (~10KB target), URL choice panel (download+optimize vs direct link), deferred upload en new product wizard, SUPABASE/URL Externa badges, compression size badges
+- **Image handling system** (2026-04-03): proxy API (`/api/image-proxy`), tiered validation (≤15MB ok, 15-25MB warn, >25MB block), WebP compression (~10KB target), URL choice panel (download+optimize vs direct link), deferred upload en new product wizard, SUPABASE/URL Externa badges, compression size badges
 - Key files: `src/app/api/image-proxy/route.ts`, `src/lib/supabase/storage.ts`, `src/features/productos/components/product-image-picker.tsx`
 - `next.config.ts`: remotePatterns para Supabase storage hostname (fix next/image en POS)
 - Tested: URL download+optimize, direct link, new product deferred upload, POS page rendering, proxy API
+- **Media Manager** (2026-04-04): nueva seccion en `/configuracion` para administrar imagenes de productos
+  - Phase A: StorageOverview (4 KPI cards: total, Supabase, externas, sin imagen) + coverage bar + MediaBrowser (grid/list con filtros por tipo/categoria, sort, search)
+  - Phase B: Bulk actions — batch optimize (URL→Supabase), re-compress, orphan cleanup (scan bucket vs DB), export audit (Excel con 2 sheets)
+  - Selection system: checkboxes en grid/list, select all, violet highlight, BulkActionToolbar con progress tracking
+  - Server actions: `updateProductImageUrl`, `findOrphanedFiles`, `deleteStorageFiles`, `listStorageFiles` en `src/features/media/actions.ts`
+  - Phases C (multi-image gallery) y D (variant images) diferidos a Sprint 9+ — ver `Build/09-IMAGE-HANDLING.md`
+- **Design A standardization** (2026-04-04): sistema de diseño unificado en todas las paginas
+  - 3 shared components: `PageHero` (date pill + Zodiak title + subtitle + CTA), `KpiCard` (default variant con CountUp, badge, children slot), `SectionCard` (labeled content wrapper con className)
+  - Refactored: Productos, POS landing, Configuracion (mismo output visual, menos codigo)
+  - Design A aplicado: Clientes (KPIs: total/con descuento/sin descuento), Ventas (KPIs: total ventas/ingresos/ticket promedio), Notas de credito (KPIs: total/saldo activo/aplicadas), Reportes (SectionCards Excel/PDF)
+  - Configuracion: tab navigation (Categorias/Descuentos/Imagenes) en vez de secciones apiladas
+  - Client create/edit convertido a dialog overlay (mismo patron que Product wizard) — `/clientes/nuevo` y `/clientes/[id]` ahora redirigen a `/clientes`
+  - CustomerDialog con icon labels, success animation, auto-close, pre-populated data en edit mode
+  - Bug fix: ConvertQuoteDialog null check en sale_items, ReportsGrid split en ExcelExports + PdfExports
+- **Dashboard Design A migration** (2026-04-04): home page migrada a shared Design A components
+  - PageHero con greeting personalizado (hora del dia + nombre) + subtitle
+  - 4 KpiCards default (rose/teal/blush/amber) con mini-visualizations como children (SalesProgress, WeeklyBarChart, PaymentBreakdown, InventoryHealth) y trend badges
+  - SectionCards wrapping SalesChart (3cols), ActivityFeed (2cols), TopProducts, InventoryAlerts
+  - QuickActions rediseñados: white cards con colored icon containers (match Design A)
+  - DashboardContent client wrapper para server/client boundary (icon serialization)
+  - Eliminados: greeting-section, kpi-card (custom), kpi-grid, dashboard-shell (4 files)
+  - SalesProgress con variant light/dark para adaptarse al contexto del card
 
 **Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
 

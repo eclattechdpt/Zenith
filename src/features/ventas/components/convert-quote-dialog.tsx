@@ -155,7 +155,7 @@ export function ConvertQuoteDialog({
 
             {/* Items preview */}
             <div className="max-h-32 overflow-y-auto border-b border-neutral-100 py-2">
-              {quote.sale_items.map((item) => (
+              {(quote.sale_items ?? []).map((item) => (
                 <div
                   key={item.id}
                   className="flex justify-between text-xs text-neutral-600 py-0.5"

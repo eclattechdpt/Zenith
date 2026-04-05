@@ -44,3 +44,18 @@ export function useCreditNotes(filters?: CreditNotesFilters) {
     placeholderData: (prev) => prev,
   })
 }
+
+// --- CREDIT NOTE STATS (for KPI widgets) ---
+
+export function useCreditNoteStats() {
+  const { data: notes } = useCreditNotes()
+
+  const total = notes?.length ?? 0
+  const active = notes?.filter((n) => n.status === "active").length ?? 0
+  const activeBalance = notes
+    ?.filter((n) => n.status === "active")
+    .reduce((sum, n) => sum + Number(n.remaining_amount), 0) ?? 0
+  const applied = notes?.filter((n) => n.status === "redeemed").length ?? 0
+
+  return { total, active, activeBalance, applied }
+}
