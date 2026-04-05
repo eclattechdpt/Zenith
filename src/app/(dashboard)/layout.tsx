@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/layout/sidebar"
 import { MobileNav } from "@/components/layout/mobile-nav"
+import { ModuleAccentScope } from "@/components/shared/module-accent-scope"
 
 export default function DashboardLayout({
   children,
@@ -8,6 +9,8 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="h-svh bg-neutral-50">
+      {/* Syncs [data-module] on <html> with current route for accent theming */}
+      <ModuleAccentScope />
       {/* Mobile nav (fixed, outside flow) */}
       <MobileNav />
       <div className="flex h-svh overflow-hidden">

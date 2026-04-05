@@ -3,6 +3,9 @@
 # playwright mcp
 .playwright-mcp/
 
+# claude code worktree sandboxes (local-only agent runs)
+.claude/worktrees/
+
 # dependencies
 /node_modules
 /.pnp

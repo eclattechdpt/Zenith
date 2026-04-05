@@ -137,10 +137,7 @@ export function TransitProductPicker({
           </div>
 
           {/* Product list */}
-          <div
-            className="max-h-64 overflow-y-auto rounded-xl border border-neutral-100 bg-white [&::-webkit-scrollbar-thumb]:bg-blue-200 [&::-webkit-scrollbar-thumb:hover]:bg-blue-300"
-            style={{ scrollbarWidth: "thin", scrollbarColor: "rgb(191 219 254) transparent" }}
-          >
+          <div className="max-h-64 overflow-y-auto rounded-xl border border-neutral-100 bg-white">
             {isLoading ? (
               <div className="space-y-1 p-2">
                 {Array.from({ length: 4 }).map((_, i) => (

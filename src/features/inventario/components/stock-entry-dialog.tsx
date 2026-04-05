@@ -99,7 +99,7 @@ function StockEntryForm({
   const productLabel = `${variant.products.name}${variant.name ? ` — ${variant.name}` : ""}${variant.sku ? ` (${variant.sku})` : ""}`
 
   return (
-    <DialogContent showCloseButton={false} className="sm:max-w-md p-6 [&_input]:focus-visible:border-amber-400 [&_input]:focus-visible:ring-amber-500/30 [&_textarea]:focus-visible:border-amber-400 [&_textarea]:focus-visible:ring-amber-500/30 [&_::-webkit-scrollbar-thumb]:bg-amber-200 [&_::-webkit-scrollbar-thumb:hover]:bg-amber-300" style={{ scrollbarColor: "rgb(253 230 138) transparent" }}>
+    <DialogContent showCloseButton={false} className="sm:max-w-md p-6">
       <DialogHeader>
         <DialogTitle>Entrada de mercancia</DialogTitle>
         <DialogDescription>{productLabel}</DialogDescription>

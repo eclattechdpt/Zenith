@@ -4,6 +4,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app"
 import { Toaster } from "sonner"
 
 import { QueryProvider } from "@/providers/query-provider"
+import { moduleAccentInlineScript } from "@/lib/module-accent"
 
 import "./globals.css"
 
@@ -46,6 +47,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `try{if(localStorage.getItem("sidebar-collapsed")==="true"){document.documentElement.classList.add("sidebar-collapsed")}}catch(e){}`,
           }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: moduleAccentInlineScript() }}
         />
       </head>
       <body className="min-h-full flex flex-col">

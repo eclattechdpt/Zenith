@@ -94,7 +94,7 @@ function InitialLoadEditForm({
   const variantLabel = variant.name || variant.sku || ""
 
   return (
-    <DialogContent showCloseButton={false} className="sm:max-w-md p-6 [&_input]:focus-visible:border-slate-400 [&_input]:focus-visible:ring-slate-500/30 [&_textarea]:focus-visible:border-slate-400 [&_textarea]:focus-visible:ring-slate-500/30 [&_::-webkit-scrollbar-thumb]:bg-slate-200 [&_::-webkit-scrollbar-thumb:hover]:bg-slate-300" style={{ scrollbarColor: "rgb(203 213 225) transparent" }}>
+    <DialogContent showCloseButton={false} className="sm:max-w-md p-6">
       <DialogHeader>
         <DialogTitle>Editar producto — Carga Inicial</DialogTitle>
         <DialogDescription>

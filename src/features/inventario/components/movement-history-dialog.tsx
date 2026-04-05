@@ -131,7 +131,7 @@ export function MovementHistoryDialog({
         onOpenChange(open)
       }}
     >
-      <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col p-6 [&_input]:focus-visible:border-amber-400 [&_input]:focus-visible:ring-amber-500/30 [&_::-webkit-scrollbar-thumb]:bg-amber-200 [&_::-webkit-scrollbar-thumb:hover]:bg-amber-300" style={{ scrollbarColor: "rgb(253 230 138) transparent" }}>
+      <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col p-6">
         <DialogHeader>
           <DialogTitle>Historial de movimientos</DialogTitle>
           <DialogDescription>{productLabel}</DialogDescription>

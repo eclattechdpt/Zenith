@@ -234,9 +234,15 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
-**Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-03)
+**Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-04)
 
 ### Sprint 8 — En progreso
+- **Module-scoped accent colors**: `[data-module]` attribute on `<html>` drives per-route accent theming via CSS variable scopes. Inline blocking script in root layout sets the attribute before first paint (no flash); `ModuleAccentScope` client component syncs on route changes. Dropdowns, popovers, tooltips, scrollbars, and focus rings automatically adopt the right accent via CSS cascade through portals.
+- Module mapping: `/inventario` → amber, `/inventario/transito` → blue, `/inventario/carga-inicial` → slate, `/clientes` + `/notas-credito` → teal, `/reportes` + `/configuracion` → neutral, everything else → rose (brand default). Longer prefixes match first.
+- Amber scrollbar anchored to amber-500 (not amber-300 like other palettes) because amber's scale shifts yellow→orange and the 300 shade diverges from the UI's orange identity.
+- Key files: `src/lib/module-accent.ts` (single source of truth for mapping + inline script generator), `src/components/shared/module-accent-scope.tsx` (route-change sync), `src/app/globals.css` (per-module `[data-module="..."]` scopes with `--accent-*` tokens + shadcn `--accent`/`--ring` overrides)
+- Stripped redundant manual accent overrides from 9 inventario dialog/picker files (scrollbar colors, focus-visible ring colors) — the module scope system now drives them automatically. Same dialog components adopt different accents depending on the sub-module they're opened from.
+- New Tailwind utilities exposed: `bg-accent-50`..`bg-accent-900`, `text-accent-*`, `border-accent-*` — all auto-theme per module.
 - **Image handling system**: proxy API (`/api/image-proxy`), tiered validation (≤15MB ok, 15-25MB warn, >25MB block), WebP compression (~10KB target), URL choice panel (download+optimize vs direct link), deferred upload en new product wizard, SUPABASE/URL Externa badges, compression size badges
 - Key files: `src/app/api/image-proxy/route.ts`, `src/lib/supabase/storage.ts`, `src/features/productos/components/product-image-picker.tsx`
 - `next.config.ts`: remotePatterns para Supabase storage hostname (fix next/image en POS)

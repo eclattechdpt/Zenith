@@ -367,7 +367,7 @@ function AddTransitItemForm({
   }
 
   return (
-    <DialogContent showCloseButton={false} className="sm:max-w-xl p-6 [&_input]:focus-visible:border-blue-400 [&_input]:focus-visible:ring-blue-500/30 [&_textarea]:focus-visible:border-blue-400 [&_textarea]:focus-visible:ring-blue-500/30 [&_::-webkit-scrollbar-thumb]:bg-blue-200 [&_::-webkit-scrollbar-thumb:hover]:bg-blue-300" style={{ scrollbarColor: "rgb(191 219 254) transparent" }}>
+    <DialogContent showCloseButton={false} className="sm:max-w-xl p-6">
       <DialogHeader>
         <DialogTitle className="text-lg">Agregar producto</DialogTitle>
         <DialogDescription>
@@ -539,7 +539,7 @@ function EditTransitItemForm({
   const productName = item.product_variants.products.name
 
   return (
-    <DialogContent showCloseButton={false} className="sm:max-w-md p-6 [&_input]:focus-visible:border-blue-400 [&_input]:focus-visible:ring-blue-500/30 [&_textarea]:focus-visible:border-blue-400 [&_textarea]:focus-visible:ring-blue-500/30">
+    <DialogContent showCloseButton={false} className="sm:max-w-md p-6">
       <DialogHeader>
         <DialogTitle className="text-lg">Editar producto</DialogTitle>
         <DialogDescription>{productName}</DialogDescription>

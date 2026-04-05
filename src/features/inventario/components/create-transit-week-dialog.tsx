@@ -105,7 +105,7 @@ function CreateWeekForm({
   }
 
   return (
-    <DialogContent showCloseButton={false} className="sm:max-w-md p-6 [&_input]:focus-visible:border-blue-400 [&_input]:focus-visible:ring-blue-500/30 [&_textarea]:focus-visible:border-blue-400 [&_textarea]:focus-visible:ring-blue-500/30">
+    <DialogContent showCloseButton={false} className="sm:max-w-md p-6">
       <DialogHeader>
         <DialogTitle>Nueva semana</DialogTitle>
         <DialogDescription>

@@ -34,6 +34,14 @@
 ## Sprint 8 — Polish (In Progress)
 
 ### Completed
+- **Module-scoped accent color system** (2026-04-04): Per-route accent theming via `[data-module]` attribute on `<html>`
+  - Inline blocking script in root layout sets attribute before first paint (no flash)
+  - `ModuleAccentScope` client component syncs on client-side route changes
+  - Module map: `/inventario` → amber, `/inventario/transito` → blue, `/inventario/carga-inicial` → slate, `/clientes` + `/notas-credito` → teal, `/reportes` + `/configuracion` → neutral, else rose
+  - Dropdowns, popovers, tooltips, scrollbars, and focus rings automatically adopt the right accent via CSS cascade through portals
+  - Stripped 9 dialog/picker files of redundant manual accent overrides — module scopes now own them
+  - New Tailwind utilities: `bg-accent-50` through `bg-accent-900` auto-theme per module
+  - Key files: `src/lib/module-accent.ts`, `src/components/shared/module-accent-scope.tsx`, `src/app/globals.css` (scoped `[data-module="..."]` blocks)
 - **Image handling system** (2026-04-03): Fully automatic, storage-efficient product image management
   - Server-side proxy API (`/api/image-proxy`) bypasses CORS to download external images (25MB limit, 15s timeout, Content-Type validation)
   - Tiered file validation: ≤15MB silent, 15-25MB amber warning, >25MB hard block
