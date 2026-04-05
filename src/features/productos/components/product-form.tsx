@@ -660,7 +660,7 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
             type="submit"
             size="sm"
             disabled={isSubmitting}
-            className="rounded-xl bg-rose-500 text-white hover:bg-rose-600"
+            className="rounded-xl bg-accent-500 text-white hover:bg-accent-600"
           >
             {isSubmitting && <Loader2 className="mr-1.5 size-3.5 animate-spin" />}
             {isEditing ? "Guardar cambios" : "Crear producto"}

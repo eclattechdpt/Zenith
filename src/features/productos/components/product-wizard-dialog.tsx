@@ -337,7 +337,7 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
                   Cerrar
                 </Button>
                 <Button
-                  className="rounded-xl bg-rose-500 text-white hover:bg-rose-600"
+                  className="rounded-xl bg-accent-500 text-white hover:bg-accent-600"
                   onClick={() => {
                     setSuccess(false)
                     setInfoOpen(true)
@@ -722,7 +722,7 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
               <Button
                 type="button"
                 disabled={isSubmitting}
-                className="gap-2 rounded-xl bg-rose-500 text-white hover:bg-rose-600"
+                className="gap-2 rounded-xl bg-accent-500 text-white hover:bg-accent-600"
                 onClick={handleFormSubmit}
               >
                 {isSubmitting ? (

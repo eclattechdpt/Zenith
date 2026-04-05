@@ -525,7 +525,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
               Cancelar
             </Button>
             <motion.div whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }} transition={SPRING_SMOOTH}>
-              <Button type="button" disabled={isSubmitting} className="gap-2 rounded-xl bg-rose-500 text-white hover:bg-rose-600" onClick={handleFormSubmit}>
+              <Button type="button" disabled={isSubmitting} className="gap-2 rounded-xl bg-accent-500 text-white hover:bg-accent-600" onClick={handleFormSubmit}>
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                 Guardar cambios
               </Button>

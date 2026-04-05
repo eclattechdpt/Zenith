@@ -84,7 +84,7 @@ export const POSProductCard = memo(function POSProductCard({
       animate={{ opacity: 1, y: 0 }}
       whileHover={outOfStock ? undefined : { y: -3, transition: { type: "spring", stiffness: 300, damping: 20 } }}
       whileTap={outOfStock ? undefined : { scale: 0.98 }}
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-transparent bg-white shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-rose-200 hover:shadow-md hover:shadow-rose-500/8 ${
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-transparent bg-white shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-accent-200 hover:shadow-md hover:shadow-accent-500/8 ${
         outOfStock ? "opacity-50 grayscale-[30%]" : ""
       }`}
     >

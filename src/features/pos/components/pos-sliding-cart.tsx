@@ -39,7 +39,7 @@ export function POSSlidingCart({ onCheckout }: POSSlidingCartProps) {
               Carrito
             </h3>
             <div className="flex items-center gap-3">
-              <span className="flex h-5 min-w-[22px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-bold tabular-nums text-white shadow-sm shadow-rose-500/20">
+              <span className="flex h-5 min-w-[22px] items-center justify-center rounded-full bg-accent-500 px-1.5 text-[11px] font-bold tabular-nums text-white shadow-sm shadow-accent-500/20">
                 {getItemCount()}
               </span>
               <button
@@ -173,7 +173,7 @@ export function POSSlidingCart({ onCheckout }: POSSlidingCartProps) {
             onClick={onCheckout}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-rose-500 text-sm font-bold text-white shadow-lg shadow-rose-500/20 transition-colors hover:bg-rose-600"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-accent-500 text-sm font-bold text-white shadow-lg shadow-accent-500/20 transition-colors hover:bg-accent-600"
           >
             Confirmar venta
             <ArrowRight className="h-4 w-4" />
@@ -201,7 +201,7 @@ export function POSCartFAB({ onClick }: { onClick: () => void }) {
       exit={{ scale: 0 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl bg-rose-500 px-5 py-3.5 text-white shadow-xl shadow-rose-500/25 sm:hidden"
+      className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl bg-accent-500 px-5 py-3.5 text-white shadow-xl shadow-accent-500/25 sm:hidden"
     >
       <ShoppingBag className="h-5 w-5" />
       <span className="text-sm font-bold">{formatCurrency(total)}</span>

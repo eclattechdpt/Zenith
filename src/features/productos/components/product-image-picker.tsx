@@ -630,7 +630,7 @@ export function ProductImagePicker({
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     transition={SPRING_SNAPPY}
-                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white transition-opacity hover:bg-rose-600 disabled:opacity-40"
+                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-accent-500 text-white transition-opacity hover:bg-accent-600 disabled:opacity-40"
                   >
                     <Check className="h-4 w-4" />
                   </motion.button>

@@ -73,7 +73,7 @@ export const ProductCard = memo(function ProductCard({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       layout
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-transparent bg-white shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-rose-200 hover:shadow-md hover:shadow-rose-500/8 ${
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-transparent bg-white shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-accent-200 hover:shadow-md hover:shadow-accent-500/8 ${
         !product.is_active ? "opacity-50 grayscale-[30%]" : ""
       }`}
     >

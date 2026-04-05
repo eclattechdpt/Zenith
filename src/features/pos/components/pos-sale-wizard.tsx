@@ -322,7 +322,7 @@ export function POSSaleWizard({
                         index < stepIndex
                           ? "bg-teal-500 text-white"
                           : index === stepIndex
-                            ? "bg-rose-500 text-white"
+                            ? "bg-accent-500 text-white"
                             : "bg-neutral-100 text-neutral-400"
                       )}
                     >

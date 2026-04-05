@@ -92,7 +92,7 @@ const CategoryPill = memo(function CategoryPill({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute inset-0 rounded-lg bg-rose-500 shadow-sm shadow-rose-500/20"
+            className="absolute inset-0 rounded-lg bg-accent-500 shadow-sm shadow-accent-500/20"
           />
         )}
       </AnimatePresence>

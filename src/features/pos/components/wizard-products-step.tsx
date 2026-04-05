@@ -280,7 +280,7 @@ export function WizardProductsStep({
           type="button"
           disabled={!hasItems}
           onClick={onNext}
-          className="flex h-12 items-center gap-2 rounded-xl bg-rose-500 px-6 text-base font-bold text-white shadow-sm shadow-rose-500/20 transition-colors hover:bg-rose-600 disabled:opacity-40 disabled:shadow-none disabled:hover:bg-rose-500"
+          className="flex h-12 items-center gap-2 rounded-xl bg-accent-500 px-6 text-base font-bold text-white shadow-sm shadow-accent-500/20 transition-colors hover:bg-accent-600 disabled:opacity-40 disabled:shadow-none disabled:hover:bg-accent-500"
         >
           Continuar <ArrowRight className="h-5 w-5" />
         </button>

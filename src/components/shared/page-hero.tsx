@@ -55,7 +55,7 @@ export function PageHero({ title, subtitle, ctaLabel, onCta, ctaHref }: PageHero
         >
           {ctaHref ? (
             <Link href={ctaHref}>
-              <Button className="group h-11 gap-2 rounded-xl bg-rose-500 px-6 text-sm font-bold text-white transition-colors hover:bg-rose-600 sm:h-12 sm:px-7">
+              <Button className="group h-11 gap-2 rounded-xl bg-accent-500 px-6 text-sm font-bold text-white transition-colors hover:bg-accent-600 sm:h-12 sm:px-7">
                 <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
                 {ctaLabel}
               </Button>
@@ -63,7 +63,7 @@ export function PageHero({ title, subtitle, ctaLabel, onCta, ctaHref }: PageHero
           ) : (
             <Button
               onClick={onCta}
-              className="group h-11 gap-2 rounded-xl bg-rose-500 px-6 text-sm font-bold text-white transition-colors hover:bg-rose-600 sm:h-12 sm:px-7"
+              className="group h-11 gap-2 rounded-xl bg-accent-500 px-6 text-sm font-bold text-white transition-colors hover:bg-accent-600 sm:h-12 sm:px-7"
             >
               <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
               {ctaLabel}

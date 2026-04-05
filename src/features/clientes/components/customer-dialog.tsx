@@ -319,7 +319,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
                   type="submit"
                   size="sm"
                   disabled={isSubmitting}
-                  className="bg-rose-500 text-white hover:bg-rose-600"
+                  className="bg-accent-500 text-white hover:bg-accent-600"
                 >
                   {isSubmitting && (
                     <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />

@@ -456,7 +456,7 @@ export function WizardPaymentStep({
           type="button"
           disabled={!isValid}
           onClick={() => onNext(payments)}
-          className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-rose-500 text-base font-bold text-white shadow-sm shadow-rose-500/20 transition-colors hover:bg-rose-600 disabled:opacity-40 disabled:shadow-none disabled:hover:bg-rose-500"
+          className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-accent-500 text-base font-bold text-white shadow-sm shadow-accent-500/20 transition-colors hover:bg-accent-600 disabled:opacity-40 disabled:shadow-none disabled:hover:bg-accent-500"
         >
           Continuar <ArrowRight className="h-5 w-5" />
         </button>

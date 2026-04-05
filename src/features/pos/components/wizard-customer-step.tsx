@@ -238,7 +238,7 @@ export function WizardCustomerStep({ onNext }: WizardCustomerStepProps) {
         <button
           type="button"
           onClick={onNext}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-rose-500 text-base font-bold text-white transition-colors hover:bg-rose-600 active:bg-rose-700"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-accent-500 text-base font-bold text-white transition-colors hover:bg-accent-600 active:bg-accent-700"
         >
           {customer ? `Continuar con ${customer.name}` : "Continuar sin cliente"}
           <ArrowRight className="h-5 w-5" />

@@ -358,7 +358,7 @@ export function WizardConfirmationStep({
             type="button"
             onClick={() => setConfirmAction("complete")}
             disabled={submitting !== null || !isOnline}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-rose-500 text-base font-bold text-white shadow-sm shadow-rose-500/20 transition-all hover:bg-rose-600 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-accent-500 text-base font-bold text-white shadow-sm shadow-accent-500/20 transition-all hover:bg-accent-600 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
           >
             {submitting === "complete" ? (
               <Loader2 className="h-4 w-4 animate-spin" />
