@@ -53,11 +53,21 @@ export function InventoryCardMobile({
 
   return (
     <div className="flex gap-3.5 rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm">
-      {/* Colored thumbnail */}
-      <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${status.thumbBg}`}>
-        <span className={`text-[16px] font-black ${status.thumbText}`}>
-          {initials}
-        </span>
+      {/* Thumbnail — image if available, colored initials as fallback */}
+      <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl ${v.products.image_url ? "bg-neutral-100" : status.thumbBg}`}>
+        {v.products.image_url ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={v.products.image_url}
+            alt=""
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <span className={`text-[16px] font-black ${status.thumbText}`}>
+            {initials}
+          </span>
+        )}
       </div>
 
       {/* Content */}

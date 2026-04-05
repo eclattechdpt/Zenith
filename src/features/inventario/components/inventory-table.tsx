@@ -16,16 +16,15 @@ import {
 import { useQueryState, parseAsString } from "nuqs"
 import { motion, AnimatePresence } from "motion/react"
 
-import { DataTable } from "@/components/shared/data-table"
 import { formatCurrency } from "@/lib/utils"
 import { useDebounce } from "@/hooks/use-debounce"
 
 import { useInventory, useInitialLoadInventory } from "../queries"
 import { useCategories } from "@/features/productos/queries"
 import type { InventoryVariant, InventoryType } from "../types"
-import { getInventoryColumns } from "./inventory-columns"
 import { InventoryCardMobile } from "./inventory-card-mobile"
 import { InventoryGridCard } from "./inventory-grid-card"
+import { InventoryListView } from "./inventory-list-view"
 import { StockAdjustmentDialog } from "./stock-adjustment-dialog"
 import { StockEntryDialog } from "./stock-entry-dialog"
 import { MovementHistoryDialog } from "./movement-history-dialog"
@@ -265,18 +264,6 @@ export function InventoryTable({
   const [entryTarget, setEntryTarget] = useState<InventoryVariant | null>(null)
   const [historyTarget, setHistoryTarget] = useState<InventoryVariant | null>(null)
   const [editTarget, setEditTarget] = useState<InventoryVariant | null>(null)
-
-  const columns = useMemo(
-    () =>
-      getInventoryColumns({
-        onAdjust: setAdjustTarget,
-        onAddStock: setEntryTarget,
-        onHistory: setHistoryTarget,
-        onEdit: inventoryType === "initial_load" ? setEditTarget : undefined,
-        inventoryType,
-      }),
-    [inventoryType]
-  )
 
   // ── Total value ──
   const totalValue = useMemo(() => {
@@ -699,11 +686,14 @@ export function InventoryTable({
                 ))}
               </motion.div>
             ) : (
-              <DataTable
-                columns={columns}
-                data={variants}
-                isLoading={false}
-                pageSize={20}
+              <InventoryListView
+                variants={variants}
+                inventoryType={inventoryType}
+                visible={visible}
+                onAdjust={setAdjustTarget}
+                onAddStock={setEntryTarget}
+                onHistory={setHistoryTarget}
+                onEdit={inventoryType === "initial_load" ? setEditTarget : undefined}
               />
             )
           ) : (
