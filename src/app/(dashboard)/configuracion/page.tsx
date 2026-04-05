@@ -59,7 +59,7 @@ export default function ConfiguracionPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
                 isActive
-                  ? "bg-rose-500 text-white shadow-sm"
+                  ? "bg-accent-500 text-white shadow-sm"
                   : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200/70 hover:text-neutral-700"
               }`}
             >

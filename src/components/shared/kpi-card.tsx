@@ -51,7 +51,7 @@ export function KpiCard({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...SPRING, delay }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 to-rose-600 p-6 shadow-sm shadow-rose-500/10"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent-500 to-accent-600 p-6 shadow-sm shadow-accent-500/10"
       >
         {/* Decorative ring */}
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full border-[20px] border-white/10" />
@@ -60,7 +60,7 @@ export function KpiCard({
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20">
             <Icon className="h-4 w-4 text-white" />
           </div>
-          <p className="text-[11px] font-bold uppercase tracking-[2px] text-rose-100">
+          <p className="text-[11px] font-bold uppercase tracking-[2px] text-accent-100">
             {title}
           </p>
         </div>
@@ -80,7 +80,7 @@ export function KpiCard({
           </span>
         )}
 
-        <p className="mt-1.5 text-[13px] font-medium text-rose-100">
+        <p className="mt-1.5 text-[13px] font-medium text-accent-100">
           {subtitle}
         </p>
 
