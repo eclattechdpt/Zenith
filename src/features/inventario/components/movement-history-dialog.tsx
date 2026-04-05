@@ -160,28 +160,31 @@ export function MovementHistoryDialog({
 
           {/* Date preset pills */}
           <div className="flex gap-1">
-            {DATE_PRESETS.map((preset) => (
-              <Button
-                key={preset.value}
-                variant={datePreset === preset.value ? "default" : "ghost"}
-                size="sm"
-                className="h-7 rounded-full px-3 text-[11px]"
-                onClick={() => {
-                  setDatePreset(preset.value)
-                  setCustomDate("")
-                  setDatePickerOpen(false)
-                }}
-              >
-                {preset.label}
-              </Button>
-            ))}
+            {DATE_PRESETS.map((preset) => {
+              const isActive = datePreset === preset.value
+              return (
+                <Button
+                  key={preset.value}
+                  variant={isActive ? "default" : "ghost"}
+                  size="sm"
+                  className={`h-7 rounded-full px-3 text-[11px] ${isActive ? "bg-accent-500 text-white hover:bg-accent-600" : ""}`}
+                  onClick={() => {
+                    setDatePreset(preset.value)
+                    setCustomDate("")
+                    setDatePickerOpen(false)
+                  }}
+                >
+                  {preset.label}
+                </Button>
+              )
+            })}
 
             {/* Custom date pill */}
             {datePreset === "custom" && customDate ? (
               <Button
                 variant="default"
                 size="sm"
-                className="h-7 rounded-full px-3 text-[11px] gap-1"
+                className="h-7 rounded-full px-3 text-[11px] gap-1 bg-accent-500 text-white hover:bg-accent-600"
                 onClick={() => {
                   setDatePreset("")
                   setCustomDate("")
@@ -197,7 +200,7 @@ export function MovementHistoryDialog({
                     <Button
                       variant={datePreset === "custom" ? "default" : "ghost"}
                       size="sm"
-                      className="h-7 rounded-full px-3 text-[11px]"
+                      className={`h-7 rounded-full px-3 text-[11px] ${datePreset === "custom" ? "bg-accent-500 text-white hover:bg-accent-600" : ""}`}
                     />
                   }
                 >

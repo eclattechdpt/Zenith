@@ -178,17 +178,20 @@ export function CreditNotesTable() {
           />
         </div>
         <div className="flex gap-1">
-          {STATUS_TABS.map((tab) => (
-            <Button
-              key={tab.value}
-              variant={statusFilter === tab.value ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setStatusFilter(tab.value || null)}
-              className="text-xs"
-            >
-              {tab.label}
-            </Button>
-          ))}
+          {STATUS_TABS.map((tab) => {
+            const isActive = statusFilter === tab.value
+            return (
+              <Button
+                key={tab.value}
+                variant={isActive ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setStatusFilter(tab.value || null)}
+                className={`text-xs ${isActive ? "bg-accent-500 text-white hover:bg-accent-600" : ""}`}
+              >
+                {tab.label}
+              </Button>
+            )
+          })}
         </div>
       </div>
 
