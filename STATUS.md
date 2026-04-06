@@ -73,6 +73,11 @@
   - 6 color palettes (rose/teal/amber/violet/pink/emerald) with tinted backgrounds, colored buttons, hover lift + colored shadows
   - Section cards tinted: emerald for Excel, rose for PDF
   - Staggered Motion entrance animations, larger colored icon containers
+- **Export log system** (2026-04-06): Persistent export history in Reportes page
+  - `export_logs` Supabase table with RLS, server action, TanStack Query hook
+  - Auto-logs each download, shows relative timestamps + format badges
+- **Fix: accent colors dark gray** (2026-04-06): Tailwind v4 tree-shaking stripped `--accent-*` CSS variables
+  - Wrapped accent variable declarations in `@layer base` to preserve in compiled output
 
 ### Pending
 - Design A for Inventario hub + Inventario Fisico

@@ -264,6 +264,33 @@ export type Database = {
           },
         ]
       }
+      export_logs: {
+        Row: {
+          created_at: string
+          exported_by: string | null
+          format: string
+          id: string
+          report_name: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          exported_by?: string | null
+          format: string
+          id?: string
+          report_name: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          exported_by?: string | null
+          format?: string
+          id?: string
+          report_name?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       initial_load_overrides: {
         Row: {
           created_at: string

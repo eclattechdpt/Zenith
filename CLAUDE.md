@@ -277,6 +277,15 @@ No saltar sprints. Cada sprint depende del anterior.
   - Iconos mas grandes (size-11) con fondos de color mas fuertes (e.g. bg-rose-100)
   - Staggered entrance animations con Motion (spring)
   - SectionCards con tinted backgrounds: emerald-50/30 para Excel, rose-50/30 para PDF
+- **Export log system** (2026-04-06): historial persistente de exportaciones en la pagina de Reportes
+  - Supabase table `export_logs` (report_name, format, exported_by, created_at) con RLS
+  - Server action `logExport()` registra cada descarga exitosa automaticamente
+  - `useExportLogs()` query hook con TanStack Query, invalidacion automatica despues de cada export
+  - ExportLog component: empty state, loading skeleton, entries con relative timestamps (date-fns es), format badges
+  - SectionCard "Historial de exportaciones" al fondo de la pagina de Reportes
+- **Fix: accent color variables stripped by Tailwind v4** (2026-04-06): hero KPI cards mostraban gris oscuro en POS, Productos, Clientes, Ventas, Notas de credito
+  - Root cause: Tailwind v4 tree-shakes unlayered CSS custom properties — las declaraciones `--accent-*` en `:root` y `[data-module]` eran removidas del build
+  - Fix: envolver todas las declaraciones de accent variables en `@layer base` para que Tailwind las preserve
 
 **Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
 

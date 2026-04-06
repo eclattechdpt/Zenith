@@ -6,9 +6,12 @@ import type { LucideIcon } from "lucide-react"
 import { motion } from "motion/react"
 import { toast } from "sonner"
 
+import { useQueryClient } from "@tanstack/react-query"
+
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { logExport } from "../actions"
 
 export interface ExportCardColor {
   /** Card background tint, e.g. "bg-rose-50/40" */
@@ -61,12 +64,15 @@ export function ExportCard({
 }: ExportCardProps) {
   const [isExporting, setIsExporting] = useState(false)
   const config = FORMAT_CONFIG[format]
+  const queryClient = useQueryClient()
 
   async function handleExport() {
     if (isExporting) return
     setIsExporting(true)
     try {
       await onExport()
+      await logExport(title, format)
+      queryClient.invalidateQueries({ queryKey: ["export-logs"] })
       toast.success(`${title} exportado correctamente`)
     } catch {
       toast.error(`Error al exportar ${title.toLowerCase()}`)

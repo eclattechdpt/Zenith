@@ -202,120 +202,125 @@ input[type="number"] {
   --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-ring: #F43F6B;
 
-  /* ── Module accent scale — defaults to rose (brand) ── */
-  /* Overridden per-module via [data-module="..."] scopes below */
-  --accent-50: #FFF0F3;
-  --accent-100: #FFE0E8;
-  --accent-200: #FFC2D4;
-  --accent-300: #FF9DB5;
-  --accent-400: #FF6B8A;
-  --accent-500: #F43F6B;
-  --accent-600: #E11D52;
-  --accent-700: #BE1143;
-  --accent-800: #9D1139;
-  --accent-900: #871335;
-  --accent-scrollbar: #FFC4CF;       /* blush-300 */
-  --accent-scrollbar-hover: #FF6B8A; /* rose-400 */
 }
 
-/* ── Per-module accent overrides ── */
-/* Applied to <html> via inline blocking script (pre-hydration) and
-   kept in sync on client nav via ModuleAccentScope. Cascades through
-   portals (dropdowns, popovers, tooltips, dialogs) automatically. */
+/* ── Module accent scale ── */
+/* Tailwind v4 tree-shakes unlayered CSS custom properties.
+   Wrapping in @layer base ensures the accent variables survive the build
+   and are available at runtime for the @theme inline token mappings above. */
 
-[data-module="inventario"] {
-  --accent-50: #FFFBEB;   /* amber-50 */
-  --accent-100: #FEF3C7;
-  --accent-200: #FDE68A;
-  --accent-300: #FCD34D;
-  --accent-400: #FBBF24;
-  --accent-500: #F59E0B;
-  --accent-600: #D97706;
-  --accent-700: #B45309;
-  --accent-800: #92400E;
-  --accent-900: #78350F;
-  /* amber-500 matches UI identity (same as Todas button); amber scale
-     shifts yellow→orange so we anchor to 500, not 300 like other palettes */
-  --accent-scrollbar: #F59E0B;
-  --accent-scrollbar-hover: #D97706;
-  /* shadcn semantic overrides (drive bg-accent, ring, etc.) */
-  --accent: #FFFBEB;
-  --accent-foreground: #78350F;
-  --ring: #F59E0B;
-}
+@layer base {
+  :root {
+    /* Defaults to rose (brand) — overridden per-module below */
+    --accent-50: #FFF0F3;
+    --accent-100: #FFE0E8;
+    --accent-200: #FFC2D4;
+    --accent-300: #FF9DB5;
+    --accent-400: #FF6B8A;
+    --accent-500: #F43F6B;
+    --accent-600: #E11D52;
+    --accent-700: #BE1143;
+    --accent-800: #9D1139;
+    --accent-900: #871335;
+    --accent-scrollbar: #FFC4CF;       /* blush-300 */
+    --accent-scrollbar-hover: #FF6B8A; /* rose-400 */
+  }
 
-[data-module="inventario-transito"] {
-  --accent-50: #EFF6FF;   /* blue-50 */
-  --accent-100: #DBEAFE;
-  --accent-200: #BFDBFE;
-  --accent-300: #93C5FD;
-  --accent-400: #60A5FA;
-  --accent-500: #3B82F6;
-  --accent-600: #2563EB;
-  --accent-700: #1D4ED8;
-  --accent-800: #1E40AF;
-  --accent-900: #1E3A8A;
-  --accent-scrollbar: #93C5FD;
-  --accent-scrollbar-hover: #3B82F6;
-  --accent: #EFF6FF;
-  --accent-foreground: #1E3A8A;
-  --ring: #3B82F6;
-}
+  /* Per-module accent overrides — applied to <html> via inline blocking
+     script (pre-hydration) and kept in sync on client nav via
+     ModuleAccentScope. Cascades through portals automatically. */
 
-[data-module="inventario-carga-inicial"] {
-  --accent-50: #F8FAFC;   /* slate-50 */
-  --accent-100: #F1F5F9;
-  --accent-200: #E2E8F0;
-  --accent-300: #CBD5E1;
-  --accent-400: #94A3B8;
-  --accent-500: #64748B;
-  --accent-600: #475569;
-  --accent-700: #334155;
-  --accent-800: #1E293B;
-  --accent-900: #0F172A;
-  --accent-scrollbar: #CBD5E1;
-  --accent-scrollbar-hover: #64748B;
-  --accent: #F8FAFC;
-  --accent-foreground: #0F172A;
-  --ring: #64748B;
-}
+  [data-module="inventario"] {
+    --accent-50: #FFFBEB;   /* amber-50 */
+    --accent-100: #FEF3C7;
+    --accent-200: #FDE68A;
+    --accent-300: #FCD34D;
+    --accent-400: #FBBF24;
+    --accent-500: #F59E0B;
+    --accent-600: #D97706;
+    --accent-700: #B45309;
+    --accent-800: #92400E;
+    --accent-900: #78350F;
+    --accent-scrollbar: #F59E0B;
+    --accent-scrollbar-hover: #D97706;
+    --accent: #FFFBEB;
+    --accent-foreground: #78350F;
+    --ring: #F59E0B;
+  }
 
-[data-module="clientes"],
-[data-module="notas-credito"] {
-  --accent-50: #EFFCFC;   /* teal-50 */
-  --accent-100: #D6F6F8;
-  --accent-200: #B2ECF0;
-  --accent-300: #7DDCE4;
-  --accent-400: #40C2D0;
-  --accent-500: #25A6B6;
-  --accent-600: #22859A;
-  --accent-700: #236C7D;
-  --accent-800: #255867;
-  --accent-900: #1E3D47;
-  --accent-scrollbar: #7DDCE4;
-  --accent-scrollbar-hover: #40C2D0;
-  --accent: #EFFCFC;
-  --accent-foreground: #1E3D47;
-  --ring: #25A6B6;
-}
+  [data-module="inventario-transito"] {
+    --accent-50: #EFF6FF;   /* blue-50 */
+    --accent-100: #DBEAFE;
+    --accent-200: #BFDBFE;
+    --accent-300: #93C5FD;
+    --accent-400: #60A5FA;
+    --accent-500: #3B82F6;
+    --accent-600: #2563EB;
+    --accent-700: #1D4ED8;
+    --accent-800: #1E40AF;
+    --accent-900: #1E3A8A;
+    --accent-scrollbar: #93C5FD;
+    --accent-scrollbar-hover: #3B82F6;
+    --accent: #EFF6FF;
+    --accent-foreground: #1E3A8A;
+    --ring: #3B82F6;
+  }
 
-[data-module="reportes"],
-[data-module="configuracion"] {
-  --accent-50: #F7F3F0;   /* neutral-100 */
-  --accent-100: #EDE7E2;  /* neutral-200 */
-  --accent-200: #DED6CF;
-  --accent-300: #C4B8AE;
-  --accent-400: #A99D93;
-  --accent-500: #8A7F76;
-  --accent-600: #6E655E;
-  --accent-700: #4E4741;
-  --accent-800: #302B27;
-  --accent-900: #1A1714;
-  --accent-scrollbar: #C4B8AE;
-  --accent-scrollbar-hover: #8A7F76;
-  --accent: #F7F3F0;
-  --accent-foreground: #302B27;
-  --ring: #8A7F76;
+  [data-module="inventario-carga-inicial"] {
+    --accent-50: #F8FAFC;   /* slate-50 */
+    --accent-100: #F1F5F9;
+    --accent-200: #E2E8F0;
+    --accent-300: #CBD5E1;
+    --accent-400: #94A3B8;
+    --accent-500: #64748B;
+    --accent-600: #475569;
+    --accent-700: #334155;
+    --accent-800: #1E293B;
+    --accent-900: #0F172A;
+    --accent-scrollbar: #CBD5E1;
+    --accent-scrollbar-hover: #64748B;
+    --accent: #F8FAFC;
+    --accent-foreground: #0F172A;
+    --ring: #64748B;
+  }
+
+  [data-module="clientes"],
+  [data-module="notas-credito"] {
+    --accent-50: #EFFCFC;   /* teal-50 */
+    --accent-100: #D6F6F8;
+    --accent-200: #B2ECF0;
+    --accent-300: #7DDCE4;
+    --accent-400: #40C2D0;
+    --accent-500: #25A6B6;
+    --accent-600: #22859A;
+    --accent-700: #236C7D;
+    --accent-800: #255867;
+    --accent-900: #1E3D47;
+    --accent-scrollbar: #7DDCE4;
+    --accent-scrollbar-hover: #40C2D0;
+    --accent: #EFFCFC;
+    --accent-foreground: #1E3D47;
+    --ring: #25A6B6;
+  }
+
+  [data-module="reportes"],
+  [data-module="configuracion"] {
+    --accent-50: #F7F3F0;   /* neutral-100 */
+    --accent-100: #EDE7E2;  /* neutral-200 */
+    --accent-200: #DED6CF;
+    --accent-300: #C4B8AE;
+    --accent-400: #A99D93;
+    --accent-500: #8A7F76;
+    --accent-600: #6E655E;
+    --accent-700: #4E4741;
+    --accent-800: #302B27;
+    --accent-900: #1A1714;
+    --accent-scrollbar: #C4B8AE;
+    --accent-scrollbar-hover: #8A7F76;
+    --accent: #F7F3F0;
+    --accent-foreground: #302B27;
+    --ring: #8A7F76;
+  }
 }
 
 .dark {

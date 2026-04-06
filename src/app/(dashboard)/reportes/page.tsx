@@ -1,10 +1,11 @@
 "use client"
 
-import { FileSpreadsheet, FileText } from "lucide-react"
+import { FileSpreadsheet, FileText, History } from "lucide-react"
 
 import { PageHero } from "@/components/shared/page-hero"
 import { SectionCard } from "@/components/shared/section-card"
 import { ExcelExports, PdfExports } from "@/features/reportes/components/reports-grid"
+import { ExportLog } from "@/features/reportes/components/export-log"
 
 export default function ReportesPage() {
   return (
@@ -33,6 +34,17 @@ export default function ReportesPage() {
         className="bg-rose-50/30 border-rose-200/40"
       >
         <PdfExports />
+      </SectionCard>
+
+      <SectionCard
+        label="Historial de exportaciones"
+        description="Registro de reportes descargados"
+        icon={History}
+        iconBg="bg-neutral-100"
+        iconColor="text-neutral-500"
+        delay={0.24}
+      >
+        <ExportLog />
       </SectionCard>
     </div>
   )
