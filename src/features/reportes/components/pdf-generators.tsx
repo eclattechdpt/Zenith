@@ -6,7 +6,7 @@ import {
   StyleSheet,
   pdf,
 } from "@react-pdf/renderer"
-import { format, startOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns"
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns"
 import { es } from "date-fns/locale"
 
 import { createClient } from "@/lib/supabase/client"
@@ -113,9 +113,11 @@ function downloadBlob(blob: Blob, filename: string) {
 
 // ── Sales Report PDF ──
 
-export async function exportSalesPdf() {
+export async function exportSalesPdf(monthDate?: Date) {
   const supabase = createClient()
-  const monthStart = startOfMonth(new Date())
+  const target = monthDate ?? new Date()
+  const monthStart = startOfMonth(target)
+  const monthEnd = endOfMonth(target)
 
   const { data: sales } = await supabase
     .from("sales")
@@ -127,6 +129,7 @@ export async function exportSalesPdf() {
     .in("status", VALID_STATUSES)
     .is("deleted_at", null)
     .gte("created_at", monthStart.toISOString())
+    .lte("created_at", monthEnd.toISOString())
     .order("created_at", { ascending: false })
 
   const salesList = sales ?? []
@@ -146,7 +149,7 @@ export async function exportSalesPdf() {
     }
   }
 
-  const dateRange = `${format(monthStart, "d 'de' MMMM", { locale: es })} — ${format(new Date(), "d 'de' MMMM, yyyy", { locale: es })}`
+  const dateRange = `${format(monthStart, "MMMM yyyy", { locale: es })}`
 
   const doc = (
     <Document>
@@ -226,7 +229,7 @@ export async function exportSalesPdf() {
   )
 
   const blob = await pdf(doc).toBlob()
-  downloadBlob(blob, `reporte-ventas-${format(new Date(), "yyyy-MM-dd")}.pdf`)
+  downloadBlob(blob, `reporte-ventas-${format(monthStart, "yyyy-MM")}.pdf`)
 }
 
 // ── Inventory Fisico Report PDF ──
