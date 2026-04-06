@@ -36,6 +36,8 @@ interface ExportCardProps {
   color: ExportCardColor
   onExport: () => Promise<void>
   delay?: number
+  /** Skip auto-log and toast — useful when onExport opens a dialog that handles its own export */
+  skipAutoLog?: boolean
 }
 
 const FORMAT_CONFIG = {
@@ -61,6 +63,7 @@ export function ExportCard({
   color,
   onExport,
   delay = 0,
+  skipAutoLog = false,
 }: ExportCardProps) {
   const [isExporting, setIsExporting] = useState(false)
   const config = FORMAT_CONFIG[format]
@@ -68,6 +71,10 @@ export function ExportCard({
 
   async function handleExport() {
     if (isExporting) return
+    if (skipAutoLog) {
+      await onExport()
+      return
+    }
     setIsExporting(true)
     try {
       await onExport()

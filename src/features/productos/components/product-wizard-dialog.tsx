@@ -18,6 +18,7 @@ import {
   ChevronDown,
   Sparkles,
   ShoppingBag,
+  AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -84,6 +85,7 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
   const [infoOpen, setInfoOpen] = useState(true)
   const [pricingOpen, setPricingOpen] = useState(true)
   const [advancedOpen, setAdvancedOpen] = useState(false)
+  const [slugFocused, setSlugFocused] = useState(false)
 
   const queryClient = useQueryClient()
   const { data: categories = [] } = useCategories()
@@ -661,21 +663,10 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
                 onToggle={() => setAdvancedOpen((v) => !v)}
               >
                 <p className="mb-3 text-[11px] text-neutral-400">
-                  Slug y codigo se generan automaticamente. Modifica solo si es necesario.
+                  Estos campos se generan automaticamente. Puedes modificarlos si lo necesitas.
                 </p>
                 <div className="rounded-xl border border-white/80 bg-white p-4 shadow-sm">
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="flex flex-col gap-1.5">
-                      <Label className="text-xs font-medium text-neutral-500">Slug (URL)</Label>
-                      <Input
-                        placeholder="crema-dia-y-noche"
-                        className="rounded-xl border-neutral-200/80 bg-neutral-50/80 font-mono text-sm focus:border-rose-200/80"
-                        {...register("slug")}
-                      />
-                      {errors.slug && (
-                        <p className="text-xs text-destructive">{errors.slug.message}</p>
-                      )}
-                    </div>
                     {!hasVariants && (
                       <div className="flex flex-col gap-1.5">
                         <Label className="text-xs font-medium text-neutral-500">
@@ -689,13 +680,44 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
                             updateSingleVariant("sku", e.target.value.toUpperCase() || null)
                           }
                         />
+                        <p className="text-[10px] text-neutral-400">
+                          Identificador unico de la variante
+                        </p>
                       </div>
                     )}
                     {hasVariants && (
-                      <p className="text-xs text-neutral-400">
-                        Los codigos de cada variante se configuran arriba.
-                      </p>
+                      <div className="flex flex-col gap-1.5">
+                        <p className="text-xs text-neutral-400">
+                          Los codigos de cada variante se configuran arriba.
+                        </p>
+                      </div>
                     )}
+
+                    <div className="flex flex-col gap-1.5">
+                      <Label className="text-xs font-medium text-neutral-500">Slug (URL)</Label>
+                      <Input
+                        placeholder="Ej: crema-dia-y-noche"
+                        className="rounded-xl border-neutral-200/80 bg-neutral-50/80 font-mono text-sm focus:border-rose-200/80"
+                        {...register("slug")}
+                        onFocus={() => setSlugFocused(true)}
+                        onBlur={() => setSlugFocused(false)}
+                      />
+                      {errors.slug && (
+                        <p className="text-xs text-destructive">{errors.slug.message}</p>
+                      )}
+                      {slugFocused ? (
+                        <div className="flex items-start gap-1.5 rounded-lg bg-amber-50 border border-amber-200/60 px-2.5 py-2">
+                          <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-amber-500 mt-0.5" />
+                          <p className="text-[11px] leading-relaxed text-amber-700">
+                            El slug se genera automaticamente desde el nombre. Cambiarlo puede afectar URLs existentes.
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-neutral-400">
+                          Generado desde el nombre del producto
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CollapsibleSection>

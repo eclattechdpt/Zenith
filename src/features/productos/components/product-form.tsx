@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, Loader2, Info, Layers, Package, Gift, Settings2, ChevronDown, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, Loader2, Info, Layers, Package, Gift, Settings2, ChevronDown, CheckCircle2, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import { motion } from "motion/react"
 
@@ -106,6 +106,7 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
     useUnsavedGuard(isDirty)
 
   const [advancedOpen, setAdvancedOpen] = useState(false)
+  const [slugFocused, setSlugFocused] = useState(false)
   const pendingFileRef = useRef<File | null>(null)
   const imageUrl = watch("image_url")
 
@@ -589,22 +590,6 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
               Estos campos se generan automaticamente. Puedes modificarlos si lo necesitas.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="slug" className="text-xs font-medium text-neutral-500">Slug (URL)</Label>
-                <Input
-                  id="slug"
-                  placeholder="crema-dia-y-noche-de-liposomas"
-                  className="rounded-xl border-neutral-200/80 bg-neutral-50/80 font-mono text-sm focus:border-rose-200/80"
-                  {...register("slug")}
-                />
-                {errors.slug && (
-                  <p className="text-xs text-destructive">{errors.slug.message}</p>
-                )}
-                <p className="text-[10px] text-neutral-400">
-                  Generado desde el nombre del producto
-                </p>
-              </div>
-
               {!hasVariants && (
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-medium text-neutral-500">Codigo (SKU)</Label>
@@ -629,6 +614,33 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
                   </p>
                 </div>
               )}
+
+              <div className="flex flex-col gap-1.5 sm:col-span-2 sm:max-w-[50%]">
+                <Label htmlFor="slug" className="text-xs font-medium text-neutral-500">Slug (URL)</Label>
+                <Input
+                  id="slug"
+                  placeholder="Ej: crema-dia-y-noche"
+                  className="rounded-xl border-neutral-200/80 bg-neutral-50/80 font-mono text-sm focus:border-rose-200/80"
+                  {...register("slug")}
+                  onFocus={() => setSlugFocused(true)}
+                  onBlur={() => setSlugFocused(false)}
+                />
+                {errors.slug && (
+                  <p className="text-xs text-destructive">{errors.slug.message}</p>
+                )}
+                {slugFocused ? (
+                  <div className="flex items-start gap-1.5 rounded-lg bg-amber-50 border border-amber-200/60 px-2.5 py-2">
+                    <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-amber-500 mt-0.5" />
+                    <p className="text-[11px] leading-relaxed text-amber-700">
+                      El slug se genera automaticamente desde el nombre. Cambiarlo puede afectar URLs existentes.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-neutral-400">
+                    Generado desde el nombre del producto
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </motion.div>

@@ -9,6 +9,7 @@ import {
   Plus,
   Trash2,
   User,
+  Tag,
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { cn } from "@/lib/utils"
@@ -145,6 +146,20 @@ export function WizardProductsStep({
                       </span>
                     </div>
                   )}
+                  {customer && customer.discountPercent > 0 && items.length > 0 && (() => {
+                    const totalSavings = items.reduce(
+                      (sum, i) => sum + (i.basePrice - i.unitPrice) * i.quantity,
+                      0
+                    )
+                    return totalSavings > 0 ? (
+                      <div className="mt-2 flex items-center gap-2 rounded-lg bg-teal-500/10 border border-teal-200/60 px-3 py-2">
+                        <Tag className="h-3 w-3 flex-shrink-0 text-teal-600" />
+                        <span className="text-[11px] font-semibold text-teal-700">
+                          Ahorrando {formatCurrency(totalSavings)} con {customer.discountPercent}% desc.
+                        </span>
+                      </div>
+                    ) : null
+                  })()}
                 </div>
 
                 {/* Divider */}
@@ -168,8 +183,21 @@ export function WizardProductsStep({
                             <p className="truncate text-[13px] font-semibold leading-tight text-neutral-800">
                               {item.productName}
                             </p>
-                            <p className="mt-0.5 text-xs text-neutral-400">
-                              {formatCurrency(item.unitPrice)} c/u
+                            <p className="mt-0.5 flex items-center gap-1.5 text-xs">
+                              {item.basePrice > item.unitPrice ? (
+                                <>
+                                  <span className="text-neutral-400 line-through tabular-nums">
+                                    {formatCurrency(item.basePrice)}
+                                  </span>
+                                  <span className="font-semibold text-teal-600 tabular-nums">
+                                    {formatCurrency(item.unitPrice)} c/u
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="text-neutral-400 tabular-nums">
+                                  {formatCurrency(item.unitPrice)} c/u
+                                </span>
+                              )}
                             </p>
                           </div>
                           <button
@@ -222,28 +250,63 @@ export function WizardProductsStep({
 
                 {/* Panel totals */}
                 <div className="flex-shrink-0 border-t border-neutral-100 bg-neutral-50/40 px-5 py-5">
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs text-neutral-500">
-                      <span>Subtotal</span>
-                      <span className="font-medium tabular-nums">
-                        {formatCurrency(getSubtotal())}
-                      </span>
-                    </div>
-                    {getItemsDiscount() > 0 && (
-                      <div className="flex justify-between text-xs text-teal-600">
-                        <span>Descuento</span>
-                        <span className="font-medium tabular-nums">
-                          -{formatCurrency(getItemsDiscount())}
-                        </span>
+                  {(() => {
+                    const basePriceTotal = items.reduce(
+                      (sum, i) => sum + i.basePrice * i.quantity,
+                      0
+                    )
+                    const customerSavings = items.reduce(
+                      (sum, i) => sum + (i.basePrice - i.unitPrice) * i.quantity,
+                      0
+                    )
+                    const hasCustomerDiscount = customerSavings > 0
+                    const itemsDiscount = getItemsDiscount()
+
+                    return (
+                      <div className="space-y-1.5">
+                        {hasCustomerDiscount ? (
+                          <>
+                            <div className="flex justify-between text-xs text-neutral-500">
+                              <span>Precio base</span>
+                              <span className="font-medium tabular-nums">
+                                {formatCurrency(basePriceTotal)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="flex items-center gap-1.5 font-semibold text-teal-600">
+                                <Tag className="h-3 w-3" />
+                                Desc. -{customer?.discountPercent}%
+                              </span>
+                              <span className="font-semibold tabular-nums text-teal-600">
+                                -{formatCurrency(customerSavings)}
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex justify-between text-xs text-neutral-500">
+                            <span>Subtotal</span>
+                            <span className="font-medium tabular-nums">
+                              {formatCurrency(getSubtotal())}
+                            </span>
+                          </div>
+                        )}
+                        {itemsDiscount > 0 && (
+                          <div className="flex justify-between text-xs text-rose-500">
+                            <span>Descuento adicional</span>
+                            <span className="font-medium tabular-nums">
+                              -{formatCurrency(itemsDiscount)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex justify-between border-t border-neutral-200 pt-2 text-base font-extrabold">
+                          <span className="text-neutral-800">Total</span>
+                          <span className="tabular-nums text-rose-600">
+                            {formatCurrency(getTotal())}
+                          </span>
+                        </div>
                       </div>
-                    )}
-                    <div className="flex justify-between border-t border-neutral-200 pt-2 text-base font-extrabold">
-                      <span className="text-neutral-800">Total</span>
-                      <span className="tabular-nums text-rose-600">
-                        {formatCurrency(getTotal())}
-                      </span>
-                    </div>
-                  </div>
+                    )
+                  })()}
                 </div>
               </div>
             </motion.div>

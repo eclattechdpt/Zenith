@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   Receipt,
   Package,
@@ -9,7 +10,22 @@ import {
   Warehouse,
   Truck,
   Archive,
+  CalendarDays,
+  Download,
+  Loader2,
+  Calendar as CalendarIcon,
 } from "lucide-react"
+import { startOfWeek, endOfWeek, subWeeks, format } from "date-fns"
+import { es } from "date-fns/locale"
+import { toast } from "sonner"
+import { useQueryClient } from "@tanstack/react-query"
+
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils"
+import { logExport } from "../actions"
 
 import { ExportCard, type ExportCardColor } from "./export-card"
 import {
@@ -135,7 +151,168 @@ export function ExcelExports() {
   )
 }
 
+/* ── Weekly Sales PDF — Dialog-based week picker ── */
+
+type WeekPreset = "current" | "previous" | "custom"
+
+function WeeklySalesDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+}) {
+  const [preset, setPreset] = useState<WeekPreset>("current")
+  const [customDate, setCustomDate] = useState<Date | undefined>(undefined)
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+  const queryClient = useQueryClient()
+
+  const now = new Date()
+  const selectedDate =
+    preset === "current" ? now
+    : preset === "previous" ? subWeeks(now, 1)
+    : customDate ?? now
+
+  const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
+  const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 })
+  const rangeLabel = `${format(weekStart, "d MMM", { locale: es })} — ${format(weekEnd, "d MMM yyyy", { locale: es })}`
+
+  function handlePreset(p: WeekPreset) {
+    setPreset(p)
+    if (p !== "custom") {
+      setCustomDate(undefined)
+      setCalendarOpen(false)
+    }
+  }
+
+  function handleCalendarSelect(day: Date | undefined) {
+    if (!day) return
+    setCustomDate(day)
+    setPreset("custom")
+    setCalendarOpen(false)
+  }
+
+  async function handleExport() {
+    if (isExporting) return
+    setIsExporting(true)
+    try {
+      const { exportWeeklySalesPdf } = await import("./pdf-generators")
+      await exportWeeklySalesPdf(selectedDate)
+      await logExport("Reporte semanal", "pdf")
+      queryClient.invalidateQueries({ queryKey: ["export-logs"] })
+      toast.success("Reporte semanal exportado correctamente")
+      onOpenChange(false)
+    } catch {
+      toast.error("Error al exportar reporte semanal")
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-amber-100">
+            <CalendarDays className="size-5 text-amber-600" strokeWidth={1.75} />
+          </div>
+          <div>
+            <DialogTitle className="text-base font-bold text-neutral-900">
+              Reporte semanal
+            </DialogTitle>
+            <DialogDescription className="text-xs text-neutral-500">
+              Selecciona el periodo a exportar
+            </DialogDescription>
+          </div>
+        </div>
+
+        {/* Segmented presets */}
+        <div className="flex items-center gap-1.5 rounded-xl bg-amber-50/60 border border-amber-100 p-1">
+          <button
+            type="button"
+            onClick={() => handlePreset("current")}
+            className={cn(
+              "flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all",
+              preset === "current"
+                ? "bg-amber-500 text-white shadow-sm"
+                : "text-neutral-500 hover:bg-amber-50 hover:text-amber-700"
+            )}
+          >
+            Esta semana
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePreset("previous")}
+            className={cn(
+              "flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all",
+              preset === "previous"
+                ? "bg-amber-500 text-white shadow-sm"
+                : "text-neutral-500 hover:bg-amber-50 hover:text-amber-700"
+            )}
+          >
+            Anterior
+          </button>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger
+              render={
+                <button
+                  type="button"
+                  className={cn(
+                    "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all",
+                    preset === "custom"
+                      ? "bg-amber-500 text-white shadow-sm"
+                      : "text-neutral-500 hover:bg-amber-50 hover:text-amber-700"
+                  )}
+                />
+              }
+            >
+              <CalendarIcon className="size-3.5" />
+              Elegir fecha
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center">
+              <Calendar
+                mode="single"
+                selected={customDate}
+                onSelect={handleCalendarSelect}
+                disabled={{ after: new Date() }}
+                locale={es}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Selected range */}
+        <div className="rounded-xl bg-neutral-50 border border-neutral-100 px-4 py-3 text-center">
+          <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">
+            Periodo seleccionado
+          </p>
+          <p className="text-sm font-bold text-neutral-800 capitalize">
+            {rangeLabel}
+          </p>
+        </div>
+
+        {/* Export button */}
+        <Button
+          onClick={handleExport}
+          disabled={isExporting}
+          className="w-full bg-amber-500 text-white hover:bg-amber-600 border-0"
+        >
+          {isExporting ? (
+            <Loader2 className="mr-1.5 size-4 animate-spin" />
+          ) : (
+            <Download className="mr-1.5 size-4" />
+          )}
+          {isExporting ? "Generando PDF..." : "Exportar PDF"}
+        </Button>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function PdfExports() {
+  const [weeklyOpen, setWeeklyOpen] = useState(false)
+
   async function handleSalesPdf() {
     const { exportSalesPdf } = await import("./pdf-generators")
     await exportSalesPdf()
@@ -157,43 +334,57 @@ export function PdfExports() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <ExportCard
-        title="Reporte de ventas"
-        description="Resumen del mes con metricas y detalle de transacciones"
-        icon={TrendingUp}
-        format="pdf"
-        color={COLORS.rose}
-        delay={0.0}
-        onExport={handleSalesPdf}
-      />
-      <ExportCard
-        title="Inventario Fisico"
-        description="Stock actual con alertas y valor total"
-        icon={Warehouse}
-        format="pdf"
-        color={COLORS.teal}
-        delay={0.04}
-        onExport={handleInventoryPdf}
-      />
-      <ExportCard
-        title="Inventario en Transito"
-        description="Semanas de transito con productos y valores"
-        icon={Truck}
-        format="pdf"
-        color={COLORS.amber}
-        delay={0.08}
-        onExport={handleTransitPdf}
-      />
-      <ExportCard
-        title="Inventario Carga Inicial"
-        description="Stock inicial con precios editados y valor total"
-        icon={Archive}
-        format="pdf"
-        color={COLORS.violet}
-        delay={0.12}
-        onExport={handleInitialLoadPdf}
-      />
-    </div>
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ExportCard
+          title="Reporte de ventas"
+          description="Resumen del mes con metricas y detalle de transacciones"
+          icon={TrendingUp}
+          format="pdf"
+          color={COLORS.rose}
+          delay={0.0}
+          onExport={handleSalesPdf}
+        />
+        <ExportCard
+          title="Reporte semanal"
+          description="Ventas, metricas y top productos de la semana"
+          icon={CalendarDays}
+          format="pdf"
+          color={COLORS.amber}
+          delay={0.04}
+          onExport={async () => { setWeeklyOpen(true) }}
+          skipAutoLog
+        />
+        <ExportCard
+          title="Inventario Fisico"
+          description="Stock actual con alertas y valor total"
+          icon={Warehouse}
+          format="pdf"
+          color={COLORS.teal}
+          delay={0.08}
+          onExport={handleInventoryPdf}
+        />
+        <ExportCard
+          title="Inventario en Transito"
+          description="Semanas de transito con productos y valores"
+          icon={Truck}
+          format="pdf"
+          color={COLORS.amber}
+          delay={0.12}
+          onExport={handleTransitPdf}
+        />
+        <ExportCard
+          title="Inventario Carga Inicial"
+          description="Stock inicial con precios editados y valor total"
+          icon={Archive}
+          format="pdf"
+          color={COLORS.violet}
+          delay={0.16}
+          onExport={handleInitialLoadPdf}
+        />
+      </div>
+
+      <WeeklySalesDialog open={weeklyOpen} onOpenChange={setWeeklyOpen} />
+    </>
   )
 }

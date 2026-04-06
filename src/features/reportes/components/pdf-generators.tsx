@@ -6,7 +6,7 @@ import {
   StyleSheet,
   pdf,
 } from "@react-pdf/renderer"
-import { format, startOfMonth } from "date-fns"
+import { format, startOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns"
 import { es } from "date-fns/locale"
 
 import { createClient } from "@/lib/supabase/client"
@@ -579,4 +579,213 @@ export async function exportInitialLoadPdf() {
 
   const blob = await pdf(doc).toBlob()
   downloadBlob(blob, `carga-inicial-${format(new Date(), "yyyy-MM-dd")}.pdf`)
+}
+
+// ── Weekly Sales Report PDF ──
+
+const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"]
+
+export async function exportWeeklySalesPdf(weekStart: Date) {
+  const supabase = createClient()
+
+  const from = startOfWeek(weekStart, { weekStartsOn: 1 }) // Monday
+  const to = endOfWeek(weekStart, { weekStartsOn: 1 }) // Sunday
+  const days = eachDayOfInterval({ start: from, end: to })
+
+  const { data: sales } = await supabase
+    .from("sales")
+    .select(
+      `id, sale_number, status, total, created_at,
+      customers:customers(name),
+      sale_items(product_name, quantity, unit_price, line_total),
+      sale_payments(method, amount)`
+    )
+    .in("status", VALID_STATUSES)
+    .is("deleted_at", null)
+    .gte("created_at", from.toISOString())
+    .lte("created_at", to.toISOString())
+    .order("created_at", { ascending: false })
+
+  const salesList = (sales ?? []) as unknown as {
+    id: string
+    sale_number: string
+    status: string
+    total: number
+    created_at: string
+    customers: { name: string } | null
+    sale_items: { product_name: string; quantity: number; unit_price: number; line_total: number }[]
+    sale_payments: { method: string; amount: number }[]
+  }[]
+
+  // ── Aggregations ──
+  const totalRevenue = salesList.reduce((s, r) => s + Number(r.total ?? 0), 0)
+  const totalTransactions = salesList.length
+  const avgTicket = totalTransactions > 0 ? totalRevenue / totalTransactions : 0
+  const totalUnits = salesList.reduce(
+    (s, r) => s + (r.sale_items ?? []).reduce((si, item) => si + item.quantity, 0),
+    0
+  )
+
+  // Payment method breakdown
+  const methodTotals: Record<string, number> = {}
+  for (const s of salesList) {
+    for (const p of s.sale_payments ?? []) {
+      methodTotals[p.method] = (methodTotals[p.method] ?? 0) + Number(p.amount)
+    }
+  }
+
+  // Daily breakdown
+  const dailyData = days.map((day) => {
+    const daySales = salesList.filter((s) => isSameDay(new Date(s.created_at), day))
+    const revenue = daySales.reduce((s, r) => s + Number(r.total ?? 0), 0)
+    return {
+      label: DAY_NAMES[day.getDay()],
+      date: format(day, "dd/MM"),
+      count: daySales.length,
+      revenue,
+      avg: daySales.length > 0 ? revenue / daySales.length : 0,
+    }
+  })
+
+  // Top 5 products by revenue
+  const productMap = new Map<string, { units: number; revenue: number }>()
+  for (const sale of salesList) {
+    for (const item of sale.sale_items ?? []) {
+      const key = item.product_name
+      const existing = productMap.get(key) ?? { units: 0, revenue: 0 }
+      existing.units += item.quantity
+      existing.revenue += Number(item.line_total)
+      productMap.set(key, existing)
+    }
+  }
+  const topProducts = [...productMap.entries()]
+    .sort((a, b) => b[1].revenue - a[1].revenue)
+    .slice(0, 5)
+
+  const dateRange = `${format(from, "d MMM", { locale: es })} — ${format(to, "d MMM yyyy", { locale: es })}`
+
+  const doc = (
+    <Document>
+      <Page size="LETTER" style={styles.page}>
+        <View style={styles.header}>
+          <Text style={styles.title}>
+            {BUSINESS_NAME} — Reporte Semanal de Ventas
+          </Text>
+          <Text style={styles.subtitle}>{dateRange}</Text>
+        </View>
+
+        {/* Summary metrics */}
+        <Text style={styles.sectionTitle}>Resumen</Text>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Total ingresos</Text>
+          <Text style={styles.metricValue}>{currency(totalRevenue)}</Text>
+        </View>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Transacciones</Text>
+          <Text style={styles.metricValue}>{totalTransactions}</Text>
+        </View>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Ticket promedio</Text>
+          <Text style={styles.metricValue}>{currency(avgTicket)}</Text>
+        </View>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Unidades vendidas</Text>
+          <Text style={styles.metricValue}>{totalUnits}</Text>
+        </View>
+
+        {/* Daily breakdown */}
+        <Text style={styles.sectionTitle}>Desglose por dia</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.cellBold}>Dia</Text>
+          <Text style={styles.cellBold}>Fecha</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Ventas</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Ingresos</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Promedio</Text>
+        </View>
+        {dailyData.map((d) => (
+          <View key={d.date} style={styles.row}>
+            <Text style={styles.cell}>{d.label}</Text>
+            <Text style={styles.cell}>{d.date}</Text>
+            <Text style={styles.cellRight}>{d.count}</Text>
+            <Text style={styles.cellRight}>{currency(d.revenue)}</Text>
+            <Text style={styles.cellRight}>{currency(d.avg)}</Text>
+          </View>
+        ))}
+        <View style={{ ...styles.row, borderBottomWidth: 1, borderBottomColor: "#1a1a1a" }}>
+          <Text style={styles.cellBold}>Total</Text>
+          <Text style={styles.cell} />
+          <Text style={{ ...styles.cellRight, fontFamily: "Helvetica-Bold" }}>{totalTransactions}</Text>
+          <Text style={{ ...styles.cellRight, fontFamily: "Helvetica-Bold" }}>{currency(totalRevenue)}</Text>
+          <Text style={{ ...styles.cellRight, fontFamily: "Helvetica-Bold" }}>{currency(avgTicket)}</Text>
+        </View>
+
+        {/* Payment methods */}
+        <Text style={styles.sectionTitle}>Por metodo de pago</Text>
+        {Object.entries(methodTotals).map(([method, total]) => {
+          const pct = totalRevenue > 0 ? ((total / totalRevenue) * 100).toFixed(1) : "0"
+          return (
+            <View key={method} style={styles.metric}>
+              <Text style={styles.metricLabel}>
+                {PAYMENT_METHODS[method as keyof typeof PAYMENT_METHODS] ?? method}
+              </Text>
+              <Text style={styles.metricValue}>
+                {currency(total)} ({pct}%)
+              </Text>
+            </View>
+          )
+        })}
+
+        {/* Top 5 products */}
+        {topProducts.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Top 5 productos</Text>
+            <View style={styles.headerRow}>
+              <Text style={{ ...styles.cellBold, flex: 2 }}>Producto</Text>
+              <Text style={{ ...styles.cellBold, textAlign: "right" }}>Unidades</Text>
+              <Text style={{ ...styles.cellBold, textAlign: "right" }}>Ingresos</Text>
+            </View>
+            {topProducts.map(([name, data]) => (
+              <View key={name} style={styles.row}>
+                <Text style={{ ...styles.cell, flex: 2 }}>{name}</Text>
+                <Text style={styles.cellRight}>{data.units}</Text>
+                <Text style={styles.cellRight}>{currency(data.revenue)}</Text>
+              </View>
+            ))}
+          </>
+        )}
+
+        {/* Sales detail */}
+        <Text style={styles.sectionTitle}>Detalle de ventas</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.cellBold}>Folio</Text>
+          <Text style={styles.cellBold}>Estado</Text>
+          <Text style={styles.cellBold}>Cliente</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Total</Text>
+          <Text style={{ ...styles.cellBold, textAlign: "right" }}>Fecha</Text>
+        </View>
+        {salesList.slice(0, 50).map((s) => (
+          <View key={s.sale_number} style={styles.row}>
+            <Text style={styles.cell}>{s.sale_number}</Text>
+            <Text style={styles.cell}>
+              {SALE_STATUSES[s.status as keyof typeof SALE_STATUSES] ?? s.status}
+            </Text>
+            <Text style={styles.cell}>
+              {s.customers?.name ?? "—"}
+            </Text>
+            <Text style={styles.cellRight}>{currency(Number(s.total))}</Text>
+            <Text style={styles.cellRight}>
+              {format(new Date(s.created_at), "dd/MM HH:mm")}
+            </Text>
+          </View>
+        ))}
+
+        <Text style={styles.footer}>
+          Generado por Zenith POS — {format(new Date(), "dd/MM/yyyy HH:mm")}
+        </Text>
+      </Page>
+    </Document>
+  )
+
+  const blob = await pdf(doc).toBlob()
+  downloadBlob(blob, `reporte-semanal-${format(from, "yyyy-MM-dd")}.pdf`)
 }
