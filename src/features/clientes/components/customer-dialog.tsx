@@ -348,6 +348,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
                   </div>
                 </div>
               </CollapsibleSection>
+
             </form>
           )}
         </div>

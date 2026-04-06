@@ -66,6 +66,55 @@ export function useCustomer(id: string) {
   })
 }
 
+// --- CUSTOMER SALES HISTORY ---
+
+export interface CustomerSale {
+  sale_number: string
+  status: string
+  total: number
+  created_at: string
+}
+
+export function useCustomerSales(
+  customerId: string | null,
+  filters?: { year?: number; month?: number | null }
+) {
+  const year = filters?.year
+  const month = filters?.month
+  return useQuery({
+    queryKey: ["customer-sales", customerId, year, month],
+    queryFn: async (): Promise<CustomerSale[]> => {
+      const supabase = createClient()
+      let query = supabase
+        .from("sales")
+        .select("sale_number, status, total, created_at")
+        .eq("customer_id", customerId!)
+        .in("status", ["completed", "partially_returned", "fully_returned"])
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
+
+      if (year) {
+        const from = month != null
+          ? new Date(year, month, 1)
+          : new Date(year, 0, 1)
+        const to = month != null
+          ? new Date(year, month + 1, 0, 23, 59, 59)
+          : new Date(year, 11, 31, 23, 59, 59)
+        query = query.gte("created_at", from.toISOString()).lte("created_at", to.toISOString())
+      }
+
+      const { data, error } = await query.limit(50)
+
+      if (error) return []
+      return (data ?? []).map((s) => ({
+        ...s,
+        total: Number(s.total),
+      }))
+    },
+    enabled: !!customerId,
+  })
+}
+
 // --- CUSTOMER STATS (for KPI widgets) ---
 
 export function useCustomerStats() {

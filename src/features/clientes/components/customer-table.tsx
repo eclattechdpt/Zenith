@@ -23,9 +23,10 @@ import { CustomerCardMobile } from "./customer-card-mobile"
 interface CustomerTableProps {
   onEdit?: (customer: CustomerWithPriceList) => void
   onCreate?: () => void
+  onView?: (customer: CustomerWithPriceList) => void
 }
 
-export function CustomerTable({ onEdit, onCreate }: CustomerTableProps) {
+export function CustomerTable({ onEdit, onCreate, onView }: CustomerTableProps) {
   const [search, setSearch] = useQueryState(
     "q",
     parseAsString.withDefault("")
@@ -41,8 +42,8 @@ export function CustomerTable({ onEdit, onCreate }: CustomerTableProps) {
   const [isDeleting, setIsDeleting] = useState(false)
 
   const columns = useMemo(
-    () => getCustomerColumns({ onEdit, onDelete: setDeleteTarget }),
-    [onEdit]
+    () => getCustomerColumns({ onEdit, onDelete: setDeleteTarget, onView }),
+    [onEdit, onView]
   )
 
   const queryClient = useQueryClient()
@@ -105,6 +106,7 @@ export function CustomerTable({ onEdit, onCreate }: CustomerTableProps) {
                 customer={customer}
                 onEdit={onEdit}
                 onDelete={setDeleteTarget}
+                onView={onView}
               />
             ))
           ) : (

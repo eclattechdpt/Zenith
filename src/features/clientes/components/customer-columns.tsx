@@ -1,7 +1,7 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Pencil, Trash2, Eye } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,11 +17,13 @@ import type { CustomerWithPriceList } from "../types"
 interface CustomerColumnsOptions {
   onEdit?: (customer: CustomerWithPriceList) => void
   onDelete?: (customer: CustomerWithPriceList) => void
+  onView?: (customer: CustomerWithPriceList) => void
 }
 
 export function getCustomerColumns({
   onEdit,
   onDelete,
+  onView,
 }: CustomerColumnsOptions = {}): ColumnDef<CustomerWithPriceList>[] {
   return [
     {
@@ -40,9 +42,13 @@ export function getCustomerColumns({
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="font-medium text-neutral-950">
+        <button
+          type="button"
+          onClick={() => onView?.(row.original)}
+          className="text-left font-medium text-neutral-950 hover:text-teal-600 transition-colors"
+        >
           {row.original.name}
-        </span>
+        </button>
       ),
     },
     {
@@ -105,6 +111,12 @@ export function getCustomerColumns({
               <span className="sr-only">Acciones</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {onView && (
+                <DropdownMenuItem onClick={() => onView(customer)}>
+                  <Eye className="mr-2 size-3.5" />
+                  Ver detalle
+                </DropdownMenuItem>
+              )}
               {onEdit && (
                 <DropdownMenuItem onClick={() => onEdit(customer)}>
                   <Pencil className="mr-2 size-3.5" />

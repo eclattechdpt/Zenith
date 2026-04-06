@@ -8,12 +8,14 @@ import { KpiCard } from "@/components/shared/kpi-card"
 import { SectionCard } from "@/components/shared/section-card"
 import { CustomerTable } from "@/features/clientes/components/customer-table"
 import { CustomerDialog } from "@/features/clientes/components/customer-dialog"
+import { CustomerDetailSheet } from "@/features/clientes/components/customer-detail-sheet"
 import { useCustomerStats } from "@/features/clientes/queries"
 
 export default function ClientesPage() {
   const stats = useCustomerStats()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editCustomerId, setEditCustomerId] = useState<string | null>(null)
+  const [detailCustomerId, setDetailCustomerId] = useState<string | null>(null)
 
   const openCreate = useCallback(() => {
     setEditCustomerId(null)
@@ -23,6 +25,14 @@ export default function ClientesPage() {
   const openEdit = useCallback((customer: { id: string }) => {
     setEditCustomerId(customer.id)
     setDialogOpen(true)
+  }, [])
+
+  const openDetail = useCallback((customer: { id: string }) => {
+    setDetailCustomerId(customer.id)
+  }, [])
+
+  const closeDetail = useCallback(() => {
+    setDetailCustomerId(null)
   }, [])
 
   const closeDialog = useCallback(() => {
@@ -77,7 +87,7 @@ export default function ClientesPage() {
           iconColor="text-teal-500"
           delay={0.18}
         >
-          <CustomerTable onEdit={openEdit} onCreate={openCreate} />
+          <CustomerTable onEdit={openEdit} onCreate={openCreate} onView={openDetail} />
         </SectionCard>
       </div>
 
@@ -86,6 +96,17 @@ export default function ClientesPage() {
         open={dialogOpen}
         customerId={editCustomerId}
         onClose={closeDialog}
+      />
+
+      {/* Customer detail sheet */}
+      <CustomerDetailSheet
+        customerId={detailCustomerId}
+        open={!!detailCustomerId}
+        onClose={closeDetail}
+        onEdit={(c) => {
+          closeDetail()
+          openEdit(c)
+        }}
       />
     </>
   )
