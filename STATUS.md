@@ -84,6 +84,16 @@
 - **Ventas date filters** (2026-04-06): Hoy (default) | Esta semana | < Month nav > | Fecha (custom)
   - Combines with status tabs, dateFrom/dateTo added to useSales query
 - **Fix: sidebar scoop color** (2026-04-06): Changed `white` to `var(--background)` on active tab pill + scoops
+- **Cart discount visibility** (2026-04-06): Savings banner + before/after totals + per-item strikethrough in POS wizard
+- **Slug UX warning** (2026-04-06): Amber warning on focus, SKU/Slug reordered in product forms
+- **Weekly sales PDF** (2026-04-06): Dialog with week picker (presets + inline calendar + timeline bar), full report
+- **Monthly sales report dialog** (2026-04-06): 4x3 month grid picker with year nav, rose theming
+- **Brand system** (2026-04-06): Ideal/Eclat toggle in product forms, inventory value split by brand
+- **Client number** (2026-04-06): Unique `client_number` column + UI field in customer dialog
+- **Customer dialog redesign** (2026-04-06): Collapsible sections, teal accents, matches product wizard
+- **Customer detail sheet** (2026-04-06): Slide-over panel with info + purchase history + date filters
+- **Global discount system** (2026-04-06): Preset picker + custom input in all POS flows
+- **POS cleanup** (2026-04-06): Removed edit pencil icon from product cards
 
 ### Pending
 - Design A for Inventario hub + Inventario Fisico

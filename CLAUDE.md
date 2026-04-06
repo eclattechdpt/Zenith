@@ -302,6 +302,16 @@ No saltar sprints. Cada sprint depende del anterior.
   - Se combinan con status tabs existentes (Todos/Cotizaciones/Ventas/Devoluciones/Canceladas)
   - dateFrom/dateTo filters agregados a `useSales` query
 - **Fix: sidebar scoop color mismatch** (2026-04-06): active tab pill y scoops usaban `white` (#FFF) en vez de `var(--background)` (#FDFBFA), creando seam visible contra el fondo neutral-50 del content area
+- **Cart discount visibility** (2026-04-06): POS wizard cart shows savings banner, before/after totals, per-item strikethrough prices when customer discount active
+- **Slug UX warning** (2026-04-06): amber warning on slug focus in product forms (create + edit), SKU/Slug order swapped, updated placeholders
+- **Weekly sales PDF report** (2026-04-06): full report (summary, daily breakdown, payment methods, top 5 products, sales detail) with dialog-based week picker (Esta semana/Anterior/Elegir fecha with inline calendar + timeline bar)
+- **Monthly sales report dialog** (2026-04-06): month picker with 4x3 month grid, year navigation, rose theming. exportSalesPdf accepts optional month param
+- **Brand system** (2026-04-06): Ideal/Eclat toggle replaces free-text brand input in product forms. Physical inventory shows Ideal/Eclat value split in toolbar and hub page
+- **Client number** (2026-04-06): `client_number` column added to customers (unique per tenant). Field in customer dialog, DB migration applied
+- **Customer dialog redesign** (2026-04-06): collapsible sections (Informacion + Detalles adicionales), white cards, teal accents, large success animation — matches product wizard design
+- **Customer detail sheet** (2026-04-06): slide-over panel with client info + purchase history. Clickable names in table, "Ver detalle" dropdown. Date filters: Todo/Este mes/Anterior + Elegir with year nav + month grid. useCustomerSales query with server-side year/month filtering
+- **Global discount system** (2026-04-06): preset discount picker (from settings price lists) + custom % or $ input. Available in wizard products step, CartPanel, PaymentDialog, and WizardPaymentStep. Stacks with customer pricing
+- **POS product card cleanup** (2026-04-06): removed edit pencil icon from product cards in POS views
 
 **Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
 
