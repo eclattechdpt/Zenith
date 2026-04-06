@@ -15,14 +15,14 @@ import {
   Loader2,
   Calendar as CalendarIcon,
 } from "lucide-react"
-import { startOfWeek, endOfWeek, subWeeks, format } from "date-fns"
+import { startOfWeek, endOfWeek, subWeeks, format, eachDayOfInterval, isToday, isBefore, startOfDay, isSameWeek } from "date-fns"
 import { es } from "date-fns/locale"
+import { AnimatePresence, motion } from "motion/react"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { logExport } from "../actions"
@@ -190,7 +190,8 @@ function WeeklySalesDialog({
     if (!day) return
     setCustomDate(day)
     setPreset("custom")
-    setCalendarOpen(false)
+    // Delay close slightly so user sees the selection highlight
+    setTimeout(() => setCalendarOpen(false), 200)
   }
 
   async function handleExport() {
@@ -253,44 +254,158 @@ function WeeklySalesDialog({
           >
             Anterior
           </button>
-          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-            <PopoverTrigger
-              render={
-                <button
-                  type="button"
-                  className={cn(
-                    "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all",
-                    preset === "custom"
-                      ? "bg-amber-500 text-white shadow-sm"
-                      : "text-neutral-500 hover:bg-amber-50 hover:text-amber-700"
-                  )}
-                />
+          <button
+            type="button"
+            onClick={() => {
+              if (preset === "custom" && calendarOpen) {
+                setCalendarOpen(false)
+              } else {
+                setPreset("custom")
+                setCalendarOpen(true)
               }
-            >
-              <CalendarIcon className="size-3.5" />
-              Elegir fecha
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="center">
-              <Calendar
-                mode="single"
-                selected={customDate}
-                onSelect={handleCalendarSelect}
-                disabled={{ after: new Date() }}
-                locale={es}
-              />
-            </PopoverContent>
-          </Popover>
+            }}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all",
+              preset === "custom"
+                ? "bg-amber-500 text-white shadow-sm"
+                : "text-neutral-500 hover:bg-amber-50 hover:text-amber-700"
+            )}
+          >
+            <CalendarIcon className="size-3.5" />
+            Elegir fecha
+          </button>
         </div>
 
-        {/* Selected range */}
-        <div className="rounded-xl bg-neutral-50 border border-neutral-100 px-4 py-3 text-center">
-          <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">
-            Periodo seleccionado
-          </p>
-          <p className="text-sm font-bold text-neutral-800 capitalize">
-            {rangeLabel}
-          </p>
-        </div>
+        {/* Inline calendar — slides in/out */}
+        <AnimatePresence initial={false}>
+          {calendarOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="rounded-xl border border-amber-100 bg-amber-50/30 p-1 [&_.rdp-root]:w-full [&_.rdp-month]:w-full [&_.rdp-month_table]:w-full [&_[data-selected-single=true]]:!bg-amber-500 [&_[data-selected-single=true]]:!text-white [&_[data-today=true]]:bg-amber-100 [&_[data-today=true]]:text-amber-900">
+                <Calendar
+                  mode="single"
+                  selected={customDate}
+                  onSelect={handleCalendarSelect}
+                  disabled={{ after: new Date() }}
+                  locale={es}
+                  className="w-full"
+                  modifiers={{
+                    selectedWeek: (day) =>
+                      customDate
+                        ? isSameWeek(day, customDate, { weekStartsOn: 1 })
+                        : false,
+                  }}
+                  modifiersClassNames={{
+                    selectedWeek: "bg-amber-100 text-amber-900 rounded-none first:rounded-l-md last:rounded-r-md",
+                  }}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Timeline bar — hidden when calendar is open */}
+        <AnimatePresence initial={false}>
+        {!calendarOpen && (() => {
+          const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
+          const today = startOfDay(new Date())
+          const DAY_LABELS = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"]
+          // For current/future weeks: fill up to today. For past weeks: fill all.
+          const isPastWeek = isBefore(weekEnd, today)
+
+          return (
+            <motion.div
+              key="timeline"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+            <div className="rounded-xl bg-neutral-50 border border-neutral-100 px-4 py-4">
+              {/* Month + year label */}
+              <p className="text-center text-[11px] font-semibold text-neutral-500 mb-3 capitalize">
+                {rangeLabel}
+              </p>
+
+              {/* Day labels */}
+              <div className="flex items-center justify-between mb-2 px-1">
+                {days.map((day, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "text-[10px] font-semibold w-8 text-center",
+                      isToday(day) ? "text-amber-600" : "text-neutral-400"
+                    )}
+                  >
+                    {DAY_LABELS[i]}
+                  </span>
+                ))}
+              </div>
+
+              {/* Timeline track */}
+              <div className="relative flex items-center justify-between px-1">
+                {/* Background line */}
+                <div className="absolute left-5 right-5 top-1/2 -translate-y-1/2 h-1 rounded-full bg-neutral-200" />
+                {/* Filled portion */}
+                <div
+                  className="absolute left-5 top-1/2 -translate-y-1/2 h-1 rounded-full bg-amber-400 transition-all duration-300"
+                  style={{
+                    width: isPastWeek
+                      ? "calc(100% - 40px)"
+                      : `calc(${
+                          (days.filter((d) => isBefore(d, today) || isToday(d)).length / 7) * 100
+                        }% - ${40 - (days.filter((d) => isBefore(d, today) || isToday(d)).length / 7) * 40}px)`,
+                  }}
+                />
+
+                {/* Day dots */}
+                {days.map((day, i) => {
+                  const isPast = isBefore(day, today)
+                  const isTodayDay = isToday(day)
+                  const filled = isPastWeek || isPast || isTodayDay
+
+                  return (
+                    <div key={i} className="relative z-10 flex flex-col items-center w-8">
+                      <div
+                        className={cn(
+                          "rounded-full transition-all duration-200",
+                          isTodayDay
+                            ? "size-4 bg-amber-500 ring-4 ring-amber-100"
+                            : filled
+                              ? "size-3 bg-amber-400"
+                              : "size-3 bg-neutral-200"
+                        )}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Day numbers */}
+              <div className="flex items-center justify-between mt-2 px-1">
+                {days.map((day, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "text-[10px] font-bold w-8 text-center tabular-nums",
+                      isToday(day) ? "text-amber-600" : "text-neutral-500"
+                    )}
+                  >
+                    {format(day, "d")}
+                  </span>
+                ))}
+              </div>
+            </div>
+            </motion.div>
+          )
+        })()}
+        </AnimatePresence>
 
         {/* Export button */}
         <Button
