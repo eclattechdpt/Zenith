@@ -88,15 +88,6 @@ export const POSProductCard = memo(function POSProductCard({
         outOfStock ? "opacity-50 grayscale-[30%]" : ""
       }`}
     >
-      {/* Edit button */}
-      <button
-        type="button"
-        onClick={() => onEdit?.(product.id)}
-        className="absolute right-2.5 top-2.5 z-10 rounded-lg bg-white/80 p-1.5 text-neutral-400 opacity-0 backdrop-blur-sm transition-all hover:text-neutral-600 group-hover:opacity-100"
-      >
-        <Pencil className="h-3 w-3" />
-      </button>
-
       {/* Low stock badge */}
       {lowStock && (
         <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-600">
