@@ -49,7 +49,7 @@ function ScoopTop() {
       className="absolute right-0 pointer-events-none"
       style={{ top: -S, width: S, height: S }}
       viewBox={`0 0 ${S} ${S}`}
-      fill="white"
+      fill="var(--background)"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path d={`M${S} 0L${S} ${S}L0 ${S}A${S} ${S} 0 0 0 ${S} 0Z`} />
@@ -63,7 +63,7 @@ function ScoopBottom() {
       className="absolute right-0 pointer-events-none"
       style={{ bottom: -S, width: S, height: S }}
       viewBox={`0 0 ${S} ${S}`}
-      fill="white"
+      fill="var(--background)"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path d={`M${S} ${S}L${S} 0L0 0A${S} ${S} 0 0 1 ${S} ${S}Z`} />
@@ -197,7 +197,7 @@ export function Sidebar() {
                         {isActive && (
                           <motion.div
                             layoutId="sidebar-active"
-                            className="absolute inset-0 rounded-l-[22px] bg-white"
+                            className="absolute inset-0 rounded-l-[22px] bg-background"
                             style={{ overflow: "visible", filter: "drop-shadow(2px 0 3px rgba(0,0,0,0.06))" }}
                             transition={{
                               type: "spring",

@@ -286,6 +286,22 @@ No saltar sprints. Cada sprint depende del anterior.
 - **Fix: accent color variables stripped by Tailwind v4** (2026-04-06): hero KPI cards mostraban gris oscuro en POS, Productos, Clientes, Ventas, Notas de credito
   - Root cause: Tailwind v4 tree-shakes unlayered CSS custom properties — las declaraciones `--accent-*` en `:root` y `[data-module]` eran removidas del build
   - Fix: envolver todas las declaraciones de accent variables en `@layer base` para que Tailwind las preserve
+- **Dashboard performance optimization** (2026-04-06): pagina de inicio cargaba lento con full-page skeleton
+  - Single `get_dashboard_data` Supabase RPC reemplaza 13+ queries server-side en un solo round-trip
+  - Convertido a client-side TanStack Query (`useDashboardData` hook) — page shell renderiza instantaneamente
+  - Skeletons inline por seccion (KPIs, chart, activity, products, alerts) en vez de full-page loading.tsx
+  - 30s stale time, 60s auto-refresh, cache instantaneo al re-navegar
+  - Eliminado `loading.tsx` (reemplazado por isPending skeletons en DashboardContent)
+- **Export log monthly filter** (2026-04-06): historial de exportaciones filtrado por mes
+  - Month navigator con chevron left/right + label "Abril 2026"
+  - Export count label por mes, empty state contextual
+  - Query filtrada por dateFrom/dateTo del mes seleccionado
+- **Ventas date filters** (2026-04-06): pills de fecha en la tabla de ventas
+  - Layout: Hoy (default) | Esta semana | < Mes > | Fecha (custom date picker)
+  - Month navigator con chevrons para navegar meses anteriores
+  - Se combinan con status tabs existentes (Todos/Cotizaciones/Ventas/Devoluciones/Canceladas)
+  - dateFrom/dateTo filters agregados a `useSales` query
+- **Fix: sidebar scoop color mismatch** (2026-04-06): active tab pill y scoops usaban `white` (#FFF) en vez de `var(--background)` (#FDFBFA), creando seam visible contra el fondo neutral-50 del content area
 
 **Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
 

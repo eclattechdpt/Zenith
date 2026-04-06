@@ -78,10 +78,15 @@
   - Auto-logs each download, shows relative timestamps + format badges
 - **Fix: accent colors dark gray** (2026-04-06): Tailwind v4 tree-shaking stripped `--accent-*` CSS variables
   - Wrapped accent variable declarations in `@layer base` to preserve in compiled output
+- **Dashboard performance** (2026-04-06): Single `get_dashboard_data` RPC + client-side TanStack Query
+  - Page shell renders instantly, inline skeletons per section, 60s auto-refresh, cache on re-nav
+- **Export log monthly filter** (2026-04-06): Month navigator with chevrons for browsing export history
+- **Ventas date filters** (2026-04-06): Hoy (default) | Esta semana | < Month nav > | Fecha (custom)
+  - Combines with status tabs, dateFrom/dateTo added to useSales query
+- **Fix: sidebar scoop color** (2026-04-06): Changed `white` to `var(--background)` on active tab pill + scoops
 
 ### Pending
 - Design A for Inventario hub + Inventario Fisico
-- Performance optimization
 - Final UX polish pass
 - Vercel deployment
 
