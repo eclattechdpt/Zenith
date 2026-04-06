@@ -1,12 +1,29 @@
 "use client"
 
 import { useMemo, useRef, useState } from "react"
-import { Search, Receipt } from "lucide-react"
+import { Search, Receipt, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { useQueryState, parseAsString } from "nuqs"
 import { motion } from "motion/react"
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  startOfMonth,
+  endOfMonth,
+  subMonths,
+  addMonths,
+  isAfter,
+  format,
+} from "date-fns"
+import { es } from "date-fns/locale"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { DataTable } from "@/components/shared/data-table"
 import { EmptyState } from "@/components/shared/empty-state"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
@@ -30,12 +47,54 @@ const STATUS_TABS = [
   { value: "cancelled", label: "Canceladas" },
 ] as const
 
+function getDateRange(
+  preset: string,
+  selectedMonth: Date,
+  customDate?: string
+): { from: string; to: string } | null {
+  const now = new Date()
+  const todayEnd = `${format(now, "yyyy-MM-dd")}T23:59:59`
+  if (preset === "today") {
+    return { from: startOfDay(now).toISOString(), to: todayEnd }
+  }
+  if (preset === "week") {
+    return {
+      from: startOfWeek(now, { weekStartsOn: 1 }).toISOString(),
+      to: todayEnd,
+    }
+  }
+  if (preset === "month") {
+    return {
+      from: startOfMonth(selectedMonth).toISOString(),
+      to: endOfMonth(selectedMonth).toISOString(),
+    }
+  }
+  if (preset === "custom" && customDate) {
+    const date = new Date(customDate)
+    return {
+      from: startOfDay(date).toISOString(),
+      to: endOfDay(date).toISOString(),
+    }
+  }
+  return null
+}
+
 export function SalesTable() {
   const [search, setSearch] = useQueryState("q", parseAsString.withDefault(""))
   const [statusFilter, setStatusFilter] = useQueryState(
     "status",
     parseAsString.withDefault("")
   )
+  const [datePreset, setDatePreset] = useState("today")
+  const [selectedMonth, setSelectedMonth] = useState(() => startOfMonth(new Date()))
+  const [customDate, setCustomDate] = useState("")
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
+
+  const isCurrentMonth =
+    format(selectedMonth, "yyyy-MM") === format(new Date(), "yyyy-MM")
+  const monthLabel = format(selectedMonth, "MMMM yyyy", { locale: es })
+
+  const dateRange = getDateRange(datePreset, selectedMonth, customDate)
 
   const {
     data: sales = [],
@@ -45,6 +104,8 @@ export function SalesTable() {
   } = useSales({
     search: search || undefined,
     status: statusFilter || undefined,
+    dateFrom: dateRange?.from,
+    dateTo: dateRange?.to,
   })
   const hasLoadedOnce = useRef(false)
   if (isFetched) hasLoadedOnce.current = true
@@ -149,6 +210,128 @@ export function SalesTable() {
             </Button>
           ))}
         </div>
+      </div>
+
+      {/* Date filter pills */}
+      <div className="flex flex-wrap items-center gap-1">
+        {/* Quick presets */}
+        <Button
+          variant={datePreset === "today" ? "default" : "ghost"}
+          size="sm"
+          className={`h-7 rounded-full px-3 text-[11px] ${datePreset === "today" ? "bg-accent-500 text-white hover:bg-accent-600" : ""}`}
+          onClick={() => {
+            setDatePreset("today")
+            setCustomDate("")
+            setDatePickerOpen(false)
+          }}
+        >
+          Hoy
+        </Button>
+        <Button
+          variant={datePreset === "week" ? "default" : "ghost"}
+          size="sm"
+          className={`h-7 rounded-full px-3 text-[11px] ${datePreset === "week" ? "bg-accent-500 text-white hover:bg-accent-600" : ""}`}
+          onClick={() => {
+            setDatePreset("week")
+            setCustomDate("")
+            setDatePickerOpen(false)
+          }}
+        >
+          Esta semana
+        </Button>
+
+        {/* Month navigator */}
+        <div className="flex items-center gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7"
+            onClick={() => {
+              setSelectedMonth((m) => subMonths(m, 1))
+              setDatePreset("month")
+              setCustomDate("")
+              setDatePickerOpen(false)
+            }}
+          >
+            <ChevronLeft className="size-3.5" />
+          </Button>
+          <Button
+            variant={datePreset === "month" ? "default" : "ghost"}
+            size="sm"
+            className={`h-7 rounded-full px-3 text-[11px] capitalize ${datePreset === "month" ? "bg-accent-500 text-white hover:bg-accent-600" : ""}`}
+            onClick={() => {
+              setSelectedMonth(startOfMonth(new Date()))
+              setDatePreset("month")
+              setCustomDate("")
+              setDatePickerOpen(false)
+            }}
+          >
+            {monthLabel}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7"
+            disabled={isCurrentMonth}
+            onClick={() => {
+              setSelectedMonth((m) => {
+                const next = addMonths(m, 1)
+                return isAfter(next, new Date()) ? startOfMonth(new Date()) : next
+              })
+              setDatePreset("month")
+              setCustomDate("")
+              setDatePickerOpen(false)
+            }}
+          >
+            <ChevronRight className="size-3.5" />
+          </Button>
+        </div>
+
+        {/* Custom date pill */}
+        {datePreset === "custom" && customDate ? (
+          <Button
+            variant="default"
+            size="sm"
+            className="h-7 gap-1 rounded-full px-3 text-[11px] bg-accent-500 text-white hover:bg-accent-600"
+            onClick={() => {
+              setDatePreset("today")
+              setCustomDate("")
+            }}
+          >
+            {format(new Date(customDate), "d MMM yyyy", { locale: es })}
+            <X className="size-3" />
+          </Button>
+        ) : (
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 rounded-full px-3 text-[11px]"
+                />
+              }
+            >
+              Fecha
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-3" side="bottom" align="start">
+              <Input
+                type="date"
+                value={customDate}
+                onChange={(e) => {
+                  const val = e.target.value
+                  if (val) {
+                    setCustomDate(val)
+                    setDatePreset("custom")
+                    setDatePickerOpen(false)
+                  }
+                }}
+                className="h-9"
+                autoFocus
+              />
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
 
       {/* Table */}

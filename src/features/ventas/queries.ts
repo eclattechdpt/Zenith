@@ -9,6 +9,8 @@ import type { SaleWithSummary, SaleWithItems, SaleDetail } from "./types"
 interface SalesFilters {
   search?: string
   status?: string
+  dateFrom?: string
+  dateTo?: string
 }
 
 export function useSales(filters?: SalesFilters) {
@@ -40,6 +42,13 @@ export function useSales(filters?: SalesFilters) {
       if (filters?.search) {
         const q = filters.search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
         query = query.ilike("sale_number", `%${q}%`)
+      }
+
+      if (filters?.dateFrom) {
+        query = query.gte("created_at", filters.dateFrom)
+      }
+      if (filters?.dateTo) {
+        query = query.lte("created_at", filters.dateTo)
       }
 
       const { data, error } = await query

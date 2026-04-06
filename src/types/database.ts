@@ -1159,6 +1159,7 @@ export type Database = {
         }
         Returns: string
       }
+      get_dashboard_data: { Args: { p_tenant_id: string }; Returns: Json }
       get_inventory_summary: { Args: { p_tenant_id: string }; Returns: Json }
     }
     Enums: {

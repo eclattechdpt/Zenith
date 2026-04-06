@@ -13,7 +13,9 @@ import {
 import { formatCurrency } from "@/lib/utils"
 import { KpiCard } from "@/components/shared/kpi-card"
 import { SectionCard } from "@/components/shared/section-card"
+import { Skeleton } from "@/components/ui/skeleton"
 
+import { useDashboardData } from "../queries"
 import { SalesProgress } from "./mini-bar-chart"
 import { WeeklyBarChart } from "./mini-sparkline"
 import { PaymentBreakdown } from "./mini-progress-ring"
@@ -23,80 +25,34 @@ import { ActivityFeed } from "./activity-feed"
 import { TopProductsGrid } from "./top-products-grid"
 import { InventoryAlertsGrid } from "./inventory-alerts-grid"
 
-interface KpiData {
-  ventasDelDia: number
-  ventasDelDiaCambio: number
-  ventasAyer: number
-  ventasMaxDia: number
-  productosVendidos: number
-  productosVendidosCambio: number
-  vendidosPorDia: number[]
-  vendidosDias: string[]
-  vendidosDiaActual: number
-  transacciones: number
-  transaccionesCambio: number
-  pagoTarjeta: number
-  pagoEfectivo: number
-  pagoTransferencia: number
-  stockBajoAlertas: number
-  inventarioOk: number
-  inventarioBajo: number
-  inventarioCritico: number
-}
+export function DashboardContent() {
+  const { data, isPending } = useDashboardData()
 
-interface WeekData {
-  label: string
-  rango: string
-  total: number
-  enProgreso?: boolean
-}
+  if (isPending || !data) {
+    return (
+      <>
+        {/* KPI skeletons */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-[200px] rounded-2xl" />
+          ))}
+        </div>
+        {/* Chart + Activity skeletons */}
+        <div className="grid min-w-0 gap-5 xl:grid-cols-5">
+          <Skeleton className="h-72 rounded-2xl xl:col-span-3" />
+          <Skeleton className="h-72 rounded-2xl xl:col-span-2" />
+        </div>
+        {/* Products + Alerts skeletons */}
+        <div className="grid min-w-0 gap-5 xl:grid-cols-2">
+          <Skeleton className="h-64 rounded-2xl" />
+          <Skeleton className="h-64 rounded-2xl" />
+        </div>
+      </>
+    )
+  }
 
-interface SalesChartData {
-  totalMes: number
-  cambioMes: number
-  semanas: WeekData[]
-}
+  const { kpiData, salesChart, activity, topProducts, inventoryAlerts } = data
 
-interface ActivityItem {
-  id: string
-  tipo: string
-  descripcion: string
-  detalle: string
-  monto: number | null
-  hora: string
-}
-
-interface TopProduct {
-  nombre: string
-  variante: string
-  unidades: number
-  ingresos: number
-  margen: number
-}
-
-interface InventoryAlert {
-  nombre: string
-  variante: string
-  stockActual: number
-  stockMinimo: number
-  estado: "critico" | "bajo"
-}
-
-interface DashboardContentProps {
-  kpiData: KpiData
-  salesChart: SalesChartData
-  activity: ActivityItem[]
-  topProducts: TopProduct[]
-  inventoryAlerts: InventoryAlert[]
-}
-
-export function DashboardContent({
-  kpiData,
-  salesChart,
-  activity,
-  topProducts,
-  inventoryAlerts,
-}: DashboardContentProps) {
   return (
     <>
       {/* KPI Grid */}
