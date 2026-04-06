@@ -33,6 +33,7 @@ import { BundleManager } from "./bundle-manager"
 import { ProductImagePicker } from "./product-image-picker"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { useUnsavedGuard } from "@/hooks/use-unsaved-guard"
+import { cn } from "@/lib/utils"
 import { uploadProductImage } from "@/lib/supabase/storage"
 
 function slugify(text: string) {
@@ -109,6 +110,7 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
   const [slugFocused, setSlugFocused] = useState(false)
   const pendingFileRef = useRef<File | null>(null)
   const imageUrl = watch("image_url")
+  const brand = watch("brand")
 
   const categoryIds: string[] = watch("category_ids") ?? []
   const isActive = watch("is_active")
@@ -284,12 +286,23 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="brand" className="text-xs font-medium text-neutral-500">Marca</Label>
-            <Input
-              id="brand"
-              placeholder="Ej: Eclat, Ideal"
-              className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus:border-rose-200/80"
-              {...register("brand")}
-            />
+            <div className="flex items-center gap-2 rounded-xl border border-neutral-200/80 bg-neutral-50/80 p-1">
+              {(["Ideal", "Eclat"] as const).map((b) => (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => setValue("brand", b, { shouldDirty: true })}
+                  className={cn(
+                    "flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-all",
+                    brand === b
+                      ? "bg-rose-500 text-white shadow-sm"
+                      : "text-neutral-500 hover:bg-rose-50 hover:text-rose-700"
+                  )}
+                >
+                  {b}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">

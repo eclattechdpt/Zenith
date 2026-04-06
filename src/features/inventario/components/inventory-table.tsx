@@ -265,17 +265,23 @@ export function InventoryTable({
   const [historyTarget, setHistoryTarget] = useState<InventoryVariant | null>(null)
   const [editTarget, setEditTarget] = useState<InventoryVariant | null>(null)
 
-  // ── Total value ──
-  const totalValue = useMemo(() => {
-    return variants.reduce((sum, v) => {
+  // ── Total value (with brand split for physical inventory) ──
+  const { totalValue, idealValue, eclatValue } = useMemo(() => {
+    let total = 0, ideal = 0, eclat = 0
+    for (const v of variants) {
       const stock =
         inventoryType === "initial_load" ? v.initial_stock : v.stock
       const price =
         inventoryType === "initial_load" && v.override_price != null
           ? v.override_price
           : v.price
-      return sum + stock * price
-    }, 0)
+      const val = stock * price
+      total += val
+      const brand = v.products?.brand?.toLowerCase() ?? ""
+      if (brand === "ideal") ideal += val
+      else if (brand === "eclat") eclat += val
+    }
+    return { totalValue: total, idealValue: ideal, eclatValue: eclat }
   }, [variants, inventoryType])
 
   // ── Derived state ──
@@ -556,35 +562,76 @@ export function InventoryTable({
 
         {/* Total value strip */}
         {hasLoadedOnce && (
-          <div className="mt-3 flex items-center justify-between rounded-lg bg-neutral-50 px-4 py-2.5">
-            <span className="text-[12px] font-semibold text-neutral-500">
-              Valor total del inventario
-            </span>
-            <AnimatePresence mode="wait">
-              {visible ? (
-                <motion.span
-                  key="val"
-                  initial={{ opacity: 0, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, filter: "blur(4px)" }}
-                  transition={{ duration: 0.2 }}
-                  className="text-[15px] font-bold text-neutral-950 tabular-nums"
-                >
-                  {formatCurrency(totalValue)}
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="hid"
-                  initial={{ opacity: 0, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, filter: "blur(4px)" }}
-                  transition={{ duration: 0.2 }}
-                  className="text-[15px] font-bold tracking-[2px] text-neutral-400 tabular-nums"
-                >
-                  ******
-                </motion.span>
-              )}
-            </AnimatePresence>
+          <div className="mt-3 rounded-lg bg-neutral-50 px-4 py-2.5 space-y-2">
+            {/* Brand split — only for physical inventory */}
+            {inventoryType === "physical" && (idealValue > 0 || eclatValue > 0) && (
+              <div className="flex items-center gap-4">
+                <AnimatePresence mode="wait">
+                  {visible ? (
+                    <motion.div
+                      key="brands"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center gap-4"
+                    >
+                      {idealValue > 0 && (
+                        <span className="text-[11px] text-neutral-500">
+                          <span className="font-semibold text-amber-600">Ideal</span>{" "}
+                          <span className="font-bold text-neutral-700 tabular-nums">{formatCurrency(idealValue)}</span>
+                        </span>
+                      )}
+                      {eclatValue > 0 && (
+                        <span className="text-[11px] text-neutral-500">
+                          <span className="font-semibold text-rose-500">Eclat</span>{" "}
+                          <span className="font-bold text-neutral-700 tabular-nums">{formatCurrency(eclatValue)}</span>
+                        </span>
+                      )}
+                    </motion.div>
+                  ) : (
+                    <motion.span
+                      key="brands-hid"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="text-[11px] font-bold tracking-[2px] text-neutral-300 tabular-nums"
+                    >
+                      ***
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-semibold text-neutral-500">
+                Valor total del inventario
+              </span>
+              <AnimatePresence mode="wait">
+                {visible ? (
+                  <motion.span
+                    key="val"
+                    initial={{ opacity: 0, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, filter: "blur(4px)" }}
+                    transition={{ duration: 0.2 }}
+                    className="text-[15px] font-bold text-neutral-950 tabular-nums"
+                  >
+                    {formatCurrency(totalValue)}
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="hid"
+                    initial={{ opacity: 0, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, filter: "blur(4px)" }}
+                    transition={{ duration: 0.2 }}
+                    className="text-[15px] font-bold tracking-[2px] text-neutral-400 tabular-nums"
+                  >
+                    ******
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@ import { z } from "zod"
 
 export const customerSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").max(200),
+  client_number: z.string().max(50).optional().nullable().or(z.literal("")),
   phone: z.string().max(20).optional().nullable(),
   email: z
     .string()

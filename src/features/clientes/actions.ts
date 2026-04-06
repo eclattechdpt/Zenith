@@ -35,6 +35,7 @@ export async function createCustomer(input: CustomerInput) {
   // Normalize empty strings to null
   const data = {
     ...parsed.data,
+    client_number: parsed.data.client_number || null,
     email: parsed.data.email || null,
     phone: parsed.data.phone || null,
     address: parsed.data.address || null,
@@ -66,6 +67,7 @@ export async function updateCustomer(id: string, input: CustomerInput) {
     .from("customers")
     .update({
       name: parsed.data.name,
+      client_number: parsed.data.client_number || null,
       phone: parsed.data.phone || null,
       email: parsed.data.email || null,
       address: parsed.data.address || null,

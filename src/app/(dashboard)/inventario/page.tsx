@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import {
   Warehouse,
@@ -23,6 +23,7 @@ import { es } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency } from "@/lib/utils"
 import {
+  useInventory,
   useInventorySummary,
   useLowStockAlerts,
   useTransitMonthSummary,
@@ -58,6 +59,7 @@ const MONTH_SHORT = [
 export default function InventarioPage() {
   const { data: summary } = useInventorySummary()
   const { data: lowStockItems = [] } = useLowStockAlerts()
+  const { data: physicalVariants = [] } = useInventory()
   const currentYear = new Date().getFullYear()
   const { data: monthSummary = [] } = useTransitMonthSummary(currentYear)
   const today = format(new Date(), "EEEE, d 'de' MMMM", { locale: es })
@@ -84,6 +86,17 @@ export default function InventarioPage() {
   const initialPct = grandTotal > 0 ? Math.round(((summary?.initial_load_total ?? 0) / grandTotal) * 100) : 0
 
   const fmtValue = (val: number) => (visible ? formatCurrency(val) : "******")
+
+  const { idealValue, eclatValue } = useMemo(() => {
+    let ideal = 0, eclat = 0
+    for (const v of physicalVariants) {
+      const val = v.stock * v.price
+      const brand = v.products?.brand?.toLowerCase() ?? ""
+      if (brand === "ideal") ideal += val
+      else if (brand === "eclat") eclat += val
+    }
+    return { idealValue: ideal, eclatValue: eclat }
+  }, [physicalVariants])
 
   return (
     <motion.div
@@ -323,6 +336,22 @@ export default function InventarioPage() {
                     <p className="text-lg font-bold text-neutral-950 tabular-nums">
                       {visible ? formatCurrency(summary?.physical_total ?? 0) : "******"}
                     </p>
+                    {visible && (idealValue > 0 || eclatValue > 0) && (
+                      <div className="mt-1.5 flex items-center gap-3">
+                        {idealValue > 0 && (
+                          <span className="text-[10px] text-neutral-500">
+                            <span className="font-semibold text-amber-600">Ideal</span>{" "}
+                            <span className="font-bold tabular-nums">{formatCurrency(idealValue)}</span>
+                          </span>
+                        )}
+                        {eclatValue > 0 && (
+                          <span className="text-[10px] text-neutral-500">
+                            <span className="font-semibold text-rose-500">Eclat</span>{" "}
+                            <span className="font-bold tabular-nums">{formatCurrency(eclatValue)}</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

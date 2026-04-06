@@ -51,6 +51,7 @@ import { VariantManager } from "./variant-manager"
 import { BundleManager } from "./bundle-manager"
 import { CollapsibleSection } from "./collapsible-section"
 import { ProductImagePicker } from "./product-image-picker"
+import { cn } from "@/lib/utils"
 import { uploadProductImage } from "@/lib/supabase/storage"
 
 function slugify(text: string) {
@@ -395,11 +396,23 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <Label className="text-xs font-medium text-neutral-500">Marca</Label>
-                      <Input
-                        placeholder="Ej: Eclat, Ideal"
-                        className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus:border-rose-200/80"
-                        {...register("brand")}
-                      />
+                      <div className="flex items-center gap-2 rounded-xl border border-neutral-200/80 bg-neutral-50/80 p-1">
+                        {(["Ideal", "Eclat"] as const).map((b) => (
+                          <button
+                            key={b}
+                            type="button"
+                            onClick={() => setValue("brand", b, { shouldDirty: true })}
+                            className={cn(
+                              "flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-all",
+                              brand === b
+                                ? "bg-rose-500 text-white shadow-sm"
+                                : "text-neutral-500 hover:bg-rose-50 hover:text-rose-700"
+                            )}
+                          >
+                            {b}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <Label className="text-xs font-medium text-neutral-500">Categoria</Label>
