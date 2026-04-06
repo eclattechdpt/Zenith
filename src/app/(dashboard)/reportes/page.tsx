@@ -15,9 +15,10 @@ export default function ReportesPage() {
         label="Exportar a Excel"
         description="Descarga datos en formato Excel para analisis"
         icon={FileSpreadsheet}
-        iconBg="bg-emerald-50"
-        iconColor="text-emerald-500"
+        iconBg="bg-emerald-100"
+        iconColor="text-emerald-600"
         delay={0.08}
+        className="bg-emerald-50/30 border-emerald-200/40"
       >
         <ExcelExports />
       </SectionCard>
@@ -26,9 +27,10 @@ export default function ReportesPage() {
         label="Reportes PDF"
         description="Reportes formateados listos para imprimir"
         icon={FileText}
-        iconBg="bg-rose-50"
-        iconColor="text-rose-400"
+        iconBg="bg-rose-100"
+        iconColor="text-rose-500"
         delay={0.16}
+        className="bg-rose-50/30 border-rose-200/40"
       >
         <PdfExports />
       </SectionCard>

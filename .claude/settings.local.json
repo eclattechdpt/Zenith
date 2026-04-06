@@ -61,7 +61,14 @@
       "Bash(grep:*)",
       "Bash(rm .git/COMMIT_MSG_TMP)",
       "Bash(git fetch:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(sed 's/CREATE TABLE //')",
+      "Bash(sed 's/ \\(.*//')",
+      "Bash(sed 's/CREATE OR REPLACE FUNCTION //')",
+      "Bash(sed 's/\\(.*//')",
+      "Bash(sed \"s/.*\\\\.rpc\\('//\")",
+      "Bash(sed \"s/'.*$//\")",
+      "Bash(rm:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

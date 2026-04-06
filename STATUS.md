@@ -69,6 +69,11 @@
   - DashboardContent client wrapper for server/client boundary
   - Deleted 4 custom dashboard components (greeting-section, kpi-card, kpi-grid, dashboard-shell)
 
+- **Reportes page vibrant redesign** (2026-04-06): Colorful export cards with per-card palettes
+  - 6 color palettes (rose/teal/amber/violet/pink/emerald) with tinted backgrounds, colored buttons, hover lift + colored shadows
+  - Section cards tinted: emerald for Excel, rose for PDF
+  - Staggered Motion entrance animations, larger colored icon containers
+
 ### Pending
 - Design A for Inventario hub + Inventario Fisico
 - Performance optimization

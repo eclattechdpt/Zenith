@@ -234,7 +234,7 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
-**Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-04)
+**Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-06)
 
 ### Sprint 8 — En progreso
 - **Module-scoped accent colors** (2026-04-04): `[data-module]` attribute on `<html>` drives per-route accent theming via CSS variable scopes. Inline blocking script in root layout sets the attribute before first paint (no flash); `ModuleAccentScope` client component syncs on route changes. Dropdowns, popovers, tooltips, scrollbars, and focus rings automatically adopt the right accent via CSS cascade through portals.
@@ -269,6 +269,14 @@ No saltar sprints. Cada sprint depende del anterior.
   - DashboardContent client wrapper para server/client boundary (icon serialization)
   - Eliminados: greeting-section, kpi-card (custom), kpi-grid, dashboard-shell (4 files)
   - SalesProgress con variant light/dark para adaptarse al contexto del card
+- **Reportes page vibrant redesign** (2026-04-06): export cards rediseñados con colores vibrantes
+  - ExportCard ahora acepta `color` prop con paleta completa (cardBg, cardBorder, iconBg, iconColor, hoverShadow, buttonClass)
+  - 6 paletas: rose (Ventas), teal (Inv. Fisico), amber (Inv. Transito), violet (Inv. Carga Inicial), blush/pink (Clientes), emerald (Productos)
+  - Botones de descarga coloreados (filled accent) en vez de outline neutro
+  - Hover lift (y: -2) con colored shadow por card (mismo patron que QuickActions del dashboard)
+  - Iconos mas grandes (size-11) con fondos de color mas fuertes (e.g. bg-rose-100)
+  - Staggered entrance animations con Motion (spring)
+  - SectionCards con tinted backgrounds: emerald-50/30 para Excel, rose-50/30 para PDF
 
 **Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
 
