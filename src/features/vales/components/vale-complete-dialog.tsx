@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { CheckCircle2, Loader2, Package } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import {
   Dialog,
@@ -41,11 +41,11 @@ export function ValeCompleteDialog({ valeId, onOpenChange }: Props) {
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al completar el vale"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success(`Vale ${result.data.vale_number} entregado`)
+    sileo.success({ title: `Vale ${result.data.vale_number} entregado` })
 
     queryClient.invalidateQueries({ queryKey: ["vales"] })
     queryClient.invalidateQueries({ queryKey: ["vales-ready"] })

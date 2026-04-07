@@ -15,7 +15,7 @@ import {
   Check,
 } from "lucide-react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { motion, AnimatePresence } from "motion/react"
 
 import {
@@ -187,13 +187,13 @@ export function CreateCreditNoteDialog({ open, onOpenChange }: Props) {
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al crear la nota"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success(
-      `${mode === "lending" ? "Prestamo" : "Intercambio"} ${result.data.credit_number} creado`
-    )
+    sileo.success({
+      title: `${mode === "lending" ? "Prestamo" : "Intercambio"} ${result.data.credit_number} creado`,
+    })
 
     queryClient.invalidateQueries({ queryKey: ["credit-notes"] })
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
