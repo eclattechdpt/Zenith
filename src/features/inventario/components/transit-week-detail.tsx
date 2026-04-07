@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Plus, Trash2, Pencil, Loader2 } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,10 @@ import {
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { formatCurrency } from "@/lib/utils"
 
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
+
 import { useTransitWeekDetail } from "../queries"
+import { TransitDetailFixture } from "./fixtures/transit-detail-fixture"
 import {
   addTransitWeekItem,
   updateTransitWeekItem,
@@ -85,11 +88,11 @@ export function TransitWeekDetail({ weekId }: TransitWeekDetailProps) {
     setDeleteTarget(null)
 
     if ("error" in result && result.error) {
-      toast.error("Error al eliminar el producto")
+      sileo.error({ title: "Error al eliminar el producto" })
       return
     }
 
-    toast.success("Producto eliminado de la semana")
+    sileo.success({ title: "Producto eliminado de la semana", description: "El producto fue removido del transito" })
     queryClient.invalidateQueries({ queryKey: ["transit-week"] })
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
     queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
@@ -98,18 +101,13 @@ export function TransitWeekDetail({ weekId }: TransitWeekDetailProps) {
 
   return (
     <div className="rounded-2xl border border-neutral-200/60 bg-white shadow-sm">
-      {isLoading ? (
-        <div className="space-y-4 p-6 sm:p-8">
-          <div className="h-12 w-56 animate-pulse rounded-xl bg-neutral-100/80" />
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-24 animate-pulse rounded-xl bg-neutral-100/80"
-              style={{ animationDelay: `${i * 80}ms` }}
-            />
-          ))}
-        </div>
-      ) : week ? (
+      <BoneyardSkeleton
+        name="transit-week-detail"
+        loading={isLoading}
+        animate="shimmer"
+        fixture={<TransitDetailFixture />}
+      >
+      {week ? (
         <>
           {/* Header */}
           <div className="px-6 pt-6 sm:px-8 sm:pt-8">
@@ -257,6 +255,7 @@ export function TransitWeekDetail({ weekId }: TransitWeekDetailProps) {
           </div>
         </>
       ) : null}
+      </BoneyardSkeleton>
 
       {/* Add item dialog */}
       <AddTransitItemDialog
@@ -354,11 +353,11 @@ function AddTransitItemForm({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al agregar producto"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success("Producto agregado")
+    sileo.success({ title: "Producto agregado", description: "El producto aparece en el inventario en transito" })
     queryClient.invalidateQueries({ queryKey: ["transit-week"] })
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
     queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
@@ -524,11 +523,11 @@ function EditTransitItemForm({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al actualizar"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success("Producto actualizado")
+    sileo.success({ title: "Producto actualizado", description: "Los cambios fueron guardados" })
     queryClient.invalidateQueries({ queryKey: ["transit-week"] })
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
     queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
