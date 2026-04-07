@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation"
 import { motion } from "motion/react"
 import {
   ArrowLeft,
+  ArrowRightLeft,
   RotateCcw,
   XCircle,
-  Loader2,
   FileText,
   PackageCheck,
   PackageX,
@@ -43,9 +43,12 @@ import {
   CREDIT_NOTE_STATUSES,
 } from "@/lib/constants"
 
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
+
 import { useSaleDetail } from "../queries"
 import { cancelSale } from "../actions"
 import { ReturnDialog } from "./return-dialog"
+import { SaleDetailFixture } from "./fixtures/sale-detail-fixture"
 import { SaleReceipt } from "@/features/pos/components/sale-receipt"
 import type { ReceiptData } from "@/features/pos/components/sale-receipt"
 
@@ -81,12 +84,21 @@ const itemVariants = {
 
 // ── Helpers ──
 
+const METHOD_SHORT_LABELS: Record<string, string> = {
+  cash: "Efectivo",
+  card: "Tarjeta",
+  transfer: "Transfer.",
+  credit_note: "Nota NC",
+  other: "Otro",
+}
+
 function getPaymentSummaryLabel(
   payments: { method: string; amount: number }[]
 ): string {
   if (payments.length === 0) return "—"
   if (payments.length === 1) {
     return (
+      METHOD_SHORT_LABELS[payments[0].method] ??
       PAYMENT_METHODS[payments[0].method as keyof typeof PAYMENT_METHODS] ??
       payments[0].method
     )
@@ -94,14 +106,19 @@ function getPaymentSummaryLabel(
   return "Mixto"
 }
 
-function getPaymentIcon(
-  payments: { method: string }[]
-): typeof Banknote {
-  if (payments.length === 0) return Banknote
-  if (payments.length > 1) return CreditCard
-  const method = payments[0].method
-  if (method === "card") return CreditCard
-  return Banknote
+const METHOD_STYLE: Record<string, { icon: typeof Banknote; iconBg: string; iconColor: string; cardBg: string; cardBorder: string; innerBg: string; labelColor: string }> = {
+  cash: { icon: Banknote, iconBg: "bg-emerald-50", iconColor: "text-emerald-500", cardBg: "bg-emerald-50/40", cardBorder: "border-emerald-200/60", innerBg: "bg-emerald-50/60", labelColor: "text-emerald-600" },
+  card: { icon: CreditCard, iconBg: "bg-blue-50", iconColor: "text-blue-500", cardBg: "bg-blue-50/40", cardBorder: "border-blue-200/60", innerBg: "bg-blue-50/60", labelColor: "text-blue-600" },
+  transfer: { icon: ArrowRightLeft, iconBg: "bg-violet-50", iconColor: "text-violet-500", cardBg: "bg-violet-50/40", cardBorder: "border-violet-200/60", innerBg: "bg-violet-50/60", labelColor: "text-violet-600" },
+  credit_note: { icon: FileText, iconBg: "bg-amber-50", iconColor: "text-amber-500", cardBg: "bg-amber-50/40", cardBorder: "border-amber-200/60", innerBg: "bg-amber-50/60", labelColor: "text-amber-600" },
+}
+
+const MIXED_STYLE = { icon: CreditCard, iconBg: "bg-neutral-100", iconColor: "text-neutral-500", cardBg: "", cardBorder: "", innerBg: "bg-neutral-50", labelColor: "text-neutral-600" }
+
+function getPaymentStyle(payments: { method: string }[]) {
+  if (payments.length === 0) return MIXED_STYLE
+  if (payments.length > 1) return MIXED_STYLE
+  return METHOD_STYLE[payments[0].method] ?? MIXED_STYLE
 }
 
 // ── Component ──
@@ -187,22 +204,14 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
       return
     }
 
-    sileo.success({ title: "Venta cancelada" })
+    sileo.success({ title: "Venta cancelada", description: "El stock fue restaurado al inventario" })
     queryClient.invalidateQueries({ queryKey: ["sales"] })
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
   }
 
   // ── Loading / Not found ──
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="size-8 animate-spin text-neutral-300" />
-      </div>
-    )
-  }
-
-  if (!sale) {
+  if (!isLoading && !sale) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <p className="text-neutral-500">Venta no encontrada</p>
@@ -214,30 +223,34 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
     )
   }
 
-  // ── Derived values ──
+  // ── Derived values (safe during loading — skeleton is shown instead) ──
 
-  const dateFormatted = format(
-    new Date(sale.created_at),
-    "EEEE, d 'de' MMMM",
-    { locale: es }
-  ).replace(/^\w/, (c) => c.toUpperCase())
+  const dateFormatted = sale
+    ? format(new Date(sale.created_at), "EEEE, d 'de' MMMM", { locale: es }).replace(/^\w/, (c) => c.toUpperCase())
+    : ""
 
-  const timeFormatted = format(new Date(sale.created_at), "HH:mm", {
-    locale: es,
-  })
+  const timeFormatted = sale
+    ? format(new Date(sale.created_at), "HH:mm", { locale: es })
+    : ""
 
-  const itemCount = sale.sale_items.reduce((sum, i) => sum + i.quantity, 0)
-  const PaymentIcon = getPaymentIcon(sale.sale_payments)
-  const paymentLabel = getPaymentSummaryLabel(sale.sale_payments)
+  const itemCount = sale ? sale.sale_items.reduce((sum, i) => sum + i.quantity, 0) : 0
+  const paymentStyle = getPaymentStyle(sale?.sale_payments ?? [])
+  const paymentLabel = getPaymentSummaryLabel(sale?.sale_payments ?? [])
   const showActions = isReturnable || canCancel
 
   return (
     <>
-      <motion.div
+      <BoneyardSkeleton
+        name="sale-detail"
+        loading={isLoading || !sale}
+        animate="shimmer"
+        fixture={<SaleDetailFixture />}
+      >
+      {sale && <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="flex flex-col gap-6"
+        className="mx-auto flex w-full max-w-4xl flex-col gap-6 pt-10"
       >
         {/* ── Header ── */}
         <motion.div variants={itemVariants}>
@@ -297,10 +310,8 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
 
               {showActions && (
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="size-10 p-0 rounded-xl">
-                      <MoreVertical className="size-4" />
-                    </Button>
+                  <DropdownMenuTrigger className="inline-flex size-10 items-center justify-center rounded-xl border border-input bg-background text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                    <MoreVertical className="size-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {isReturnable && (
@@ -330,7 +341,7 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
         {/* ── KPI Strip ── */}
         <motion.div
           variants={itemVariants}
-          className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+          className="grid grid-cols-3 gap-3"
         >
           <KpiCard
             title="Total"
@@ -345,10 +356,7 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
           <KpiCard
             title="Productos"
             value={itemCount}
-            format={(n) =>
-              `${n} ${n === 1 ? "artículo" : "artículos"}`
-            }
-            subtitle={`${sale.sale_items.length} ${sale.sale_items.length === 1 ? "línea" : "líneas"}`}
+            subtitle={`${itemCount === 1 ? "artículo" : "artículos"} · ${sale.sale_items.length} ${sale.sale_items.length === 1 ? "línea" : "líneas"}`}
             icon={ShoppingBag}
             iconBg="bg-blush-50"
             iconColor="text-blush-500"
@@ -363,9 +371,9 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
                 ? `${sale.sale_payments.length} métodos`
                 : "Pago único"
             }
-            icon={PaymentIcon}
-            iconBg="bg-neutral-100"
-            iconColor="text-neutral-500"
+            icon={paymentStyle.icon}
+            iconBg={paymentStyle.iconBg}
+            iconColor={paymentStyle.iconColor}
             delay={0.12}
           />
         </motion.div>
@@ -455,33 +463,37 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
         {/* ── Payments ── */}
         <SectionCard
           label="Forma de pago"
-          icon={Banknote}
-          iconBg="bg-neutral-100"
-          iconColor="text-neutral-500"
+          icon={paymentStyle.icon}
+          iconBg={paymentStyle.iconBg}
+          iconColor={paymentStyle.iconColor}
           delay={0.24}
+          className={paymentStyle.cardBg ? `${paymentStyle.cardBg} ${paymentStyle.cardBorder}` : ""}
         >
-          <div className="rounded-xl bg-neutral-50 p-4">
+          <div className={`rounded-xl p-4 ${paymentStyle.innerBg}`}>
             <div className="space-y-2">
-              {sale.sale_payments.map((p) => (
-                <div
-                  key={p.id}
-                  className="flex items-center justify-between text-sm"
-                >
-                  <span className="text-neutral-600">
-                    {PAYMENT_METHODS[
-                      p.method as keyof typeof PAYMENT_METHODS
-                    ] ?? p.method}
-                    {p.reference && (
-                      <span className="ml-1.5 text-xs text-neutral-400">
-                        ({p.reference})
-                      </span>
-                    )}
-                  </span>
-                  <span className="font-medium tabular-nums text-neutral-950">
-                    {formatCurrency(Number(p.amount))}
-                  </span>
-                </div>
-              ))}
+              {sale.sale_payments.map((p) => {
+                const pStyle = METHOD_STYLE[p.method] ?? MIXED_STYLE
+                return (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className={pStyle.labelColor}>
+                      {PAYMENT_METHODS[
+                        p.method as keyof typeof PAYMENT_METHODS
+                      ] ?? p.method}
+                      {p.reference && (
+                        <span className="ml-1.5 text-xs opacity-60">
+                          ({p.reference})
+                        </span>
+                      )}
+                    </span>
+                    <span className="font-medium tabular-nums text-neutral-950">
+                      {formatCurrency(Number(p.amount))}
+                    </span>
+                  </div>
+                )
+              })}
             </div>
 
             {/* Change */}
@@ -595,7 +607,8 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
             </div>
           </SectionCard>
         )}
-      </motion.div>
+      </motion.div>}
+      </BoneyardSkeleton>
 
       {/* ── Hidden receipt for printing ── */}
       {receiptData && (
@@ -615,7 +628,7 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
         open={showCancelDialog}
         onOpenChange={(open) => !open && setShowCancelDialog(false)}
         title="Cancelar venta"
-        description={`Se cancelara la venta "${sale.sale_number}" y se regresara el stock al inventario. Esta accion no se puede deshacer.`}
+        description={`Se cancelara la venta "${sale?.sale_number}" y se regresara el stock al inventario. Esta accion no se puede deshacer.`}
         confirmLabel="Cancelar venta"
         variant="destructive"
         isLoading={isCancelling}
