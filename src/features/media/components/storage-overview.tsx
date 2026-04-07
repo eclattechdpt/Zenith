@@ -8,6 +8,9 @@ import {
   Database,
 } from "lucide-react"
 
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
+
+import { StorageOverviewFixture } from "./fixtures/storage-overview-fixture"
 import type { MediaStats } from "../types"
 
 interface StorageOverviewProps {
@@ -61,34 +64,37 @@ export function StorageOverview({ stats, isLoading }: StorageOverviewProps) {
   return (
     <div className="space-y-5">
       {/* KPI cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {kpis.map((kpi) => (
-          <div
-            key={kpi.key}
-            className="flex items-center gap-3 rounded-xl border border-neutral-200/60 bg-white p-3.5"
-          >
+      <BoneyardSkeleton
+        name="storage-overview"
+        loading={isLoading}
+        animate="shimmer"
+        fixture={<StorageOverviewFixture />}
+      >
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {kpis.map((kpi) => (
             <div
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${kpi.bg}`}
+              key={kpi.key}
+              className="flex items-center gap-3 rounded-xl border border-neutral-200/60 bg-white p-3.5"
             >
-              <kpi.icon className={`h-4 w-4 ${kpi.iconColor}`} />
-            </div>
-            <div className="min-w-0">
-              {isLoading ? (
-                <div className="h-6 w-10 animate-pulse rounded bg-neutral-100" />
-              ) : (
+              <div
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${kpi.bg}`}
+              >
+                <kpi.icon className={`h-4 w-4 ${kpi.iconColor}`} />
+              </div>
+              <div className="min-w-0">
                 <p
                   className={`text-lg font-semibold leading-none ${kpi.valueColor}`}
                 >
                   {stats[kpi.key]}
                 </p>
-              )}
-              <p className="mt-0.5 truncate text-[11px] text-neutral-400">
-                {kpi.label}
-              </p>
+                <p className="mt-0.5 truncate text-[11px] text-neutral-400">
+                  {kpi.label}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </BoneyardSkeleton>
 
       {/* Coverage bar */}
       <div className="space-y-2">
