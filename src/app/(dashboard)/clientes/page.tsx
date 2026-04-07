@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Users, Percent, UserX } from "lucide-react"
 import { AnimatePresence } from "motion/react"
@@ -13,7 +13,7 @@ import { CustomerProfileDialog } from "@/features/clientes/components/customer-p
 import { CustomerPreviewCard } from "@/features/clientes/components/customer-preview-card"
 import { useCustomerStats } from "@/features/clientes/queries"
 
-export default function ClientesPage() {
+function ClientesPageContent() {
   const searchParams = useSearchParams()
   const stats = useCustomerStats()
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -144,5 +144,13 @@ export default function ClientesPage() {
         )}
       </AnimatePresence>
     </>
+  )
+}
+
+export default function ClientesPage() {
+  return (
+    <Suspense>
+      <ClientesPageContent />
+    </Suspense>
   )
 }

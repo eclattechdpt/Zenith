@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { FileText, ArrowRightLeft, CheckCircle2 } from "lucide-react"
 
 import { PageHero } from "@/components/shared/page-hero"
@@ -15,6 +15,7 @@ export default function NotasCreditoPage() {
   const [createOpen, setCreateOpen] = useState(false)
 
   return (
+    <Suspense>
     <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
       <PageHero
         title="Notas de Credito"
@@ -68,5 +69,6 @@ export default function NotasCreditoPage() {
         onOpenChange={setCreateOpen}
       />
     </div>
+    </Suspense>
   )
 }

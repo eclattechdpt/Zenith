@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { History } from "lucide-react"
 
 import { PageHero } from "@/components/shared/page-hero"
@@ -9,6 +10,7 @@ import { ExportLog } from "@/features/reportes/components/export-log"
 
 export default function ReportesPage() {
   return (
+    <Suspense>
     <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
       <PageHero title="Reportes y Exportaciones" />
 
@@ -25,5 +27,6 @@ export default function ReportesPage() {
         <ExportLog />
       </SectionCard>
     </div>
+    </Suspense>
   )
 }

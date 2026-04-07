@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { Receipt, DollarSign, TrendingUp } from "lucide-react"
 
 import { PageHero } from "@/components/shared/page-hero"
@@ -12,6 +13,7 @@ export default function VentasPage() {
   const stats = useSalesStats()
 
   return (
+    <Suspense>
     <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
       <PageHero title="Ventas y Cotizaciones" />
 
@@ -49,5 +51,6 @@ export default function VentasPage() {
       {/* Sales table */}
       <SalesTable />
     </div>
+    </Suspense>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, Plus, Truck, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
@@ -119,6 +119,7 @@ export default function InventarioTransitoPage() {
   }
 
   return (
+    <Suspense>
     <motion.div
       variants={containerVariants}
       initial="hidden"
@@ -422,5 +423,6 @@ export default function InventarioTransitoPage() {
         onConfirm={handleDeleteWeek}
       />
     </motion.div>
+    </Suspense>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import {
   FolderTree,
@@ -71,6 +71,7 @@ export default function ConfiguracionPage() {
   }
 
   return (
+    <Suspense>
     <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
       <PageHero title="Configuracion" />
 
@@ -177,5 +178,6 @@ export default function ConfiguracionPage() {
         onCancel={() => setShowPasswordDialog(false)}
       />
     </div>
+    </Suspense>
   )
 }

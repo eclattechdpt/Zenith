@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { Ticket, Clock, CheckCircle2, AlertCircle } from "lucide-react"
 
 import { PageHero } from "@/components/shared/page-hero"
@@ -12,6 +13,7 @@ export default function ValesPage() {
   const stats = useValeStats()
 
   return (
+    <Suspense>
     <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
       <PageHero title="Vales" />
 
@@ -65,5 +67,6 @@ export default function ValesPage() {
         <ValesTable />
       </SectionCard>
     </div>
+    </Suspense>
   )
 }
