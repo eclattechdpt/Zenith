@@ -53,7 +53,7 @@ function getDateRange(
   customDate?: string
 ): { from: string; to: string } | null {
   const now = new Date()
-  const todayEnd = `${format(now, "yyyy-MM-dd")}T23:59:59`
+  const todayEnd = endOfDay(now).toISOString()
   if (preset === "today") {
     return { from: startOfDay(now).toISOString(), to: todayEnd }
   }

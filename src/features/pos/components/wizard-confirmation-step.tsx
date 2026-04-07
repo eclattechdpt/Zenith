@@ -40,6 +40,7 @@ interface WizardConfirmationStepProps {
   onCompleteSale: () => Promise<void>
   onPendingSale: () => Promise<void>
   onCreateVale: (paymentStatus: "paid" | "pending") => Promise<void>
+  onSplitSale: (valePaymentStatus: "paid" | "pending") => Promise<void>
   onPrint: () => void
   onBack: () => void
   onClose: () => void
@@ -51,6 +52,7 @@ export function WizardConfirmationStep({
   onCompleteSale,
   onPendingSale,
   onCreateVale,
+  onSplitSale,
   onPrint,
   onBack,
   onClose,
@@ -62,11 +64,26 @@ export function WizardConfirmationStep({
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const getTotal = usePOSStore((s) => s.getTotal)
 
+  const inStockItems = items.filter((i) => i.stock > 0)
+  const outOfStockItems = items.filter((i) => i.stock === 0)
+  const hasOutOfStock = outOfStockItems.length > 0
+  const isMixedCart = inStockItems.length > 0 && outOfStockItems.length > 0
+  const isAllOutOfStock = inStockItems.length === 0 && outOfStockItems.length > 0
+
+  const inStockTotal = inStockItems.reduce(
+    (sum, i) => sum + Math.max(0, i.unitPrice * i.quantity - i.discount),
+    0
+  )
+  const outOfStockTotal = outOfStockItems.reduce(
+    (sum, i) => sum + Math.max(0, i.unitPrice * i.quantity - i.discount),
+    0
+  )
+
   const [submitting, setSubmitting] = useState<"complete" | "pending" | "vale-paid" | "vale-pending" | null>(
     null
   )
   const [confirmAction, setConfirmAction] = useState<
-    "complete" | "pending" | "vale" | null
+    "complete" | "pending" | "vale" | "split" | null
   >(null)
 
   const isOnline = useOnlineStatus()
@@ -99,6 +116,16 @@ export function WizardConfirmationStep({
     setSubmitting(paymentStatus === "paid" ? "vale-paid" : "vale-pending")
     try {
       await onCreateVale(paymentStatus)
+    } finally {
+      setSubmitting(null)
+    }
+  }
+
+  const handleSplit = async (valePaymentStatus: "paid" | "pending") => {
+    setConfirmAction(null)
+    setSubmitting("complete")
+    try {
+      await onSplitSale(valePaymentStatus)
     } finally {
       setSubmitting(null)
     }
@@ -234,32 +261,88 @@ export function WizardConfirmationStep({
           {/* Order details card */}
           <div className="rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-sm shadow-neutral-900/[0.02]">
             <div className="mb-5">
-              <div className="mb-3 flex items-center gap-2">
-                <ShoppingBag className="h-4 w-4 text-neutral-400" />
-                <p className="text-[11px] font-bold uppercase tracking-[1.5px] text-neutral-400">
-                  Productos ({items.length})
-                </p>
-              </div>
-              <div className="space-y-3">
-                {items.map((item) => (
-                  <div
-                    key={item.variantId}
-                    className="flex items-center justify-between rounded-lg bg-neutral-50/60 px-3.5 py-3"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-neutral-800">
-                        {item.productName}
-                      </p>
-                      <p className="mt-0.5 text-xs text-neutral-400">
-                        {formatCurrency(item.unitPrice)} x {item.quantity}
-                      </p>
-                    </div>
-                    <p className="flex-shrink-0 text-sm font-bold tabular-nums text-neutral-800">
-                      {formatCurrency(item.unitPrice * item.quantity)}
+              {/* In-stock items */}
+              {inStockItems.length > 0 && (
+                <>
+                  <div className="mb-3 flex items-center gap-2">
+                    <ShoppingBag className="h-4 w-4 text-neutral-400" />
+                    <p className="text-[11px] font-bold uppercase tracking-[1.5px] text-neutral-400">
+                      {isMixedCart ? "Venta" : "Productos"} ({inStockItems.length})
                     </p>
                   </div>
-                ))}
-              </div>
+                  <div className="space-y-3">
+                    {inStockItems.map((item) => (
+                      <div
+                        key={item.variantId}
+                        className="flex items-center justify-between rounded-lg bg-neutral-50/60 px-3.5 py-3"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-neutral-800">
+                            {item.productName}
+                          </p>
+                          <p className="mt-0.5 text-xs text-neutral-400">
+                            {formatCurrency(item.unitPrice)} x {item.quantity}
+                          </p>
+                        </div>
+                        <p className="flex-shrink-0 text-sm font-bold tabular-nums text-neutral-800">
+                          {formatCurrency(item.unitPrice * item.quantity)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  {isMixedCart && (
+                    <div className="mt-2 flex justify-between px-1 text-xs">
+                      <span className="text-neutral-400">Subtotal venta</span>
+                      <span className="font-semibold tabular-nums text-neutral-600">
+                        {formatCurrency(inStockTotal)}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Out-of-stock items */}
+              {outOfStockItems.length > 0 && (
+                <>
+                  {inStockItems.length > 0 && (
+                    <div className="my-4 h-px bg-indigo-100" />
+                  )}
+                  <div className="mb-3 flex items-center gap-2">
+                    <Ticket className="h-4 w-4 text-indigo-400" />
+                    <p className="text-[11px] font-bold uppercase tracking-[1.5px] text-indigo-400">
+                      Vale — sin stock ({outOfStockItems.length})
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    {outOfStockItems.map((item) => (
+                      <div
+                        key={item.variantId}
+                        className="flex items-center justify-between rounded-lg bg-indigo-50/50 px-3.5 py-3"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-neutral-800">
+                            {item.productName}
+                          </p>
+                          <p className="mt-0.5 text-xs text-neutral-400">
+                            {formatCurrency(item.unitPrice)} x {item.quantity}
+                          </p>
+                        </div>
+                        <p className="flex-shrink-0 text-sm font-bold tabular-nums text-neutral-800">
+                          {formatCurrency(item.unitPrice * item.quantity)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  {isMixedCart && (
+                    <div className="mt-2 flex justify-between px-1 text-xs">
+                      <span className="text-indigo-400">Subtotal vale</span>
+                      <span className="font-semibold tabular-nums text-indigo-600">
+                        {formatCurrency(outOfStockTotal)}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             <div className="h-px bg-neutral-100" />
@@ -344,6 +427,17 @@ export function WizardConfirmationStep({
           </div>
         )}
 
+        {isAllOutOfStock && (
+          <div className="flex-shrink-0 bg-indigo-50 px-6 py-2 text-center text-xs font-semibold text-indigo-700 sm:px-8">
+            Todos los productos estan sin stock — solo se puede crear un vale
+          </div>
+        )}
+        {isMixedCart && (
+          <div className="flex-shrink-0 bg-indigo-50 px-6 py-2 text-center text-xs font-semibold text-indigo-700 sm:px-8">
+            Al completar se creara una venta por los productos disponibles y un vale por los sin stock
+          </div>
+        )}
+
         {/* Footer */}
         <div className="flex flex-shrink-0 items-center gap-3 border-t border-neutral-200/60 bg-white px-6 py-4 shadow-[0_-1px_3px_rgba(0,0,0,0.04)] sm:px-8">
           <button
@@ -357,7 +451,7 @@ export function WizardConfirmationStep({
           <button
             type="button"
             onClick={() => setConfirmAction("pending")}
-            disabled={submitting !== null || !isOnline}
+            disabled={submitting !== null || !isOnline || isAllOutOfStock}
             className="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-amber-300 bg-amber-50 px-6 text-sm font-bold text-amber-700 transition-all hover:bg-amber-100 active:scale-[0.98] disabled:opacity-40"
           >
             {submitting === "pending" ? (
@@ -389,8 +483,8 @@ export function WizardConfirmationStep({
           </button>
           <button
             type="button"
-            onClick={() => setConfirmAction("complete")}
-            disabled={submitting !== null || !isOnline}
+            onClick={() => setConfirmAction(isMixedCart ? "split" : "complete")}
+            disabled={submitting !== null || !isOnline || isAllOutOfStock}
             className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-accent-500 text-base font-bold text-white shadow-sm shadow-accent-500/20 transition-all hover:bg-accent-600 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
           >
             {submitting === "complete" ? (
@@ -398,7 +492,7 @@ export function WizardConfirmationStep({
             ) : (
               <Check className="h-5 w-5" />
             )}
-            Completar venta
+            {isMixedCart ? "Venta + Vale" : "Completar venta"}
           </button>
         </div>
       </div>
@@ -425,6 +519,67 @@ export function WizardConfirmationStep({
         isLoading={submitting === "pending"}
         onConfirm={handlePending}
       />
+
+      {/* Split dialog — sale + vale, asks vale payment status */}
+      {confirmAction === "split" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-1 flex items-center gap-2">
+              <Check className="h-5 w-5 text-accent-500" />
+              <h3 className="text-lg font-bold text-neutral-900">
+                Venta + Vale
+              </h3>
+            </div>
+            <p className="mt-3 text-sm text-neutral-500">
+              Se creara una <span className="font-semibold text-neutral-700">venta</span> por{" "}
+              <span className="font-semibold text-neutral-700">{formatCurrency(inStockTotal)}</span>{" "}
+              ({inStockItems.length} producto{inStockItems.length !== 1 ? "s" : ""} con stock) y un{" "}
+              <span className="font-semibold text-indigo-700">vale</span> por{" "}
+              <span className="font-semibold text-indigo-700">{formatCurrency(outOfStockTotal)}</span>{" "}
+              ({outOfStockItems.length} producto{outOfStockItems.length !== 1 ? "s" : ""} sin stock).
+            </p>
+            <p className="mt-4 text-sm font-semibold text-neutral-700">
+              El cliente ya pago los productos del vale?
+            </p>
+            <div className="mt-3 flex gap-3">
+              <button
+                type="button"
+                onClick={() => handleSplit("pending")}
+                disabled={submitting !== null}
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-amber-300 bg-amber-50 text-sm font-bold text-amber-700 transition-all hover:bg-amber-100 active:scale-[0.98] disabled:opacity-40"
+              >
+                {submitting === "complete" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Clock className="h-4 w-4" />
+                )}
+                No, pendiente
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSplit("paid")}
+                disabled={submitting !== null}
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-500 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-40"
+              >
+                {submitting === "complete" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="h-4 w-4" />
+                )}
+                Si, pagado
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setConfirmAction(null)}
+              disabled={submitting !== null}
+              className="mt-3 w-full text-center text-sm font-medium text-neutral-400 transition-colors hover:text-neutral-600 disabled:opacity-40"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Vale dialog — asks paid or pending */}
       {confirmAction === "vale" && (

@@ -71,28 +71,34 @@ export const POSProductCard = memo(function POSProductCard({
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleAdd = useCallback(() => {
-    if (outOfStock || justAdded) return
+    if (justAdded) return
     onAdd(product)
     setJustAdded(true)
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(() => setJustAdded(false), 1000)
-  }, [onAdd, product, outOfStock, justAdded])
+  }, [onAdd, product, justAdded])
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={outOfStock ? undefined : { y: -3, transition: { type: "spring", stiffness: 300, damping: 20 } }}
-      whileTap={outOfStock ? undefined : { scale: 0.98 }}
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-transparent bg-white shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-accent-200 hover:shadow-md hover:shadow-accent-500/8 ${
-        outOfStock ? "opacity-50 grayscale-[30%]" : ""
-      }`}
+      whileHover={{ y: -3, transition: { type: "spring", stiffness: 300, damping: 20 } }}
+      whileTap={{ scale: 0.98 }}
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-transparent bg-white shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-accent-200 hover:shadow-md hover:shadow-accent-500/8"
     >
-      {/* Low stock badge */}
-      {lowStock && (
+      {/* Stock badge — always visible */}
+      {outOfStock ? (
+        <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-md bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-600">
+          Sin stock
+        </span>
+      ) : lowStock ? (
         <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-600">
           <AlertCircle className="h-3 w-3" />
           {available}
+        </span>
+      ) : (
+        <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">
+          {available} en stock
         </span>
       )}
 
@@ -140,12 +146,13 @@ export const POSProductCard = memo(function POSProductCard({
             <TooltipTrigger
               render={
                 <button
-                  disabled={outOfStock}
                   onClick={handleAdd}
-                  className={`relative flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl transition-colors active:scale-[0.95] disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-300 ${
+                  className={`relative flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl transition-colors active:scale-[0.95] ${
                     justAdded
                       ? "bg-emerald-100 text-emerald-600"
-                      : "bg-rose-100 text-rose-500 hover:bg-rose-200"
+                      : outOfStock
+                        ? "bg-indigo-100 text-indigo-500 hover:bg-indigo-200"
+                        : "bg-rose-100 text-rose-500 hover:bg-rose-200"
                   }`}
                 />
               }
@@ -177,7 +184,7 @@ export const POSProductCard = memo(function POSProductCard({
               </AnimatePresence>
             </TooltipTrigger>
             <TooltipContent side="top" sideOffset={6}>
-              {outOfStock ? "Agotado" : justAdded ? "Agregado" : "Agregar al carrito"}
+              {justAdded ? "Agregado" : outOfStock ? "Agregar como vale" : "Agregar al carrito"}
             </TooltipContent>
           </Tooltip>
         </div>

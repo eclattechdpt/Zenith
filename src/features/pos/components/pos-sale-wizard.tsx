@@ -283,6 +283,123 @@ export function POSSaleWizard({
     }
   }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline])
 
+  // ── Split sale (in-stock → sale, out-of-stock → vale) ──
+
+  const handleSplitSale = useCallback(async (valePaymentStatus: "paid" | "pending") => {
+    if (!isOnline) {
+      toast.error("Sin conexion", {
+        description: "Revisa tu conexion a internet e intenta de nuevo.",
+      })
+      return
+    }
+    if (!customer) {
+      toast.error("Se requiere un cliente para crear un vale")
+      return
+    }
+
+    const inStockItems = items.filter((i) => i.stock > 0)
+    const outOfStockItems = items.filter((i) => i.stock === 0)
+
+    if (inStockItems.length === 0 || outOfStockItems.length === 0) return
+
+    try {
+      // 1. Create sale for in-stock items
+      const saleItems = inStockItems.map((item) => ({
+        product_variant_id: item.variantId,
+        product_name: item.productName,
+        variant_label: item.variantLabel,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        unit_cost: item.unitCost,
+        discount: item.discount,
+      }))
+
+      const saleSubtotal = inStockItems.reduce(
+        (sum, i) => sum + i.unitPrice * i.quantity, 0
+      )
+      const saleItemsDiscount = inStockItems.reduce(
+        (sum, i) => sum + i.discount, 0
+      )
+      const saleTotal = Math.max(0, saleSubtotal - saleItemsDiscount)
+
+      // Adjust payments to cover only the sale total
+      const adjustedPayments = payments.map((p, idx) => {
+        if (idx === 0) return { method: p.method, amount: Math.min(p.amount, saleTotal), reference: p.reference ?? null }
+        return { method: p.method, amount: p.amount, reference: p.reference ?? null }
+      })
+      const paymentSum = adjustedPayments.reduce((s, p) => s + p.amount, 0)
+      if (paymentSum < saleTotal && adjustedPayments.length > 0) {
+        adjustedPayments[0].amount += saleTotal - paymentSum
+      }
+
+      const saleResult = await createSale({
+        customer_id: customer.id,
+        items: saleItems,
+        payments: adjustedPayments.filter((p) => p.amount > 0),
+        discount_amount: 0,
+        notes: notes || null,
+      })
+
+      if (saleResult.error) {
+        const msg =
+          "_form" in saleResult.error
+            ? (saleResult.error._form as string[])[0]
+            : "Error al crear la venta"
+        toast.error(msg)
+        return
+      }
+
+      // 2. Create vale for out-of-stock items
+      const valeItems = outOfStockItems.map((item) => ({
+        product_variant_id: item.variantId,
+        product_name: item.productName,
+        variant_label: item.variantLabel,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        unit_cost: item.unitCost,
+        discount: item.discount,
+      }))
+
+      const valeResult = await createVale({
+        customer_id: customer.id,
+        items: valeItems,
+        payment_status: valePaymentStatus,
+        discount_amount: 0,
+        notes: notes ? `Separado de venta ${saleResult.data!.sale_number}` : null,
+      })
+
+      if (valeResult.error) {
+        const msg =
+          "_form" in valeResult.error
+            ? (valeResult.error._form as string[])[0]
+            : "Error al crear el vale"
+        toast.error(`Venta creada pero error en vale: ${msg}`)
+        setSaleResult({ sale_number: saleResult.data!.sale_number })
+        clear()
+        return
+      }
+
+      setSaleResult({
+        sale_number: `${saleResult.data!.sale_number} + ${valeResult.data!.vale_number}`,
+      })
+      toast.success("Venta y vale creados", {
+        description: `Venta ${saleResult.data!.sale_number} completada. Vale ${valeResult.data!.vale_number} ${valePaymentStatus === "paid" ? "pagado" : "pendiente de pago"}.`,
+      })
+      clear()
+      queryClient.invalidateQueries({ queryKey: ["sales"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["pos"] })
+      queryClient.invalidateQueries({ queryKey: ["vales"] })
+      queryClient.invalidateQueries({ queryKey: ["vales-ready"] })
+      queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
+    } catch {
+      toast.error("Error de conexion", {
+        description: "No se pudo conectar con el servidor. Intenta de nuevo.",
+      })
+    }
+  }, [items, customer, payments, notes, globalDiscount, clear, queryClient, isOnline])
+
   // ── Print ──
 
   const handlePrint = useCallback(() => {
@@ -452,6 +569,7 @@ export function POSSaleWizard({
                   onCompleteSale={handleCompleteSale}
                   onPendingSale={handlePendingSale}
                   onCreateVale={handleCreateVale}
+                  onSplitSale={handleSplitSale}
                   onPrint={handlePrint}
                   onBack={goBack}
                   onClose={handleClose}

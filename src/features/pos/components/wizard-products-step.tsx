@@ -12,6 +12,7 @@ import {
   Tag,
   Percent,
   X,
+  Package,
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { cn } from "@/lib/utils"
@@ -47,17 +48,23 @@ export function WizardProductsStep({
   const getTotal = usePOSStore((s) => s.getTotal)
   const getItemCount = usePOSStore((s) => s.getItemCount)
 
-  const handleAddProduct = useCallback(
-    async (product: POSProductWithImage) => {
-      const availableVariants = product.product_variants.filter(
-        (v) => v.is_active && v.stock - v.reserved_stock > 0
-      )
-      if (availableVariants.length === 0) return
+  // Out-of-stock confirmation dialog state
+  const [pendingOosProduct, setPendingOosProduct] = useState<POSProductWithImage | null>(null)
 
-      const variant = availableVariants[0]
+  const doAddProduct = useCallback(
+    async (product: POSProductWithImage) => {
+      const activeVariants = product.product_variants.filter(
+        (v) => v.is_active
+      )
+      if (activeVariants.length === 0) return
+
+      const variant = activeVariants[0]
       const existingItem = items.find((i) => i.variantId === variant.id)
-      const availableStock = variant.stock - variant.reserved_stock
-      if (existingItem && existingItem.quantity >= availableStock) return
+      const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
+
+      // For in-stock products, cap quantity at available stock
+      // For out-of-stock products (vale candidates), allow unlimited quantity
+      if (availableStock > 0 && existingItem && existingItem.quantity >= availableStock) return
 
       let price = variant.price
       if (customer) {
@@ -88,6 +95,26 @@ export function WizardProductsStep({
     [addItem, customer, items]
   )
 
+  const handleAddProduct = useCallback(
+    async (product: POSProductWithImage) => {
+      const activeVariants = product.product_variants.filter((v) => v.is_active)
+      if (activeVariants.length === 0) return
+
+      const variant = activeVariants[0]
+      const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
+      const existingItem = items.find((i) => i.variantId === variant.id)
+
+      // First time adding an out-of-stock product → show confirmation dialog
+      if (availableStock === 0 && !existingItem) {
+        setPendingOosProduct(product)
+        return
+      }
+
+      await doAddProduct(product)
+    },
+    [doAddProduct, items]
+  )
+
   const { data: priceLists = [] } = usePriceLists()
   const activeDiscounts = priceLists.filter((pl) => Number(pl.discount_percent) > 0)
 
@@ -99,6 +126,7 @@ export function WizardProductsStep({
   const hasItems = items.length > 0
 
   return (
+    <>
     <div className="flex h-full flex-col">
       {/* ── Main area: product grid + cart panel ── */}
       <div className="flex min-h-0 flex-1">
@@ -240,7 +268,7 @@ export function WizardProductsStep({
                             </span>
                             <button
                               type="button"
-                              disabled={item.quantity >= item.stock}
+                              disabled={item.stock > 0 && item.quantity >= item.stock}
                               onClick={() =>
                                 updateQuantity(
                                   item.variantId,
@@ -511,5 +539,46 @@ export function WizardProductsStep({
         </button>
       </div>
     </div>
+
+      {/* Out-of-stock confirmation dialog */}
+      {pendingOosProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-1 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100">
+                <Package className="h-4 w-4 text-indigo-600" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-900">
+                Producto sin stock
+              </h3>
+            </div>
+            <p className="mt-3 text-sm text-neutral-500">
+              <span className="font-semibold text-neutral-700">&quot;{pendingOosProduct.name}&quot;</span>{" "}
+              no tiene stock disponible. Solo se podra vender como vale — el
+              cliente recibira el producto cuando se reabastezca.
+            </p>
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setPendingOosProduct(null)}
+                className="flex h-10 flex-1 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-semibold text-neutral-600 transition-colors hover:bg-neutral-100"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await doAddProduct(pendingOosProduct)
+                  setPendingOosProduct(null)
+                }}
+                className="flex h-10 flex-1 items-center justify-center rounded-xl bg-indigo-500 text-sm font-bold text-white transition-colors hover:bg-indigo-600 active:scale-[0.98]"
+              >
+                Entendido, agregar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

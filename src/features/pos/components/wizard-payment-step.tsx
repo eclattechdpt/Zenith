@@ -457,7 +457,7 @@ export function WizardPaymentStep({
                         sideOffset={6}
                         className="min-w-[180px]"
                       >
-                        {Object.entries(PAYMENT_METHODS).map(([key, label]) => {
+                        {Object.entries(PAYMENT_METHODS).filter(([key]) => key !== "credit_note").map(([key, label]) => {
                           const m =
                             METHOD_META[key] ?? METHOD_META.other
                           const MIcon = m.icon
