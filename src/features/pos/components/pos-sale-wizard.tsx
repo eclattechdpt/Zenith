@@ -222,13 +222,11 @@ export function POSSaleWizard({
 
   const handleCreateVale = useCallback(async (paymentStatus: "paid" | "pending") => {
     if (!isOnline) {
-      toast.error("Sin conexion", {
-        description: "Revisa tu conexion a internet e intenta de nuevo.",
-      })
+      sileo.error({ title: "Sin conexion", description: "Revisa tu conexion a internet e intenta de nuevo." })
       return
     }
     if (!customer) {
-      toast.error("Se requiere un cliente para crear un vale")
+      sileo.error({ title: "Se requiere un cliente para crear un vale" })
       return
     }
     try {
@@ -253,11 +251,12 @@ export function POSSaleWizard({
           "_form" in result.error
             ? (result.error._form as string[])[0]
             : "Error al crear el vale"
-        toast.error(msg)
+        sileo.error({ title: msg })
         return
       }
       setSaleResult({ sale_number: result.data!.vale_number })
-      toast.success(`Vale ${result.data!.vale_number} creado`, {
+      sileo.success({
+        title: `Vale ${result.data!.vale_number} creado`,
         description: paymentStatus === "paid"
           ? "El cliente ya pago. Entregar cuando haya stock."
           : "Cobrar al cliente cuando recoja el producto.",
@@ -267,9 +266,7 @@ export function POSSaleWizard({
       queryClient.invalidateQueries({ queryKey: ["vales-ready"] })
       queryClient.invalidateQueries({ queryKey: ["pos"] })
     } catch {
-      toast.error("Error de conexion", {
-        description: "No se pudo conectar con el servidor. Intenta de nuevo.",
-      })
+      sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
   }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline])
 
@@ -277,13 +274,11 @@ export function POSSaleWizard({
 
   const handleSplitSale = useCallback(async (valePaymentStatus: "paid" | "pending") => {
     if (!isOnline) {
-      toast.error("Sin conexion", {
-        description: "Revisa tu conexion a internet e intenta de nuevo.",
-      })
+      sileo.error({ title: "Sin conexion", description: "Revisa tu conexion a internet e intenta de nuevo." })
       return
     }
     if (!customer) {
-      toast.error("Se requiere un cliente para crear un vale")
+      sileo.error({ title: "Se requiere un cliente para crear un vale" })
       return
     }
 
@@ -335,7 +330,7 @@ export function POSSaleWizard({
           "_form" in saleResult.error
             ? (saleResult.error._form as string[])[0]
             : "Error al crear la venta"
-        toast.error(msg)
+        sileo.error({ title: msg })
         return
       }
 
@@ -363,7 +358,7 @@ export function POSSaleWizard({
           "_form" in valeResult.error
             ? (valeResult.error._form as string[])[0]
             : "Error al crear el vale"
-        toast.error(`Venta creada pero error en vale: ${msg}`)
+        sileo.error({ title: `Venta creada pero error en vale: ${msg}` })
         setSaleResult({ sale_number: saleResult.data!.sale_number })
         clear()
         return
@@ -372,7 +367,8 @@ export function POSSaleWizard({
       setSaleResult({
         sale_number: `${saleResult.data!.sale_number} + ${valeResult.data!.vale_number}`,
       })
-      toast.success("Venta y vale creados", {
+      sileo.success({
+        title: "Venta y vale creados",
         description: `Venta ${saleResult.data!.sale_number} completada. Vale ${valeResult.data!.vale_number} ${valePaymentStatus === "paid" ? "pagado" : "pendiente de pago"}.`,
       })
       clear()
@@ -384,9 +380,7 @@ export function POSSaleWizard({
       queryClient.invalidateQueries({ queryKey: ["vales-ready"] })
       queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
     } catch {
-      toast.error("Error de conexion", {
-        description: "No se pudo conectar con el servidor. Intenta de nuevo.",
-      })
+      sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
   }, [items, customer, payments, notes, globalDiscount, clear, queryClient, isOnline])
 
