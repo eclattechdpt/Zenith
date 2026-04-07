@@ -127,8 +127,8 @@ export function DevPanel() {
     ])
 
     setHealth(healthRes.data)
-    setAuth("data" in authRes ? authRes.data : null)
-    setStorage("data" in storageRes ? storageRes.data : null)
+    setAuth("data" in authRes ? (authRes.data ?? null) : null)
+    setStorage("data" in storageRes ? (storageRes.data ?? null) : null)
     setTables(tablesRes.data)
   }
 
