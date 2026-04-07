@@ -50,15 +50,16 @@ export function WizardProductsStep({
 
   // Out-of-stock confirmation dialog state
   const [pendingOosProduct, setPendingOosProduct] = useState<POSProductWithImage | null>(null)
+  // Variant picker state — for multi-variant products
+  const [variantPickerProduct, setVariantPickerProduct] = useState<POSProductWithImage | null>(null)
+  // Pending variant for OOS confirmation (multi-variant flow)
+  const [pendingOosVariant, setPendingOosVariant] = useState<POSProductWithImage["product_variants"][number] | null>(null)
 
-  const doAddProduct = useCallback(
-    async (product: POSProductWithImage) => {
-      const activeVariants = product.product_variants.filter(
-        (v) => v.is_active
-      )
-      if (activeVariants.length === 0) return
-
-      const variant = activeVariants[0]
+  const doAddVariant = useCallback(
+    async (
+      product: POSProductWithImage,
+      variant: POSProductWithImage["product_variants"][number]
+    ) => {
       const existingItem = items.find((i) => i.variantId === variant.id)
       const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
 
@@ -100,19 +101,44 @@ export function WizardProductsStep({
       const activeVariants = product.product_variants.filter((v) => v.is_active)
       if (activeVariants.length === 0) return
 
+      // Multi-variant product → show variant picker
+      if (product.has_variants && activeVariants.length > 1) {
+        setVariantPickerProduct(product)
+        return
+      }
+
+      // Single variant → add directly (with OOS check)
       const variant = activeVariants[0]
       const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
       const existingItem = items.find((i) => i.variantId === variant.id)
 
-      // First time adding an out-of-stock product → show confirmation dialog
       if (availableStock === 0 && !existingItem) {
         setPendingOosProduct(product)
         return
       }
 
-      await doAddProduct(product)
+      await doAddVariant(product, variant)
     },
-    [doAddProduct, items]
+    [doAddVariant, items]
+  )
+
+  const handlePickVariant = useCallback(
+    async (variant: POSProductWithImage["product_variants"][number]) => {
+      if (!variantPickerProduct) return
+      const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
+      const existingItem = items.find((i) => i.variantId === variant.id)
+
+      if (availableStock === 0 && !existingItem) {
+        setPendingOosVariant(variant)
+        setPendingOosProduct(variantPickerProduct)
+        setVariantPickerProduct(null)
+        return
+      }
+
+      await doAddVariant(variantPickerProduct, variant)
+      setVariantPickerProduct(null)
+    },
+    [doAddVariant, variantPickerProduct, items]
   )
 
   const { data: priceLists = [] } = usePriceLists()
@@ -540,6 +566,76 @@ export function WizardProductsStep({
       </div>
     </div>
 
+      {/* Variant picker dialog */}
+      {variantPickerProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-1 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100">
+                <Package className="h-4 w-4 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-neutral-900">
+                  {variantPickerProduct.name}
+                </h3>
+                {variantPickerProduct.brand && (
+                  <p className="text-xs text-neutral-400">{variantPickerProduct.brand}</p>
+                )}
+              </div>
+            </div>
+            <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
+              Selecciona una variante
+            </p>
+            <div className="mt-2 max-h-60 space-y-1.5 overflow-y-auto">
+              {variantPickerProduct.product_variants
+                .filter((v) => v.is_active)
+                .map((variant) => {
+                  const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
+                  const existingItem = items.find((i) => i.variantId === variant.id)
+                  const isFull = availableStock > 0 && existingItem && existingItem.quantity >= availableStock
+                  const isOos = availableStock === 0
+
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      disabled={!!isFull}
+                      onClick={() => handlePickVariant(variant)}
+                      className="flex w-full items-center justify-between rounded-xl border border-neutral-200/80 bg-white px-4 py-3 text-left transition-colors hover:border-rose-200 hover:bg-rose-50/50 disabled:opacity-40 disabled:pointer-events-none"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-neutral-800 truncate">
+                          {variant.name ?? variant.sku ?? "Variante"}
+                        </p>
+                        {variant.sku && variant.name && (
+                          <p className="text-xs text-neutral-400">{variant.sku}</p>
+                        )}
+                      </div>
+                      <div className="text-right shrink-0 ml-3">
+                        <p className="text-sm font-bold text-neutral-900 tabular-nums">
+                          {formatCurrency(variant.price)}
+                        </p>
+                        <p className={`text-[10px] font-semibold ${
+                          isOos ? "text-red-500" : availableStock <= 5 ? "text-amber-500" : "text-emerald-500"
+                        }`}>
+                          {isOos ? "Sin stock" : `${availableStock} en stock`}
+                        </p>
+                      </div>
+                    </button>
+                  )
+                })}
+            </div>
+            <button
+              type="button"
+              onClick={() => setVariantPickerProduct(null)}
+              className="mt-4 flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-semibold text-neutral-600 transition-colors hover:bg-neutral-100"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Out-of-stock confirmation dialog */}
       {pendingOosProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -553,14 +649,14 @@ export function WizardProductsStep({
               </h3>
             </div>
             <p className="mt-3 text-sm text-neutral-500">
-              <span className="font-semibold text-neutral-700">&quot;{pendingOosProduct.name}&quot;</span>{" "}
+              <span className="font-semibold text-neutral-700">&quot;{pendingOosProduct.name}{pendingOosVariant ? ` — ${pendingOosVariant.name}` : ""}&quot;</span>{" "}
               no tiene stock disponible. Solo se podra vender como vale — el
               cliente recibira el producto cuando se reabastezca.
             </p>
             <div className="mt-5 flex gap-3">
               <button
                 type="button"
-                onClick={() => setPendingOosProduct(null)}
+                onClick={() => { setPendingOosProduct(null); setPendingOosVariant(null) }}
                 className="flex h-10 flex-1 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-semibold text-neutral-600 transition-colors hover:bg-neutral-100"
               >
                 Cancelar
@@ -568,8 +664,11 @@ export function WizardProductsStep({
               <button
                 type="button"
                 onClick={async () => {
-                  await doAddProduct(pendingOosProduct)
+                  const product = pendingOosProduct
+                  const variant = pendingOosVariant ?? product.product_variants.filter((v) => v.is_active)[0]
+                  if (product && variant) await doAddVariant(product, variant)
                   setPendingOosProduct(null)
+                  setPendingOosVariant(null)
                 }}
                 className="flex h-10 flex-1 items-center justify-center rounded-xl bg-indigo-500 text-sm font-bold text-white transition-colors hover:bg-indigo-600 active:scale-[0.98]"
               >
