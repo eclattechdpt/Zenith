@@ -339,6 +339,18 @@ No saltar sprints. Cada sprint depende del anterior.
 - **Shared DateFilterPills** (2026-04-07): extracted reusable date filter component, added to Vales + Notas de Credito pages
 - **Ventas date fix** (2026-04-07): timezone bug in "Hoy" filter fixed (`endOfDay().toISOString()` instead of naive string)
 - **Search fixes** (2026-04-07): client-side filtering via `useMemo` for vales + credit notes (PostgREST joined table limitation)
+- **Cancel actions for all transactional modules** (2026-04-07): consistent cancel/delete across Vales, Notas de Credito, and Devoluciones
+  - Vales: cancel UI wired (action existed), "Cancelados" tab, ConfirmDialog, mobile card support
+  - Notas de Credito: `cancelCreditNote` action + schema, cancel UI for active notes (lending + exchange), "Canceladas" tab
+  - Devoluciones: `cancelReturn` action with full stock reversal (restock + replacement), cancel button on return cards in sale detail, cancelled returns shown faded with badge
+  - Sale status recalculation after return cancel (completed/partially_returned/fully_returned)
+  - All modules now follow same pattern: ConfirmDialog, destructive variant, XCircle icon, toast feedback, query invalidation
+- **Sale detail page Design A** (2026-04-07): redesigned with SectionCard (Productos/Pagos/Devoluciones), colored icons, proper spacing
+  - Cancelled returns: faded card, grey border, strikethrough refund, "Cancelada" badge
+  - "Cancelar venta" button unlocks when all returns are cancelled
+- **UI consistency fixes** (2026-04-07): status tab buttons use `variant="default"` (not inline accent), mobile card borders normalized to `neutral-100`, mobile card layout fix (buttons on separate row from date/total)
+- **POS variant picker** (2026-04-07): multi-variant products now show picker dialog instead of silently adding first variant. Shows name, price, stock per variant. OOS flow preserved.
+- **Fix: cancelled returns counted in max_returnable** (2026-04-07): return dialog now excludes cancelled returns from already-returned quantity calculation
 
 **Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
 

@@ -122,6 +122,16 @@
 - **Date filter pills** (2026-04-07): Shared `DateFilterPills` component (Hoy/Esta semana/Mes/Fecha) added to Vales and Notas de Credito pages
 - **Ventas date fix** (2026-04-07): Fixed timezone bug in "Hoy" filter — used `endOfDay().toISOString()` instead of naive string
 - **Search fixes** (2026-04-07): Vale and credit note search uses client-side filtering via `useMemo` (PostgREST joined table limitation). Placeholder hints with prefixes (VL-, NC-)
+- **Cancel actions — all transactional modules** (2026-04-07): Consistent cancel for Vales, Notas de Credito, and Devoluciones
+  - Vales: cancel UI (action existed), "Cancelados" tab, ConfirmDialog, mobile card
+  - Notas de Credito: `cancelCreditNote` action + UI, "Canceladas" tab, works on lending + exchange
+  - Devoluciones: `cancelReturn` action with stock reversal, cancel button on return cards, sale status recalculation
+  - All follow same pattern: ConfirmDialog, destructive XCircle, toast, query invalidation
+- **Sale detail Design A** (2026-04-07): SectionCard for Productos/Pagos/Devoluciones, cancelled returns faded with badge + strikethrough
+- **UI consistency** (2026-04-07): status tab variant fix, mobile card borders, mobile layout fix (buttons on separate row)
+- **POS variant picker** (2026-04-07): Multi-variant products show picker dialog in wizard instead of auto-adding first variant
+- **Fix: max_returnable** (2026-04-07): Return dialog excludes cancelled returns from already-returned count
+- **31 manual tests passed** (2026-04-07): Cancel flows, stock reversal, cross-module checks, mobile layout
 
 ### Pending
 - Design A for Inventario hub + Inventario Fisico
