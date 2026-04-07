@@ -4,8 +4,6 @@ import { NuqsAdapter } from "nuqs/adapters/next/app"
 import { QueryProvider } from "@/providers/query-provider"
 import { SileoToaster } from "@/components/shared/sileo-toaster"
 import { moduleAccentInlineScript } from "@/lib/module-accent"
-import "../bones/registry"
-
 import "./globals.css"
 
 const plusJakarta = Plus_Jakarta_Sans({
