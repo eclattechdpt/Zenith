@@ -9,8 +9,8 @@
     "lint": "eslint",
     "type-check": "tsc --noEmit",
     "test:e2e": "npx playwright test",
-    "bones": "npx boneyard-js build http://localhost:3000 http://localhost:3000/inventario/fisico",
-    "bones:force": "npx boneyard-js build http://localhost:3000 http://localhost:3000/inventario/fisico --force"
+    "bones": "npx boneyard-js build http://localhost:3000 http://localhost:3000/inventario/fisico http://localhost:3000/boneyard-capture",
+    "bones:force": "npx boneyard-js build http://localhost:3000 http://localhost:3000/inventario/fisico http://localhost:3000/boneyard-capture --force"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
