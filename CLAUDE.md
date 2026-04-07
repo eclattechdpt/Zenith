@@ -312,6 +312,33 @@ No saltar sprints. Cada sprint depende del anterior.
 - **Customer detail sheet** (2026-04-06): slide-over panel with client info + purchase history. Clickable names in table, "Ver detalle" dropdown. Date filters: Todo/Este mes/Anterior + Elegir with year nav + month grid. useCustomerSales query with server-side year/month filtering
 - **Global discount system** (2026-04-06): preset discount picker (from settings price lists) + custom % or $ input. Available in wizard products step, CartPanel, PaymentDialog, and WizardPaymentStep. Stacks with customer pricing
 - **POS product card cleanup** (2026-04-06): removed edit pencil icon from product cards in POS views
+- **Vales system** (2026-04-07): customer backorder vouchers for out-of-stock products
+  - New `/vales` page with KPIs, DataTable, status tabs, date filter, search
+  - POS wizard: "Vale" button in confirmation step (paid/pending), out-of-stock products selectable with confirmation dialog
+  - Mixed cart: "Venta + Vale" auto-split — sale for in-stock items + vale for out-of-stock items
+  - Stock badges always visible on POS product cards (green/amber/red), out-of-stock clickable with indigo + button
+  - Vale pickup: complete dialog deducts stock. DB trigger auto-updates status to "ready" when stock available
+  - Ready banner in dashboard layout, localStorage-persisted dismissal
+  - DB: `vales` + `vale_items` tables, `create_vale` + `complete_vale` RPCs, `check_vales_on_stock_change` trigger
+  - Key files: `src/features/vales/`, `src/app/(dashboard)/vales/page.tsx`, `src/features/pos/components/wizard-confirmation-step.tsx`
+- **Notas de Credito repurposed** (2026-04-07): distributor lending/exchange (replaces old monetary credit notes from returns)
+  - Full-screen split-panel create dialog, all customers + products visible immediately (client-side filtering)
+  - Two modes: Prestamo (lending — stock out, settle to restock) and Intercambio (exchange — stock adjusts both ways)
+  - Settle dialog, status tabs (Activas/Liquidadas), date filter pills, search by NC- number or distributor name
+  - DB: `credit_note_items` table, `credit_type`/`settled_at` on `credit_notes`, `create_distributor_credit_note` + `settle_credit_note` RPCs
+  - Old return-type credit notes hidden (filtered by `credit_type IN ('lending','exchange')`)
+  - Key files: `src/features/notas-credito/`, `src/features/notas-credito/components/create-credit-note-dialog.tsx`
+- **Devoluciones restructured** (2026-04-07): returns as product swaps, no monetary credit
+  - Return dialog: "Producto vendible" toggle + "Cambio para el cliente" section (defaults same product, "Sin cambio" option)
+  - Stock movement breakdown summary with net effect. RPC: no auto credit note, supports replacement product stock deduction
+  - DB: `replacement_variant_id`/`replacement_product_name`/`replacement_variant_label` on `return_items`
+  - Key files: `src/features/ventas/components/return-dialog.tsx`, `create_return_transaction` RPC modified
+- **Credit note payment removed** (2026-04-07): removed from payment dialog + wizard payment step dropdown. Kept in DB/constants for historical display
+- **Stock threshold unified** (2026-04-07): hardcoded threshold of 5 across products, POS, inventory, dashboard RPC
+  - 0 stock: "Sin stock" (red), 1-5: "Bajo" (amber), 6+: no badge. Inventory hub alerts card shows agotados/bajo breakdown
+- **Shared DateFilterPills** (2026-04-07): extracted reusable date filter component, added to Vales + Notas de Credito pages
+- **Ventas date fix** (2026-04-07): timezone bug in "Hoy" filter fixed (`endOfDay().toISOString()` instead of naive string)
+- **Search fixes** (2026-04-07): client-side filtering via `useMemo` for vales + credit notes (PostgREST joined table limitation)
 
 **Sprint 7 — Dashboard y reportes: COMPLETO** (actualizado 2026-04-01)
 

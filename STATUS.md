@@ -94,6 +94,34 @@
 - **Customer detail sheet** (2026-04-06): Slide-over panel with info + purchase history + date filters
 - **Global discount system** (2026-04-06): Preset picker + custom input in all POS flows
 - **POS cleanup** (2026-04-06): Removed edit pencil icon from product cards
+- **Vales system** (2026-04-07): Customer backorder vouchers for out-of-stock products
+  - New `/vales` page with KPIs (total/pending/ready/completed), DataTable with status tabs + date filter + search
+  - POS wizard: "Vale" button in confirmation step, asks paid/pending. Out-of-stock products now selectable with confirmation dialog
+  - Mixed cart support: "Venta + Vale" split — creates sale for in-stock items + vale for out-of-stock items automatically
+  - Stock badge on all POS product cards (green/amber/red), out-of-stock products show indigo + button
+  - Vale pickup flow: complete dialog deducts stock, marks as completed
+  - DB trigger auto-updates vale status to "ready" when stock becomes available
+  - Ready banner in dashboard layout with localStorage-persisted dismissal
+  - DB: `vales` + `vale_items` tables, `create_vale` + `complete_vale` RPCs
+- **Notas de Credito repurposed** (2026-04-07): Distributor lending/exchange system
+  - Full-screen split-panel create dialog with all customers + products visible (client-side filtering)
+  - Two modes: Prestamo (lending — stock out, settle to restock) and Intercambio (exchange — stock adjusts both ways)
+  - Settle dialog for lending returns, status tabs (Activas/Liquidadas), date filter pills
+  - DB: `credit_note_items` table, `credit_type`/`settled_at` columns, `create_distributor_credit_note` + `settle_credit_note` RPCs
+  - Old return-type credit notes removed from view (historical data preserved with `credit_type='return'`)
+- **Devoluciones restructured** (2026-04-07): Returns as product swaps, not monetary credit
+  - Return dialog: "Producto vendible" toggle + "Cambio para el cliente" section (defaults to same product)
+  - Stock movement breakdown summary with net effect calculation
+  - RPC modified: no auto credit note creation, supports replacement product stock deduction
+  - DB: `replacement_variant_id` columns on `return_items`
+- **Credit note payment removed from POS** (2026-04-07): Removed credit note picker from payment dialog and wizard payment step dropdown
+- **Stock threshold unified** (2026-04-07): Hardcoded threshold of 5 across all views (products, POS, inventory, dashboard)
+  - Products with 0 stock: "Sin stock" (red). 1-5: "Bajo" (amber). 6+: no badge
+  - Updated `get_dashboard_data` RPC, inventory alerts, health bar
+  - Inventory hub "Alertas totales" now shows agotados/bajo breakdown
+- **Date filter pills** (2026-04-07): Shared `DateFilterPills` component (Hoy/Esta semana/Mes/Fecha) added to Vales and Notas de Credito pages
+- **Ventas date fix** (2026-04-07): Fixed timezone bug in "Hoy" filter — used `endOfDay().toISOString()` instead of naive string
+- **Search fixes** (2026-04-07): Vale and credit note search uses client-side filtering via `useMemo` (PostgREST joined table limitation). Placeholder hints with prefixes (VL-, NC-)
 
 ### Pending
 - Design A for Inventario hub + Inventario Fisico
