@@ -19,7 +19,7 @@ import {
   ShoppingBag,
   CheckCircle2,
 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -51,6 +51,8 @@ import { BundleManager } from "./bundle-manager"
 import { CollapsibleSection } from "./collapsible-section"
 import { ProductImagePicker } from "./product-image-picker"
 import type { ProductWithDetails } from "../types"
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
+import { ProductEditFixture } from "./fixtures/product-edit-fixture"
 
 function slugify(text: string) {
   return text
@@ -197,11 +199,11 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
     setIsSubmitting(false)
     if ("error" in result) {
       const formError = (result.error as Record<string, string[]>)._form
-      toast.error(formError?.[0] ?? "Error al actualizar el producto")
+      sileo.error({ title: formError?.[0] ?? "Error al actualizar el producto" })
       return
     }
     setSuccess(true)
-    toast.success("Producto actualizado")
+    sileo.success({ title: "Producto actualizado", description: "Los cambios fueron guardados" })
     queryClient.invalidateQueries({ queryKey: ["products"] })
     queryClient.invalidateQueries({ queryKey: ["product-stats"] })
     queryClient.invalidateQueries({ queryKey: ["pos"] })
@@ -218,7 +220,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
     const result = createProductSchema.safeParse(data)
     if (!result.success) {
       console.log("Edit validation errors:", result.error.issues)
-      toast.error("Revisa los campos antes de continuar")
+      sileo.error({ title: "Revisa los campos antes de continuar" })
       return
     }
 
@@ -269,11 +271,13 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
 
         {/* ── Content ── */}
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {isLoading ? (
-            <div className="flex h-full items-center justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin text-neutral-300" />
-            </div>
-          ) : success ? (
+          <BoneyardSkeleton
+            name="product-edit-form"
+            loading={isLoading}
+            animate="shimmer"
+            fixture={<ProductEditFixture />}
+          >
+            {success ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -516,6 +520,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
               </CollapsibleSection>
             </div>
           )}
+          </BoneyardSkeleton>
         </div>
 
         {/* ── Footer ── */}
