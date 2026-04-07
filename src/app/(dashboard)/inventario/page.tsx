@@ -256,7 +256,7 @@ export default function InventarioPage() {
                               : "border-amber-200 bg-amber-50 text-amber-700"
                           }`}
                         >
-                          {v.stock <= 0 ? "Sin stock" : `${v.stock} / ${v.stock_min}`}
+                          {v.stock <= 0 ? "Sin stock" : `${v.stock} en stock`}
                         </Badge>
                       </div>
                     ))}
@@ -330,6 +330,24 @@ export default function InventarioPage() {
                   <div className="rounded-lg bg-neutral-50 px-3 py-2">
                     <p className="text-[10px] text-neutral-400">Alertas totales</p>
                     <p className="text-lg font-bold text-neutral-950 tabular-nums">{lowStockItems.length}</p>
+                    {lowStockItems.length > 0 && (
+                      <div className="mt-1 flex items-center gap-3">
+                        {outOfStockCount > 0 && (
+                          <span className="flex items-center gap-1 text-[10px]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+                            <span className="font-semibold text-rose-600">{outOfStockCount}</span>
+                            <span className="text-neutral-400">agotados</span>
+                          </span>
+                        )}
+                        {lowStockCount > 0 && (
+                          <span className="flex items-center gap-1 text-[10px]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
+                            <span className="font-semibold text-amber-600">{lowStockCount}</span>
+                            <span className="text-neutral-400">bajo</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="rounded-lg bg-neutral-50 px-3 py-2">
                     <p className="text-[10px] text-neutral-400">Valor inventario</p>

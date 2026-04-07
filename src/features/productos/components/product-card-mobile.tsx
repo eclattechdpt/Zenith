@@ -52,7 +52,7 @@ export function ProductCardMobile({ product, onEdit, onDelete }: ProductCardMobi
   const totalStock = activeVariants.reduce((sum, v) => sum + v.stock, 0)
   const categoryName = getCategoryNames(product.product_categories)
   const variantCount = product.has_variants ? activeVariants.length : null
-  const lowStock = activeVariants.some((v) => v.stock <= v.stock_min)
+  const lowStock = activeVariants.some((v) => v.stock > 0 && v.stock <= 5)
 
   const colorIdx = getColorIndex(product.name)
   const palette = INITIAL_COLORS[colorIdx]
@@ -131,9 +131,15 @@ export function ProductCardMobile({ product, onEdit, onDelete }: ProductCardMobi
               {priceLabel}
             </span>
             <span className="flex items-center gap-1 text-[11px] tabular-nums text-neutral-400">
-              <span className="font-bold text-neutral-500">{totalStock}</span> stock
-              {lowStock && (
-                <AlertCircle className="h-3 w-3 text-amber-500" />
+              {totalStock === 0 ? (
+                <span className="font-bold text-rose-500">Sin stock</span>
+              ) : (
+                <>
+                  <span className="font-bold text-neutral-500">{totalStock}</span> stock
+                  {lowStock && (
+                    <AlertCircle className="h-3 w-3 text-amber-500" />
+                  )}
+                </>
               )}
             </span>
           </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 
 import { createClient } from "@/lib/supabase/client"
@@ -9,15 +10,17 @@ import type { CreditNoteWithDetails } from "./types"
 interface CreditNotesFilters {
   search?: string
   status?: string
+  dateFrom?: string
+  dateTo?: string
 }
 
 export function useCreditNotes(filters?: CreditNotesFilters) {
-  return useQuery({
-    queryKey: ["credit-notes", filters],
+  const query = useQuery({
+    queryKey: ["credit-notes", filters?.status, filters?.dateFrom, filters?.dateTo],
     queryFn: async (): Promise<CreditNoteWithDetails[]> => {
       const supabase = createClient()
 
-      let query = supabase
+      let q = supabase
         .from("credit_notes")
         .select(
           `*,
@@ -30,21 +33,35 @@ export function useCreditNotes(filters?: CreditNotesFilters) {
         .order("created_at", { ascending: false })
 
       if (filters?.status) {
-        query = query.eq("status", filters.status)
+        q = q.eq("status", filters.status)
+      }
+      if (filters?.dateFrom) {
+        q = q.gte("created_at", filters.dateFrom)
+      }
+      if (filters?.dateTo) {
+        q = q.lte("created_at", filters.dateTo)
       }
 
-      if (filters?.search) {
-        const q = filters.search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
-        query = query.ilike("credit_number", `%${q}%`)
-      }
-
-      const { data, error } = await query
+      const { data, error } = await q
 
       if (error) throw error
       return (data ?? []) as unknown as CreditNoteWithDetails[]
     },
     placeholderData: (prev) => prev,
   })
+
+  const filtered = useMemo(() => {
+    const all = query.data ?? []
+    if (!filters?.search?.trim()) return all
+    const s = filters.search.trim().toLowerCase()
+    return all.filter(
+      (n) =>
+        n.credit_number.toLowerCase().includes(s) ||
+        n.customers?.name?.toLowerCase().includes(s)
+    )
+  }, [query.data, filters?.search])
+
+  return { ...query, data: filtered }
 }
 
 // --- CREDIT NOTE STATS (for KPI widgets) ---

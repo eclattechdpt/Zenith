@@ -1,14 +1,57 @@
 "use client"
 
 import { Ticket, X } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useSyncExternalStore } from "react"
 import { motion, AnimatePresence } from "motion/react"
 
 import { useReadyVales } from "../queries"
 
+const STORAGE_KEY = "dismissed-vales"
+
+function getDismissed(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? new Set(JSON.parse(raw)) : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+function addDismissed(id: string) {
+  const set = getDismissed()
+  set.add(id)
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]))
+  window.dispatchEvent(new Event("storage"))
+}
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback)
+  return () => window.removeEventListener("storage", callback)
+}
+
+function getSnapshot() {
+  return localStorage.getItem(STORAGE_KEY) ?? "[]"
+}
+
+function getServerSnapshot() {
+  return "[]"
+}
+
 export function ValeReadyBanner() {
   const { data: readyVales = [] } = useReadyVales()
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set())
+
+  const raw = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  const dismissed: Set<string> = (() => {
+    try {
+      return new Set(JSON.parse(raw))
+    } catch {
+      return new Set()
+    }
+  })()
+
+  const handleDismiss = useCallback((id: string) => {
+    addDismissed(id)
+  }, [])
 
   const visible = readyVales.filter((v) => !dismissed.has(v.id))
 
@@ -33,9 +76,7 @@ export function ValeReadyBanner() {
             </p>
             <button
               type="button"
-              onClick={() =>
-                setDismissed((prev) => new Set([...prev, vale.id]))
-              }
+              onClick={() => handleDismiss(vale.id)}
               className="rounded-lg p-1 text-emerald-500 transition-colors hover:bg-emerald-100"
             >
               <X className="size-3.5" />

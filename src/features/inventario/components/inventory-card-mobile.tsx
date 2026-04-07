@@ -29,9 +29,9 @@ interface InventoryCardMobileProps {
   onEdit?: (variant: InventoryVariant) => void
 }
 
-function getStockStatus(stock: number, stockMin: number) {
+function getStockStatus(stock: number) {
   if (stock <= 0) return { label: "Sin stock", bg: "bg-rose-50", text: "text-rose-700", border: "border-rose-200", thumbBg: "bg-rose-50", thumbText: "text-rose-300" }
-  if (stock <= stockMin) return { label: "Bajo", bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", thumbBg: "bg-amber-50", thumbText: "text-amber-300" }
+  if (stock <= 5) return { label: "Bajo", bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", thumbBg: "bg-amber-50", thumbText: "text-amber-300" }
   return { label: "OK", bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", thumbBg: "bg-emerald-50", thumbText: "text-emerald-300" }
 }
 
@@ -49,7 +49,7 @@ export function InventoryCardMobile({
   const displayPrice = (inventoryType === "initial_load" && v.override_price != null) ? v.override_price : v.price
   const variantLabel = v.name || v.sku
   const initials = displayName.slice(0, 2).toUpperCase()
-  const status = getStockStatus(stockValue, v.stock_min)
+  const status = getStockStatus(stockValue)
 
   return (
     <div className="flex gap-3.5 rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm">

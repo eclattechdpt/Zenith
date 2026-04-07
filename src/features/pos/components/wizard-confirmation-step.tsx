@@ -429,10 +429,17 @@ export function WizardConfirmationStep({
 
         {isAllOutOfStock && (
           <div className="flex-shrink-0 bg-indigo-50 px-6 py-2 text-center text-xs font-semibold text-indigo-700 sm:px-8">
-            Todos los productos estan sin stock — solo se puede crear un vale
+            {!customer
+              ? "Todos los productos estan sin stock — selecciona un cliente para crear un vale"
+              : "Todos los productos estan sin stock — solo se puede crear un vale"}
           </div>
         )}
-        {isMixedCart && (
+        {isMixedCart && !customer && (
+          <div className="flex-shrink-0 bg-indigo-50 px-6 py-2 text-center text-xs font-semibold text-indigo-700 sm:px-8">
+            Selecciona un cliente para crear un vale con los productos sin stock
+          </div>
+        )}
+        {isMixedCart && customer && (
           <div className="flex-shrink-0 bg-indigo-50 px-6 py-2 text-center text-xs font-semibold text-indigo-700 sm:px-8">
             Al completar se creara una venta por los productos disponibles y un vale por los sin stock
           </div>
@@ -483,8 +490,8 @@ export function WizardConfirmationStep({
           </button>
           <button
             type="button"
-            onClick={() => setConfirmAction(isMixedCart ? "split" : "complete")}
-            disabled={submitting !== null || !isOnline || isAllOutOfStock}
+            onClick={() => isMixedCart ? setConfirmAction("split") : handleComplete()}
+            disabled={submitting !== null || !isOnline || isAllOutOfStock || (isMixedCart && !customer)}
             className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-accent-500 text-base font-bold text-white shadow-sm shadow-accent-500/20 transition-all hover:bg-accent-600 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
           >
             {submitting === "complete" ? (
@@ -498,17 +505,6 @@ export function WizardConfirmationStep({
       </div>
 
       {/* ── Confirmation dialogs ── */}
-      <ConfirmDialog
-        open={confirmAction === "complete"}
-        onOpenChange={(open) => !open && setConfirmAction(null)}
-        title="Completar venta"
-        description={`Se registrara la venta por ${formatCurrency(getTotal())} y se descontara el stock de los productos. Esta accion no se puede deshacer.`}
-        confirmLabel="Completar venta"
-        cancelLabel="Cancelar"
-        isLoading={submitting === "complete"}
-        onConfirm={handleComplete}
-      />
-
       <ConfirmDialog
         open={confirmAction === "pending"}
         onOpenChange={(open) => !open && setConfirmAction(null)}

@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 
 import { createClient } from "@/lib/supabase/client"
@@ -9,15 +10,17 @@ import type { ValeWithDetails, ValeWithItems } from "./types"
 interface ValesFilters {
   search?: string
   status?: string
+  dateFrom?: string
+  dateTo?: string
 }
 
 export function useVales(filters?: ValesFilters) {
-  return useQuery({
-    queryKey: ["vales", filters],
+  const query = useQuery({
+    queryKey: ["vales", filters?.status, filters?.dateFrom, filters?.dateTo],
     queryFn: async (): Promise<ValeWithDetails[]> => {
       const supabase = createClient()
 
-      let query = supabase
+      let q = supabase
         .from("vales")
         .select(
           `*,
@@ -27,21 +30,36 @@ export function useVales(filters?: ValesFilters) {
         .order("created_at", { ascending: false })
 
       if (filters?.status) {
-        query = query.eq("status", filters.status)
+        q = q.eq("status", filters.status)
+      }
+      if (filters?.dateFrom) {
+        q = q.gte("created_at", filters.dateFrom)
+      }
+      if (filters?.dateTo) {
+        q = q.lte("created_at", filters.dateTo)
       }
 
-      if (filters?.search) {
-        const q = filters.search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
-        query = query.or(`vale_number.ilike.%${q}%,customers.name.ilike.%${q}%`)
-      }
-
-      const { data, error } = await query
+      const { data, error } = await q
 
       if (error) throw error
       return (data ?? []) as unknown as ValeWithDetails[]
     },
     placeholderData: (prev) => prev,
   })
+
+  // Client-side search (PostgREST can't filter on joined tables in .or())
+  const filtered = useMemo(() => {
+    const all = query.data ?? []
+    if (!filters?.search?.trim()) return all
+    const s = filters.search.trim().toLowerCase()
+    return all.filter(
+      (v) =>
+        v.vale_number.toLowerCase().includes(s) ||
+        v.customers?.name?.toLowerCase().includes(s)
+    )
+  }, [query.data, filters?.search])
+
+  return { ...query, data: filtered }
 }
 
 export function useValeDetail(valeId: string | null) {

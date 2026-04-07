@@ -266,8 +266,8 @@ export function useLowStockAlerts() {
       if (error) throw error
 
       const lowStock = ((data ?? []) as unknown as InventoryVariant[])
-        .filter((v) => v.stock <= v.stock_min)
-        .sort((a, b) => (a.stock - a.stock_min) - (b.stock - b.stock_min))
+        .filter((v) => v.stock <= 5)
+        .sort((a, b) => a.stock - b.stock)
 
       return lowStock
     },

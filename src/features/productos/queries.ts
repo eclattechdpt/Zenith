@@ -174,7 +174,7 @@ export function useProductStats() {
         for (const v of variants) {
           const vTyped = v as { price: number; stock: number; stock_min: number }
           inventoryValue += vTyped.price * vTyped.stock
-          if (vTyped.stock <= vTyped.stock_min) lowStockCount++
+          if (vTyped.stock > 0 && vTyped.stock <= 5) lowStockCount++
         }
       }
 

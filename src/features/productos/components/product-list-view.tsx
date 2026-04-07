@@ -35,7 +35,7 @@ function getTotalStock(product: ProductWithDetails) {
 
 function getLowStockVariants(product: ProductWithDetails) {
   return product.product_variants
-    .filter((v) => v.is_active && v.stock <= v.stock_min)
+    .filter((v) => v.is_active && v.stock > 0 && v.stock <= 5)
     .map((v) => {
       const firstOption = v.variant_option_assignments[0]?.variant_options?.value
       return { label: firstOption || v.sku || "Variante", stock: v.stock }
@@ -158,13 +158,20 @@ function ProductRow({
             <span className="text-[13px] font-bold tabular-nums text-neutral-800">
               {totalStock}
             </span>
-            {lowVariants.length > 0 && (
+            {totalStock === 0 ? (
+              <Badge
+                variant="destructive"
+                className="cursor-default rounded-md px-1.5 text-[10px] font-semibold leading-none"
+              >
+                Sin stock
+              </Badge>
+            ) : lowVariants.length > 0 ? (
               <Tooltip>
                 <TooltipTrigger
                   render={
                     <Badge
                       variant="destructive"
-                      className="cursor-default rounded-md px-1.5 text-[10px] font-semibold leading-none"
+                      className="cursor-default rounded-md bg-amber-100 px-1.5 text-[10px] font-semibold leading-none text-amber-700 hover:bg-amber-100"
                     />
                   }
                 >
@@ -181,7 +188,7 @@ function ProductRow({
                   </div>
                 </TooltipContent>
               </Tooltip>
-            )}
+            ) : null}
           </div>
         </td>
 
@@ -252,7 +259,7 @@ function ProductRow({
                           {formatCurrency(v.price)}
                         </span>
                         <span className={`w-16 text-right text-[12px] font-semibold tabular-nums ${
-                          v.stock <= v.stock_min ? "text-amber-500" : "text-neutral-600"
+                          v.stock <= 5 ? "text-amber-500" : "text-neutral-600"
                         }`}>
                           {v.stock}
                         </span>

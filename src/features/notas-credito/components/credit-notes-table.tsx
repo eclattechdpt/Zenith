@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DataTable } from "@/components/shared/data-table"
 import { EmptyState } from "@/components/shared/empty-state"
+import { DateFilterPills, type DateRange } from "@/components/shared/date-filter-pills"
 import { formatDate } from "@/lib/utils"
 import { CREDIT_NOTE_STATUSES, CREDIT_NOTE_TYPES } from "@/lib/constants"
 
@@ -50,6 +51,7 @@ export function CreditNotesTable() {
     parseAsString.withDefault("")
   )
   const [settleId, setSettleId] = useState<string | null>(null)
+  const [dateRange, setDateRange] = useState<DateRange | null>(null)
 
   const {
     data: notes = [],
@@ -59,6 +61,8 @@ export function CreditNotesTable() {
   } = useCreditNotes({
     search: search || undefined,
     status: statusFilter || undefined,
+    dateFrom: dateRange?.from,
+    dateTo: dateRange?.to,
   })
   const hasLoadedOnce = useRef(false)
   if (isFetched) hasLoadedOnce.current = true
@@ -198,7 +202,7 @@ export function CreditNotesTable() {
           <div className="relative flex-1 sm:max-w-sm">
             <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
             <Input
-              placeholder="Buscar por numero (NC-0001)..."
+              placeholder="Buscar (NC-0001) o nombre de distribuidor..."
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
               className="pl-9"
@@ -221,6 +225,9 @@ export function CreditNotesTable() {
             })}
           </div>
         </div>
+
+        {/* Date filter */}
+        <DateFilterPills onChange={setDateRange} defaultPreset="today" />
 
         {/* Table */}
         <div

@@ -87,7 +87,7 @@ export function InventoryGridCard({
   const accent = ACCENT[inventoryType]
 
   const isOutOfStock = stockValue <= 0
-  const isLowStock = !isOutOfStock && stockValue <= v.stock_min
+  const isLowStock = !isOutOfStock && stockValue <= 5
 
   const colorIdx = getColorIndex(displayName)
   const palette = INITIAL_COLORS[colorIdx]

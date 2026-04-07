@@ -274,15 +274,22 @@ export function ReturnDialog({
 
                     {/* Restock toggle (only when selected) */}
                     {isSelected && (
-                      <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-neutral-100">
-                        <div className="flex items-center gap-1.5 text-xs text-neutral-600">
-                          <PackageCheck className="size-3.5" />
-                          Regresar al inventario
+                      <div className="mt-2.5 pt-2.5 border-t border-neutral-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700">
+                            <PackageCheck className="size-3.5" />
+                            Producto vendible
+                          </div>
+                          <Switch
+                            checked={item.restock}
+                            onCheckedChange={() => toggleRestock(index)}
+                          />
                         </div>
-                        <Switch
-                          checked={item.restock}
-                          onCheckedChange={() => toggleRestock(index)}
-                        />
+                        <p className="mt-1 text-[11px] text-neutral-400">
+                          {item.restock
+                            ? `El producto devuelto se regresara al stock (+${item.quantity} uds.)`
+                            : "El producto esta dañado o no se puede revender"}
+                        </p>
                       </div>
                     )}
 
@@ -290,11 +297,11 @@ export function ReturnDialog({
                     {isSelected && (
                       <div className="mt-2 pt-2 border-t border-neutral-100">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 text-xs text-neutral-600">
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700">
                             <RefreshCw className="size-3.5" />
-                            Producto de reemplazo
+                            Cambio para el cliente
                           </div>
-                          {item.replacement_variant_id && (
+                          {item.replacement_variant_id ? (
                             <button
                               type="button"
                               onClick={() =>
@@ -313,7 +320,28 @@ export function ReturnDialog({
                               }
                               className="text-xs text-neutral-400 hover:text-neutral-600"
                             >
-                              Sin reemplazo
+                              Sin cambio
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setItems((prev) =>
+                                  prev.map((it, i) =>
+                                    i === index
+                                      ? {
+                                          ...it,
+                                          replacement_variant_id: it.product_variant_id,
+                                          replacement_product_name: it.product_name,
+                                          replacement_variant_label: it.variant_label,
+                                        }
+                                      : it
+                                  )
+                                )
+                              }
+                              className="text-xs text-teal-500 hover:text-teal-700"
+                            >
+                              Dar cambio
                             </button>
                           )}
                         </div>
@@ -327,11 +355,12 @@ export function ReturnDialog({
                               )}
                             </span>
                           </div>
-                        ) : (
-                          <p className="mt-1 text-xs text-neutral-400">
-                            No se entregara producto de reemplazo
-                          </p>
-                        )}
+                        ) : null}
+                        <p className="mt-1 text-[11px] text-neutral-400">
+                          {item.replacement_variant_id
+                            ? `Se entregara ${item.replacement_product_name} al cliente (-${item.quantity} uds. del stock)`
+                            : "El cliente no recibira otro producto"}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -356,7 +385,7 @@ export function ReturnDialog({
 
             {/* Summary */}
             {selectedItems.length > 0 && (
-              <div className="border-t border-neutral-100 pt-3 space-y-1.5">
+              <div className="border-t border-neutral-100 pt-3 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-neutral-600">
                     {selectedItems.length} producto
@@ -370,12 +399,65 @@ export function ReturnDialog({
                     {formatCurrency(totalRefund)}
                   </span>
                 </div>
-                {selectedItems.some((i) => i.replacement_variant_id) && (
-                  <p className="text-xs text-teal-600">
-                    <RefreshCw className="mr-1 inline size-3" />
-                    Se entregara producto de reemplazo y se descontara su stock
+
+                {/* Stock movement breakdown */}
+                <div className="rounded-lg border border-neutral-100 bg-neutral-50 p-2.5 space-y-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1">
+                    Movimiento de stock
                   </p>
-                )}
+                  {selectedItems.map((item) => {
+                    const restockQty = item.restock ? item.quantity : 0
+                    const replaceQty = item.replacement_variant_id ? item.quantity : 0
+                    const net = restockQty - replaceQty
+                    return (
+                      <div key={item.sale_item_id} className="space-y-0.5">
+                        {item.restock && (
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-emerald-600">
+                              +{item.quantity} {item.product_name} (devolucion)
+                            </span>
+                          </div>
+                        )}
+                        {item.replacement_variant_id && (
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-rose-500">
+                              -{item.quantity} {item.replacement_product_name} (cambio)
+                            </span>
+                          </div>
+                        )}
+                        {!item.restock && !item.replacement_variant_id && (
+                          <div className="text-[11px] text-neutral-400">
+                            Sin movimiento (producto desechado, sin cambio)
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                  <div className="border-t border-neutral-200 pt-1 mt-1">
+                    <div className="flex items-center justify-between text-[11px] font-semibold">
+                      <span className="text-neutral-600">Efecto neto</span>
+                      <span className={
+                        (() => {
+                          const totalNet = selectedItems.reduce((sum, i) => {
+                            const r = i.restock ? i.quantity : 0
+                            const p = i.replacement_variant_id ? i.quantity : 0
+                            return sum + r - p
+                          }, 0)
+                          return totalNet > 0 ? "text-emerald-600" : totalNet < 0 ? "text-rose-500" : "text-neutral-500"
+                        })()
+                      }>
+                        {(() => {
+                          const totalNet = selectedItems.reduce((sum, i) => {
+                            const r = i.restock ? i.quantity : 0
+                            const p = i.replacement_variant_id ? i.quantity : 0
+                            return sum + r - p
+                          }, 0)
+                          return totalNet === 0 ? "0 uds. (cambio directo)" : `${totalNet > 0 ? "+" : ""}${totalNet} uds.`
+                        })()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

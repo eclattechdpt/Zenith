@@ -60,7 +60,7 @@ export const ProductCard = memo(function ProductCard({
   const [expanded, setExpanded] = useState(false)
   const totalStock = getTotalStock(product)
   const lowStock = product.product_variants.some(
-    (v) => v.is_active && v.stock <= v.stock_min
+    (v) => v.is_active && v.stock > 0 && v.stock <= 5
   )
   const colorIdx = getColorIndex(product.name)
   const palette = INITIAL_COLORS[colorIdx]
@@ -97,13 +97,17 @@ export const ProductCard = memo(function ProductCard({
         )}
       </div>
 
-      {/* Low stock badge */}
-      {lowStock && (
+      {/* Stock badge */}
+      {totalStock === 0 ? (
+        <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-md bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-600">
+          Sin stock
+        </span>
+      ) : lowStock ? (
         <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-600">
           <AlertCircle className="h-3 w-3" />
           Bajo
         </span>
-      )}
+      ) : null}
 
       {/* Inactive badge */}
       {!product.is_active && (
@@ -211,7 +215,7 @@ export const ProductCard = memo(function ProductCard({
                         {formatCurrency(v.price)}
                       </span>
                       <span className={`text-[10px] font-semibold tabular-nums ${
-                        v.stock <= v.stock_min ? "text-amber-500" : "text-neutral-400"
+                        v.stock <= 5 ? "text-amber-500" : "text-neutral-400"
                       }`}>
                         {v.stock}
                       </span>

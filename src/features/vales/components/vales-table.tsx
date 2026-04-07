@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DataTable } from "@/components/shared/data-table"
 import { EmptyState } from "@/components/shared/empty-state"
+import { DateFilterPills, type DateRange } from "@/components/shared/date-filter-pills"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { VALE_STATUSES, VALE_PAYMENT_STATUSES } from "@/lib/constants"
 
@@ -52,6 +53,7 @@ export function ValesTable() {
     parseAsString.withDefault("")
   )
   const [completeValeId, setCompleteValeId] = useState<string | null>(null)
+  const [dateRange, setDateRange] = useState<DateRange | null>(null)
 
   const {
     data: vales = [],
@@ -61,6 +63,8 @@ export function ValesTable() {
   } = useVales({
     search: search || undefined,
     status: statusFilter || undefined,
+    dateFrom: dateRange?.from,
+    dateTo: dateRange?.to,
   })
   const hasLoadedOnce = useRef(false)
   if (isFetched) hasLoadedOnce.current = true
@@ -187,13 +191,13 @@ export function ValesTable() {
           <div className="relative flex-1 sm:max-w-sm">
             <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
             <Input
-              placeholder="Buscar por numero o cliente..."
+              placeholder="Buscar (VL-0001) o nombre de cliente..."
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
               className="pl-9"
             />
           </div>
-          <div className="flex gap-1">
+          <div className="flex flex-wrap gap-1">
             {STATUS_TABS.map((tab) => {
               const isActive = statusFilter === tab.value
               return (
@@ -210,6 +214,9 @@ export function ValesTable() {
             })}
           </div>
         </div>
+
+        {/* Date filter */}
+        <DateFilterPills onChange={setDateRange} defaultPreset="today" />
 
         {/* Table */}
         <div
