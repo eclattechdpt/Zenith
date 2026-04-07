@@ -66,14 +66,16 @@ export function ReturnDialog({
 
     return sale.sale_items.map((si) => {
       // Sum already returned quantities for this sale_item
-      const alreadyReturned = (sale.returns ?? []).reduce((sum, ret) => {
-        return (
-          sum +
-          (ret.return_items ?? [])
-            .filter((ri) => ri.sale_item_id === si.id)
-            .reduce((s, ri) => s + ri.quantity, 0)
-        )
-      }, 0)
+      const alreadyReturned = (sale.returns ?? [])
+        .filter((ret) => ret.status === "completed")
+        .reduce((sum, ret) => {
+          return (
+            sum +
+            (ret.return_items ?? [])
+              .filter((ri) => ri.sale_item_id === si.id)
+              .reduce((s, ri) => s + ri.quantity, 0)
+          )
+        }, 0)
 
       return {
         sale_item_id: si.id,
