@@ -100,11 +100,60 @@ export type Database = {
           },
         ]
       }
+      credit_note_items: {
+        Row: {
+          created_at: string
+          credit_note_id: string
+          direction: string
+          id: string
+          product_name: string
+          product_variant_id: string
+          quantity: number
+          variant_label: string
+        }
+        Insert: {
+          created_at?: string
+          credit_note_id: string
+          direction: string
+          id?: string
+          product_name: string
+          product_variant_id: string
+          quantity: number
+          variant_label: string
+        }
+        Update: {
+          created_at?: string
+          credit_note_id?: string
+          direction?: string
+          id?: string
+          product_name?: string
+          product_variant_id?: string
+          quantity?: number
+          variant_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_note_items_credit_note_id_fkey"
+            columns: ["credit_note_id"]
+            isOneToOne: false
+            referencedRelation: "credit_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_note_items_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_notes: {
         Row: {
           created_at: string
           created_by: string | null
           credit_number: string
+          credit_type: string
           customer_id: string
           deleted_at: string | null
           expires_at: string | null
@@ -112,6 +161,7 @@ export type Database = {
           original_amount: number
           remaining_amount: number
           return_id: string | null
+          settled_at: string | null
           status: string
           tenant_id: string
           updated_at: string
@@ -120,6 +170,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           credit_number: string
+          credit_type?: string
           customer_id: string
           deleted_at?: string | null
           expires_at?: string | null
@@ -127,6 +178,7 @@ export type Database = {
           original_amount: number
           remaining_amount: number
           return_id?: string | null
+          settled_at?: string | null
           status?: string
           tenant_id: string
           updated_at?: string
@@ -135,6 +187,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           credit_number?: string
+          credit_type?: string
           customer_id?: string
           deleted_at?: string | null
           expires_at?: string | null
@@ -142,6 +195,7 @@ export type Database = {
           original_amount?: number
           remaining_amount?: number
           return_id?: string | null
+          settled_at?: string | null
           status?: string
           tenant_id?: string
           updated_at?: string
@@ -637,6 +691,9 @@ export type Database = {
           line_total: number
           product_variant_id: string
           quantity: number
+          replacement_product_name: string | null
+          replacement_variant_id: string | null
+          replacement_variant_label: string | null
           restock: boolean
           return_id: string
           sale_item_id: string
@@ -647,6 +704,9 @@ export type Database = {
           line_total: number
           product_variant_id: string
           quantity: number
+          replacement_product_name?: string | null
+          replacement_variant_id?: string | null
+          replacement_variant_label?: string | null
           restock?: boolean
           return_id: string
           sale_item_id: string
@@ -657,6 +717,9 @@ export type Database = {
           line_total?: number
           product_variant_id?: string
           quantity?: number
+          replacement_product_name?: string | null
+          replacement_variant_id?: string | null
+          replacement_variant_label?: string | null
           restock?: boolean
           return_id?: string
           sale_item_id?: string
@@ -666,6 +729,13 @@ export type Database = {
           {
             foreignKeyName: "return_items_product_variant_id_fkey"
             columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_items_replacement_variant_id_fkey"
+            columns: ["replacement_variant_id"]
             isOneToOne: false
             referencedRelation: "product_variants"
             referencedColumns: ["id"]
@@ -984,6 +1054,122 @@ export type Database = {
         }
         Relationships: []
       }
+      vale_items: {
+        Row: {
+          discount: number
+          id: string
+          line_total: number
+          product_name: string
+          product_variant_id: string
+          quantity: number
+          unit_cost: number
+          unit_price: number
+          vale_id: string
+          variant_label: string
+        }
+        Insert: {
+          discount?: number
+          id?: string
+          line_total: number
+          product_name: string
+          product_variant_id: string
+          quantity: number
+          unit_cost?: number
+          unit_price: number
+          vale_id: string
+          variant_label: string
+        }
+        Update: {
+          discount?: number
+          id?: string
+          line_total?: number
+          product_name?: string
+          product_variant_id?: string
+          quantity?: number
+          unit_cost?: number
+          unit_price?: number
+          vale_id?: string
+          variant_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vale_items_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vale_items_vale_id_fkey"
+            columns: ["vale_id"]
+            isOneToOne: false
+            referencedRelation: "vales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vales: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          deleted_at: string | null
+          discount_amount: number
+          id: string
+          notes: string | null
+          payment_status: string
+          status: string
+          subtotal: number
+          tenant_id: string
+          total: number
+          updated_at: string
+          vale_number: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          deleted_at?: string | null
+          discount_amount?: number
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          status?: string
+          subtotal?: number
+          tenant_id: string
+          total?: number
+          updated_at?: string
+          vale_number: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          deleted_at?: string | null
+          discount_amount?: number
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          status?: string
+          subtotal?: number
+          tenant_id?: string
+          total?: number
+          updated_at?: string
+          vale_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vales_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       variant_option_assignments: {
         Row: {
           id: string
@@ -1115,6 +1301,21 @@ export type Database = {
         }
         Returns: Json
       }
+      complete_vale: {
+        Args: { p_created_by?: string; p_tenant_id: string; p_vale_id: string }
+        Returns: Json
+      }
+      create_distributor_credit_note: {
+        Args: {
+          p_created_by?: string
+          p_credit_type: string
+          p_customer_id: string
+          p_items?: Json
+          p_notes?: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
       create_pending_sale: {
         Args: {
           p_created_by?: string
@@ -1153,6 +1354,20 @@ export type Database = {
         }
         Returns: Json
       }
+      create_vale: {
+        Args: {
+          p_created_by?: string
+          p_customer_id: string
+          p_discount_amount?: number
+          p_items?: Json
+          p_notes?: string
+          p_payment_status?: string
+          p_subtotal?: number
+          p_tenant_id: string
+          p_total?: number
+        }
+        Returns: Json
+      }
       generate_sequential_number: {
         Args: {
           p_column: string
@@ -1164,6 +1379,14 @@ export type Database = {
       }
       get_dashboard_data: { Args: { p_tenant_id: string }; Returns: Json }
       get_inventory_summary: { Args: { p_tenant_id: string }; Returns: Json }
+      settle_credit_note: {
+        Args: {
+          p_created_by?: string
+          p_credit_note_id: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

@@ -7,6 +7,8 @@ import {
   PackageCheck,
   Minus,
   Plus,
+  RefreshCw,
+  X,
 } from "lucide-react"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
@@ -41,6 +43,9 @@ interface ReturnItemState {
   max_returnable: number
   quantity: number
   restock: boolean
+  replacement_variant_id: string | null
+  replacement_product_name: string | null
+  replacement_variant_label: string | null
 }
 
 export function ReturnDialog({
@@ -79,6 +84,10 @@ export function ReturnDialog({
         max_returnable: Math.max(0, si.quantity - alreadyReturned),
         quantity: 0,
         restock: true,
+        // Default replacement: same product
+        replacement_variant_id: si.product_variant_id,
+        replacement_product_name: si.product_name,
+        replacement_variant_label: si.variant_label,
       }
     })
   }, [sale])
@@ -96,7 +105,6 @@ export function ReturnDialog({
     (sum, i) => sum + i.unit_price * i.quantity,
     0
   )
-  const hasCustomer = !!sale?.customer_id
   const isValid = selectedItems.length > 0
 
   function updateQuantity(index: number, delta: number) {
@@ -130,6 +138,9 @@ export function ReturnDialog({
         quantity: i.quantity,
         unit_price: i.unit_price,
         restock: i.restock,
+        replacement_variant_id: i.replacement_variant_id,
+        replacement_product_name: i.replacement_product_name,
+        replacement_variant_label: i.replacement_variant_label,
       })),
     })
 
@@ -143,18 +154,13 @@ export function ReturnDialog({
       return
     }
 
-    const data = result.data
-    const creditMsg = data.credit_note_number
-      ? ` — Nota de credito ${data.credit_note_number}`
-      : ""
-    toast.success(`Devolucion ${data.return_number} creada${creditMsg}`)
+    toast.success(`Devolucion ${result.data.return_number} creada`)
 
     queryClient.invalidateQueries({ queryKey: ["sales"] })
     queryClient.invalidateQueries({ queryKey: ["products"] })
     queryClient.invalidateQueries({ queryKey: ["pos-products"] })
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
     queryClient.invalidateQueries({ queryKey: ["dashboard"] })
-    queryClient.invalidateQueries({ queryKey: ["credit-notes"] })
 
     onOpenChange(false)
     onReturned()
@@ -279,6 +285,55 @@ export function ReturnDialog({
                         />
                       </div>
                     )}
+
+                    {/* Replacement product (only when selected) */}
+                    {isSelected && (
+                      <div className="mt-2 pt-2 border-t border-neutral-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-xs text-neutral-600">
+                            <RefreshCw className="size-3.5" />
+                            Producto de reemplazo
+                          </div>
+                          {item.replacement_variant_id && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setItems((prev) =>
+                                  prev.map((it, i) =>
+                                    i === index
+                                      ? {
+                                          ...it,
+                                          replacement_variant_id: null,
+                                          replacement_product_name: null,
+                                          replacement_variant_label: null,
+                                        }
+                                      : it
+                                  )
+                                )
+                              }
+                              className="text-xs text-neutral-400 hover:text-neutral-600"
+                            >
+                              Sin reemplazo
+                            </button>
+                          )}
+                        </div>
+                        {item.replacement_variant_id ? (
+                          <div className="mt-1.5 flex items-center gap-2 rounded-md bg-teal-50 px-2.5 py-1.5">
+                            <RefreshCw className="size-3 text-teal-500" />
+                            <span className="text-xs font-medium text-teal-700 truncate">
+                              {item.replacement_product_name}
+                              {item.replacement_variant_label !== item.replacement_product_name && (
+                                <span className="text-teal-500"> — {item.replacement_variant_label}</span>
+                              )}
+                            </span>
+                          </div>
+                        ) : (
+                          <p className="mt-1 text-xs text-neutral-400">
+                            No se entregara producto de reemplazo
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )
               })}
@@ -315,14 +370,10 @@ export function ReturnDialog({
                     {formatCurrency(totalRefund)}
                   </span>
                 </div>
-                {hasCustomer && (
+                {selectedItems.some((i) => i.replacement_variant_id) && (
                   <p className="text-xs text-teal-600">
-                    Se generara una nota de credito por {formatCurrency(totalRefund)}
-                  </p>
-                )}
-                {!hasCustomer && (
-                  <p className="text-xs text-amber-600">
-                    Sin cliente — no se generara nota de credito
+                    <RefreshCw className="mr-1 inline size-3" />
+                    Se entregara producto de reemplazo y se descontara su stock
                   </p>
                 )}
               </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { Search, FileText, MoreHorizontal, CheckCircle2, Package } from "lucide-react"
+import { Search, Ticket, MoreHorizontal, CheckCircle2, X } from "lucide-react"
 import { useQueryState, parseAsString } from "nuqs"
 import { motion } from "motion/react"
 
@@ -16,86 +16,71 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DataTable } from "@/components/shared/data-table"
 import { EmptyState } from "@/components/shared/empty-state"
-import { formatDate } from "@/lib/utils"
-import { CREDIT_NOTE_STATUSES, CREDIT_NOTE_TYPES } from "@/lib/constants"
+import { formatCurrency, formatDate } from "@/lib/utils"
+import { VALE_STATUSES, VALE_PAYMENT_STATUSES } from "@/lib/constants"
 
-import { useCreditNotes } from "../queries"
-import type { CreditNoteWithDetails } from "../types"
-import { CreditNotesCardMobile } from "./credit-notes-card-mobile"
-import { SettleDialog } from "./settle-dialog"
+import { useVales } from "../queries"
+import type { ValeWithDetails } from "../types"
+import { ValesCardMobile } from "./vales-card-mobile"
+import { ValeCompleteDialog } from "./vale-complete-dialog"
 
 import type { ColumnDef } from "@tanstack/react-table"
 
 const STATUS_COLORS: Record<string, string> = {
-  active: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  settled: "bg-blue-50 text-blue-700 border-blue-200",
+  pending: "bg-amber-50 text-amber-700 border-amber-200",
+  ready: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  completed: "bg-blue-50 text-blue-700 border-blue-200",
   cancelled: "bg-neutral-100 text-neutral-500 border-neutral-200",
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  lending: "bg-violet-50 text-violet-700 border-violet-200",
-  exchange: "bg-amber-50 text-amber-700 border-amber-200",
+const PAYMENT_COLORS: Record<string, string> = {
+  paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  pending: "bg-amber-50 text-amber-700 border-amber-200",
 }
 
 const STATUS_TABS = [
-  { value: "", label: "Todas" },
-  { value: "active", label: "Activas" },
-  { value: "settled", label: "Liquidadas" },
+  { value: "", label: "Todos" },
+  { value: "pending", label: "Pendientes" },
+  { value: "ready", label: "Listos" },
+  { value: "completed", label: "Completados" },
 ] as const
 
-export function CreditNotesTable() {
+export function ValesTable() {
   const [search, setSearch] = useQueryState("q", parseAsString.withDefault(""))
   const [statusFilter, setStatusFilter] = useQueryState(
     "status",
     parseAsString.withDefault("")
   )
-  const [settleId, setSettleId] = useState<string | null>(null)
+  const [completeValeId, setCompleteValeId] = useState<string | null>(null)
 
   const {
-    data: notes = [],
+    data: vales = [],
     isLoading,
     isFetched,
     isFetching,
-  } = useCreditNotes({
+  } = useVales({
     search: search || undefined,
     status: statusFilter || undefined,
   })
   const hasLoadedOnce = useRef(false)
   if (isFetched) hasLoadedOnce.current = true
 
-  const columns: ColumnDef<CreditNoteWithDetails>[] = [
+  const columns: ColumnDef<ValeWithDetails>[] = [
     {
-      accessorKey: "credit_number",
+      accessorKey: "vale_number",
       size: 120,
       minSize: 100,
       header: "Numero",
       cell: ({ row }) => (
         <span className="font-semibold text-neutral-950 tabular-nums">
-          {row.original.credit_number}
+          {row.original.vale_number}
         </span>
       ),
     },
     {
-      accessorKey: "credit_type",
-      size: 110,
-      minSize: 90,
-      header: "Tipo",
-      cell: ({ row }) => {
-        const type = row.original.credit_type
-        return (
-          <Badge
-            variant="outline"
-            className={`text-[10px] ${TYPE_COLORS[type] ?? ""}`}
-          >
-            {CREDIT_NOTE_TYPES[type as keyof typeof CREDIT_NOTE_TYPES] ?? type}
-          </Badge>
-        )
-      },
-    },
-    {
       accessorKey: "status",
-      size: 110,
-      minSize: 90,
+      size: 130,
+      minSize: 100,
       header: "Estado",
       cell: ({ row }) => {
         const status = row.original.status
@@ -104,7 +89,24 @@ export function CreditNotesTable() {
             variant="outline"
             className={`text-[10px] ${STATUS_COLORS[status] ?? ""}`}
           >
-            {CREDIT_NOTE_STATUSES[status as keyof typeof CREDIT_NOTE_STATUSES] ?? status}
+            {VALE_STATUSES[status as keyof typeof VALE_STATUSES] ?? status}
+          </Badge>
+        )
+      },
+    },
+    {
+      accessorKey: "payment_status",
+      size: 100,
+      minSize: 80,
+      header: "Pago",
+      cell: ({ row }) => {
+        const ps = row.original.payment_status
+        return (
+          <Badge
+            variant="outline"
+            className={`text-[10px] ${PAYMENT_COLORS[ps] ?? ""}`}
+          >
+            {VALE_PAYMENT_STATUSES[ps as keyof typeof VALE_PAYMENT_STATUSES] ?? ps}
           </Badge>
         )
       },
@@ -113,7 +115,7 @@ export function CreditNotesTable() {
       id: "customer",
       size: 160,
       minSize: 120,
-      header: "Distribuidor",
+      header: "Cliente",
       cell: ({ row }) => (
         <span className="text-sm text-neutral-600">
           {row.original.customers?.name ?? "—"}
@@ -121,29 +123,15 @@ export function CreditNotesTable() {
       ),
     },
     {
-      id: "items_summary",
-      size: 140,
-      minSize: 100,
-      header: "Productos",
-      cell: ({ row }) => {
-        const items = row.original.credit_note_items ?? []
-        const outCount = items.filter((i) => i.direction === "out").reduce((s, i) => s + i.quantity, 0)
-        const inCount = items.filter((i) => i.direction === "in").reduce((s, i) => s + i.quantity, 0)
-        return (
-          <div className="flex items-center gap-2 text-xs text-neutral-500">
-            {outCount > 0 && (
-              <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-600">
-                -{outCount} salida
-              </span>
-            )}
-            {inCount > 0 && (
-              <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-600">
-                +{inCount} entrada
-              </span>
-            )}
-          </div>
-        )
-      },
+      accessorKey: "total",
+      size: 110,
+      minSize: 90,
+      header: () => <span className="block text-right">Total</span>,
+      cell: ({ row }) => (
+        <span className="block text-right font-semibold text-neutral-950 tabular-nums">
+          {formatCurrency(Number(row.original.total))}
+        </span>
+      ),
     },
     {
       accessorKey: "created_at",
@@ -162,8 +150,9 @@ export function CreditNotesTable() {
       minSize: 50,
       header: "",
       cell: ({ row }) => {
-        const cn = row.original
-        if (cn.status !== "active" || cn.credit_type !== "lending") return null
+        const vale = row.original
+        const canComplete = vale.status === "pending" || vale.status === "ready"
+        if (!canComplete) return null
         return (
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -174,9 +163,9 @@ export function CreditNotesTable() {
               <MoreHorizontal className="size-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSettleId(cn.id)}>
+              <DropdownMenuItem onClick={() => setCompleteValeId(vale.id)}>
                 <CheckCircle2 className="mr-2 size-4 text-emerald-500" />
-                Liquidar prestamo
+                Entregar vale
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -191,14 +180,14 @@ export function CreditNotesTable() {
         initial={{ opacity: 0 }}
         animate={{ opacity: hasLoadedOnce.current ? 1 : 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        className="space-y-4 overflow-hidden rounded-2xl border border-teal-100 bg-gradient-to-b from-white to-teal-50/30 p-4 shadow-sm sm:p-6"
+        className="space-y-4 overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-b from-white to-indigo-50/30 p-4 shadow-sm sm:p-6"
       >
         {/* Filters */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1 sm:max-w-sm">
             <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
             <Input
-              placeholder="Buscar por numero (NC-0001)..."
+              placeholder="Buscar por numero o cliente..."
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
               className="pl-9"
@@ -229,22 +218,22 @@ export function CreditNotesTable() {
         >
           {/* Mobile cards */}
           <div className="flex flex-col gap-3 sm:hidden">
-            {notes.length > 0 ? (
-              notes.map((note) => (
-                <CreditNotesCardMobile
-                  key={note.id}
-                  note={note}
-                  onSettle={note.status === "active" && note.credit_type === "lending" ? () => setSettleId(note.id) : undefined}
+            {vales.length > 0 ? (
+              vales.map((vale) => (
+                <ValesCardMobile
+                  key={vale.id}
+                  vale={vale}
+                  onComplete={() => setCompleteValeId(vale.id)}
                 />
               ))
             ) : (
               <EmptyState
-                icon={search ? Search : FileText}
-                title={search ? "Sin resultados" : "No hay notas de credito"}
+                icon={search ? Search : Ticket}
+                title={search ? "Sin resultados" : "No hay vales"}
                 description={
                   search
-                    ? "Intenta con otro numero."
-                    : "Crea una nota de credito para registrar prestamos o intercambios con distribuidores."
+                    ? "Intenta con otro numero o nombre."
+                    : "Los vales apareceran aqui al crearlos desde el punto de venta."
                 }
               />
             )}
@@ -254,7 +243,7 @@ export function CreditNotesTable() {
           <div className="hidden sm:block">
             <DataTable
               columns={columns}
-              data={notes}
+              data={vales}
               isLoading={isLoading}
               pageSize={15}
               emptyState={
@@ -262,13 +251,13 @@ export function CreditNotesTable() {
                   <EmptyState
                     icon={Search}
                     title="Sin resultados"
-                    description="Intenta con otro numero."
+                    description="Intenta con otro numero o nombre."
                   />
                 ) : (
                   <EmptyState
-                    icon={FileText}
-                    title="No hay notas de credito"
-                    description="Crea una nota de credito para registrar prestamos o intercambios con distribuidores."
+                    icon={Ticket}
+                    title="No hay vales"
+                    description="Los vales apareceran aqui al crearlos desde el punto de venta."
                   />
                 )
               }
@@ -277,9 +266,9 @@ export function CreditNotesTable() {
         </div>
       </motion.div>
 
-      <SettleDialog
-        creditNoteId={settleId}
-        onOpenChange={(open) => !open && setSettleId(null)}
+      <ValeCompleteDialog
+        valeId={completeValeId}
+        onOpenChange={(open) => !open && setCompleteValeId(null)}
       />
     </>
   )

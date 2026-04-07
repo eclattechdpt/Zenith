@@ -43,9 +43,38 @@ export const CREDIT_NOTE_STATUSES = {
   redeemed: "Aplicada",
   expired: "Expirada",
   cancelled: "Cancelada",
+  settled: "Liquidada",
 } as const
 
 export type CreditNoteStatus = keyof typeof CREDIT_NOTE_STATUSES
+
+// ── Credit note types ──
+
+export const CREDIT_NOTE_TYPES = {
+  return: "Devolucion",
+  lending: "Prestamo",
+  exchange: "Intercambio",
+} as const
+
+export type CreditNoteType = keyof typeof CREDIT_NOTE_TYPES
+
+// ── Vale statuses ──
+
+export const VALE_STATUSES = {
+  pending: "Pendiente",
+  ready: "Listo para recoger",
+  completed: "Completado",
+  cancelled: "Cancelado",
+} as const
+
+export type ValeStatus = keyof typeof VALE_STATUSES
+
+export const VALE_PAYMENT_STATUSES = {
+  paid: "Pagado",
+  pending: "Pendiente",
+} as const
+
+export type ValePaymentStatus = keyof typeof VALE_PAYMENT_STATUSES
 
 // ── Return statuses ──
 
@@ -67,3 +96,4 @@ export const SALE_NUMBER_PREFIX = "V"
 export const QUOTE_NUMBER_PREFIX = "C"
 export const RETURN_NUMBER_PREFIX = "D"
 export const CREDIT_NOTE_PREFIX = "NC"
+export const VALE_NUMBER_PREFIX = "VL"

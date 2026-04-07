@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils"
 
 import { usePOSStore } from "../store"
 import { createSale, createPendingSale, completePendingSale } from "../actions"
+import { createVale } from "@/features/vales/actions"
 import type { PendingSaleWithSummary, CartPayment } from "../types"
 
 import type { ReceiptData } from "./sale-receipt"
@@ -227,6 +228,61 @@ export function POSSaleWizard({
     }
   }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline])
 
+  // ── Create vale ──
+
+  const handleCreateVale = useCallback(async (paymentStatus: "paid" | "pending") => {
+    if (!isOnline) {
+      toast.error("Sin conexion", {
+        description: "Revisa tu conexion a internet e intenta de nuevo.",
+      })
+      return
+    }
+    if (!customer) {
+      toast.error("Se requiere un cliente para crear un vale")
+      return
+    }
+    try {
+      const saleItems = items.map((item) => ({
+        product_variant_id: item.variantId,
+        product_name: item.productName,
+        variant_label: item.variantLabel,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        unit_cost: item.unitCost,
+        discount: item.discount,
+      }))
+      const result = await createVale({
+        customer_id: customer.id,
+        items: saleItems,
+        payment_status: paymentStatus,
+        discount_amount: globalDiscount,
+        notes: notes || null,
+      })
+      if (result.error) {
+        const msg =
+          "_form" in result.error
+            ? (result.error._form as string[])[0]
+            : "Error al crear el vale"
+        toast.error(msg)
+        return
+      }
+      setSaleResult({ sale_number: result.data!.vale_number })
+      toast.success(`Vale ${result.data!.vale_number} creado`, {
+        description: paymentStatus === "paid"
+          ? "El cliente ya pago. Entregar cuando haya stock."
+          : "Cobrar al cliente cuando recoja el producto.",
+      })
+      clear()
+      queryClient.invalidateQueries({ queryKey: ["vales"] })
+      queryClient.invalidateQueries({ queryKey: ["vales-ready"] })
+      queryClient.invalidateQueries({ queryKey: ["pos"] })
+    } catch {
+      toast.error("Error de conexion", {
+        description: "No se pudo conectar con el servidor. Intenta de nuevo.",
+      })
+    }
+  }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline])
+
   // ── Print ──
 
   const handlePrint = useCallback(() => {
@@ -395,6 +451,7 @@ export function POSSaleWizard({
                   payments={payments}
                   onCompleteSale={handleCompleteSale}
                   onPendingSale={handlePendingSale}
+                  onCreateVale={handleCreateVale}
                   onPrint={handlePrint}
                   onBack={goBack}
                   onClose={handleClose}

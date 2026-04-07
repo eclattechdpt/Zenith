@@ -1,78 +1,88 @@
 "use client"
 
-import { isPast } from "date-fns"
+import { CheckCircle2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency, formatDate } from "@/lib/utils"
-import { CREDIT_NOTE_STATUSES } from "@/lib/constants"
+import { Button } from "@/components/ui/button"
+import { formatDate } from "@/lib/utils"
+import { CREDIT_NOTE_STATUSES, CREDIT_NOTE_TYPES } from "@/lib/constants"
 
 import type { CreditNoteWithDetails } from "../types"
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  redeemed: "bg-blue-50 text-blue-700 border-blue-200",
-  expired: "bg-amber-50 text-amber-700 border-amber-200",
+  settled: "bg-blue-50 text-blue-700 border-blue-200",
   cancelled: "bg-neutral-100 text-neutral-500 border-neutral-200",
 }
 
-interface CreditNotesCardMobileProps {
-  note: CreditNoteWithDetails
+const TYPE_COLORS: Record<string, string> = {
+  lending: "bg-violet-50 text-violet-700 border-violet-200",
+  exchange: "bg-amber-50 text-amber-700 border-amber-200",
 }
 
-export function CreditNotesCardMobile({ note }: CreditNotesCardMobileProps) {
-  const status = note.status as string
-  const isExpired =
-    status === "active" &&
-    note.expires_at &&
-    isPast(new Date(note.expires_at))
+interface Props {
+  note: CreditNoteWithDetails
+  onSettle?: () => void
+}
 
-  const statusLabel = isExpired
-    ? "Expirada"
-    : (CREDIT_NOTE_STATUSES[status as keyof typeof CREDIT_NOTE_STATUSES] ??
-        status)
-
-  const statusColor = isExpired
-    ? "bg-amber-50 text-amber-700 border-amber-200"
-    : (STATUS_COLORS[status] ?? "")
+export function CreditNotesCardMobile({ note, onSettle }: Props) {
+  const items = note.credit_note_items ?? []
+  const outCount = items.filter((i) => i.direction === "out").reduce((s, i) => s + i.quantity, 0)
+  const inCount = items.filter((i) => i.direction === "in").reduce((s, i) => s + i.quantity, 0)
 
   return (
-    <div className="rounded-xl border border-neutral-100 bg-white p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
+    <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <div>
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-neutral-950 tabular-nums">
-              {note.credit_number}
-            </span>
+            <span className="font-semibold tabular-nums">{note.credit_number}</span>
             <Badge
               variant="outline"
-              className={`text-[10px] ${statusColor}`}
+              className={`text-[10px] ${TYPE_COLORS[note.credit_type] ?? ""}`}
             >
-              {statusLabel}
+              {CREDIT_NOTE_TYPES[note.credit_type as keyof typeof CREDIT_NOTE_TYPES] ?? note.credit_type}
             </Badge>
           </div>
-          <p className="text-xs text-neutral-500 mt-0.5">
-            {note.customers?.name}
+          <p className="mt-0.5 text-sm text-neutral-500">
+            {note.customers?.name ?? "—"}
           </p>
-          {note.returns && (
-            <p className="text-xs text-neutral-400">
-              {note.returns.return_number}
-            </p>
-          )}
         </div>
-        <div className="text-right shrink-0">
-          <p className="font-semibold text-neutral-950 tabular-nums">
-            {formatCurrency(Number(note.remaining_amount))}
-          </p>
-          {Number(note.remaining_amount) !== Number(note.original_amount) && (
-            <p className="text-xs text-neutral-400 tabular-nums line-through">
-              {formatCurrency(Number(note.original_amount))}
-            </p>
-          )}
-        </div>
+        <Badge
+          variant="outline"
+          className={`text-[10px] ${STATUS_COLORS[note.status] ?? ""}`}
+        >
+          {CREDIT_NOTE_STATUSES[note.status as keyof typeof CREDIT_NOTE_STATUSES] ?? note.status}
+        </Badge>
       </div>
 
-      <div className="mt-2 text-xs text-neutral-500 tabular-nums">
-        {formatDate(note.created_at)}
+      <div className="mt-2 flex items-center gap-2 text-xs">
+        {outCount > 0 && (
+          <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-600">
+            -{outCount} salida
+          </span>
+        )}
+        {inCount > 0 && (
+          <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-600">
+            +{inCount} entrada
+          </span>
+        )}
+      </div>
+
+      <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3">
+        <span className="text-sm text-neutral-500 tabular-nums">
+          {formatDate(note.created_at)}
+        </span>
+        {onSettle && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onSettle}
+            className="text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+          >
+            <CheckCircle2 className="mr-1 size-4" />
+            Liquidar
+          </Button>
+        )}
       </div>
     </div>
   )

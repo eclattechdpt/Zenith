@@ -22,9 +22,11 @@ export function useCreditNotes(filters?: CreditNotesFilters) {
         .select(
           `*,
           customers:customers!credit_notes_customer_id_fkey(id, name),
-          returns:returns!credit_notes_return_id_fkey(return_number)`
+          returns:returns!credit_notes_return_id_fkey(return_number),
+          credit_note_items(*)`
         )
         .is("deleted_at", null)
+        .in("credit_type", ["lending", "exchange"])
         .order("created_at", { ascending: false })
 
       if (filters?.status) {
@@ -51,11 +53,34 @@ export function useCreditNoteStats() {
   const { data: notes } = useCreditNotes()
 
   const total = notes?.length ?? 0
-  const active = notes?.filter((n) => n.status === "active").length ?? 0
-  const activeBalance = notes
-    ?.filter((n) => n.status === "active")
-    .reduce((sum, n) => sum + Number(n.remaining_amount), 0) ?? 0
-  const applied = notes?.filter((n) => n.status === "redeemed").length ?? 0
+  const activeLendings = notes?.filter((n) => n.status === "active" && n.credit_type === "lending").length ?? 0
+  const exchanges = notes?.filter((n) => n.credit_type === "exchange").length ?? 0
+  const settled = notes?.filter((n) => n.status === "settled").length ?? 0
 
-  return { total, active, activeBalance, applied }
+  return { total, activeLendings, exchanges, settled }
+}
+
+export function useCreditNoteDetail(creditNoteId: string | null) {
+  return useQuery({
+    queryKey: ["credit-note-detail", creditNoteId],
+    queryFn: async (): Promise<CreditNoteWithDetails> => {
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("credit_notes")
+        .select(
+          `*,
+          customers:customers!credit_notes_customer_id_fkey(id, name),
+          returns:returns!credit_notes_return_id_fkey(return_number),
+          credit_note_items(*)`
+        )
+        .eq("id", creditNoteId!)
+        .is("deleted_at", null)
+        .single()
+
+      if (error) throw error
+      return data as unknown as CreditNoteWithDetails
+    },
+    enabled: !!creditNoteId,
+  })
 }

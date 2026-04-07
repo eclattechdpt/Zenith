@@ -33,6 +33,7 @@ export const MODULE_ACCENT_MAP = {
   "/inventario/carga-inicial": "inventario-carga-inicial",
   "/inventario": "inventario",
   "/clientes": "clientes",
+  "/vales": "vales",
   "/notas-credito": "notas-credito",
   "/reportes": "reportes",
   "/configuracion": "configuracion",

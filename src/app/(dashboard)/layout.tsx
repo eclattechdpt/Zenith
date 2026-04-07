@@ -1,6 +1,7 @@
 import { Sidebar } from "@/components/layout/sidebar"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { ModuleAccentScope } from "@/components/shared/module-accent-scope"
+import { ValeReadyBanner } from "@/features/vales/components/vale-ready-banner"
 
 export default function DashboardLayout({
   children,
@@ -19,6 +20,9 @@ export default function DashboardLayout({
         {/* Main area */}
         <div className="flex min-w-0 flex-1 flex-col">
           <main className="flex-1 overflow-x-hidden overflow-y-auto bg-neutral-50">
+            <div className="px-5 pt-4 sm:px-8">
+              <ValeReadyBanner />
+            </div>
             {children}
           </main>
         </div>

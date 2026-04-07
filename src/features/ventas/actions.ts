@@ -203,6 +203,9 @@ export async function createReturn(input: CreateReturnInput) {
         quantity: item.quantity,
         unit_price: item.unit_price,
         restock: item.restock,
+        replacement_variant_id: item.replacement_variant_id ?? null,
+        replacement_product_name: item.replacement_product_name ?? null,
+        replacement_variant_label: item.replacement_variant_label ?? null,
       })),
     }
   )
@@ -221,8 +224,6 @@ export async function createReturn(input: CreateReturnInput) {
       return_id: string
       return_number: string
       total_refund: number
-      credit_note_id: string | null
-      credit_note_number: string | null
       sale_status: string
     },
   }

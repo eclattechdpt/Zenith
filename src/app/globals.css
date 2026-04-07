@@ -303,6 +303,24 @@ input[type="number"] {
     --ring: #25A6B6;
   }
 
+  [data-module="vales"] {
+    --accent-50: #EEF2FF;   /* indigo-50 */
+    --accent-100: #E0E7FF;
+    --accent-200: #C7D2FE;
+    --accent-300: #A5B4FC;
+    --accent-400: #818CF8;
+    --accent-500: #6366F1;
+    --accent-600: #4F46E5;
+    --accent-700: #4338CA;
+    --accent-800: #3730A3;
+    --accent-900: #312E81;
+    --accent-scrollbar: #818CF8;
+    --accent-scrollbar-hover: #6366F1;
+    --accent: #EEF2FF;
+    --accent-foreground: #312E81;
+    --ring: #6366F1;
+  }
+
   [data-module="reportes"],
   [data-module="configuracion"] {
     --accent-50: #F7F3F0;   /* neutral-100 */

@@ -13,6 +13,7 @@ import {
   CreditCard,
   ArrowRightLeft,
   Sparkles,
+  Ticket,
 } from "lucide-react"
 import { motion } from "motion/react"
 import { cn } from "@/lib/utils"
@@ -38,6 +39,7 @@ interface WizardConfirmationStepProps {
   payments: CartPayment[]
   onCompleteSale: () => Promise<void>
   onPendingSale: () => Promise<void>
+  onCreateVale: (paymentStatus: "paid" | "pending") => Promise<void>
   onPrint: () => void
   onBack: () => void
   onClose: () => void
@@ -48,6 +50,7 @@ export function WizardConfirmationStep({
   payments,
   onCompleteSale,
   onPendingSale,
+  onCreateVale,
   onPrint,
   onBack,
   onClose,
@@ -59,11 +62,11 @@ export function WizardConfirmationStep({
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const getTotal = usePOSStore((s) => s.getTotal)
 
-  const [submitting, setSubmitting] = useState<"complete" | "pending" | null>(
+  const [submitting, setSubmitting] = useState<"complete" | "pending" | "vale-paid" | "vale-pending" | null>(
     null
   )
   const [confirmAction, setConfirmAction] = useState<
-    "complete" | "pending" | null
+    "complete" | "pending" | "vale" | null
   >(null)
 
   const isOnline = useOnlineStatus()
@@ -86,6 +89,16 @@ export function WizardConfirmationStep({
     setSubmitting("pending")
     try {
       await onPendingSale()
+    } finally {
+      setSubmitting(null)
+    }
+  }
+
+  const handleVale = async (paymentStatus: "paid" | "pending") => {
+    setConfirmAction(null)
+    setSubmitting(paymentStatus === "paid" ? "vale-paid" : "vale-pending")
+    try {
+      await onCreateVale(paymentStatus)
     } finally {
       setSubmitting(null)
     }
@@ -356,6 +369,26 @@ export function WizardConfirmationStep({
           </button>
           <button
             type="button"
+            onClick={() => {
+              if (!customer) {
+                // Vale requires a customer
+                return
+              }
+              setConfirmAction("vale")
+            }}
+            disabled={submitting !== null || !isOnline || !customer}
+            title={!customer ? "Se requiere un cliente para crear un vale" : undefined}
+            className="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-indigo-300 bg-indigo-50 px-6 text-sm font-bold text-indigo-700 transition-all hover:bg-indigo-100 active:scale-[0.98] disabled:opacity-40"
+          >
+            {submitting === "vale-paid" || submitting === "vale-pending" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Ticket className="h-4 w-4" />
+            )}
+            Vale
+          </button>
+          <button
+            type="button"
             onClick={() => setConfirmAction("complete")}
             disabled={submitting !== null || !isOnline}
             className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-accent-500 text-base font-bold text-white shadow-sm shadow-accent-500/20 transition-all hover:bg-accent-600 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
@@ -392,6 +425,63 @@ export function WizardConfirmationStep({
         isLoading={submitting === "pending"}
         onConfirm={handlePending}
       />
+
+      {/* Vale dialog — asks paid or pending */}
+      {confirmAction === "vale" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-1 flex items-center gap-2">
+              <Ticket className="h-5 w-5 text-indigo-500" />
+              <h3 className="text-lg font-bold text-neutral-900">
+                Crear vale
+              </h3>
+            </div>
+            <p className="mb-5 text-sm text-neutral-500">
+              Se creara un vale para {customer?.name}. No se descontara stock
+              hasta que el cliente recoja el producto.
+            </p>
+            <p className="mb-4 text-sm font-semibold text-neutral-700">
+              El cliente ya pago?
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => handleVale("pending")}
+                disabled={submitting !== null}
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-amber-300 bg-amber-50 text-sm font-bold text-amber-700 transition-all hover:bg-amber-100 active:scale-[0.98] disabled:opacity-40"
+              >
+                {submitting === "vale-pending" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Clock className="h-4 w-4" />
+                )}
+                No, pendiente
+              </button>
+              <button
+                type="button"
+                onClick={() => handleVale("paid")}
+                disabled={submitting !== null}
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-500 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-40"
+              >
+                {submitting === "vale-paid" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="h-4 w-4" />
+                )}
+                Si, pagado
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setConfirmAction(null)}
+              disabled={submitting !== null}
+              className="mt-3 w-full text-center text-sm font-medium text-neutral-400 transition-colors hover:text-neutral-600 disabled:opacity-40"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }

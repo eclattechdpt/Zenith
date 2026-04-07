@@ -18,6 +18,9 @@ export const returnItemSchema = z.object({
   quantity: z.number().int().positive("La cantidad debe ser positiva"),
   unit_price: z.number().positive("El precio debe ser mayor a 0"),
   restock: z.boolean().default(true),
+  replacement_variant_id: z.string().regex(uuidPattern).optional().nullable(),
+  replacement_product_name: z.string().optional().nullable(),
+  replacement_variant_label: z.string().optional().nullable(),
 })
 
 export const createReturnSchema = z.object({
