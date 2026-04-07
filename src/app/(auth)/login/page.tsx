@@ -1,8 +1,8 @@
 "use client"
 
 import dynamic from "next/dynamic"
-
-import { LoginSkeleton } from "@/features/auth/components/login-skeleton"
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
+import { LoginFixture } from "@/features/auth/components/fixtures/login-fixture"
 
 const LoginContent = dynamic(
   () =>
@@ -11,7 +11,12 @@ const LoginContent = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <LoginSkeleton />,
+    loading: () => (
+      <BoneyardSkeleton name="login-page" loading={true} animate="shimmer"
+        fixture={<LoginFixture />}>
+        <div />
+      </BoneyardSkeleton>
+    ),
   }
 )
 
