@@ -285,7 +285,7 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="mx-auto flex w-full max-w-4xl flex-col gap-6 pt-10"
+        className="mx-auto flex w-full max-w-4xl flex-col gap-6 pt-10 pb-12"
       >
         {/* ── Header ── */}
         <motion.div variants={itemVariants}>

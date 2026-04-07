@@ -1,66 +1,37 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowLeft, Warehouse } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { motion } from "motion/react"
 
+import { PageHero } from "@/components/shared/page-hero"
 import { InventoryTable } from "@/features/inventario/components/inventory-table"
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.06, delayChildren: 0.05 },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
-  },
-}
 
 export default function InventarioFisicoPage() {
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="min-w-0 flex-1 space-y-8 p-5 sm:p-8"
-    >
-      <motion.div variants={itemVariants} className="text-center sm:text-left">
+    <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
+      <div>
         <motion.div
-          whileHover={{ x: -2 }}
+          initial={{ opacity: 0, x: -4 }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ type: "spring", stiffness: 500, damping: 35 }}
-          className="inline-block"
+          className="mb-3"
         >
           <Link
             href="/inventario"
-            className="group mb-3 inline-flex items-center gap-1.5 rounded-md px-2 py-1 -ml-2 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 -ml-2 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
           >
             <ArrowLeft className="size-3" />
             Inventarios
           </Link>
         </motion.div>
-        <p className="flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-[2px] text-neutral-400 sm:justify-start">
-          <Warehouse className="h-3.5 w-3.5 text-amber-400" />
-          Inventario Fisico
-        </p>
-        <h1 className="mt-2 font-display text-[38px] font-semibold leading-none tracking-[-1.5px] text-neutral-950 sm:text-[48px]">
-          Stock Fisico
-        </h1>
-        <p className="mt-2 text-sm text-neutral-500">
-          Stock actual del almacen — se descuenta con ventas
-        </p>
-      </motion.div>
+        <PageHero
+          title="Stock Fisico"
+          subtitle="Stock actual del almacen — se descuenta con ventas"
+        />
+      </div>
 
-      <motion.div variants={itemVariants}>
-        <InventoryTable inventoryType="physical" />
-      </motion.div>
-    </motion.div>
+      <InventoryTable inventoryType="physical" />
+    </div>
   )
 }

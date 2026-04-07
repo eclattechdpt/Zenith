@@ -20,7 +20,7 @@ export default function ValesPage() {
         <KpiCard
           title="Total vales"
           value={stats.total}
-          subtitle="vales creados"
+          subtitle={stats.cancelled > 0 ? `vales creados · ${stats.cancelled} cancelado${stats.cancelled !== 1 ? "s" : ""}` : "vales creados"}
           icon={Ticket}
           variant="hero"
         />

@@ -34,7 +34,7 @@ export default function NotasCreditoPage() {
         <KpiCard
           title="Prestamos activos"
           value={stats.activeLendings}
-          subtitle="pendientes de devolucion"
+          subtitle="prestamos sin liquidar"
           icon={ArrowRightLeft}
           iconBg="bg-violet-50"
           iconColor="text-violet-500"

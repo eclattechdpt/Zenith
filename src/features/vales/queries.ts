@@ -93,8 +93,9 @@ export function useValeStats() {
   const pending = vales?.filter((v) => v.status === "pending").length ?? 0
   const ready = vales?.filter((v) => v.status === "ready").length ?? 0
   const completed = vales?.filter((v) => v.status === "completed").length ?? 0
+  const cancelled = vales?.filter((v) => v.status === "cancelled").length ?? 0
 
-  return { total, pending, ready, completed }
+  return { total, pending, ready, completed, cancelled }
 }
 
 export function useReadyVales() {
