@@ -192,7 +192,7 @@ export function DevPanel() {
       </div>
 
       {/* Conexion Supabase */}
-      <section className="space-y-3">
+      <section className="space-y-3 rounded-2xl border border-neutral-200/60 bg-neutral-50/40 p-5">
         <SectionHeader icon={Wifi} title="Conexion Supabase" />
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <InfoTile
@@ -221,7 +221,7 @@ export function DevPanel() {
       </section>
 
       {/* Autenticacion */}
-      <section className="space-y-3">
+      <section className="space-y-3 rounded-2xl border border-neutral-200/60 bg-neutral-50/40 p-5">
         <SectionHeader icon={User} title="Autenticacion" />
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <InfoTile
@@ -262,7 +262,7 @@ export function DevPanel() {
       </section>
 
       {/* Almacenamiento */}
-      <section className="space-y-3">
+      <section className="space-y-3 rounded-2xl border border-neutral-200/60 bg-neutral-50/40 p-5">
         <SectionHeader icon={HardDrive} title="Almacenamiento" />
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <InfoTile
@@ -282,7 +282,7 @@ export function DevPanel() {
       </section>
 
       {/* Registros por tabla */}
-      <section className="space-y-3">
+      <section className="space-y-3 rounded-2xl border border-neutral-200/60 bg-neutral-50/40 p-5">
         <SectionHeader icon={Database} title="Registros por tabla" />
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
           {tableCounts.map(({ label, value }) => (
@@ -296,7 +296,7 @@ export function DevPanel() {
       </section>
 
       {/* Zona de peligro */}
-      <section className="space-y-3">
+      <section className="space-y-3 rounded-2xl border border-red-200/50 bg-red-50/30 p-5">
         <SectionHeader icon={Trash2} title="Zona de peligro" danger />
         <div className="space-y-2">
           <DangerZoneCard
