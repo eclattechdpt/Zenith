@@ -3,5 +3,10 @@
   "out": "./src/bones",
   "wait": 1000,
   "color": "rgba(0,0,0,0.08)",
-  "animate": "shimmer"
+  "animate": "shimmer",
+  "auth": {
+    "headers": {
+      "x-boneyard-build": "true"
+    }
+  }
 }
