@@ -11,6 +11,11 @@ import {
   FileText,
   PackageCheck,
   PackageX,
+  ShoppingBag,
+  CreditCard,
+  Receipt,
+  User,
+  Calendar,
 } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -19,6 +24,7 @@ import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { SectionCard } from "@/components/shared/section-card"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { formatCurrency } from "@/lib/utils"
 import {
@@ -28,7 +34,7 @@ import {
 } from "@/lib/constants"
 
 import { useSaleDetail } from "../queries"
-import { cancelSale } from "../actions"
+import { cancelSale, cancelReturn } from "../actions"
 import { ReturnDialog } from "./return-dialog"
 
 const STATUS_COLORS: Record<string, string> = {
@@ -37,24 +43,6 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-neutral-100 text-neutral-500 border-neutral-200",
   partially_returned: "bg-amber-50 text-amber-700 border-amber-200",
   fully_returned: "bg-rose-50 text-rose-700 border-rose-200",
-}
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
-  },
 }
 
 interface SaleDetailProps {
@@ -69,11 +57,18 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
   const [showReturnDialog, setShowReturnDialog] = useState(false)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
+  const [cancelReturnTarget, setCancelReturnTarget] = useState<{
+    id: string
+    return_number: string
+  } | null>(null)
+  const [isCancellingReturn, setIsCancellingReturn] = useState(false)
 
   const status = sale?.status as string | undefined
   const isReturnable =
     status === "completed" || status === "partially_returned"
-  const hasReturns = (sale?.returns ?? []).length > 0
+  const hasReturns = (sale?.returns ?? []).some(
+    (r) => r.status === "completed"
+  )
   const canCancel = status === "completed" && !hasReturns
 
   async function handleCancelSale() {
@@ -94,6 +89,34 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
     toast.success("Venta cancelada")
     queryClient.invalidateQueries({ queryKey: ["sales"] })
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
+  }
+
+  async function handleCancelReturn() {
+    if (!cancelReturnTarget) return
+    setIsCancellingReturn(true)
+    try {
+      const result = await cancelReturn({ return_id: cancelReturnTarget.id })
+      setIsCancellingReturn(false)
+      setCancelReturnTarget(null)
+
+      if ("error" in result) {
+        const msg =
+          (result.error as Record<string, string[]>)._form?.[0] ??
+          "Error al cancelar la devolucion"
+        toast.error(msg)
+        return
+      }
+
+      toast.success("Devolucion cancelada")
+      queryClient.invalidateQueries({ queryKey: ["sale-detail", saleId] })
+      queryClient.invalidateQueries({ queryKey: ["sales"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory"] })
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+    } catch {
+      setIsCancellingReturn(false)
+      setCancelReturnTarget(null)
+      toast.error("Error al cancelar la devolucion")
+    }
   }
 
   if (isLoading) {
@@ -117,28 +140,28 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="flex flex-col gap-6"
-    >
+    <div className="min-w-0 flex-1 space-y-6 p-5 sm:p-8">
       {/* Header */}
       <motion.div
-        variants={itemVariants}
-        className="flex flex-col gap-4 pl-12 sm:pl-0 sm:flex-row sm:items-center sm:justify-between"
+        initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        className="flex flex-col gap-4 pl-10 sm:pl-0"
       >
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/ventas")}
-          >
-            <ArrowLeft className="size-4" />
-          </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/ventas")}
+          className="w-fit -ml-2 text-neutral-500 hover:text-neutral-900"
+        >
+          <ArrowLeft className="mr-1.5 size-4" />
+          Volver a ventas
+        </Button>
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-display text-2xl font-semibold tracking-tight text-neutral-950">
+            <div className="flex items-center gap-3">
+              <h1 className="font-display text-3xl font-semibold tracking-tight text-neutral-950">
                 {sale.sale_number}
               </h1>
               <Badge
@@ -148,52 +171,57 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
                 {SALE_STATUSES[status as keyof typeof SALE_STATUSES] ?? status}
               </Badge>
             </div>
-            <p className="text-sm text-neutral-500">
-              {format(new Date(sale.created_at), "dd 'de' MMMM, yyyy — HH:mm", {
-                locale: es,
-              })}
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-500">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="size-3.5" />
+                {format(new Date(sale.created_at), "dd 'de' MMMM, yyyy — HH:mm", {
+                  locale: es,
+                })}
+              </span>
               {sale.customers && (
-                <span className="text-teal-600 ml-2">
+                <span className="flex items-center gap-1.5 text-teal-600 font-medium">
+                  <User className="size-3.5" />
                   {sale.customers.name}
                 </span>
               )}
-            </p>
+            </div>
           </div>
-        </div>
 
-        <div className="flex gap-2">
-          {isReturnable && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowReturnDialog(true)}
-            >
-              <RotateCcw className="mr-1.5 size-4" />
-              Devolver
-            </Button>
-          )}
-          {canCancel && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:text-destructive"
-              onClick={() => setShowCancelDialog(true)}
-            >
-              <XCircle className="mr-1.5 size-4" />
-              Cancelar venta
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {isReturnable && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowReturnDialog(true)}
+              >
+                <RotateCcw className="mr-1.5 size-4" />
+                Devolver
+              </Button>
+            )}
+            {canCancel && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={() => setShowCancelDialog(true)}
+              >
+                <XCircle className="mr-1.5 size-4" />
+                Cancelar venta
+              </Button>
+            )}
+          </div>
         </div>
       </motion.div>
 
       {/* Items */}
-      <motion.div
-        variants={itemVariants}
-        className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-6"
+      <SectionCard
+        label="Productos"
+        description={`${sale.sale_items.length} producto${sale.sale_items.length !== 1 ? "s" : ""} en esta venta`}
+        icon={ShoppingBag}
+        iconBg="bg-rose-50"
+        iconColor="text-rose-400"
+        delay={0.06}
       >
-        <h2 className="text-sm font-semibold text-neutral-950 mb-4">
-          Productos
-        </h2>
         <div className="space-y-3">
           {sale.sale_items.map((item) => (
             <div
@@ -248,16 +276,17 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
             </span>
           </div>
         </div>
-      </motion.div>
+      </SectionCard>
 
       {/* Payments */}
-      <motion.div
-        variants={itemVariants}
-        className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-6"
+      <SectionCard
+        label="Pagos"
+        description="Metodos de pago registrados"
+        icon={CreditCard}
+        iconBg="bg-teal-50"
+        iconColor="text-teal-500"
+        delay={0.12}
       >
-        <h2 className="text-sm font-semibold text-neutral-950 mb-4">
-          Pagos
-        </h2>
         <div className="space-y-2">
           {sale.sale_payments.map((p) => (
             <div key={p.id} className="flex justify-between text-sm">
@@ -276,104 +305,139 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
             </div>
           ))}
         </div>
-      </motion.div>
+      </SectionCard>
 
       {/* Returns history */}
       {sale.returns.length > 0 && (
-        <motion.div
-          variants={itemVariants}
-          className="rounded-2xl border border-rose-100 bg-gradient-to-b from-white to-rose-50/30 p-4 sm:p-6"
+        <SectionCard
+          label="Devoluciones"
+          description={`${sale.returns.length} devolucion${sale.returns.length !== 1 ? "es" : ""} registrada${sale.returns.length !== 1 ? "s" : ""}`}
+          icon={RotateCcw}
+          iconBg="bg-rose-50"
+          iconColor="text-rose-500"
+          delay={0.18}
+          className="border-rose-100 bg-gradient-to-b from-white to-rose-50/30"
         >
-          <h2 className="text-sm font-semibold text-neutral-950 mb-4 flex items-center gap-2">
-            <RotateCcw className="size-4 text-rose-500" />
-            Devoluciones
-          </h2>
           <div className="space-y-4">
-            {sale.returns.map((ret) => (
-              <div
-                key={ret.id}
-                className="rounded-xl border border-rose-100 bg-white p-4"
-              >
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div>
-                    <p className="text-sm font-semibold text-neutral-950">
-                      {ret.return_number}
-                    </p>
-                    <p className="text-xs text-neutral-500">
-                      {format(new Date(ret.created_at), "dd MMM yyyy, HH:mm", {
-                        locale: es,
-                      })}
-                    </p>
-                    {ret.reason && (
-                      <p className="text-xs text-neutral-500 mt-1 italic">
-                        {ret.reason}
-                      </p>
-                    )}
-                  </div>
-                  <p className="text-sm font-bold text-rose-600 tabular-nums">
-                    -{formatCurrency(Number(ret.total_refund))}
-                  </p>
-                </div>
-
-                {/* Return items */}
-                <div className="space-y-1.5">
-                  {(ret.return_items ?? []).map((ri) => (
-                    <div
-                      key={ri.id}
-                      className="flex items-center justify-between text-xs"
-                    >
-                      <div className="flex items-center gap-1.5 text-neutral-600">
-                        {ri.restock ? (
-                          <PackageCheck className="size-3 text-emerald-500" />
-                        ) : (
-                          <PackageX className="size-3 text-neutral-400" />
-                        )}
-                        <span>
-                          {ri.quantity}x —{" "}
-                          {formatCurrency(Number(ri.unit_price))} c/u
-                        </span>
-                      </div>
-                      <span className="tabular-nums text-neutral-500">
-                        {formatCurrency(Number(ri.line_total))}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Credit notes from this return */}
-                {(ret.credit_notes ?? []).length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-neutral-100">
-                    {(ret.credit_notes ?? []).map((cn) => (
-                      <div
-                        key={cn.id}
-                        className="flex items-center justify-between text-xs"
-                      >
-                        <div className="flex items-center gap-1.5">
-                          <FileText className="size-3 text-teal-500" />
-                          <span className="font-medium text-teal-700">
-                            {cn.credit_number}
-                          </span>
+            {sale.returns.map((ret) => {
+              const isCancelled = ret.status === "cancelled"
+              return (
+                <div
+                  key={ret.id}
+                  className={`rounded-xl border p-4 ${
+                    isCancelled
+                      ? "border-neutral-200 bg-neutral-50/50 opacity-60"
+                      : "border-rose-100 bg-white"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-neutral-950">
+                          {ret.return_number}
+                        </p>
+                        {isCancelled && (
                           <Badge
                             variant="outline"
-                            className="text-[9px] py-0 px-1"
+                            className="text-[10px] bg-neutral-100 text-neutral-500 border-neutral-200"
                           >
-                            {CREDIT_NOTE_STATUSES[
-                              cn.status as keyof typeof CREDIT_NOTE_STATUSES
-                            ] ?? cn.status}
+                            Cancelada
                           </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-neutral-500">
+                        {format(new Date(ret.created_at), "dd MMM yyyy, HH:mm", {
+                          locale: es,
+                        })}
+                      </p>
+                      {ret.reason && (
+                        <p className="text-xs text-neutral-500 mt-1 italic">
+                          {ret.reason}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <p className={`text-sm font-bold tabular-nums ${isCancelled ? "text-neutral-400 line-through" : "text-rose-600"}`}>
+                        -{formatCurrency(Number(ret.total_refund))}
+                      </p>
+                      {ret.status === "completed" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="size-7 p-0 text-neutral-400 hover:text-red-600"
+                          onClick={() =>
+                            setCancelReturnTarget({
+                              id: ret.id,
+                              return_number: ret.return_number,
+                            })
+                          }
+                        >
+                          <XCircle className="size-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Return items */}
+                  <div className="space-y-1.5">
+                    {(ret.return_items ?? []).map((ri) => (
+                      <div
+                        key={ri.id}
+                        className="flex items-center justify-between text-xs"
+                      >
+                        <div className="flex items-center gap-1.5 text-neutral-600">
+                          {ri.restock ? (
+                            <PackageCheck className="size-3 text-emerald-500" />
+                          ) : (
+                            <PackageX className="size-3 text-neutral-400" />
+                          )}
+                          <span>
+                            {ri.quantity}x —{" "}
+                            {formatCurrency(Number(ri.unit_price))} c/u
+                          </span>
                         </div>
-                        <span className="tabular-nums text-neutral-600">
-                          {formatCurrency(Number(cn.remaining_amount))} /{" "}
-                          {formatCurrency(Number(cn.original_amount))}
+                        <span className="tabular-nums text-neutral-500">
+                          {formatCurrency(Number(ri.line_total))}
                         </span>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {/* Credit notes from this return */}
+                  {(ret.credit_notes ?? []).length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-neutral-100">
+                      {(ret.credit_notes ?? []).map((cn) => (
+                        <div
+                          key={cn.id}
+                          className="flex items-center justify-between text-xs"
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <FileText className="size-3 text-teal-500" />
+                            <span className="font-medium text-teal-700">
+                              {cn.credit_number}
+                            </span>
+                            <Badge
+                              variant="outline"
+                              className="text-[9px] py-0 px-1"
+                            >
+                              {CREDIT_NOTE_STATUSES[
+                                cn.status as keyof typeof CREDIT_NOTE_STATUSES
+                              ] ?? cn.status}
+                            </Badge>
+                          </div>
+                          <span className="tabular-nums text-neutral-600">
+                            {formatCurrency(Number(cn.remaining_amount))} /{" "}
+                            {formatCurrency(Number(cn.original_amount))}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
-        </motion.div>
+        </SectionCard>
       )}
 
       {/* Return dialog */}
@@ -394,6 +458,18 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
         isLoading={isCancelling}
         onConfirm={handleCancelSale}
       />
-    </motion.div>
+
+      {/* Cancel return confirmation */}
+      <ConfirmDialog
+        open={!!cancelReturnTarget}
+        onOpenChange={(open) => !open && setCancelReturnTarget(null)}
+        title="Cancelar devolucion"
+        description={`Se cancelara la devolucion "${cancelReturnTarget?.return_number}" y se revertiran los movimientos de stock. Esta accion no se puede deshacer.`}
+        confirmLabel="Cancelar devolucion"
+        variant="destructive"
+        isLoading={isCancellingReturn}
+        onConfirm={handleCancelReturn}
+      />
+    </div>
   )
 }

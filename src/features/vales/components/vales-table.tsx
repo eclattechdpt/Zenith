@@ -1,7 +1,9 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { Search, Ticket, MoreHorizontal, CheckCircle2, X } from "lucide-react"
+import { Search, Ticket, MoreHorizontal, CheckCircle2, XCircle, X } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { useQueryState, parseAsString } from "nuqs"
 import { motion } from "motion/react"
 
@@ -16,11 +18,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DataTable } from "@/components/shared/data-table"
 import { EmptyState } from "@/components/shared/empty-state"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { DateFilterPills, type DateRange } from "@/components/shared/date-filter-pills"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { VALE_STATUSES, VALE_PAYMENT_STATUSES } from "@/lib/constants"
 
 import { useVales } from "../queries"
+import { cancelVale } from "../actions"
 import type { ValeWithDetails } from "../types"
 import { ValesCardMobile } from "./vales-card-mobile"
 import { ValeCompleteDialog } from "./vale-complete-dialog"
@@ -44,6 +48,7 @@ const STATUS_TABS = [
   { value: "pending", label: "Pendientes" },
   { value: "ready", label: "Listos" },
   { value: "completed", label: "Completados" },
+  { value: "cancelled", label: "Cancelados" },
 ] as const
 
 export function ValesTable() {
@@ -53,7 +58,10 @@ export function ValesTable() {
     parseAsString.withDefault("")
   )
   const [completeValeId, setCompleteValeId] = useState<string | null>(null)
+  const [cancelTarget, setCancelTarget] = useState<ValeWithDetails | null>(null)
+  const [isCancelling, setIsCancelling] = useState(false)
   const [dateRange, setDateRange] = useState<DateRange | null>(null)
+  const queryClient = useQueryClient()
 
   const {
     data: vales = [],
@@ -68,6 +76,32 @@ export function ValesTable() {
   })
   const hasLoadedOnce = useRef(false)
   if (isFetched) hasLoadedOnce.current = true
+
+  async function handleCancelVale() {
+    if (!cancelTarget) return
+    setIsCancelling(true)
+    try {
+      const result = await cancelVale({ vale_id: cancelTarget.id })
+      setIsCancelling(false)
+      setCancelTarget(null)
+
+      if ("error" in result) {
+        const msg =
+          (result.error as Record<string, string[]>)._form?.[0] ??
+          "Error al cancelar el vale"
+        toast.error(msg)
+        return
+      }
+
+      toast.success("Vale cancelado")
+      queryClient.invalidateQueries({ queryKey: ["vales"] })
+      queryClient.invalidateQueries({ queryKey: ["vales-ready"] })
+    } catch {
+      setIsCancelling(false)
+      setCancelTarget(null)
+      toast.error("Error al cancelar el vale")
+    }
+  }
 
   const columns: ColumnDef<ValeWithDetails>[] = [
     {
@@ -155,8 +189,8 @@ export function ValesTable() {
       header: "",
       cell: ({ row }) => {
         const vale = row.original
-        const canComplete = vale.status === "pending" || vale.status === "ready"
-        if (!canComplete) return null
+        const canAct = vale.status === "pending" || vale.status === "ready"
+        if (!canAct) return null
         return (
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -168,8 +202,15 @@ export function ValesTable() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setCompleteValeId(vale.id)}>
-                <CheckCircle2 className="mr-2 size-4 text-emerald-500" />
+                <CheckCircle2 className="mr-2 size-3.5 text-emerald-500" />
                 Entregar vale
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setCancelTarget(vale)}
+              >
+                <XCircle className="mr-2 size-3.5" />
+                Cancelar vale
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -206,7 +247,7 @@ export function ValesTable() {
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setStatusFilter(tab.value || null)}
-                  className={`text-xs ${isActive ? "bg-accent-500 text-white hover:bg-accent-600" : ""}`}
+                  className="text-xs"
                 >
                   {tab.label}
                 </Button>
@@ -231,6 +272,7 @@ export function ValesTable() {
                   key={vale.id}
                   vale={vale}
                   onComplete={() => setCompleteValeId(vale.id)}
+                  onCancel={() => setCancelTarget(vale)}
                 />
               ))
             ) : (
@@ -276,6 +318,17 @@ export function ValesTable() {
       <ValeCompleteDialog
         valeId={completeValeId}
         onOpenChange={(open) => !open && setCompleteValeId(null)}
+      />
+
+      <ConfirmDialog
+        open={!!cancelTarget}
+        onOpenChange={(open) => !open && setCancelTarget(null)}
+        title="Cancelar vale"
+        description={`Se cancelara el vale "${cancelTarget?.vale_number}". Esta accion no se puede deshacer.`}
+        confirmLabel="Cancelar vale"
+        variant="destructive"
+        isLoading={isCancelling}
+        onConfirm={handleCancelVale}
       />
     </>
   )

@@ -8,9 +8,11 @@ import {
   createLendingSchema,
   createExchangeSchema,
   settleCreditNoteSchema,
+  cancelCreditNoteSchema,
   type CreateLendingInput,
   type CreateExchangeInput,
   type SettleCreditNoteInput,
+  type CancelCreditNoteInput,
 } from "./schemas"
 
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
@@ -126,4 +128,29 @@ export async function settleCreditNote(input: SettleCreditNoteInput) {
   revalidatePath("/inventario")
 
   return { data: data as { id: string; credit_number: string; settled_at: string } }
+}
+
+export async function cancelCreditNote(input: CancelCreditNoteInput) {
+  const parsed = cancelCreditNoteSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const supabase = await createServerClient()
+
+  const { data, error } = await supabase
+    .from("credit_notes")
+    .update({ status: "cancelled" })
+    .eq("id", parsed.data.credit_note_id)
+    .eq("tenant_id", TENANT_ID)
+    .eq("status", "active")
+    .is("deleted_at", null)
+    .select("id, credit_number")
+    .single()
+
+  if (error || !data) {
+    return { error: { _form: ["Nota no encontrada o ya fue liquidada"] } }
+  }
+
+  revalidatePath("/notas-credito")
+
+  return { data }
 }

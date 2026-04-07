@@ -1,7 +1,9 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { Search, FileText, MoreHorizontal, CheckCircle2, Package } from "lucide-react"
+import { Search, FileText, MoreHorizontal, CheckCircle2, XCircle, Package } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { useQueryState, parseAsString } from "nuqs"
 import { motion } from "motion/react"
 
@@ -16,11 +18,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DataTable } from "@/components/shared/data-table"
 import { EmptyState } from "@/components/shared/empty-state"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { DateFilterPills, type DateRange } from "@/components/shared/date-filter-pills"
 import { formatDate } from "@/lib/utils"
 import { CREDIT_NOTE_STATUSES, CREDIT_NOTE_TYPES } from "@/lib/constants"
 
 import { useCreditNotes } from "../queries"
+import { cancelCreditNote } from "../actions"
 import type { CreditNoteWithDetails } from "../types"
 import { CreditNotesCardMobile } from "./credit-notes-card-mobile"
 import { SettleDialog } from "./settle-dialog"
@@ -42,6 +46,7 @@ const STATUS_TABS = [
   { value: "", label: "Todas" },
   { value: "active", label: "Activas" },
   { value: "settled", label: "Liquidadas" },
+  { value: "cancelled", label: "Canceladas" },
 ] as const
 
 export function CreditNotesTable() {
@@ -51,7 +56,10 @@ export function CreditNotesTable() {
     parseAsString.withDefault("")
   )
   const [settleId, setSettleId] = useState<string | null>(null)
+  const [cancelTarget, setCancelTarget] = useState<CreditNoteWithDetails | null>(null)
+  const [isCancelling, setIsCancelling] = useState(false)
   const [dateRange, setDateRange] = useState<DateRange | null>(null)
+  const queryClient = useQueryClient()
 
   const {
     data: notes = [],
@@ -66,6 +74,31 @@ export function CreditNotesTable() {
   })
   const hasLoadedOnce = useRef(false)
   if (isFetched) hasLoadedOnce.current = true
+
+  async function handleCancel() {
+    if (!cancelTarget) return
+    setIsCancelling(true)
+    try {
+      const result = await cancelCreditNote({ credit_note_id: cancelTarget.id })
+      setIsCancelling(false)
+      setCancelTarget(null)
+
+      if ("error" in result) {
+        const msg =
+          (result.error as Record<string, string[]>)._form?.[0] ??
+          "Error al cancelar la nota de credito"
+        toast.error(msg)
+        return
+      }
+
+      toast.success("Nota de credito cancelada")
+      queryClient.invalidateQueries({ queryKey: ["credit-notes"] })
+    } catch {
+      setIsCancelling(false)
+      setCancelTarget(null)
+      toast.error("Error al cancelar la nota de credito")
+    }
+  }
 
   const columns: ColumnDef<CreditNoteWithDetails>[] = [
     {
@@ -167,7 +200,9 @@ export function CreditNotesTable() {
       header: "",
       cell: ({ row }) => {
         const cn = row.original
-        if (cn.status !== "active" || cn.credit_type !== "lending") return null
+        const isActive = cn.status === "active"
+        const canSettle = isActive && cn.credit_type === "lending"
+        if (!isActive) return null
         return (
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -178,9 +213,18 @@ export function CreditNotesTable() {
               <MoreHorizontal className="size-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSettleId(cn.id)}>
-                <CheckCircle2 className="mr-2 size-4 text-emerald-500" />
-                Liquidar prestamo
+              {canSettle && (
+                <DropdownMenuItem onClick={() => setSettleId(cn.id)}>
+                  <CheckCircle2 className="mr-2 size-3.5 text-emerald-500" />
+                  Liquidar prestamo
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setCancelTarget(cn)}
+              >
+                <XCircle className="mr-2 size-3.5" />
+                Cancelar nota
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -217,7 +261,7 @@ export function CreditNotesTable() {
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setStatusFilter(tab.value || null)}
-                  className={`text-xs ${isActive ? "bg-accent-500 text-white hover:bg-accent-600" : ""}`}
+                  className="text-xs"
                 >
                   {tab.label}
                 </Button>
@@ -242,6 +286,7 @@ export function CreditNotesTable() {
                   key={note.id}
                   note={note}
                   onSettle={note.status === "active" && note.credit_type === "lending" ? () => setSettleId(note.id) : undefined}
+                  onCancel={note.status === "active" ? () => setCancelTarget(note) : undefined}
                 />
               ))
             ) : (
@@ -287,6 +332,17 @@ export function CreditNotesTable() {
       <SettleDialog
         creditNoteId={settleId}
         onOpenChange={(open) => !open && setSettleId(null)}
+      />
+
+      <ConfirmDialog
+        open={!!cancelTarget}
+        onOpenChange={(open) => !open && setCancelTarget(null)}
+        title="Cancelar nota de credito"
+        description={`Se cancelara la nota "${cancelTarget?.credit_number}". Esta accion no se puede deshacer.`}
+        confirmLabel="Cancelar nota"
+        variant="destructive"
+        isLoading={isCancelling}
+        onConfirm={handleCancel}
       />
     </>
   )

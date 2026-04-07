@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle2 } from "lucide-react"
+import { CheckCircle2, XCircle } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -19,13 +19,14 @@ const STATUS_COLORS: Record<string, string> = {
 interface Props {
   vale: ValeWithDetails
   onComplete: () => void
+  onCancel?: () => void
 }
 
-export function ValesCardMobile({ vale, onComplete }: Props) {
-  const canComplete = vale.status === "pending" || vale.status === "ready"
+export function ValesCardMobile({ vale, onComplete, onCancel }: Props) {
+  const canAct = vale.status === "pending" || vale.status === "ready"
 
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-neutral-100 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div>
           <span className="font-semibold tabular-nums">{vale.vale_number}</span>
@@ -49,15 +50,17 @@ export function ValesCardMobile({ vale, onComplete }: Props) {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3">
-        <span className="text-sm text-neutral-500 tabular-nums">
-          {formatDate(vale.created_at)}
-        </span>
-        <div className="flex items-center gap-3">
+      <div className="mt-3 border-t border-neutral-100 pt-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-neutral-500 tabular-nums">
+            {formatDate(vale.created_at)}
+          </span>
           <span className="font-semibold tabular-nums">
             {formatCurrency(Number(vale.total))}
           </span>
-          {canComplete && (
+        </div>
+        {canAct && (
+          <div className="mt-2 flex items-center justify-end gap-1">
             <Button
               size="sm"
               variant="ghost"
@@ -67,8 +70,19 @@ export function ValesCardMobile({ vale, onComplete }: Props) {
               <CheckCircle2 className="mr-1 size-4" />
               Entregar
             </Button>
-          )}
-        </div>
+            {onCancel && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={onCancel}
+                className="text-red-600 hover:bg-red-50 hover:text-red-700"
+              >
+                <XCircle className="mr-1 size-4" />
+                Cancelar
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

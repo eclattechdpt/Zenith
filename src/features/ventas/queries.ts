@@ -126,11 +126,9 @@ export function useSaleDetail(saleId: string | null) {
 
       if (error) throw error
 
-      // Filter out cancelled returns
+      // Filter out soft-deleted returns, keep cancelled for visibility
       const sale = data as unknown as SaleDetail
-      sale.returns = (sale.returns ?? []).filter(
-        (r) => r.status === "completed" && !r.deleted_at
-      )
+      sale.returns = (sale.returns ?? []).filter((r) => !r.deleted_at)
 
       return sale
     },

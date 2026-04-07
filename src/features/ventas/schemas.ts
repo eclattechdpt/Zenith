@@ -35,8 +35,13 @@ export const cancelSaleSchema = z.object({
   sale_id: z.string().regex(uuidPattern, "UUID invalido"),
 })
 
+export const cancelReturnSchema = z.object({
+  return_id: z.string().regex(uuidPattern, "UUID invalido"),
+})
+
 export type ConvertQuoteInput = z.infer<typeof convertQuoteSchema>
 export type CancelQuoteInput = z.infer<typeof cancelQuoteSchema>
 export type ReturnItemInput = z.infer<typeof returnItemSchema>
 export type CreateReturnInput = z.infer<typeof createReturnSchema>
 export type CancelSaleInput = z.infer<typeof cancelSaleSchema>
+export type CancelReturnInput = z.infer<typeof cancelReturnSchema>

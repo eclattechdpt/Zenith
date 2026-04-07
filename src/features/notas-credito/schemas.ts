@@ -29,4 +29,9 @@ export const settleCreditNoteSchema = z.object({
 export type CreditNoteItemInput = z.infer<typeof creditNoteItemSchema>
 export type CreateLendingInput = z.infer<typeof createLendingSchema>
 export type CreateExchangeInput = z.infer<typeof createExchangeSchema>
+export const cancelCreditNoteSchema = z.object({
+  credit_note_id: z.string().regex(uuidPattern),
+})
+
 export type SettleCreditNoteInput = z.infer<typeof settleCreditNoteSchema>
+export type CancelCreditNoteInput = z.infer<typeof cancelCreditNoteSchema>
