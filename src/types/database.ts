@@ -52,6 +52,7 @@ export type Database = {
       }
       categories: {
         Row: {
+          color: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
@@ -65,6 +66,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -78,6 +80,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null

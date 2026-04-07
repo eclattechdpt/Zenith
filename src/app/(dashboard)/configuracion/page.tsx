@@ -2,7 +2,12 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
-import { FolderTree, Percent, ImageIcon, Terminal } from "lucide-react"
+import {
+  FolderTree,
+  Percent,
+  ImageIcon,
+  Terminal,
+} from "lucide-react"
 
 import { PageHero } from "@/components/shared/page-hero"
 import { SectionCard } from "@/components/shared/section-card"
@@ -11,6 +16,7 @@ import { PriceListManager } from "@/features/clientes/components/price-list-mana
 import { MediaManager } from "@/features/media/components/media-manager"
 import { DevPanel } from "@/features/configuracion/components/dev-panel"
 import { DevPasswordGate } from "@/features/configuracion/components/dev-password-gate"
+import { ConfigKpiWidgets } from "@/features/configuracion/components/config-kpi-widgets"
 
 const TABS = [
   {
@@ -41,6 +47,8 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"] | "desarrollo"
 
+const SPRING_SNAPPY = { type: "spring" as const, stiffness: 500, damping: 35 }
+
 export default function ConfiguracionPage() {
   const [activeTab, setActiveTab] = useState<TabId>("categorias")
   const [devUnlocked, setDevUnlocked] = useState(false)
@@ -66,48 +74,76 @@ export default function ConfiguracionPage() {
     <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
       <PageHero title="Configuracion" />
 
-      {/* Tab pills */}
+      {/* KPI Row — contextual per active tab */}
+      <ConfigKpiWidgets activeTab={activeTab} />
+
+      {/* Tab pills with animated indicator */}
       <div className="flex items-center gap-1.5">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id
           const Icon = tab.icon
           return (
-            <button
+            <motion.button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={SPRING_SNAPPY}
+              className={`relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition-colors ${
                 isActive
-                  ? "bg-accent-500 text-white shadow-sm"
+                  ? "text-white"
                   : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200/70 hover:text-neutral-700"
               }`}
             >
-              <Icon className="h-3.5 w-3.5" />
-              {tab.label}
-            </button>
+              {isActive && (
+                <motion.div
+                  layoutId="config-tab-indicator"
+                  className="absolute inset-0 rounded-xl bg-accent-500 shadow-sm shadow-accent-500/20"
+                  transition={SPRING_SNAPPY}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-2">
+                <Icon className="h-3.5 w-3.5" />
+                {tab.label}
+              </span>
+            </motion.button>
           )
         })}
-        {/* Dev tab trigger — hidden until unlocked, pushed to far right */}
-        <button
+
+        {/* Dev tab trigger */}
+        <motion.button
           onClick={handleDevTabClick}
-          className={`ml-auto flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          transition={SPRING_SNAPPY}
+          className={`relative ml-auto flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition-colors ${
             activeTab === "desarrollo"
-              ? "bg-neutral-900 text-white shadow-sm"
+              ? "text-white"
               : "bg-neutral-100 text-neutral-400 hover:bg-neutral-200/70 hover:text-neutral-600"
           }`}
         >
-          <Terminal className="h-3.5 w-3.5" />
-          {devUnlocked && <span>Dev</span>}
-        </button>
+          {activeTab === "desarrollo" && (
+            <motion.div
+              layoutId="config-tab-indicator"
+              className="absolute inset-0 rounded-xl bg-neutral-900 shadow-sm shadow-neutral-900/20"
+              transition={SPRING_SNAPPY}
+            />
+          )}
+          <span className="relative z-10 flex items-center gap-2">
+            <Terminal className="h-3.5 w-3.5" />
+            {devUnlocked && "Dev"}
+          </span>
+        </motion.button>
       </div>
 
-      {/* Active section */}
+      {/* Active section with transition */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
         >
           {activeTab === "desarrollo" ? (
             <SectionCard

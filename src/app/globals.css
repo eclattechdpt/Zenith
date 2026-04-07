@@ -175,18 +175,13 @@ input[type="number"] {
   --card-foreground: #1A1714;
   --popover: #FFFFFF;
   --popover-foreground: #1A1714;
-  --primary: #F43F6B;
-  --primary-foreground: #FFFFFF;
   --secondary: #EFFCFC;
   --secondary-foreground: #1E3D47;
   --muted: #F7F3F0;
   --muted-foreground: #8A7F76;
-  --accent: #FFF0F3;
-  --accent-foreground: #4C0519;
   --destructive: #DC2626;
   --border: #EDE7E2;
   --input: #EDE7E2;
-  --ring: #F43F6B;
   --chart-1: #F43F6B;
   --chart-2: #25A6B6;
   --chart-3: #FF96AE;
@@ -212,6 +207,11 @@ input[type="number"] {
 @layer base {
   :root {
     /* Defaults to rose (brand) — overridden per-module below */
+    --primary: #F43F6B;
+    --primary-foreground: #FFFFFF;
+    --accent: #FFF0F3;
+    --accent-foreground: #4C0519;
+    --ring: #F43F6B;
     --accent-50: #FFF0F3;
     --accent-100: #FFE0E8;
     --accent-200: #FFC2D4;
@@ -245,6 +245,8 @@ input[type="number"] {
     --accent-scrollbar-hover: #D97706;
     --accent: #FFFBEB;
     --accent-foreground: #78350F;
+    --primary: #F59E0B;
+    --primary-foreground: #FFFFFF;
     --ring: #F59E0B;
   }
 
@@ -263,6 +265,8 @@ input[type="number"] {
     --accent-scrollbar-hover: #3B82F6;
     --accent: #EFF6FF;
     --accent-foreground: #1E3A8A;
+    --primary: #3B82F6;
+    --primary-foreground: #FFFFFF;
     --ring: #3B82F6;
   }
 
@@ -281,6 +285,8 @@ input[type="number"] {
     --accent-scrollbar-hover: #64748B;
     --accent: #F8FAFC;
     --accent-foreground: #0F172A;
+    --primary: #64748B;
+    --primary-foreground: #FFFFFF;
     --ring: #64748B;
   }
 
@@ -300,6 +306,8 @@ input[type="number"] {
     --accent-scrollbar-hover: #40C2D0;
     --accent: #EFFCFC;
     --accent-foreground: #1E3D47;
+    --primary: #25A6B6;
+    --primary-foreground: #FFFFFF;
     --ring: #25A6B6;
   }
 
@@ -337,6 +345,8 @@ input[type="number"] {
     --accent-scrollbar-hover: #8A7F76;
     --accent: #F7F3F0;
     --accent-foreground: #302B27;
+    --primary: #8A7F76;
+    --primary-foreground: #FFFFFF;
     --ring: #8A7F76;
   }
 }
@@ -411,4 +421,5 @@ input[type="number"] {
   ::-webkit-scrollbar-corner {
     background: transparent;
   }
+
 }

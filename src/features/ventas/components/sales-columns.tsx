@@ -64,11 +64,18 @@ export function getSalesColumns({
           <ArrowUpDown className="ml-1 size-3.5" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <span className="font-semibold text-neutral-950 tabular-nums">
-          {row.original.sale_number}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const sale = row.original
+        return (
+          <button
+            type="button"
+            onClick={() => onViewDetail?.(sale)}
+            className="font-semibold text-neutral-950 tabular-nums hover:text-rose-600 hover:underline underline-offset-2 transition-colors cursor-pointer"
+          >
+            {sale.sale_number}
+          </button>
+        )
+      },
     },
     {
       accessorKey: "status",

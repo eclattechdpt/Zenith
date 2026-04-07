@@ -127,6 +127,79 @@ export async function deleteCategory(id: string) {
   return { data: { success: true } }
 }
 
+// --- PRODUCT ↔ CATEGORY ASSIGNMENTS ---
+
+export async function assignProductToCategory(productId: string, categoryId: string) {
+  const supabase = await createServerClient()
+
+  // Validate: only leaf categories (no children) can have products
+  const { count: childCount } = await supabase
+    .from("categories")
+    .select("*", { count: "exact", head: true })
+    .eq("parent_id", categoryId)
+    .is("deleted_at", null)
+
+  if (childCount && childCount > 0) {
+    return { error: { _form: ["Solo se pueden asignar productos a subcategorias (categorias sin hijos)"] } }
+  }
+
+  // Check if already assigned
+  const { count } = await supabase
+    .from("product_categories")
+    .select("*", { count: "exact", head: true })
+    .eq("product_id", productId)
+    .eq("category_id", categoryId)
+
+  if (count && count > 0) {
+    return { error: { _form: ["El producto ya pertenece a esta categoria"] } }
+  }
+
+  const { error } = await supabase
+    .from("product_categories")
+    .insert({ product_id: productId, category_id: categoryId, tenant_id: TENANT_ID })
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/productos")
+  revalidatePath("/configuracion")
+  return { data: { success: true } }
+}
+
+export async function removeProductFromCategory(productId: string, categoryId: string) {
+  const supabase = await createServerClient()
+
+  const { error } = await supabase
+    .from("product_categories")
+    .delete()
+    .eq("product_id", productId)
+    .eq("category_id", categoryId)
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/productos")
+  revalidatePath("/configuracion")
+  return { data: { success: true } }
+}
+
+export async function reorderCategories(
+  items: { id: string; sort_order: number }[]
+) {
+  const supabase = await createServerClient()
+
+  for (const item of items) {
+    const { error } = await supabase
+      .from("categories")
+      .update({ sort_order: item.sort_order })
+      .eq("id", item.id)
+
+    if (error) return { error: { _form: [error.message] } }
+  }
+
+  revalidatePath("/productos")
+  revalidatePath("/configuracion")
+  return { data: { success: true } }
+}
+
 // --- TIPOS Y OPCIONES DE VARIANTE ---
 
 export async function createVariantType(input: VariantTypeInput) {
@@ -500,6 +573,13 @@ export async function deleteProduct(id: string) {
     .update({ deleted_at: new Date().toISOString() })
     .eq("product_id", id)
 
+  // Clean up category assignments so counts stay accurate
+  await supabase
+    .from("product_categories")
+    .delete()
+    .eq("product_id", id)
+
   revalidatePath("/productos")
+  revalidatePath("/configuracion")
   return { data: { success: true } }
 }

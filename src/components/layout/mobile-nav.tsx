@@ -21,6 +21,9 @@ import {
   LogOut,
 } from "lucide-react"
 
+import { useRouter } from "next/navigation"
+import { sileo } from "sileo"
+
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { logout } from "@/features/auth/actions"
@@ -97,7 +100,14 @@ const navItems = [
 
 export function MobileNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
+
+  async function handleLogout() {
+    await logout()
+    sileo.success({ title: "Sesion cerrada", description: "Tu sesion se cerro correctamente" })
+    router.push("/login")
+  }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -185,22 +195,22 @@ export function MobileNav() {
 
         {/* Bottom section */}
         <div className="absolute inset-x-0 bottom-0 space-y-0.5 px-3 pb-5">
-          <button
-            type="button"
+          <Link
+            href="/ayuda"
+            onClick={() => setOpen(false)}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-500 transition-colors duration-[200ms] hover:bg-white/60 hover:text-neutral-800"
           >
             <HelpCircle className="size-[17px] text-neutral-400" strokeWidth={1.5} />
             Ayuda
+          </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-500 transition-colors duration-[200ms] hover:bg-rose-50 hover:text-rose-600"
+          >
+            <LogOut className="size-[17px] text-neutral-400" strokeWidth={1.5} />
+            Cerrar sesion
           </button>
-          <form action={logout}>
-            <button
-              type="submit"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-500 transition-colors duration-[200ms] hover:bg-rose-50 hover:text-rose-600"
-            >
-              <LogOut className="size-[17px] text-neutral-400" strokeWidth={1.5} />
-              Cerrar sesion
-            </button>
-          </form>
         </div>
       </SheetContent>
     </Sheet>

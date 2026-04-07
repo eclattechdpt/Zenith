@@ -115,6 +115,45 @@ export function useCustomerSales(
   })
 }
 
+// --- CUSTOMER PREVIEW (aggregate stats for hover card + profile KPIs) ---
+
+export interface CustomerPreview {
+  totalPurchases: number
+  totalSpent: number
+  avgTicket: number
+  lastPurchaseAt: string | null
+}
+
+export function useCustomerPreview(customerId: string | null) {
+  return useQuery({
+    queryKey: ["customer-preview", customerId],
+    queryFn: async (): Promise<CustomerPreview> => {
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("sales")
+        .select("total, created_at")
+        .eq("customer_id", customerId!)
+        .in("status", ["completed", "partially_returned", "fully_returned"])
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
+
+      if (error || !data || data.length === 0) {
+        return { totalPurchases: 0, totalSpent: 0, avgTicket: 0, lastPurchaseAt: null }
+      }
+
+      const totalPurchases = data.length
+      const totalSpent = data.reduce((sum, s) => sum + Number(s.total), 0)
+      const avgTicket = totalSpent / totalPurchases
+      const lastPurchaseAt = data[0].created_at
+
+      return { totalPurchases, totalSpent, avgTicket, lastPurchaseAt }
+    },
+    enabled: !!customerId,
+    staleTime: 30_000,
+  })
+}
+
 // --- CUSTOMER STATS (for KPI widgets) ---
 
 export function useCustomerStats() {

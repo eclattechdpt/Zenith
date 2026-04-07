@@ -19,14 +19,22 @@ import {
   Hash,
   Info,
   Sparkles,
+  ExternalLink,
 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { CollapsibleSection } from "@/features/productos/components/collapsible-section"
 
 import { customerSchema, type CustomerInput } from "../schemas"
@@ -47,6 +55,9 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
   const [success, setSuccess] = useState(false)
   const [infoOpen, setInfoOpen] = useState(true)
   const [detailsOpen, setDetailsOpen] = useState(false)
+  const [mapCoords, setMapCoords] = useState<{ lat: number; lon: number } | null>(null)
+  const [isGeocoding, setIsGeocoding] = useState(false)
+  const [geocodeFailed, setGeocodeFailed] = useState(false)
 
   const queryClient = useQueryClient()
   const { data: priceLists = [] } = usePriceLists()
@@ -57,6 +68,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CustomerInput>({
@@ -74,13 +86,82 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
 
   const name = watch("name")
 
+  // Format phone as user types: "33 1234 5678"
+  const formatPhone = useCallback((raw: string) => {
+    const digits = raw.replace(/\D/g, "").slice(0, 10)
+    if (digits.length <= 2) return digits
+    if (digits.length <= 6) return `${digits.slice(0, 2)} ${digits.slice(2)}`
+    return `${digits.slice(0, 2)} ${digits.slice(2, 6)} ${digits.slice(6)}`
+  }, [])
+
+  const phoneRegister = register("phone")
+  const handlePhoneChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const formatted = formatPhone(e.target.value)
+      setValue("phone", formatted, { shouldValidate: false })
+      e.target.value = formatted
+    },
+    [formatPhone, setValue]
+  )
+
+  // Geocode address with Nominatim (debounced)
+  const address = watch("address")
+  useEffect(() => {
+    if (!address || address.trim().length < 8) {
+      setMapCoords(null)
+      setIsGeocoding(false)
+      setGeocodeFailed(false)
+      return
+    }
+    setIsGeocoding(true)
+    setGeocodeFailed(false)
+    const controller = new AbortController()
+    const timer = setTimeout(async () => {
+      try {
+        const q = encodeURIComponent(address.trim())
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${q}`,
+          {
+            signal: controller.signal,
+            headers: { Accept: "application/json" },
+          }
+        )
+        if (!res.ok) {
+          setMapCoords(null)
+          setGeocodeFailed(true)
+          setIsGeocoding(false)
+          return
+        }
+        const data = await res.json()
+        if (Array.isArray(data) && data.length > 0) {
+          setMapCoords({ lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) })
+          setGeocodeFailed(false)
+        } else {
+          setMapCoords(null)
+          setGeocodeFailed(true)
+        }
+      } catch (err) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
+          setMapCoords(null)
+          setGeocodeFailed(true)
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsGeocoding(false)
+      }
+    }, 1500)
+    return () => {
+      clearTimeout(timer)
+      controller.abort()
+    }
+  }, [address])
+
   // Populate form when editing
   useEffect(() => {
     if (isEditing && existingCustomer) {
       reset({
         name: existingCustomer.name,
         client_number: existingCustomer.client_number ?? "",
-        phone: existingCustomer.phone ?? "",
+        phone: formatPhone(existingCustomer.phone ?? ""),
         email: existingCustomer.email ?? "",
         address: existingCustomer.address ?? "",
         notes: existingCustomer.notes ?? "",
@@ -104,6 +185,8 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
       setSuccess(false)
       setInfoOpen(true)
       setDetailsOpen(false)
+      setMapCoords(null)
+      setGeocodeFailed(false)
     }
   }, [open, isEditing, reset])
 
@@ -132,10 +215,10 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
 
     if ("error" in result) {
       const formError = (result.error as Record<string, string[]>)._form
-      toast.error(
-        formError?.[0] ??
-          `Error al ${isEditing ? "actualizar" : "crear"} el cliente`
-      )
+      sileo.error({
+        title: formError?.[0] ??
+          `Error al ${isEditing ? "actualizar" : "crear"} el cliente`,
+      })
       return
     }
 
@@ -240,7 +323,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
                         <Input
                           id="cd-name"
                           placeholder="Nombre completo"
-                          className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus:border-teal-200/80"
+                          className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus-visible:border-teal-300 focus-visible:ring-teal-500/20"
                           {...register("name")}
                         />
                         {errors.name && (
@@ -248,11 +331,11 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
                         )}
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="cd-client-number" className="text-xs font-medium text-neutral-500">Numero de cliente</Label>
+                        <Label htmlFor="cd-client-number" className="text-xs font-medium text-neutral-500">Numero de cliente <span className="font-normal text-neutral-400">(opcional)</span></Label>
                         <Input
                           id="cd-client-number"
                           placeholder="Ej: C-001"
-                          className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus:border-teal-200/80"
+                          className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus-visible:border-teal-300 focus-visible:ring-teal-500/20"
                           {...register("client_number")}
                         />
                         {errors.client_number && (
@@ -268,20 +351,24 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
                         <Input
                           id="cd-phone"
                           placeholder="Ej: 33 1234 5678"
-                          className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus:border-teal-200/80"
-                          {...register("phone")}
+                          className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus-visible:border-teal-300 focus-visible:ring-teal-500/20"
+                          {...phoneRegister}
+                          onChange={(e) => {
+                            handlePhoneChange(e)
+                            phoneRegister.onChange(e)
+                          }}
                         />
                         {errors.phone && (
                           <p className="text-[11px] text-destructive">{errors.phone.message}</p>
                         )}
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="cd-email" className="text-xs font-medium text-neutral-500">Email</Label>
+                        <Label htmlFor="cd-email" className="text-xs font-medium text-neutral-500">Email <span className="font-normal text-neutral-400">(opcional)</span></Label>
                         <Input
                           id="cd-email"
                           type="email"
                           placeholder="correo@ejemplo.com"
-                          className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus:border-teal-200/80"
+                          className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus-visible:border-teal-300 focus-visible:ring-teal-500/20"
                           {...register("email")}
                         />
                         {errors.email && (
@@ -292,23 +379,51 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
 
                     {/* Discount */}
                     <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="cd-discount" className="text-xs font-medium text-neutral-500">Descuento</Label>
-                      <select
-                        id="cd-discount"
-                        {...register("price_list_id", {
-                          setValueAs: (v: string) => v || null,
-                        })}
-                        className="h-9 rounded-xl border border-neutral-200/80 bg-neutral-50/80 px-3 text-sm outline-none transition-colors focus:border-teal-200/80 focus:ring-3 focus:ring-teal-500/10"
+                      <Label className="text-xs font-medium text-neutral-500">Descuento</Label>
+                      <Select
+                        value={watch("price_list_id") ?? ""}
+                        onValueChange={(val) =>
+                          setValue("price_list_id", val || null, { shouldDirty: true })
+                        }
                       >
-                        <option value="">Sin descuento (precio base)</option>
-                        {priceLists.map((pl) => (
-                          <option key={pl.id} value={pl.id}>
-                            {pl.name}
-                            {Number(pl.discount_percent) > 0 &&
-                              ` (-${pl.discount_percent}%)`}
-                          </option>
-                        ))}
-                      </select>
+                        <SelectTrigger className="w-full rounded-xl border-neutral-200/80 bg-neutral-50/80 focus-visible:border-teal-300 focus-visible:ring-teal-500/20">
+                          <SelectValue placeholder="Sin descuento (precio base)">
+                            {(value: string | null) => {
+                              if (!value) return "Sin descuento (precio base)"
+                              const pl = priceLists.find((p) => p.id === value)
+                              if (!pl) return "Sin descuento (precio base)"
+                              return (
+                                <>
+                                  {pl.name}
+                                  {Number(pl.discount_percent) > 0 && (
+                                    <span className="text-accent-500 font-medium"> (-{pl.discount_percent}%)</span>
+                                  )}
+                                </>
+                              )
+                            }}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent align="start" alignItemWithTrigger={false}>
+                          <SelectItem value="" label="Sin descuento (precio base)">
+                            <Percent className="size-3.5 text-neutral-400" />
+                            Sin descuento (precio base)
+                          </SelectItem>
+                          {priceLists.map((pl) => {
+                            const label = `${pl.name}${Number(pl.discount_percent) > 0 ? ` (-${pl.discount_percent}%)` : ""}`
+                            return (
+                              <SelectItem key={pl.id} value={pl.id} label={label}>
+                                <Percent className="size-3.5 text-teal-500" />
+                                {pl.name}
+                                {Number(pl.discount_percent) > 0 && (
+                                  <span className="text-teal-600 font-medium">
+                                    -{pl.discount_percent}%
+                                  </span>
+                                )}
+                              </SelectItem>
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
@@ -325,13 +440,58 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
                   <div className="space-y-4">
                     {/* Address */}
                     <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="cd-address" className="text-xs font-medium text-neutral-500">Direccion</Label>
+                      <Label htmlFor="cd-address" className="text-xs font-medium text-neutral-500">
+                        Direccion <span className="font-normal text-neutral-400">(opcional)</span>
+                      </Label>
                       <Input
                         id="cd-address"
-                        placeholder="Direccion de entrega (opcional)"
-                        className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus:border-teal-200/80"
+                        placeholder="Direccion de entrega"
+                        className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus-visible:border-teal-300 focus-visible:ring-teal-500/20"
                         {...register("address")}
                       />
+                      {isGeocoding && (
+                        <p className="flex items-center gap-1.5 text-[11px] text-neutral-400">
+                          <Loader2 className="size-3 animate-spin" />
+                          Buscando ubicacion...
+                        </p>
+                      )}
+                      {geocodeFailed && !isGeocoding && (
+                        <p className="flex items-center gap-1.5 text-[11px] text-neutral-400">
+                          <MapPin className="size-3" />
+                          No se encontro la ubicacion — intenta con una direccion mas general (ej: colonia, ciudad)
+                        </p>
+                      )}
+                      <AnimatePresence>
+                        {mapCoords && !isGeocoding && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="relative mt-1 overflow-hidden rounded-xl border border-neutral-200/80 shadow-sm">
+                              <iframe
+                                title="Mapa de ubicacion"
+                                width="100%"
+                                height="180"
+                                style={{ border: 0, display: "block" }}
+                                loading="lazy"
+                                src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lon - 0.005},${mapCoords.lat - 0.003},${mapCoords.lon + 0.005},${mapCoords.lat + 0.003}&layer=mapnik&marker=${mapCoords.lat},${mapCoords.lon}`}
+                              />
+                              <a
+                                href={`https://www.google.com/maps?q=${mapCoords.lat},${mapCoords.lon}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="absolute bottom-2 right-2 flex items-center gap-1 rounded-lg bg-white/90 px-2 py-1 text-[10px] font-medium text-neutral-600 shadow-sm backdrop-blur-sm transition-colors hover:bg-white hover:text-neutral-900"
+                              >
+                                <ExternalLink className="size-3" />
+                                Abrir mapa
+                              </a>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     {/* Notes */}
@@ -341,7 +501,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
                         id="cd-notes"
                         placeholder="Notas internas sobre el cliente..."
                         rows={3}
-                        className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus:border-teal-200/80"
+                        className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus-visible:border-teal-300 focus-visible:ring-teal-500/20"
                         {...register("notes")}
                       />
                     </div>

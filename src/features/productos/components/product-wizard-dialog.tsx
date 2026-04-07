@@ -20,7 +20,7 @@ import {
   ShoppingBag,
   AlertTriangle,
 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -185,7 +185,7 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
     if ("error" in result) {
       setIsSubmitting(false)
       const formError = (result.error as Record<string, string[]>)._form
-      toast.error(formError?.[0] ?? "Error al crear el producto")
+      sileo.error({ title: formError?.[0] ?? "Error al crear el producto" })
       return
     }
 
@@ -201,14 +201,14 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
         await updateProduct(result.data.id, { ...data, image_url: publicUrl })
       } catch {
         // Product was created, image upload failed — not critical
-        toast.warning("Producto creado pero la imagen no se pudo subir")
+        sileo.warning({ title: "Producto creado pero la imagen no se pudo subir" })
       }
       pendingFileRef.current = null
     }
 
     setIsSubmitting(false)
     setSuccess(true)
-    toast.success("Producto creado exitosamente")
+    sileo.success({ title: "Producto creado exitosamente", description: "El producto ya esta disponible en el catalogo" })
     queryClient.invalidateQueries({ queryKey: ["products"] })
     queryClient.invalidateQueries({ queryKey: ["product-stats"] })
   }
@@ -225,7 +225,7 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
     const result = createProductSchema.safeParse(data)
     if (!result.success) {
       console.log("Wizard validation errors:", result.error.issues)
-      toast.error("Revisa los campos antes de continuar")
+      sileo.error({ title: "Revisa los campos antes de continuar" })
       return
     }
 

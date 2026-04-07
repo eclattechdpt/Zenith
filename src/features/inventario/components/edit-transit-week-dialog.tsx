@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
@@ -71,11 +71,11 @@ function EditWeekForm({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al actualizar"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success("Semana actualizada")
+    sileo.success({ title: "Semana actualizada", description: "Los cambios se reflejan en el inventario en transito" })
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
     onOpenChange(false)
   }

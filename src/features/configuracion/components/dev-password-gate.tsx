@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-const DEV_PASSWORD = "zenith-dev-2026"
+const DEV_PASSWORD = process.env.NEXT_PUBLIC_DEV_PASSWORD ?? ""
 
 interface DevPasswordGateProps {
   open: boolean

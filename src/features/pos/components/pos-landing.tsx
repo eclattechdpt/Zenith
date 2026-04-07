@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { AnimatePresence, motion } from "motion/react"
 import { Flame, Clock } from "lucide-react"
 import { PageHero } from "@/components/shared/page-hero"
@@ -49,6 +50,8 @@ const SALES_KEYS = [
 // ── Component ──
 
 export function POSLanding() {
+  const searchParams = useSearchParams()
+
   // ── Wizard state ──
   const [wizardOpen, setWizardOpen] = useState(false)
   const [wizardMode, setWizardMode] = useState<WizardMode>("new-sale")
@@ -141,6 +144,14 @@ export function POSLanding() {
     setPendingSale(sale)
     setWizardOpen(true)
   }, [])
+
+  // Auto-open wizard when navigating with ?action=new
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      openNewSale()
+      window.history.replaceState(null, "", "/pos")
+    }
+  }, [searchParams, openNewSale])
 
   const closeWizard = useCallback(() => {
     setWizardOpen(false)

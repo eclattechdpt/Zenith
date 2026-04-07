@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -65,10 +65,10 @@ export function VariantTypeManager() {
   async function onTypeSubmit(data: VariantTypeInput) {
     const result = await createVariantType(data)
     if ("error" in result) {
-      toast.error("Error al crear el tipo")
+      sileo.error({ title: "Error al crear el tipo" })
       return
     }
-    toast.success("Tipo de variante creado")
+    sileo.success({ title: "Tipo de variante creado", description: "Ya puedes agregar opciones a este tipo" })
     queryClient.invalidateQueries({ queryKey: ["variant-types"] })
     setTypeDialogOpen(false)
   }
@@ -98,11 +98,11 @@ export function VariantTypeManager() {
       : await createVariantOption(data)
 
     if ("error" in result) {
-      toast.error("Error al guardar la opcion")
+      sileo.error({ title: "Error al guardar la opcion" })
       return
     }
 
-    toast.success(editOptionId ? "Opcion actualizada" : "Opcion creada")
+    sileo.success({ title: editOptionId ? "Opcion actualizada" : "Opcion creada", description: "Los productos con este tipo reflejan el cambio" })
     queryClient.invalidateQueries({ queryKey: ["variant-types"] })
     setOptionDialogOpen(false)
   }
@@ -113,7 +113,7 @@ export function VariantTypeManager() {
     await deleteVariantOption(deleteTarget.id)
     setIsDeleting(false)
     setDeleteTarget(null)
-    toast.success("Opcion eliminada")
+    sileo.success({ title: "Opcion eliminada", description: "Los productos vinculados ya no mostraran esta opcion" })
     queryClient.invalidateQueries({ queryKey: ["variant-types"] })
   }
 

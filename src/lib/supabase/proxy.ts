@@ -35,7 +35,14 @@ export async function updateSession(request: NextRequest) {
   // If the refresh token is invalid/expired, clear the stale session cookies
   // so the error doesn't repeat on every subsequent request
   if (error) {
-    await supabase.auth.signOut()
+    const cookieNames = request.cookies
+      .getAll()
+      .map((c) => c.name)
+      .filter((name) => name.startsWith("sb-"))
+
+    for (const name of cookieNames) {
+      supabaseResponse.cookies.set(name, "", { maxAge: 0, path: "/" })
+    }
   }
 
   return { supabaseResponse, user }

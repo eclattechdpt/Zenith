@@ -28,6 +28,10 @@ interface KpiCardProps {
   delay?: number
   /** Optional trend badge between value and subtitle */
   badge?: KpiBadge
+  /** Override hero gradient classes, e.g. "from-rose-500 to-rose-600" */
+  heroGradient?: string
+  /** Override hero shadow class, e.g. "shadow-rose-500/10" */
+  heroShadow?: string
   /** Optional children rendered below subtitle (e.g. mini-visualizations) */
   children?: React.ReactNode
 }
@@ -43,6 +47,8 @@ export function KpiCard({
   iconColor = "text-neutral-500",
   delay = 0,
   badge,
+  heroGradient,
+  heroShadow,
   children,
 }: KpiCardProps) {
   if (variant === "hero") {
@@ -51,7 +57,7 @@ export function KpiCard({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...SPRING, delay }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent-500 to-accent-600 p-6 shadow-sm shadow-accent-500/10"
+        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br p-6 shadow-sm ${heroGradient ?? "from-accent-500 to-accent-600"} ${heroShadow ?? "shadow-accent-500/10"}`}
       >
         {/* Decorative ring */}
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full border-[20px] border-white/10" />

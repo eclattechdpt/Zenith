@@ -20,7 +20,7 @@ import {
 import { startOfWeek, endOfWeek, subWeeks, subMonths, startOfMonth, format, eachDayOfInterval, isToday, isBefore, startOfDay, isSameWeek, isSameMonth } from "date-fns"
 import { es } from "date-fns/locale"
 import { AnimatePresence, motion } from "motion/react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
@@ -29,133 +29,82 @@ import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { logExport } from "../actions"
 
-import { ExportCard, type ExportCardColor } from "./export-card"
+import { ReportCard, type ReportCardColor } from "./report-card"
+import { DateRangeExportDialog } from "./date-range-export-dialog"
 import {
   exportSalesExcel,
+  exportSalesRangeExcel,
   exportInventoryExcel,
   exportCustomersExcel,
   exportProductsExcel,
   exportTransitExcel,
+  exportTransitRangeExcel,
   exportInitialLoadExcel,
 } from "./excel-generators"
 
-/* ── Color palettes per export card ── */
+/* ── Color palettes — one per topic ── */
 
 const COLORS = {
   rose: {
-    cardBg: "bg-rose-50/40",
-    cardBorder: "border-rose-200/50",
     iconBg: "bg-rose-100",
     iconColor: "text-rose-500",
-    hoverShadow: "hover:shadow-[0_4px_20px_rgba(244,63,107,0.12)]",
-    buttonClass: "bg-rose-500 text-white hover:bg-rose-600 border-0",
+    accentBorder: "border-l-rose-400",
   },
   teal: {
-    cardBg: "bg-teal-50/40",
-    cardBorder: "border-teal-200/50",
     iconBg: "bg-teal-100",
     iconColor: "text-teal-500",
-    hoverShadow: "hover:shadow-[0_4px_20px_rgba(37,166,182,0.12)]",
-    buttonClass: "bg-teal-500 text-white hover:bg-teal-600 border-0",
+    accentBorder: "border-l-teal-400",
   },
   amber: {
-    cardBg: "bg-amber-50/40",
-    cardBorder: "border-amber-200/50",
     iconBg: "bg-amber-100",
     iconColor: "text-amber-600",
-    hoverShadow: "hover:shadow-[0_4px_20px_rgba(245,158,11,0.12)]",
-    buttonClass: "bg-amber-500 text-white hover:bg-amber-600 border-0",
+    accentBorder: "border-l-amber-400",
   },
   violet: {
-    cardBg: "bg-violet-50/40",
-    cardBorder: "border-violet-200/50",
     iconBg: "bg-violet-100",
     iconColor: "text-violet-500",
-    hoverShadow: "hover:shadow-[0_4px_20px_rgba(139,92,246,0.12)]",
-    buttonClass: "bg-violet-500 text-white hover:bg-violet-600 border-0",
+    accentBorder: "border-l-violet-400",
   },
-  blush: {
-    cardBg: "bg-pink-50/40",
-    cardBorder: "border-pink-200/50",
+  pink: {
     iconBg: "bg-pink-100",
     iconColor: "text-pink-500",
-    hoverShadow: "hover:shadow-[0_4px_20px_rgba(236,72,153,0.12)]",
-    buttonClass: "bg-pink-500 text-white hover:bg-pink-600 border-0",
+    accentBorder: "border-l-pink-400",
   },
   emerald: {
-    cardBg: "bg-emerald-50/40",
-    cardBorder: "border-emerald-200/50",
     iconBg: "bg-emerald-100",
     iconColor: "text-emerald-500",
-    hoverShadow: "hover:shadow-[0_4px_20px_rgba(16,185,129,0.12)]",
-    buttonClass: "bg-emerald-500 text-white hover:bg-emerald-600 border-0",
+    accentBorder: "border-l-emerald-400",
   },
-} satisfies Record<string, ExportCardColor>
+} satisfies Record<string, ReportCardColor>
 
-export function ExcelExports() {
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <ExportCard
-        title="Ventas"
-        description="Historial completo de ventas con pagos y clientes"
-        icon={Receipt}
-        format="excel"
-        color={COLORS.rose}
-        delay={0.0}
-        onExport={exportSalesExcel}
-      />
-      <ExportCard
-        title="Inventario Fisico"
-        description="Stock actual, minimo y estado por producto"
-        icon={Package}
-        format="excel"
-        color={COLORS.teal}
-        delay={0.04}
-        onExport={exportInventoryExcel}
-      />
-      <ExportCard
-        title="Inventario en Transito"
-        description="Semanas de transito con productos y valores"
-        icon={Truck}
-        format="excel"
-        color={COLORS.amber}
-        delay={0.08}
-        onExport={exportTransitExcel}
-      />
-      <ExportCard
-        title="Inventario Carga Inicial"
-        description="Stock inicial con precios y nombres editados"
-        icon={Archive}
-        format="excel"
-        color={COLORS.violet}
-        delay={0.12}
-        onExport={exportInitialLoadExcel}
-      />
-      <ExportCard
-        title="Clientes"
-        description="Lista de clientes con datos de contacto"
-        icon={Users}
-        format="excel"
-        color={COLORS.blush}
-        delay={0.16}
-        onExport={exportCustomersExcel}
-      />
-      <ExportCard
-        title="Productos"
-        description="Catalogo completo con variantes y precios"
-        icon={ShoppingBag}
-        format="excel"
-        color={COLORS.emerald}
-        delay={0.2}
-        onExport={exportProductsExcel}
-      />
-    </div>
-  )
+/* ── PDF handlers (dynamic import for code-splitting) ── */
+
+async function handleInventoryPdf() {
+  const { exportInventoryPdf } = await import("./pdf-generators")
+  await exportInventoryPdf()
 }
 
-/* ── Weekly Sales PDF — Dialog-based week picker ── */
+async function handleTransitPdf() {
+  const { exportTransitPdf } = await import("./pdf-generators")
+  await exportTransitPdf()
+}
 
-/* ── Monthly Sales PDF — Dialog-based month picker ── */
+async function handleInitialLoadPdf() {
+  const { exportInitialLoadPdf } = await import("./pdf-generators")
+  await exportInitialLoadPdf()
+}
+
+async function handleCustomersPdf() {
+  const { exportCustomersPdf } = await import("./pdf-generators")
+  await exportCustomersPdf()
+}
+
+async function handleProductsPdf() {
+  const { exportProductsPdf } = await import("./pdf-generators")
+  await exportProductsPdf()
+}
+
+/* ── Monthly Sales PDF Dialog ── */
 
 const MONTH_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
 
@@ -211,12 +160,16 @@ function MonthlySalesDialog({
     try {
       const { exportSalesPdf } = await import("./pdf-generators")
       await exportSalesPdf(selectedDate)
-      await logExport("Reporte de ventas", "pdf")
-      queryClient.invalidateQueries({ queryKey: ["export-logs"] })
-      toast.success("Reporte de ventas exportado correctamente")
+      try {
+        await logExport("Reporte de ventas", "pdf")
+        queryClient.invalidateQueries({ queryKey: ["export-logs"] })
+      } catch {
+        sileo.warning({ title: "Exportacion exitosa", description: "El registro de exportacion no se pudo guardar" })
+      }
+      sileo.success({ title: "Reporte de ventas exportado correctamente", description: "El archivo se descargo automaticamente" })
       onOpenChange(false)
     } catch {
-      toast.error("Error al exportar reporte de ventas")
+      sileo.error({ title: "Error al exportar reporte de ventas" })
     } finally {
       setIsExporting(false)
     }
@@ -397,6 +350,8 @@ function MonthlySalesDialog({
   )
 }
 
+/* ── Weekly Sales PDF Dialog ── */
+
 type WeekPreset = "current" | "previous" | "custom"
 
 function WeeklySalesDialog({
@@ -434,7 +389,6 @@ function WeeklySalesDialog({
     if (!day) return
     setCustomDate(day)
     setPreset("custom")
-    // Delay close slightly so user sees the selection highlight
     setTimeout(() => setCalendarOpen(false), 200)
   }
 
@@ -444,12 +398,16 @@ function WeeklySalesDialog({
     try {
       const { exportWeeklySalesPdf } = await import("./pdf-generators")
       await exportWeeklySalesPdf(selectedDate)
-      await logExport("Reporte semanal", "pdf")
-      queryClient.invalidateQueries({ queryKey: ["export-logs"] })
-      toast.success("Reporte semanal exportado correctamente")
+      try {
+        await logExport("Reporte semanal", "pdf")
+        queryClient.invalidateQueries({ queryKey: ["export-logs"] })
+      } catch {
+        sileo.warning({ title: "Exportacion exitosa", description: "El registro de exportacion no se pudo guardar" })
+      }
+      sileo.success({ title: "Reporte semanal exportado correctamente", description: "El archivo se descargo automaticamente" })
       onOpenChange(false)
     } catch {
-      toast.error("Error al exportar reporte semanal")
+      sileo.error({ title: "Error al exportar reporte semanal" })
     } finally {
       setIsExporting(false)
     }
@@ -559,7 +517,6 @@ function WeeklySalesDialog({
           const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
           const today = startOfDay(new Date())
           const DAY_LABELS = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"]
-          // For current/future weeks: fill up to today. For past weeks: fill all.
           const isPastWeek = isBefore(weekEnd, today)
 
           return (
@@ -572,12 +529,10 @@ function WeeklySalesDialog({
               className="overflow-hidden"
             >
             <div className="rounded-xl bg-neutral-50 border border-neutral-100 px-4 py-4">
-              {/* Month + year label */}
               <p className="text-center text-[11px] font-semibold text-neutral-500 mb-3 capitalize">
                 {rangeLabel}
               </p>
 
-              {/* Day labels */}
               <div className="flex items-center justify-between mb-2 px-1">
                 {days.map((day, i) => (
                   <span
@@ -592,11 +547,8 @@ function WeeklySalesDialog({
                 ))}
               </div>
 
-              {/* Timeline track */}
               <div className="relative flex items-center justify-between px-1">
-                {/* Background line */}
                 <div className="absolute left-5 right-5 top-1/2 -translate-y-1/2 h-1 rounded-full bg-neutral-200" />
-                {/* Filled portion */}
                 <div
                   className="absolute left-5 top-1/2 -translate-y-1/2 h-1 rounded-full bg-amber-400 transition-all duration-300"
                   style={{
@@ -608,7 +560,6 @@ function WeeklySalesDialog({
                   }}
                 />
 
-                {/* Day dots */}
                 {days.map((day, i) => {
                   const isPast = isBefore(day, today)
                   const isTodayDay = isToday(day)
@@ -631,7 +582,6 @@ function WeeklySalesDialog({
                 })}
               </div>
 
-              {/* Day numbers */}
               <div className="flex items-center justify-between mt-2 px-1">
                 {days.map((day, i) => (
                   <span
@@ -669,79 +619,128 @@ function WeeklySalesDialog({
   )
 }
 
-export function PdfExports() {
+/* ── Unified Reports Grid ── */
+
+export function ReportsGrid() {
   const [monthlyOpen, setMonthlyOpen] = useState(false)
   const [weeklyOpen, setWeeklyOpen] = useState(false)
-
-  async function handleInventoryPdf() {
-    const { exportInventoryPdf } = await import("./pdf-generators")
-    await exportInventoryPdf()
-  }
-
-  async function handleTransitPdf() {
-    const { exportTransitPdf } = await import("./pdf-generators")
-    await exportTransitPdf()
-  }
-
-  async function handleInitialLoadPdf() {
-    const { exportInitialLoadPdf } = await import("./pdf-generators")
-    await exportInitialLoadPdf()
-  }
+  const [salesRangeOpen, setSalesRangeOpen] = useState(false)
+  const [transitRangeOpen, setTransitRangeOpen] = useState(false)
 
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <ExportCard
-          title="Reporte de ventas"
-          description="Resumen mensual con metricas y detalle de transacciones"
-          icon={TrendingUp}
-          format="pdf"
+        {/* Ventas — most used, first position */}
+        <ReportCard
+          title="Ventas"
+          description="Historial de ventas con metricas, pagos y clientes"
+          icon={Receipt}
           color={COLORS.rose}
           delay={0.0}
-          onExport={async () => { setMonthlyOpen(true) }}
-          skipAutoLog
+          actions={[
+            { label: "PDF Mensual", format: "pdf", onExport: async () => setMonthlyOpen(true), skipAutoLog: true },
+            { label: "PDF Semanal", format: "pdf", onExport: async () => setWeeklyOpen(true), skipAutoLog: true },
+            { label: "Excel", format: "excel", onExport: exportSalesExcel },
+            { label: "Personalizado", format: "range", onExport: async () => setSalesRangeOpen(true), skipAutoLog: true },
+          ]}
         />
-        <ExportCard
-          title="Reporte semanal"
-          description="Ventas, metricas y top productos de la semana"
-          icon={CalendarDays}
-          format="pdf"
-          color={COLORS.amber}
-          delay={0.04}
-          onExport={async () => { setWeeklyOpen(true) }}
-          skipAutoLog
-        />
-        <ExportCard
+
+        {/* Inventario Fisico */}
+        <ReportCard
           title="Inventario Fisico"
-          description="Stock actual con alertas y valor total"
-          icon={Warehouse}
-          format="pdf"
+          description="Stock actual con alertas, minimos y valor total"
+          icon={Package}
           color={COLORS.teal}
-          delay={0.08}
-          onExport={handleInventoryPdf}
+          delay={0.04}
+          actions={[
+            { label: "PDF", format: "pdf", onExport: handleInventoryPdf },
+            { label: "Excel", format: "excel", onExport: exportInventoryExcel },
+          ]}
         />
-        <ExportCard
+
+        {/* Inventario en Transito */}
+        <ReportCard
           title="Inventario en Transito"
           description="Semanas de transito con productos y valores"
           icon={Truck}
-          format="pdf"
           color={COLORS.amber}
-          delay={0.12}
-          onExport={handleTransitPdf}
+          delay={0.08}
+          actions={[
+            { label: "PDF", format: "pdf", onExport: handleTransitPdf },
+            { label: "Excel", format: "excel", onExport: exportTransitExcel },
+            { label: "Personalizado", format: "range", onExport: async () => setTransitRangeOpen(true), skipAutoLog: true },
+          ]}
         />
-        <ExportCard
+
+        {/* Inventario Carga Inicial */}
+        <ReportCard
           title="Inventario Carga Inicial"
           description="Stock inicial con precios editados y valor total"
           icon={Archive}
-          format="pdf"
           color={COLORS.violet}
+          delay={0.12}
+          actions={[
+            { label: "PDF", format: "pdf", onExport: handleInitialLoadPdf },
+            { label: "Excel", format: "excel", onExport: exportInitialLoadExcel },
+          ]}
+        />
+
+        {/* Clientes */}
+        <ReportCard
+          title="Clientes"
+          description="Lista de clientes con datos de contacto"
+          icon={Users}
+          color={COLORS.pink}
           delay={0.16}
-          onExport={handleInitialLoadPdf}
+          actions={[
+            { label: "PDF", format: "pdf", onExport: handleCustomersPdf },
+            { label: "Excel", format: "excel", onExport: exportCustomersExcel },
+          ]}
+        />
+
+        {/* Productos */}
+        <ReportCard
+          title="Productos"
+          description="Catalogo completo con variantes y precios"
+          icon={ShoppingBag}
+          color={COLORS.emerald}
+          delay={0.2}
+          actions={[
+            { label: "PDF", format: "pdf", onExport: handleProductsPdf },
+            { label: "Excel", format: "excel", onExport: exportProductsExcel },
+          ]}
         />
       </div>
 
+      {/* Sales PDF dialogs */}
       <MonthlySalesDialog open={monthlyOpen} onOpenChange={setMonthlyOpen} />
       <WeeklySalesDialog open={weeklyOpen} onOpenChange={setWeeklyOpen} />
+
+      {/* Date range export dialogs */}
+      <DateRangeExportDialog
+        open={salesRangeOpen}
+        onOpenChange={setSalesRangeOpen}
+        title="Ventas"
+        onExportPdf={async (from, to) => {
+          const { exportSalesRangePdf } = await import("./pdf-generators")
+          await exportSalesRangePdf(from, to)
+        }}
+        onExportExcel={async (from, to) => {
+          await exportSalesRangeExcel(from, to)
+        }}
+      />
+      <DateRangeExportDialog
+        open={transitRangeOpen}
+        onOpenChange={setTransitRangeOpen}
+        title="Inventario en Transito"
+        onExportPdf={async (from, to) => {
+          const { exportTransitRangePdf } = await import("./pdf-generators")
+          await exportTransitRangePdf(from, to)
+        }}
+        onExportExcel={async (from, to) => {
+          await exportTransitRangeExcel(from, to)
+        }}
+      />
     </>
   )
 }

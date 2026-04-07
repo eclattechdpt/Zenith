@@ -56,7 +56,7 @@ export function DangerZoneCard({
           description: result.error,
         })
       } else {
-        sileo.success({ title: `"${title}" ejecutado correctamente` })
+        sileo.success({ title: `"${title}" ejecutado correctamente`, description: "La operacion se completo sin errores" })
         setOpen(false)
         setInputValue("")
       }

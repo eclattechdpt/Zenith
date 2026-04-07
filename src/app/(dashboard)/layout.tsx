@@ -5,8 +5,10 @@ import { ValeReadyBanner } from "@/features/vales/components/vale-ready-banner"
 
 export default function DashboardLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode
+  modal: React.ReactNode
 }) {
   return (
     <div className="h-svh bg-neutral-50">
@@ -25,6 +27,7 @@ export default function DashboardLayout({
             </div>
             {children}
           </main>
+          {modal}
         </div>
       </div>
     </div>

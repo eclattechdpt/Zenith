@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Search, Trash2, Loader2, Tag, X } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -112,11 +112,11 @@ export function CustomerPriceEditor({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al guardar precio"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success("Precio guardado")
+    sileo.success({ title: "Precio guardado", description: "El precio personalizado fue aplicado" })
     queryClient.invalidateQueries({ queryKey: ["customer-prices", priceList.id] })
     setSearch("")
   }
@@ -132,11 +132,11 @@ export function CustomerPriceEditor({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al eliminar"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success("Precio eliminado")
+    sileo.success({ title: "Precio eliminado", description: "Se usara el precio base del producto" })
     queryClient.invalidateQueries({ queryKey: ["customer-prices", priceList.id] })
   }
 
@@ -154,11 +154,11 @@ export function CustomerPriceEditor({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al actualizar"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success("Precio actualizado")
+    sileo.success({ title: "Precio actualizado", description: "El nuevo precio fue aplicado" })
     queryClient.invalidateQueries({ queryKey: ["customer-prices", priceList.id] })
   }
 

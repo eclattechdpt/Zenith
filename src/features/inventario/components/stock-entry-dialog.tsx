@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import { motion } from "motion/react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
@@ -82,13 +82,14 @@ function StockEntryForm({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al registrar entrada"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success(
-      `Entrada registrada: +${quantity} unidades (${currentStock} → ${currentStock + quantity})`
-    )
+    sileo.success({
+      title: `Entrada registrada: +${quantity} unidades (${currentStock} → ${currentStock + quantity})`,
+      description: "El movimiento fue registrado en el historial",
+    })
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
     queryClient.invalidateQueries({ queryKey: ["movements"] })

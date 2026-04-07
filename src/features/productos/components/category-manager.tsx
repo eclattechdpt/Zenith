@@ -1,49 +1,46 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
-import { Plus, Pencil, Trash2, ChevronRight, Loader2 } from "lucide-react"
-import { AnimatePresence, motion } from "motion/react"
-import { toast } from "sonner"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { motion, AnimatePresence } from "motion/react"
+import { Plus, FolderTree } from "lucide-react"
+import { sileo } from "sileo"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 
-import { categorySchema, type CategoryInput } from "../schemas"
 import { useCategories } from "../queries"
-import { createCategory, updateCategory, deleteCategory } from "../actions"
-
-function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-}
+import { deleteCategory, reorderCategories } from "../actions"
+import { CategoryNode, InlineCreateRow } from "./category-node"
 
 export function CategoryManager() {
   const queryClient = useQueryClient()
-  const { data: categories = [] } = useCategories()
+  const { data: categories = [], isLoading } = useCategories()
 
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editId, setEditId] = useState<string | null>(null)
-  const [parentId, setParentId] = useState<string | null>(null)
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [creatingAt, setCreatingAt] = useState<string | null | false>(false) // false=closed, null=top-level, string=parentId
+
+  const topLevel = categories.filter((c) => !c.parent_id)
+
+  function getChildren(parentId: string) {
+    return categories.filter((c) => c.parent_id === parentId)
+  }
 
   function toggleExpanded(id: string) {
     setExpanded((prev) => {
@@ -54,58 +51,6 @@ export function CategoryManager() {
     })
   }
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors, isSubmitting },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = useForm<CategoryInput>({ resolver: zodResolver(categorySchema) as any })
-
-  const topLevel = categories.filter((c) => !c.parent_id)
-
-  function openCreate(pId: string | null = null) {
-    setEditId(null)
-    setParentId(pId)
-    reset({ name: "", slug: "", description: "", parent_id: pId, sort_order: 0 })
-    setDialogOpen(true)
-  }
-
-  function openEdit(cat: { id: string; name: string; slug: string; description: string | null; parent_id: string | null; sort_order: number }) {
-    setEditId(cat.id)
-    setParentId(cat.parent_id)
-    reset({
-      name: cat.name,
-      slug: cat.slug,
-      description: cat.description,
-      parent_id: cat.parent_id,
-      sort_order: cat.sort_order,
-    })
-    setDialogOpen(true)
-  }
-
-  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setValue("name", e.target.value)
-    if (!editId) setValue("slug", slugify(e.target.value))
-  }
-
-  async function onSubmit(data: CategoryInput) {
-    const input = { ...data, parent_id: parentId }
-    const result = editId
-      ? await updateCategory(editId, input)
-      : await createCategory(input)
-
-    if ("error" in result) {
-      toast.error("Error al guardar la categoria")
-      return
-    }
-
-    toast.success(editId ? "Categoria actualizada" : "Categoria creada")
-    queryClient.invalidateQueries({ queryKey: ["categories"] })
-    setDialogOpen(false)
-  }
-
   async function handleDelete() {
     if (!deleteTarget) return
     setIsDeleting(true)
@@ -114,191 +59,154 @@ export function CategoryManager() {
     setDeleteTarget(null)
 
     if ("error" in result) {
-      const msg = (result.error as Record<string, string[]>)._form?.[0] ?? "Error al eliminar la categoria"
-      toast.error(msg)
+      const msg =
+        (result.error as Record<string, string[]>)._form?.[0] ??
+        "Error al eliminar la categoria"
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success("Categoria eliminada")
+    sileo.success({ title: "Categoria eliminada", description: "Los productos de esta categoria quedaron sin clasificar" })
     queryClient.invalidateQueries({ queryKey: ["categories"] })
   }
 
-  function getChildren(parentId: string) {
-    return categories.filter((c) => c.parent_id === parentId)
+  function handleAddChild(parentId: string) {
+    setExpanded((prev) => new Set(prev).add(parentId))
+    setCreatingAt(parentId)
+  }
+
+  // --- DnD ---
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = topLevel.findIndex((c) => c.id === active.id)
+    const newIndex = topLevel.findIndex((c) => c.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+
+    // Optimistic reorder
+    const reordered = [...topLevel]
+    const [moved] = reordered.splice(oldIndex, 1)
+    reordered.splice(newIndex, 0, moved)
+
+    const updates = reordered.map((cat, i) => ({ id: cat.id, sort_order: i }))
+
+    const result = await reorderCategories(updates)
+    if (result && "error" in result) {
+      sileo.error({ title: "Error al reordenar" })
+    }
+    queryClient.invalidateQueries({ queryKey: ["categories"] })
+  }
+
+  // --- Loading state ---
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        {[0, 1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="h-14 animate-pulse rounded-xl bg-neutral-100/80"
+            style={{ animationDelay: `${i * 80}ms` }}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  // --- Empty state ---
+  if (topLevel.length === 0 && creatingAt === false) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-neutral-200 py-12">
+        <motion.div
+          animate={{ y: [0, -4, 0] }}
+          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+        >
+          <FolderTree className="h-8 w-8 text-neutral-300" />
+        </motion.div>
+        <p className="text-sm font-medium text-neutral-400">
+          No hay categorias
+        </p>
+        <p className="text-xs text-neutral-400/70">
+          Crea tu primera categoria para organizar tus productos
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-2"
+          onClick={() => setCreatingAt(null)}
+        >
+          <Plus className="mr-1.5 size-3.5" />
+          Nueva categoria
+        </Button>
+      </div>
+    )
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {topLevel.map((cat) => {
-        const children = getChildren(cat.id)
-        const isExpanded = expanded.has(cat.id)
-        return (
-          <div key={cat.id} className="rounded-lg border border-input">
-            {/* Parent category */}
-            <div className="flex items-center justify-between px-4 py-3">
-              <button
-                type="button"
-                onClick={() => children.length > 0 && toggleExpanded(cat.id)}
-                className="flex items-center gap-2"
-              >
-                {children.length > 0 ? (
-                  <motion.span
-                    animate={{ rotate: isExpanded ? 90 : 0 }}
-                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    <ChevronRight className="size-3.5 text-neutral-400" />
-                  </motion.span>
-                ) : (
-                  <span className="size-3.5" />
-                )}
-                <span className="text-sm font-medium text-neutral-950">
-                  {cat.name}
-                </span>
-                <span className="text-xs text-neutral-400">
-                  {children.length > 0
-                    ? `${children.length} sub`
-                    : `${cat.product_categories[0]?.count ?? 0} productos`}
-                </span>
-              </button>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => openCreate(cat.id)}
-                  title="Agregar subcategoria"
-                >
-                  <Plus className="size-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => openEdit(cat)}
-                >
-                  <Pencil className="size-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => setDeleteTarget({ id: cat.id, name: cat.name })}
-                >
-                  <Trash2 className="size-3" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Subcategories */}
-            <AnimatePresence initial={false}>
-              {isExpanded && children.length > 0 && (
-                <motion.div
-                  key="children"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                  className="overflow-hidden border-t border-input"
-                >
-                  {children.map((sub) => (
-                    <div
-                      key={sub.id}
-                      className="flex items-center justify-between px-4 py-2.5 pl-10"
-                    >
-                      <div className="flex items-center gap-2">
-                        <ChevronRight className="size-3 text-neutral-300" />
-                        <span className="text-sm text-neutral-700">
-                          {sub.name}
-                        </span>
-                        <span className="text-xs text-neutral-400">
-                          {sub.product_categories[0]?.count ?? 0}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={() => openEdit(sub)}
-                        >
-                          <Pencil className="size-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={() => setDeleteTarget({ id: sub.id, name: sub.name })}
-                        >
-                          <Trash2 className="size-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+    <div className="flex flex-col gap-2">
+      {/* Sortable tree */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={topLevel.map((c) => c.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="flex flex-col gap-2">
+            {topLevel.map((cat, idx) => (
+              <CategoryNode
+                key={cat.id}
+                category={cat}
+                childCategories={getChildren(cat.id)}
+                depth={0}
+                index={idx}
+                expanded={expanded.has(cat.id)}
+                onToggleExpand={() => toggleExpanded(cat.id)}
+                onDelete={setDeleteTarget}
+                onAddChild={handleAddChild}
+                allCategories={categories}
+              />
+            ))}
           </div>
-        )
-      })}
+        </SortableContext>
+      </DndContext>
 
-      <Button variant="outline" size="sm" onClick={() => openCreate(null)}>
-        <Plus className="mr-1.5 size-3.5" />
-        Nueva categoria
-      </Button>
+      {/* Inline create row */}
+      <AnimatePresence>
+        {creatingAt !== false && (
+          <InlineCreateRow
+            key={creatingAt ?? "top"}
+            parentId={typeof creatingAt === "string" ? creatingAt : null}
+            autoColorIndex={topLevel.length}
+            onClose={() => setCreatingAt(false)}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Create/Edit dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editId
-                ? parentId ? "Editar subcategoria" : "Editar categoria"
-                : parentId ? "Nueva subcategoria" : "Nueva categoria"}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="cat-name">Nombre *</Label>
-              <Input
-                id="cat-name"
-                placeholder="Ej: Maquillaje"
-                {...register("name")}
-                onChange={handleNameChange}
-              />
-              {errors.name && (
-                <p className="text-xs text-destructive">{errors.name.message}</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="cat-slug">Slug *</Label>
-              <Input
-                id="cat-slug"
-                placeholder="maquillaje"
-                {...register("slug")}
-              />
-              {errors.slug && (
-                <p className="text-xs text-destructive">{errors.slug.message}</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="cat-desc">Descripcion</Label>
-              <Textarea
-                id="cat-desc"
-                placeholder="Opcional"
-                {...register("description")}
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setDialogOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-1.5 size-3.5 animate-spin" />}
-                {editId ? "Guardar" : "Crear"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Add button */}
+      {creatingAt === false && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Button
+            variant="outline"
+            onClick={() => setCreatingAt(null)}
+            className="h-[52px] w-full rounded-xl border-2 border-dashed border-neutral-200 text-sm font-medium text-neutral-400 hover:border-neutral-300 hover:text-neutral-600"
+          >
+            <Plus className="mr-1.5 size-4" />
+            Nueva categoria
+          </Button>
+        </motion.div>
+      )}
 
       {/* Delete confirmation */}
       <ConfirmDialog

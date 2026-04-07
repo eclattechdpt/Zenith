@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import { motion } from "motion/react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
@@ -80,11 +80,11 @@ function InitialLoadEditForm({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al guardar"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success("Producto actualizado en carga inicial")
+    sileo.success({ title: "Producto actualizado en carga inicial", description: "El stock inicial fue ajustado" })
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
     queryClient.invalidateQueries({ queryKey: ["movements"] })

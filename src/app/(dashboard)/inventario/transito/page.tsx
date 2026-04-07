@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/shared/empty-state"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { formatCurrency } from "@/lib/utils"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import {
@@ -107,12 +107,12 @@ export default function InventarioTransitoPage() {
     setDeleteTarget(null)
 
     if ("error" in result && result.error) {
-      toast.error("Error al eliminar la semana")
+      sileo.error({ title: "Error al eliminar la semana" })
       return
     }
 
     if (selectedWeekId === deleteTarget.id) setSelectedWeekId(null)
-    toast.success("Semana eliminada")
+    sileo.success({ title: "Semana eliminada", description: "Los productos de esta semana fueron removidos del transito" })
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
     queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
