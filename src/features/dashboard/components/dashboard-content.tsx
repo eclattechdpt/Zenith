@@ -30,8 +30,6 @@ import { InventoryAlertsGrid } from "./inventory-alerts-grid"
 export function DashboardContent() {
   const { data, isPending } = useDashboardData()
 
-  const { kpiData, salesChart, activity, topProducts, inventoryAlerts } = data ?? {}
-
   return (
     <BoneyardSkeleton
       name="dashboard-full"
@@ -39,88 +37,97 @@ export function DashboardContent() {
       animate="shimmer"
       fixture={<DashboardFixture />}
     >
-      <>
+      {data && <DashboardInner data={data} />}
+    </BoneyardSkeleton>
+  )
+}
+
+function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashboardData>["data"]> }) {
+  const { kpiData, salesChart, activity, topProducts, inventoryAlerts } = data
+
+  return (
+    <>
         {/* KPI Grid */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
           <KpiCard
             title="Ventas del dia"
-            value={kpiData!.ventasDelDia}
+            value={kpiData.ventasDelDia}
             format={formatCurrency}
             subtitle="hoy"
             icon={DollarSign}
             iconBg="bg-rose-50"
             iconColor="text-rose-500"
             badge={{
-              label: `+${kpiData!.ventasDelDiaCambio}% vs ayer`,
+              label: `+${kpiData.ventasDelDiaCambio}% vs ayer`,
               trend: "up",
             }}
           >
             <SalesProgress
-              today={kpiData!.ventasDelDia}
-              yesterday={kpiData!.ventasAyer}
-              max={kpiData!.ventasMaxDia}
+              today={kpiData.ventasDelDia}
+              yesterday={kpiData.ventasAyer}
+              max={kpiData.ventasMaxDia}
             />
           </KpiCard>
 
           <KpiCard
             title="Vendidos esta semana"
-            value={kpiData!.productosVendidos}
+            value={kpiData.productosVendidos}
             subtitle="productos"
             icon={Package}
             iconBg="bg-teal-50"
             iconColor="text-teal-500"
             badge={{
-              label: `+${kpiData!.productosVendidosCambio} vs ayer`,
+              label: `+${kpiData.productosVendidosCambio} vs ayer`,
               trend: "up",
             }}
             delay={0.06}
           >
             <WeeklyBarChart
-              data={kpiData!.vendidosPorDia}
-              labels={kpiData!.vendidosDias}
-              currentDayIndex={kpiData!.vendidosDiaActual}
+              data={kpiData.vendidosPorDia}
+              labels={kpiData.vendidosDias}
+              currentDayIndex={kpiData.vendidosDiaActual}
             />
           </KpiCard>
 
           <KpiCard
             title="Transacciones"
-            value={kpiData!.transacciones}
+            value={kpiData.transacciones}
             subtitle="operaciones"
             icon={ShoppingBag}
             iconBg="bg-blush-50"
             iconColor="text-rose-400"
             badge={{
-              label: `+${kpiData!.transaccionesCambio} vs ayer`,
+              label: `+${kpiData.transaccionesCambio} vs ayer`,
               trend: "up",
             }}
             delay={0.12}
           >
             <PaymentBreakdown
               methods={[
-                { label: "Tarjeta", count: kpiData!.pagoTarjeta, dotColor: "#E87A95" },
-                { label: "Efectivo", count: kpiData!.pagoEfectivo, dotColor: "#FF96AE" },
-                { label: "Transf.", count: kpiData!.pagoTransferencia, dotColor: "#FFC4CF" },
+                { label: "Tarjeta", count: kpiData.pagoTarjeta, dotColor: "#E87A95" },
+                { label: "Efectivo", count: kpiData.pagoEfectivo, dotColor: "#FF96AE" },
+                { label: "Transf.", count: kpiData.pagoTransferencia, dotColor: "#FFC4CF" },
               ]}
             />
           </KpiCard>
 
           <KpiCard
             title="Stock bajo"
-            value={kpiData!.stockBajoAlertas}
+            value={kpiData.stockBajoAlertas}
             subtitle="alertas activas"
             icon={AlertTriangle}
             iconBg="bg-amber-50"
             iconColor="text-amber-500"
             badge={{
-              label: `${kpiData!.stockBajoAlertas} alertas`,
+              label: `${kpiData.stockBajoAlertas} alertas`,
               trend: "neutral",
             }}
             delay={0.18}
           >
             <InventoryHealth
-              ok={kpiData!.inventarioOk}
-              bajo={kpiData!.inventarioBajo}
-              critico={kpiData!.inventarioCritico}
+              ok={kpiData.inventarioOk}
+              bajo={kpiData.inventarioBajo}
+              critico={kpiData.inventarioCritico}
             />
           </KpiCard>
         </div>
@@ -136,9 +143,9 @@ export function DashboardContent() {
             className="xl:col-span-3"
           >
             <SalesChart
-              totalMes={salesChart!.totalMes}
-              cambioMes={salesChart!.cambioMes}
-              semanas={salesChart!.semanas}
+              totalMes={salesChart.totalMes}
+              cambioMes={salesChart.cambioMes}
+              semanas={salesChart.semanas}
             />
           </SectionCard>
 
@@ -170,16 +177,15 @@ export function DashboardContent() {
 
           <SectionCard
             label="Alertas de inventario"
-            description={`${inventoryAlerts!.length} alertas`}
+            description={`${inventoryAlerts.length} alertas`}
             icon={AlertTriangle}
             iconBg="bg-amber-50"
             iconColor="text-amber-500"
             delay={0.42}
           >
-            <InventoryAlertsGrid alerts={inventoryAlerts!} />
+            <InventoryAlertsGrid alerts={inventoryAlerts} />
           </SectionCard>
         </div>
       </>
-    </BoneyardSkeleton>
   )
 }
