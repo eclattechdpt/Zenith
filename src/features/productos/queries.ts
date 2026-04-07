@@ -204,6 +204,67 @@ export function useCategories() {
   })
 }
 
+// --- PRODUCTS BY CATEGORY ---
+
+export interface CategoryProduct {
+  id: string
+  name: string
+  brand: string | null
+  image_url: string | null
+  is_active: boolean
+}
+
+export function useProductsByCategory(categoryId: string | null) {
+  return useQuery({
+    queryKey: ["category-products", categoryId],
+    queryFn: async (): Promise<CategoryProduct[]> => {
+      if (!categoryId) return []
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("product_categories")
+        .select("product_id, products!inner(id, name, brand, image_url, is_active)")
+        .eq("category_id", categoryId)
+        .is("products.deleted_at", null)
+
+      if (error) throw error
+
+      return (data ?? []).map((row) => {
+        const p = row.products as unknown as CategoryProduct
+        return p
+      })
+    },
+    enabled: !!categoryId,
+  })
+}
+
+// --- PRODUCT SEARCH (for assignment) ---
+
+export function useProductSearch(search: string) {
+  return useQuery({
+    queryKey: ["product-search-assign", search],
+    queryFn: async (): Promise<CategoryProduct[]> => {
+      if (!search || search.length < 2) return []
+      const supabase = createClient()
+
+      const q = search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
+
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, brand, image_url, is_active")
+        .is("deleted_at", null)
+        .ilike("name", `%${q}%`)
+        .order("name")
+        .limit(10)
+
+      if (error) throw error
+      return (data ?? []) as CategoryProduct[]
+    },
+    enabled: search.length >= 2,
+    placeholderData: (prev) => prev,
+  })
+}
+
 // --- VARIANT TYPES ---
 
 export function useVariantTypes() {

@@ -16,8 +16,11 @@ import {
 import { useQueryState, parseAsString } from "nuqs"
 import { motion, AnimatePresence } from "motion/react"
 
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
+
 import { formatCurrency } from "@/lib/utils"
 import { useDebounce } from "@/hooks/use-debounce"
+import { InventoryTableFixture } from "./fixtures/inventory-table-fixture"
 
 import { useInventory, useInitialLoadInventory } from "../queries"
 import { useCategories } from "@/features/productos/queries"
@@ -645,17 +648,8 @@ export function InventoryTable({
       >
         {/* Mobile: always cards */}
         <div className="sm:hidden">
-          {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-[88px] animate-pulse rounded-2xl bg-neutral-100/80"
-                  style={{ animationDelay: `${i * 80}ms` }}
-                />
-              ))}
-            </div>
-          ) : variants.length > 0 ? (
+          <BoneyardSkeleton name="inventory-table" loading={isLoading} animate="shimmer" fixture={<InventoryTableFixture />}>
+          {variants.length > 0 ? (
             <motion.div
               className="flex flex-col gap-3"
               variants={cardListVariants}
@@ -684,33 +678,13 @@ export function InventoryTable({
               onClearAll={handleClearAll}
             />
           )}
+          </BoneyardSkeleton>
         </div>
 
         {/* Desktop: grid or list based on viewMode */}
         <div className="hidden sm:block">
-          {isLoading ? (
-            viewMode === "grid" ? (
-              <div className="grid grid-cols-2 gap-5 lg:grid-cols-3 xl:grid-cols-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-[240px] animate-pulse rounded-2xl bg-neutral-100/80"
-                    style={{ animationDelay: `${i * 80}ms` }}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-14 animate-pulse rounded-xl bg-neutral-100/80"
-                    style={{ animationDelay: `${i * 80}ms` }}
-                  />
-                ))}
-              </div>
-            )
-          ) : variants.length > 0 ? (
+          <BoneyardSkeleton name="inventory-table" loading={isLoading} animate="shimmer" fixture={<InventoryTableFixture />}>
+          {variants.length > 0 ? (
             viewMode === "grid" ? (
               <motion.div
                 className="grid grid-cols-2 gap-5 lg:grid-cols-3 xl:grid-cols-4"
@@ -751,6 +725,7 @@ export function InventoryTable({
               onClearAll={handleClearAll}
             />
           )}
+          </BoneyardSkeleton>
         </div>
       </motion.div>
 

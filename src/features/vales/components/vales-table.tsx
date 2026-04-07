@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import { Search, Ticket, MoreHorizontal, CheckCircle2, XCircle, X } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryState, parseAsString } from "nuqs"
 import { motion } from "motion/react"
 
@@ -89,17 +89,17 @@ export function ValesTable() {
         const msg =
           (result.error as Record<string, string[]>)._form?.[0] ??
           "Error al cancelar el vale"
-        toast.error(msg)
+        sileo.error({ title: msg })
         return
       }
 
-      toast.success("Vale cancelado")
+      sileo.success({ title: "Vale cancelado" })
       queryClient.invalidateQueries({ queryKey: ["vales"] })
       queryClient.invalidateQueries({ queryKey: ["vales-ready"] })
     } catch {
       setIsCancelling(false)
       setCancelTarget(null)
-      toast.error("Error al cancelar el vale")
+      sileo.error({ title: "Error al cancelar el vale" })
     }
   }
 

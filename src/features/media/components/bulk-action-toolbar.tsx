@@ -14,7 +14,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import {
   uploadProductImage,
@@ -56,7 +56,7 @@ export function BulkActionToolbar({
       (i) => (i.hostingType === "url" || i.hostingType === "data") && i.imageUrl
     )
     if (toOptimize.length === 0) {
-      toast.warning("Selecciona productos con URL externa o Data URL para optimizar")
+      sileo.warning({ title: "Selecciona productos con URL externa o Data URL para optimizar" })
       return
     }
 
@@ -84,9 +84,9 @@ export function BulkActionToolbar({
     onComplete()
 
     if (failed === 0) {
-      toast.success(`${success} imagen${success !== 1 ? "es" : ""} optimizada${success !== 1 ? "s" : ""} y subida${success !== 1 ? "s" : ""} a Supabase`)
+      sileo.success({ title: `${success} imagen${success !== 1 ? "es" : ""} optimizada${success !== 1 ? "s" : ""} y subida${success !== 1 ? "s" : ""} a Supabase`, description: "Las imagenes fueron subidas a Supabase Storage" })
     } else {
-      toast.warning(`Optimizacion parcial: ${success} exitosa${success !== 1 ? "s" : ""}, ${failed} fallida${failed !== 1 ? "s" : ""}`)
+      sileo.warning({ title: `Optimizacion parcial: ${success} exitosa${success !== 1 ? "s" : ""}, ${failed} fallida${failed !== 1 ? "s" : ""}` })
     }
   }
 
@@ -97,12 +97,12 @@ export function BulkActionToolbar({
     setRunning(null)
 
     if (result.error) {
-      toast.error(result.error)
+      sileo.error({ title: result.error })
       return
     }
 
     if (result.data!.length === 0) {
-      toast.success("No hay archivos sin vincular en el almacenamiento")
+      sileo.success({ title: "No hay archivos sin vincular en el almacenamiento" })
       return
     }
 
@@ -119,11 +119,11 @@ export function BulkActionToolbar({
     setRunning(null)
 
     if (result.error) {
-      toast.error(result.error)
+      sileo.error({ title: result.error })
       return
     }
 
-    toast.success(`${result.data} archivo${result.data !== 1 ? "s" : ""} huerfano${result.data !== 1 ? "s" : ""} eliminado${result.data !== 1 ? "s" : ""}`)
+    sileo.success({ title: `${result.data} archivo${result.data !== 1 ? "s" : ""} huerfano${result.data !== 1 ? "s" : ""} eliminado${result.data !== 1 ? "s" : ""}` })
     onComplete()
   }
 
@@ -133,7 +133,7 @@ export function BulkActionToolbar({
       (i) => i.hostingType === "supabase" && i.imageUrl
     )
     if (toRecompress.length === 0) {
-      toast.warning("Selecciona productos con imagen en Supabase para re-comprimir")
+      sileo.warning({ title: "Selecciona productos con imagen en Supabase para re-comprimir" })
       return
     }
 
@@ -167,9 +167,9 @@ export function BulkActionToolbar({
     onComplete()
 
     if (failed === 0) {
-      toast.success(`${success} imagen${success !== 1 ? "es" : ""} re-comprimida${success !== 1 ? "s" : ""}`)
+      sileo.success({ title: `${success} imagen${success !== 1 ? "es" : ""} re-comprimida${success !== 1 ? "s" : ""}` })
     } else {
-      toast.warning(`Re-compresion parcial: ${success} exitosa${success !== 1 ? "s" : ""}, ${failed} fallida${failed !== 1 ? "s" : ""}`)
+      sileo.warning({ title: `Re-compresion parcial: ${success} exitosa${success !== 1 ? "s" : ""}, ${failed} fallida${failed !== 1 ? "s" : ""}` })
     }
   }
 
@@ -178,9 +178,9 @@ export function BulkActionToolbar({
     setRunning("export")
     try {
       exportMediaAudit(allItems)
-      toast.success("Archivo Excel descargado")
+      sileo.success({ title: "Archivo Excel descargado" })
     } catch {
-      toast.error("No se pudo generar el archivo")
+      sileo.error({ title: "No se pudo generar el archivo" })
     }
     setRunning(null)
   }

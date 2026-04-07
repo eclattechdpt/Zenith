@@ -18,6 +18,7 @@ export const categorySchema = z.object({
   description: z.string().max(500).optional().nullable(),
   parent_id: zUuid().optional().nullable(),
   sort_order: z.coerce.number().int().default(0),
+  color: z.string().max(20).optional().nullable(),
 })
 
 // --- TIPOS Y OPCIONES DE VARIANTE ---

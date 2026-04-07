@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { Plus, Pencil, Trash2, Loader2, Tag } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -73,11 +73,11 @@ export function PriceListManager() {
 
     if ("error" in result) {
       const msg = (result.error as Record<string, string[]>)._form?.[0] ?? "Error al guardar"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success(editId ? "Lista actualizada" : "Lista creada")
+    sileo.success({ title: editId ? "Lista actualizada" : "Lista creada", description: editId ? "Los cambios fueron guardados" : "Ya puedes asignar clientes a esta lista" })
     queryClient.invalidateQueries({ queryKey: ["price-lists"] })
     setDialogOpen(false)
   }
@@ -91,11 +91,11 @@ export function PriceListManager() {
 
     if ("error" in result) {
       const msg = (result.error as Record<string, string[]>)._form?.[0] ?? "Error al eliminar"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success("Lista eliminada")
+    sileo.success({ title: "Lista eliminada", description: "Los clientes vinculados ya no tendran este descuento" })
     queryClient.invalidateQueries({ queryKey: ["price-lists"] })
   }
 

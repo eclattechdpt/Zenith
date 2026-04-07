@@ -10,7 +10,7 @@ import {
   Loader2,
   CheckCircle2,
 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
@@ -108,12 +108,12 @@ export function ConvertQuoteDialog({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al convertir la cotizacion"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
     const sale = result.data
-    toast.success(`Venta ${sale.sale_number} creada desde cotizacion`)
+    sileo.success({ title: `Venta ${sale.sale_number} creada desde cotizacion`, description: "La cotizacion fue convertida y el inventario actualizado" })
 
     queryClient.invalidateQueries({ queryKey: ["sales"] })
     queryClient.invalidateQueries({ queryKey: ["products"] })

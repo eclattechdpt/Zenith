@@ -3,14 +3,25 @@ import { z } from "zod"
 export const customerSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").max(200),
   client_number: z.string().max(50).optional().nullable().or(z.literal("")),
-  phone: z.string().max(20).optional().nullable(),
+  phone: z
+    .string()
+    .max(20)
+    .optional()
+    .nullable()
+    .refine(
+      (v) => !v || /^\d{10}$/.test(v?.replace(/\s/g, "") ?? ""),
+      { message: "El telefono debe tener 10 digitos" }
+    ),
   email: z
     .string()
-    .email("Email invalido")
     .max(200)
     .optional()
     .nullable()
-    .or(z.literal("")),
+    .or(z.literal(""))
+    .refine(
+      (v) => !v || /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v),
+      { message: "Ingresa un email valido (ej: correo@ejemplo.com)" }
+    ),
   address: z.string().max(500).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
   price_list_id: z.string().uuid().optional().nullable(),

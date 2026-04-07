@@ -59,6 +59,55 @@ export async function exportSalesExcel() {
   downloadWorkbook(wb, `ventas-${today()}.xlsx`)
 }
 
+// ── Sales Export (date range) ──
+
+export async function exportSalesRangeExcel(from: Date, to: Date) {
+  const supabase = createClient()
+
+  const { data: sales, error } = await supabase
+    .from("sales")
+    .select(
+      `sale_number, status, subtotal, discount_amount, total, notes, created_at,
+      customers:customers(name),
+      sale_payments(method, amount)`
+    )
+    .is("deleted_at", null)
+    .gte("created_at", from.toISOString())
+    .lte("created_at", to.toISOString())
+    .order("created_at", { ascending: false })
+
+  if (error) throw error
+
+  const rows = (sales ?? []).map((s) => {
+    const payments = (
+      s.sale_payments as { method: string; amount: number }[]
+    ).map(
+      (p) =>
+        `${PAYMENT_METHODS[p.method as keyof typeof PAYMENT_METHODS] ?? p.method}: $${Number(p.amount).toFixed(2)}`
+    )
+
+    return {
+      Numero: s.sale_number,
+      Estado:
+        SALE_STATUSES[s.status as keyof typeof SALE_STATUSES] ?? s.status,
+      Cliente:
+        (s.customers as unknown as { name: string } | null)?.name ?? "—",
+      Subtotal: Number(s.subtotal),
+      Descuento: Number(s.discount_amount),
+      Total: Number(s.total),
+      Pagos: payments.join(", "),
+      Notas: s.notes ?? "",
+      Fecha: format(new Date(s.created_at), "dd/MM/yyyy HH:mm"),
+    }
+  })
+
+  const ws = XLSX.utils.json_to_sheet(rows)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, "Ventas")
+  const label = `${format(from, "yyyy-MM-dd")}_${format(to, "yyyy-MM-dd")}`
+  downloadWorkbook(wb, `ventas-${label}.xlsx`)
+}
+
 // ── Inventory Fisico Export ──
 
 export async function exportInventoryExcel() {
@@ -387,4 +436,103 @@ export async function exportInitialLoadExcel() {
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Carga Inicial")
   downloadWorkbook(wb, `inventario-carga-inicial-${today()}.xlsx`)
+}
+
+// ── Transit Export (date range) ──
+
+export async function exportTransitRangeExcel(from: Date, to: Date) {
+  const supabase = createClient()
+
+  const fromYear = from.getFullYear()
+  const fromMonth = from.getMonth() + 1
+  const toYear = to.getFullYear()
+  const toMonth = to.getMonth() + 1
+
+  const { data: weeks, error } = await supabase
+    .from("transit_weeks")
+    .select(
+      `id, year, month, week_number, label, total_value, created_at,
+      transit_week_items(
+        quantity, unit_price, line_total,
+        product_variants!inner(
+          name, sku,
+          products!inner(name, brand)
+        )
+      )`
+    )
+    .is("deleted_at", null)
+    .gte("year", fromYear)
+    .lte("year", toYear)
+    .order("year", { ascending: false })
+    .order("month", { ascending: false })
+    .order("week_number", { ascending: false })
+
+  if (error) throw error
+
+  // Client-side month filter for exact range
+  const filtered = (weeks ?? []).filter((w) => {
+    if (w.year === fromYear && w.year === toYear)
+      return w.month >= fromMonth && w.month <= toMonth
+    if (w.year === fromYear) return w.month >= fromMonth
+    if (w.year === toYear) return w.month <= toMonth
+    return true
+  })
+
+  const MONTH_NAMES = [
+    "",
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+  ]
+
+  const rows: Record<string, unknown>[] = []
+
+  for (const week of filtered) {
+    const items = (week.transit_week_items ?? []) as unknown as {
+      quantity: number
+      unit_price: number
+      line_total: number
+      product_variants: {
+        name: string | null
+        sku: string | null
+        products: { name: string; brand: string | null }
+      }
+    }[]
+
+    if (items.length === 0) {
+      rows.push({
+        Año: week.year,
+        Mes: MONTH_NAMES[week.month] ?? week.month,
+        Semana: week.week_number,
+        Etiqueta: week.label ?? "",
+        Producto: "—",
+        Variante: "—",
+        Cantidad: 0,
+        "Precio unitario": 0,
+        "Total linea": 0,
+        "Total semana": Number(week.total_value),
+      })
+    } else {
+      for (const item of items) {
+        const pv = item.product_variants
+        rows.push({
+          Año: week.year,
+          Mes: MONTH_NAMES[week.month] ?? week.month,
+          Semana: week.week_number,
+          Etiqueta: week.label ?? "",
+          Producto: pv?.products?.name ?? "—",
+          Variante: pv?.name ?? pv?.sku ?? "—",
+          Cantidad: item.quantity,
+          "Precio unitario": Number(item.unit_price),
+          "Total linea": Number(item.line_total),
+          "Total semana": Number(week.total_value),
+        })
+      }
+    }
+  }
+
+  const ws = XLSX.utils.json_to_sheet(rows)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, "Inventario Transito")
+  const label = `${format(from, "yyyy-MM-dd")}_${format(to, "yyyy-MM-dd")}`
+  downloadWorkbook(wb, `inventario-transito-${label}.xlsx`)
 }

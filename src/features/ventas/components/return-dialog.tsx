@@ -10,7 +10,7 @@ import {
   RefreshCw,
   X,
 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
@@ -152,11 +152,15 @@ export function ReturnDialog({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al procesar la devolucion"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success(`Devolucion ${result.data.return_number} creada`)
+    const data = result.data
+    const creditMsg = data.credit_note_number
+      ? ` — Nota de credito ${data.credit_note_number}`
+      : ""
+    sileo.success({ title: `Devolucion ${data.return_number} creada${creditMsg}`, description: "El stock fue restaurado al inventario" })
 
     queryClient.invalidateQueries({ queryKey: ["sales"] })
     queryClient.invalidateQueries({ queryKey: ["products"] })

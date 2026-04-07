@@ -27,7 +27,10 @@ import {
   SelectItem,
 } from "@/components/ui/select"
 
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
+
 import { BulkActionToolbar } from "./bulk-action-toolbar"
+import { MediaBrowserFixture } from "./fixtures/media-browser-fixture"
 import type { MediaItem, ImageHostingType } from "../types"
 
 interface MediaBrowserProps {
@@ -152,19 +155,6 @@ export function MediaBrowser({ items, isLoading, onRefresh }: MediaBrowserProps)
   )
 
   const allSelected = filtered.length > 0 && selected.size === filtered.length
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={i}
-            className="aspect-square animate-pulse rounded-xl bg-neutral-100"
-          />
-        ))}
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-4">
@@ -304,36 +294,43 @@ export function MediaBrowser({ items, isLoading, onRefresh }: MediaBrowserProps)
       </p>
 
       {/* Grid / List */}
-      {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-200 py-16">
-          <ImageOff className="h-8 w-8 text-neutral-300" />
-          <p className="mt-3 text-sm text-neutral-400">
-            No se encontraron productos
-          </p>
-        </div>
-      ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {filtered.map((item) => (
-            <MediaGridCard
-              key={item.productId}
-              item={item}
-              isSelected={selected.has(item.productId)}
-              onToggle={() => toggleSelect(item.productId)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-1.5">
-          {filtered.map((item) => (
-            <MediaListRow
-              key={item.productId}
-              item={item}
-              isSelected={selected.has(item.productId)}
-              onToggle={() => toggleSelect(item.productId)}
-            />
-          ))}
-        </div>
-      )}
+      <BoneyardSkeleton
+        name="media-gallery"
+        loading={isLoading}
+        animate="shimmer"
+        fixture={<MediaBrowserFixture />}
+      >
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-200 py-16">
+            <ImageOff className="h-8 w-8 text-neutral-300" />
+            <p className="mt-3 text-sm text-neutral-400">
+              No se encontraron productos
+            </p>
+          </div>
+        ) : viewMode === "grid" ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {filtered.map((item) => (
+              <MediaGridCard
+                key={item.productId}
+                item={item}
+                isSelected={selected.has(item.productId)}
+                onToggle={() => toggleSelect(item.productId)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {filtered.map((item) => (
+              <MediaListRow
+                key={item.productId}
+                item={item}
+                isSelected={selected.has(item.productId)}
+                onToggle={() => toggleSelect(item.productId)}
+              />
+            ))}
+          </div>
+        )}
+      </BoneyardSkeleton>
     </div>
   )
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
@@ -93,11 +93,11 @@ function CreateWeekForm({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al crear la semana"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success(`Semana ${weekNumber} de ${monthName} ${year} creada`)
+    sileo.success({ title: `Semana ${weekNumber} de ${monthName} ${year} creada`, description: "Ya puedes agregar productos a esta semana" })
     queryClient.invalidateQueries({ queryKey: ["transit-weeks"] })
     queryClient.invalidateQueries({ queryKey: ["transit-month-summary"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react"
 import { Search, UserX, ArrowRight, Phone } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import { cn } from "@/lib/utils"
 import { useDebounce } from "@/hooks/use-debounce"
@@ -85,9 +85,7 @@ export function WizardCustomerStep({ onNext }: WizardCustomerStepProps) {
             }
           }
         } catch {
-          toast.warning("No se pudieron actualizar los precios", {
-            description: "Los precios del carrito podrian no reflejar el descuento del cliente.",
-          })
+          sileo.warning({ title: "No se pudieron actualizar los precios", description: "Los precios del carrito podrian no reflejar el descuento del cliente." })
         }
       }
 

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import { Search, FileText, MoreHorizontal, CheckCircle2, XCircle, Package } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryState, parseAsString } from "nuqs"
 import { motion } from "motion/react"
 
@@ -87,16 +87,16 @@ export function CreditNotesTable() {
         const msg =
           (result.error as Record<string, string[]>)._form?.[0] ??
           "Error al cancelar la nota de credito"
-        toast.error(msg)
+        sileo.error({ title: msg })
         return
       }
 
-      toast.success("Nota de credito cancelada")
+      sileo.success({ title: "Nota de credito cancelada" })
       queryClient.invalidateQueries({ queryKey: ["credit-notes"] })
     } catch {
       setIsCancelling(false)
       setCancelTarget(null)
-      toast.error("Error al cancelar la nota de credito")
+      sileo.error({ title: "Error al cancelar la nota de credito" })
     }
   }
 

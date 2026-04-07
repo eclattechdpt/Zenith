@@ -21,6 +21,9 @@ import {
   ChevronsLeft,
 } from "lucide-react"
 
+import { useRouter } from "next/navigation"
+import { sileo } from "sileo"
+
 import { cn } from "@/lib/utils"
 import { logout } from "@/features/auth/actions"
 import {
@@ -103,6 +106,13 @@ const FADE_OUT_LOGO = { duration: 0.15, ease: "easeInOut" as const }
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleLogout() {
+    await logout()
+    sileo.success({ title: "Sesion cerrada", description: "Tu sesion se cerro correctamente" })
+    router.push("/login")
+  }
   // Read initial state from the class set by the blocking script
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof document === "undefined") return false
@@ -271,8 +281,8 @@ export function Sidebar() {
           <SidebarTooltip collapsed={collapsed}>
             <TooltipTrigger
               render={
-                <button
-                  type="button"
+                <Link
+                  href="/ayuda"
                   className="group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-500 transition-colors duration-[200ms] hover:bg-white/60 hover:text-neutral-800"
                 >
                   <HelpCircle className="size-[17px] shrink-0 text-neutral-400 transition-colors duration-[200ms] group-hover:text-neutral-800" strokeWidth={1.5} />
@@ -284,19 +294,19 @@ export function Sidebar() {
                   >
                     Ayuda
                   </motion.span>
-                </button>
+                </Link>
               }
             />
             <TooltipContent side="right" sideOffset={12}>
               Ayuda
             </TooltipContent>
           </SidebarTooltip>
-          <form action={logout}>
-            <SidebarTooltip collapsed={collapsed}>
+          <SidebarTooltip collapsed={collapsed}>
               <TooltipTrigger
                 render={
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleLogout}
                     className="group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-500 transition-colors duration-[200ms] hover:bg-rose-50 hover:text-rose-600"
                   >
                     <LogOut className="size-[17px] shrink-0 text-neutral-400 transition-colors duration-[200ms] group-hover:text-rose-600" strokeWidth={1.5} />
@@ -315,7 +325,6 @@ export function Sidebar() {
                 Cerrar sesion
               </TooltipContent>
             </SidebarTooltip>
-          </form>
         </div>
       </motion.aside>
     </TooltipProvider>

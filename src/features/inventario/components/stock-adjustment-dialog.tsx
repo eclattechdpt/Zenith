@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import { motion } from "motion/react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
@@ -84,13 +84,14 @@ function StockAdjustmentForm({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al ajustar stock"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success(
-      `Stock ajustado: ${currentStock} → ${newStock} (${difference > 0 ? "+" : ""}${difference})`
-    )
+    sileo.success({
+      title: `Stock ajustado: ${currentStock} → ${newStock} (${difference > 0 ? "+" : ""}${difference})`,
+      description: "El movimiento fue registrado en el historial",
+    })
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
     queryClient.invalidateQueries({ queryKey: ["inventory-summary"] })
     queryClient.invalidateQueries({ queryKey: ["movements"] })

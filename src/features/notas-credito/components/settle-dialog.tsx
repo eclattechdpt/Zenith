@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { CheckCircle2, Loader2, Package, ArrowUpRight } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import {
   Dialog,
@@ -40,11 +40,11 @@ export function SettleDialog({ creditNoteId, onOpenChange }: Props) {
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al liquidar"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success(`Nota ${result.data.credit_number} liquidada`)
+    sileo.success({ title: `Nota ${result.data.credit_number} liquidada` })
 
     queryClient.invalidateQueries({ queryKey: ["credit-notes"] })
     queryClient.invalidateQueries({ queryKey: ["inventory"] })

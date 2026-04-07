@@ -4,7 +4,6 @@ import { Receipt, DollarSign, TrendingUp } from "lucide-react"
 
 import { PageHero } from "@/components/shared/page-hero"
 import { KpiCard } from "@/components/shared/kpi-card"
-import { SectionCard } from "@/components/shared/section-card"
 import { SalesTable } from "@/features/ventas/components/sales-table"
 import { useSalesStats } from "@/features/ventas/queries"
 import { formatCurrency } from "@/lib/utils"
@@ -48,16 +47,7 @@ export default function VentasPage() {
       </div>
 
       {/* Sales table */}
-      <SectionCard
-        label="Historial"
-        description="Historial de ventas y gestion de cotizaciones"
-        icon={Receipt}
-        iconBg="bg-rose-50"
-        iconColor="text-rose-400"
-        delay={0.18}
-      >
-        <SalesTable />
-      </SectionCard>
+      <SalesTable />
     </div>
   )
 }

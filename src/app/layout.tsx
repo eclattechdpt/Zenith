@@ -1,11 +1,9 @@
 import type { Metadata } from "next"
 import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google"
 import { NuqsAdapter } from "nuqs/adapters/next/app"
-import { Toaster } from "sonner"
-
 import { QueryProvider } from "@/providers/query-provider"
+import { SileoToaster } from "@/components/shared/sileo-toaster"
 import { moduleAccentInlineScript } from "@/lib/module-accent"
-
 import "./globals.css"
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -56,7 +54,7 @@ export default function RootLayout({
         <QueryProvider>
           <NuqsAdapter>{children}</NuqsAdapter>
         </QueryProvider>
-        <Toaster />
+        <SileoToaster />
       </body>
     </html>
   )

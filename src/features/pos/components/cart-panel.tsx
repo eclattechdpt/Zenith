@@ -15,7 +15,7 @@ import {
   Percent,
   X,
 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "motion/react"
 
@@ -90,11 +90,11 @@ export function CartPanel({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al guardar cotizacion"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success(`Cotizacion ${result.data.sale_number} guardada`)
+    sileo.success({ title: `Cotizacion ${result.data.sale_number} guardada`, description: "Puedes convertirla en venta desde la seccion de ventas" })
     queryClient.invalidateQueries({ queryKey: ["sales"] })
     clear()
   }

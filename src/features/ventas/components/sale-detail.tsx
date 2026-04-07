@@ -1,31 +1,41 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "motion/react"
 import {
   ArrowLeft,
+  ArrowRightLeft,
   RotateCcw,
   XCircle,
-  Loader2,
   FileText,
   PackageCheck,
   PackageX,
-  ShoppingBag,
-  CreditCard,
+  Printer,
+  MoreVertical,
   Receipt,
-  User,
-  Calendar,
+  ShoppingBag,
+  Banknote,
+  CreditCard,
+  CalendarDays,
 } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
+import { useReactToPrint } from "react-to-print"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { SectionCard } from "@/components/shared/section-card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import { SectionCard } from "@/components/shared/section-card"
+import { KpiCard } from "@/components/shared/kpi-card"
 import { formatCurrency } from "@/lib/utils"
 import {
   SALE_STATUSES,
@@ -33,9 +43,16 @@ import {
   CREDIT_NOTE_STATUSES,
 } from "@/lib/constants"
 
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
+
 import { useSaleDetail } from "../queries"
 import { cancelSale, cancelReturn } from "../actions"
 import { ReturnDialog } from "./return-dialog"
+import { SaleDetailFixture } from "./fixtures/sale-detail-fixture"
+import { SaleReceipt } from "@/features/pos/components/sale-receipt"
+import type { ReceiptData } from "@/features/pos/components/sale-receipt"
+
+// ── Status badge colors ──
 
 const STATUS_COLORS: Record<string, string> = {
   quote: "bg-blue-50 text-blue-700 border-blue-200",
@@ -44,6 +61,67 @@ const STATUS_COLORS: Record<string, string> = {
   partially_returned: "bg-amber-50 text-amber-700 border-amber-200",
   fully_returned: "bg-rose-50 text-rose-700 border-rose-200",
 }
+
+// ── Animation variants ──
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+  },
+}
+
+// ── Helpers ──
+
+const METHOD_SHORT_LABELS: Record<string, string> = {
+  cash: "Efectivo",
+  card: "Tarjeta",
+  transfer: "Transfer.",
+  credit_note: "Nota NC",
+  other: "Otro",
+}
+
+function getPaymentSummaryLabel(
+  payments: { method: string; amount: number }[]
+): string {
+  if (payments.length === 0) return "—"
+  if (payments.length === 1) {
+    return (
+      METHOD_SHORT_LABELS[payments[0].method] ??
+      PAYMENT_METHODS[payments[0].method as keyof typeof PAYMENT_METHODS] ??
+      payments[0].method
+    )
+  }
+  return "Mixto"
+}
+
+const METHOD_STYLE: Record<string, { icon: typeof Banknote; iconBg: string; iconColor: string; cardBg: string; cardBorder: string; innerBg: string; labelColor: string }> = {
+  cash: { icon: Banknote, iconBg: "bg-emerald-50", iconColor: "text-emerald-500", cardBg: "bg-emerald-50/40", cardBorder: "border-emerald-200/60", innerBg: "bg-emerald-50/60", labelColor: "text-emerald-600" },
+  card: { icon: CreditCard, iconBg: "bg-blue-50", iconColor: "text-blue-500", cardBg: "bg-blue-50/40", cardBorder: "border-blue-200/60", innerBg: "bg-blue-50/60", labelColor: "text-blue-600" },
+  transfer: { icon: ArrowRightLeft, iconBg: "bg-violet-50", iconColor: "text-violet-500", cardBg: "bg-violet-50/40", cardBorder: "border-violet-200/60", innerBg: "bg-violet-50/60", labelColor: "text-violet-600" },
+  credit_note: { icon: FileText, iconBg: "bg-amber-50", iconColor: "text-amber-500", cardBg: "bg-amber-50/40", cardBorder: "border-amber-200/60", innerBg: "bg-amber-50/60", labelColor: "text-amber-600" },
+}
+
+const MIXED_STYLE = { icon: CreditCard, iconBg: "bg-neutral-100", iconColor: "text-neutral-500", cardBg: "", cardBorder: "", innerBg: "bg-neutral-50", labelColor: "text-neutral-600" }
+
+function getPaymentStyle(payments: { method: string }[]) {
+  if (payments.length === 0) return MIXED_STYLE
+  if (payments.length > 1) return MIXED_STYLE
+  return METHOD_STYLE[payments[0].method] ?? MIXED_STYLE
+}
+
+// ── Component ──
 
 interface SaleDetailProps {
   saleId: string
@@ -62,6 +140,53 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
     return_number: string
   } | null>(null)
   const [isCancellingReturn, setIsCancellingReturn] = useState(false)
+
+  // ── Print ──
+
+  const receiptRef = useRef<HTMLDivElement>(null)
+
+  const receiptData = useMemo<ReceiptData | null>(() => {
+    if (!sale) return null
+    const paymentTotal = sale.sale_payments.reduce(
+      (sum, p) => sum + Number(p.amount),
+      0
+    )
+    return {
+      saleNumber: sale.sale_number,
+      date: sale.created_at,
+      customerName: sale.customers?.name ?? null,
+      items: sale.sale_items.map((item) => ({
+        product_name: item.product_name,
+        variant_label: item.variant_label,
+        quantity: item.quantity,
+        unit_price: Number(item.unit_price),
+        discount: Number(item.discount),
+        line_total: Number(item.line_total),
+      })),
+      payments: sale.sale_payments.map((p) => ({
+        method: p.method,
+        amount: Number(p.amount),
+      })),
+      subtotal: Number(sale.subtotal),
+      discountAmount: Number(sale.discount_amount),
+      total: Number(sale.total),
+      change: Math.max(0, paymentTotal - Number(sale.total)),
+    }
+  }, [sale])
+
+  const handlePrint = useReactToPrint({
+    contentRef: receiptRef,
+    documentTitle: receiptData
+      ? `Recibo-${receiptData.saleNumber}`
+      : "Recibo",
+  })
+
+  const triggerPrint = useCallback(() => {
+    if (!receiptData) return
+    setTimeout(() => handlePrint(), 150)
+  }, [receiptData, handlePrint])
+
+  // ── Actions ──
 
   const status = sale?.status as string | undefined
   const isReturnable =
@@ -82,11 +207,11 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al cancelar"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
-    toast.success("Venta cancelada")
+    sileo.success({ title: "Venta cancelada", description: "El stock fue restaurado al inventario" })
     queryClient.invalidateQueries({ queryKey: ["sales"] })
     queryClient.invalidateQueries({ queryKey: ["inventory"] })
   }
@@ -103,11 +228,11 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
         const msg =
           (result.error as Record<string, string[]>)._form?.[0] ??
           "Error al cancelar la devolucion"
-        toast.error(msg)
+        sileo.error({ title: msg })
         return
       }
 
-      toast.success("Devolucion cancelada")
+      sileo.success({ title: "Devolucion cancelada", description: "Los movimientos de stock fueron revertidos" })
       queryClient.invalidateQueries({ queryKey: ["sale-detail", saleId] })
       queryClient.invalidateQueries({ queryKey: ["sales"] })
       queryClient.invalidateQueries({ queryKey: ["inventory"] })
@@ -115,19 +240,13 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
     } catch {
       setIsCancellingReturn(false)
       setCancelReturnTarget(null)
-      toast.error("Error al cancelar la devolucion")
+      sileo.error({ title: "Error al cancelar la devolucion" })
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="size-8 animate-spin text-neutral-300" />
-      </div>
-    )
-  }
+  // ── Loading / Not found ──
 
-  if (!sale) {
+  if (!isLoading && !sale) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <p className="text-neutral-500">Venta no encontrada</p>
@@ -139,198 +258,314 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
     )
   }
 
+  // ── Derived values (safe during loading — skeleton is shown instead) ──
+
+  const dateFormatted = sale
+    ? format(new Date(sale.created_at), "EEEE, d 'de' MMMM", { locale: es }).replace(/^\w/, (c) => c.toUpperCase())
+    : ""
+
+  const timeFormatted = sale
+    ? format(new Date(sale.created_at), "HH:mm", { locale: es })
+    : ""
+
+  const itemCount = sale ? sale.sale_items.reduce((sum, i) => sum + i.quantity, 0) : 0
+  const paymentStyle = getPaymentStyle(sale?.sale_payments ?? [])
+  const paymentLabel = getPaymentSummaryLabel(sale?.sale_payments ?? [])
+  const showActions = isReturnable || canCancel
+
   return (
-    <div className="min-w-0 flex-1 space-y-6 p-5 sm:p-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        className="flex flex-col gap-4 pl-10 sm:pl-0"
+    <>
+      <BoneyardSkeleton
+        name="sale-detail"
+        loading={isLoading || !sale}
+        animate="shimmer"
+        fixture={<SaleDetailFixture />}
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/ventas")}
-          className="w-fit -ml-2 text-neutral-500 hover:text-neutral-900"
-        >
-          <ArrowLeft className="mr-1.5 size-4" />
-          Volver a ventas
-        </Button>
-
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="font-display text-3xl font-semibold tracking-tight text-neutral-950">
-                {sale.sale_number}
-              </h1>
-              <Badge
-                variant="outline"
-                className={`text-[10px] ${STATUS_COLORS[status!] ?? ""}`}
-              >
-                {SALE_STATUSES[status as keyof typeof SALE_STATUSES] ?? status}
-              </Badge>
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-500">
-              <span className="flex items-center gap-1.5">
-                <Calendar className="size-3.5" />
-                {format(new Date(sale.created_at), "dd 'de' MMMM, yyyy — HH:mm", {
-                  locale: es,
-                })}
-              </span>
-              {sale.customers && (
-                <span className="flex items-center gap-1.5 text-teal-600 font-medium">
-                  <User className="size-3.5" />
-                  {sale.customers.name}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            {isReturnable && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowReturnDialog(true)}
-              >
-                <RotateCcw className="mr-1.5 size-4" />
-                Devolver
-              </Button>
-            )}
-            {canCancel && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-destructive hover:text-destructive"
-                onClick={() => setShowCancelDialog(true)}
-              >
-                <XCircle className="mr-1.5 size-4" />
-                Cancelar venta
-              </Button>
-            )}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Items */}
-      <SectionCard
-        label="Productos"
-        description={`${sale.sale_items.length} producto${sale.sale_items.length !== 1 ? "s" : ""} en esta venta`}
-        icon={ShoppingBag}
-        iconBg="bg-rose-50"
-        iconColor="text-rose-400"
-        delay={0.06}
+      {sale && <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="mx-auto flex w-full max-w-4xl flex-col gap-6 pt-10"
       >
-        <div className="space-y-3">
-          {sale.sale_items.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-start justify-between gap-3"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-neutral-900">
-                  {item.product_name}
+        {/* ── Header ── */}
+        <motion.div variants={itemVariants}>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-3 pl-10 sm:pl-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-1 shrink-0"
+                onClick={() => router.push("/ventas")}
+              >
+                <ArrowLeft className="size-4" />
+              </Button>
+              <div>
+                <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[2px] text-neutral-400">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  {dateFormatted}
                 </p>
-                {item.variant_label !== item.product_name && (
-                  <p className="text-xs text-neutral-500">
-                    {item.variant_label}
-                  </p>
-                )}
-                <p className="text-xs text-neutral-400">
-                  {item.quantity} x {formatCurrency(Number(item.unit_price))}
-                  {Number(item.discount) > 0 && (
-                    <span className="text-rose-500 ml-1">
-                      -{formatCurrency(Number(item.discount))}
+                <div className="mt-1 flex items-center gap-2.5">
+                  <h1 className="font-display text-[32px] font-semibold leading-none tracking-[-1.5px] text-neutral-950 sm:text-[40px]">
+                    {sale.sale_number}
+                  </h1>
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] ${STATUS_COLORS[status!] ?? ""}`}
+                  >
+                    {SALE_STATUSES[status as keyof typeof SALE_STATUSES] ??
+                      status}
+                  </Badge>
+                </div>
+                <p className="mt-1 text-sm text-neutral-500">
+                  {timeFormatted} hrs
+                  {sale.customers && (
+                    <span className="ml-2 font-medium text-teal-600">
+                      {sale.customers.name}
                     </span>
                   )}
                 </p>
               </div>
-              <p className="text-sm font-semibold text-neutral-950 tabular-nums">
-                {formatCurrency(Number(item.line_total))}
-              </p>
             </div>
-          ))}
-        </div>
 
-        {/* Totals */}
-        <div className="mt-4 pt-4 border-t border-neutral-100 space-y-1">
-          <div className="flex justify-between text-sm text-neutral-600">
-            <span>Subtotal</span>
-            <span className="tabular-nums">
-              {formatCurrency(Number(sale.subtotal))}
-            </span>
+            {/* Actions */}
+            <div className="flex items-center gap-2 pl-10 sm:pl-0">
+              <motion.div
+                whileHover={{ scale: 1.03, y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  className="group h-10 gap-2 rounded-xl bg-accent-500 px-5 text-sm font-bold text-white transition-colors hover:bg-accent-600 sm:h-11 sm:px-6"
+                  onClick={triggerPrint}
+                >
+                  <Printer className="size-4" />
+                  Imprimir ticket
+                </Button>
+              </motion.div>
+
+              {showActions && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="inline-flex size-10 items-center justify-center rounded-xl border border-input bg-background text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                    <MoreVertical className="size-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {isReturnable && (
+                      <DropdownMenuItem
+                        onClick={() => setShowReturnDialog(true)}
+                      >
+                        <RotateCcw className="mr-2 size-4" />
+                        Devolver
+                      </DropdownMenuItem>
+                    )}
+                    {canCancel && (
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => setShowCancelDialog(true)}
+                      >
+                        <XCircle className="mr-2 size-4" />
+                        Cancelar venta
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
-          {Number(sale.discount_amount) > 0 && (
-            <div className="flex justify-between text-sm text-rose-600">
-              <span>Descuento</span>
-              <span className="tabular-nums">
-                -{formatCurrency(Number(sale.discount_amount))}
-              </span>
-            </div>
-          )}
-          <div className="flex justify-between text-base font-bold text-neutral-950">
-            <span>Total</span>
-            <span className="tabular-nums">
-              {formatCurrency(Number(sale.total))}
-            </span>
-          </div>
-        </div>
-      </SectionCard>
+        </motion.div>
 
-      {/* Payments */}
-      <SectionCard
-        label="Pagos"
-        description="Metodos de pago registrados"
-        icon={CreditCard}
-        iconBg="bg-teal-50"
-        iconColor="text-teal-500"
-        delay={0.12}
-      >
-        <div className="space-y-2">
-          {sale.sale_payments.map((p) => (
-            <div key={p.id} className="flex justify-between text-sm">
-              <span className="text-neutral-600">
-                {PAYMENT_METHODS[p.method as keyof typeof PAYMENT_METHODS] ??
-                  p.method}
-                {p.reference && (
-                  <span className="text-neutral-400 ml-1 text-xs">
-                    ({p.reference})
-                  </span>
-                )}
-              </span>
-              <span className="font-medium text-neutral-950 tabular-nums">
-                {formatCurrency(Number(p.amount))}
-              </span>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
-      {/* Returns history */}
-      {sale.returns.length > 0 && (
-        <SectionCard
-          label="Devoluciones"
-          description={`${sale.returns.length} devolucion${sale.returns.length !== 1 ? "es" : ""} registrada${sale.returns.length !== 1 ? "s" : ""}`}
-          icon={RotateCcw}
-          iconBg="bg-rose-50"
-          iconColor="text-rose-500"
-          delay={0.18}
-          className="border-rose-100 bg-gradient-to-b from-white to-rose-50/30"
+        {/* ── KPI Strip ── */}
+        <motion.div
+          variants={itemVariants}
+          className="grid grid-cols-3 gap-3"
         >
-          <div className="space-y-4">
-            {sale.returns.map((ret) => {
-              const isCancelled = ret.status === "cancelled"
-              return (
+          <KpiCard
+            title="Total"
+            value={Number(sale.total)}
+            format={formatCurrency}
+            subtitle="Monto de la venta"
+            icon={Receipt}
+            iconBg="bg-rose-50"
+            iconColor="text-rose-500"
+            delay={0}
+          />
+          <KpiCard
+            title="Productos"
+            value={itemCount}
+            subtitle={`${itemCount === 1 ? "artículo" : "artículos"} · ${sale.sale_items.length} ${sale.sale_items.length === 1 ? "línea" : "líneas"}`}
+            icon={ShoppingBag}
+            iconBg="bg-blush-50"
+            iconColor="text-blush-500"
+            delay={0.06}
+          />
+          <KpiCard
+            title="Método de pago"
+            value={0}
+            format={() => paymentLabel}
+            subtitle={
+              sale.sale_payments.length > 1
+                ? `${sale.sale_payments.length} métodos`
+                : "Pago único"
+            }
+            icon={paymentStyle.icon}
+            iconBg={paymentStyle.iconBg}
+            iconColor={paymentStyle.iconColor}
+            delay={0.12}
+          />
+        </motion.div>
+
+        {/* ── Items (receipt-inspired) ── */}
+        <SectionCard
+          label="Productos"
+          icon={ShoppingBag}
+          iconBg="bg-rose-50"
+          iconColor="text-rose-400"
+          delay={0.18}
+        >
+          {/* Table header */}
+          <div className="mb-3 flex justify-between border-b border-neutral-200 pb-2">
+            <span className="text-[10px] font-semibold uppercase tracking-[1px] text-neutral-400">
+              Producto
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[1px] text-neutral-400">
+              Importe
+            </span>
+          </div>
+
+          {/* Item rows */}
+          <div className="space-y-0">
+            {sale.sale_items.map((item, idx) => (
+              <div
+                key={item.id}
+                className={`flex items-start justify-between gap-4 py-3 ${
+                  idx < sale.sale_items.length - 1
+                    ? "border-b border-neutral-100"
+                    : ""
+                }`}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-neutral-900">
+                    {item.product_name}
+                  </p>
+                  {item.variant_label !== item.product_name && (
+                    <p className="text-xs text-neutral-500">
+                      {item.variant_label}
+                    </p>
+                  )}
+                  <p className="mt-0.5 text-xs text-neutral-400">
+                    {item.quantity} x{" "}
+                    {formatCurrency(Number(item.unit_price))}
+                  </p>
+                  {Number(item.discount) > 0 && (
+                    <p className="mt-0.5 text-xs text-rose-500">
+                      Descuento −{formatCurrency(Number(item.discount))}
+                    </p>
+                  )}
+                </div>
+                <p className="text-sm font-semibold tabular-nums text-neutral-950">
+                  {formatCurrency(Number(item.line_total))}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Totals */}
+          <div className="mt-4 space-y-1.5 border-t border-neutral-200 pt-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-neutral-500">Subtotal</span>
+              <span className="tabular-nums text-neutral-700">
+                {formatCurrency(Number(sale.subtotal))}
+              </span>
+            </div>
+            {Number(sale.discount_amount) > 0 && (
+              <div className="flex justify-between text-sm text-rose-600">
+                <span>Descuento</span>
+                <span className="tabular-nums">
+                  −{formatCurrency(Number(sale.discount_amount))}
+                </span>
+              </div>
+            )}
+            <div className="mt-2 flex items-center justify-between rounded-xl bg-gradient-to-r from-rose-50 to-rose-100/60 px-4 py-3">
+              <span className="text-xs font-bold uppercase tracking-[1px] text-neutral-900">
+                Total
+              </span>
+              <span className="font-display text-lg font-bold tabular-nums tracking-tight text-neutral-950">
+                {formatCurrency(Number(sale.total))}
+              </span>
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* ── Payments ── */}
+        <SectionCard
+          label="Forma de pago"
+          icon={paymentStyle.icon}
+          iconBg={paymentStyle.iconBg}
+          iconColor={paymentStyle.iconColor}
+          delay={0.24}
+          className={paymentStyle.cardBg ? `${paymentStyle.cardBg} ${paymentStyle.cardBorder}` : ""}
+        >
+          <div className={`rounded-xl p-4 ${paymentStyle.innerBg}`}>
+            <div className="space-y-2">
+              {sale.sale_payments.map((p) => {
+                const pStyle = METHOD_STYLE[p.method] ?? MIXED_STYLE
+                return (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className={pStyle.labelColor}>
+                      {PAYMENT_METHODS[
+                        p.method as keyof typeof PAYMENT_METHODS
+                      ] ?? p.method}
+                      {p.reference && (
+                        <span className="ml-1.5 text-xs opacity-60">
+                          ({p.reference})
+                        </span>
+                      )}
+                    </span>
+                    <span className="font-medium tabular-nums text-neutral-950">
+                      {formatCurrency(Number(p.amount))}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Change */}
+            {receiptData && receiptData.change > 0 && (
+              <div className="mt-3 flex items-center justify-between border-t border-neutral-200 pt-3 text-sm font-semibold text-teal-600">
+                <span>Cambio</span>
+                <span className="tabular-nums">
+                  {formatCurrency(receiptData.change)}
+                </span>
+              </div>
+            )}
+          </div>
+        </SectionCard>
+
+        {/* ── Returns ── */}
+        {sale.returns.length > 0 && (
+          <SectionCard
+            label="Devoluciones"
+            icon={RotateCcw}
+            iconBg="bg-rose-50"
+            iconColor="text-rose-500"
+            delay={0.3}
+            className="border-rose-100"
+          >
+            <div className="space-y-4">
+              {sale.returns.map((ret) => {
+                const isCancelled = ret.status === "cancelled"
+                return (
                 <div
                   key={ret.id}
                   className={`rounded-xl border p-4 ${
                     isCancelled
                       ? "border-neutral-200 bg-neutral-50/50 opacity-60"
-                      : "border-rose-100 bg-white"
+                      : "border-rose-100 bg-gradient-to-b from-white to-rose-50/30"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="mb-3 flex items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-semibold text-neutral-950">
@@ -346,19 +581,21 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
                         )}
                       </div>
                       <p className="text-xs text-neutral-500">
-                        {format(new Date(ret.created_at), "dd MMM yyyy, HH:mm", {
-                          locale: es,
-                        })}
+                        {format(
+                          new Date(ret.created_at),
+                          "dd MMM yyyy, HH:mm",
+                          { locale: es }
+                        )}
                       </p>
                       {ret.reason && (
-                        <p className="text-xs text-neutral-500 mt-1 italic">
+                        <p className="mt-1 text-xs italic text-neutral-500">
                           {ret.reason}
                         </p>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
                       <p className={`text-sm font-bold tabular-nums ${isCancelled ? "text-neutral-400 line-through" : "text-rose-600"}`}>
-                        -{formatCurrency(Number(ret.total_refund))}
+                        −{formatCurrency(Number(ret.total_refund))}
                       </p>
                       {ret.status === "completed" && (
                         <Button
@@ -403,9 +640,9 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
                     ))}
                   </div>
 
-                  {/* Credit notes from this return */}
+                  {/* Credit notes */}
                   {(ret.credit_notes ?? []).length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-neutral-100">
+                    <div className="mt-3 border-t border-neutral-100 pt-3">
                       {(ret.credit_notes ?? []).map((cn) => (
                         <div
                           key={cn.id}
@@ -418,7 +655,7 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
                             </span>
                             <Badge
                               variant="outline"
-                              className="text-[9px] py-0 px-1"
+                              className="px-1 py-0 text-[9px]"
                             >
                               {CREDIT_NOTE_STATUSES[
                                 cn.status as keyof typeof CREDIT_NOTE_STATUSES
@@ -434,32 +671,39 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
                     </div>
                   )}
                 </div>
-              )
-            })}
-          </div>
-        </SectionCard>
+                )
+              })}
+            </div>
+          </SectionCard>
+        )}
+      </motion.div>}
+      </BoneyardSkeleton>
+
+      {/* ── Hidden receipt for printing ── */}
+      {receiptData && (
+        <div className="hidden">
+          <SaleReceipt ref={receiptRef} data={receiptData} />
+        </div>
       )}
 
-      {/* Return dialog */}
+      {/* ── Dialogs ── */}
       <ReturnDialog
         saleId={showReturnDialog ? saleId : null}
         onOpenChange={(open) => !open && setShowReturnDialog(false)}
         onReturned={() => setShowReturnDialog(false)}
       />
 
-      {/* Cancel sale confirmation */}
       <ConfirmDialog
         open={showCancelDialog}
         onOpenChange={(open) => !open && setShowCancelDialog(false)}
         title="Cancelar venta"
-        description={`Se cancelara la venta "${sale.sale_number}" y se regresara el stock al inventario. Esta accion no se puede deshacer.`}
+        description={`Se cancelara la venta "${sale?.sale_number}" y se regresara el stock al inventario. Esta accion no se puede deshacer.`}
         confirmLabel="Cancelar venta"
         variant="destructive"
         isLoading={isCancelling}
         onConfirm={handleCancelSale}
       />
 
-      {/* Cancel return confirmation */}
       <ConfirmDialog
         open={!!cancelReturnTarget}
         onOpenChange={(open) => !open && setCancelReturnTarget(null)}
@@ -470,6 +714,6 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
         isLoading={isCancellingReturn}
         onConfirm={handleCancelReturn}
       />
-    </div>
+    </>
   )
 }

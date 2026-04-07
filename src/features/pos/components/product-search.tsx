@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Search, Package, Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQuery } from "@tanstack/react-query"
 
 import { Input } from "@/components/ui/input"
@@ -63,7 +63,7 @@ export function ProductSearch() {
     variant: POSProduct["product_variants"][number]
   ) {
     if (variant.stock <= 0) {
-      toast.error("Sin stock disponible")
+      sileo.error({ title: "Sin stock disponible" })
       return
     }
 
@@ -71,7 +71,7 @@ export function ProductSearch() {
       (i) => i.variantId === variant.id
     )
     if (existingItem && existingItem.quantity >= variant.stock) {
-      toast.error(`Stock maximo alcanzado (${variant.stock})`)
+      sileo.error({ title: `Stock maximo alcanzado (${variant.stock})` })
       return
     }
 

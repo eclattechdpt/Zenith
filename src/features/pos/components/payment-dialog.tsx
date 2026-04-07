@@ -13,7 +13,7 @@ import {
   Percent,
   X,
 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
@@ -153,12 +153,12 @@ export function PaymentDialog({
       const msg =
         (result.error as Record<string, string[]>)._form?.[0] ??
         "Error al crear la venta"
-      toast.error(msg)
+      sileo.error({ title: msg })
       return
     }
 
     const sale = result.data
-    toast.success(`Venta ${sale.sale_number} completada`)
+    sileo.success({ title: `Venta ${sale.sale_number} completada`, description: "La venta fue registrada y el inventario actualizado" })
 
     // Build receipt data before clearing the cart
     const receiptData: ReceiptData = {

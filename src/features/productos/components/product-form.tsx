@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, Loader2, Info, Layers, Package, Gift, Settings2, ChevronDown, CheckCircle2, AlertTriangle } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { motion } from "motion/react"
 
 import { Button } from "@/components/ui/button"
@@ -171,10 +171,10 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
     if ("error" in result) {
       setIsSubmitting(false)
       const formError = (result.error as Record<string, string[]>)._form
-      toast.error(
-        formError?.[0] ??
-          `Error al ${isEditing ? "actualizar" : "crear"} el producto`
-      )
+      sileo.error({
+        title: formError?.[0] ??
+          `Error al ${isEditing ? "actualizar" : "crear"} el producto`,
+      })
       return
     }
 
@@ -188,16 +188,17 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
         const { updateProduct: updateProd } = await import("../actions")
         await updateProd(result.data.id, { ...data, image_url: publicUrl })
       } catch {
-        toast.warning("Producto creado pero la imagen no se pudo subir")
+        sileo.warning({ title: "Producto creado pero la imagen no se pudo subir" })
       }
       pendingFileRef.current = null
     }
 
     setIsSubmitting(false)
     markSubmitted()
-    toast.success(
-      isEditing ? "Producto actualizado" : "Producto creado exitosamente"
-    )
+    sileo.success({
+      title: isEditing ? "Producto actualizado" : "Producto creado exitosamente",
+      description: isEditing ? "Los cambios fueron guardados" : "El producto ya esta disponible en el catalogo",
+    })
     queryClient.invalidateQueries({ queryKey: ["products"] })
     queryClient.invalidateQueries({ queryKey: ["product-stats"] })
     router.push("/productos")

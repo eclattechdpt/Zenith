@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -72,17 +72,18 @@ export function CustomerForm({ customerId, defaultValues, onBack }: CustomerForm
 
     if ("error" in result) {
       const formError = (result.error as Record<string, string[]>)._form
-      toast.error(
-        formError?.[0] ??
-          `Error al ${isEditing ? "actualizar" : "crear"} el cliente`
-      )
+      sileo.error({
+        title: formError?.[0] ??
+          `Error al ${isEditing ? "actualizar" : "crear"} el cliente`,
+      })
       return
     }
 
     markSubmitted()
-    toast.success(
-      isEditing ? "Cliente actualizado" : "Cliente creado exitosamente"
-    )
+    sileo.success({
+      title: isEditing ? "Cliente actualizado" : "Cliente creado exitosamente",
+      description: isEditing ? "Los cambios fueron guardados" : "El cliente ya esta disponible en el sistema",
+    })
     queryClient.invalidateQueries({ queryKey: ["customers"] })
     router.push("/clientes")
   }

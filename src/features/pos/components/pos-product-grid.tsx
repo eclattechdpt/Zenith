@@ -8,6 +8,8 @@ import { useCategories } from "@/features/productos/queries"
 import { useAllPOSProducts } from "../queries"
 import type { POSProductWithImage } from "../queries"
 import { POSProductCard } from "./pos-product-card"
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
+import { POSGridFixture } from "./fixtures/pos-grid-fixture"
 
 // ── Custom lipstick icon (matches Lucide stroke style) ─────────────────────
 
@@ -392,61 +394,58 @@ export function POSProductGrid({ onAdd, onEditProduct }: POSProductGridProps) {
         animate={{ opacity: isFetching && !isLoading ? 0.5 : 1 }}
         transition={{ duration: 0.15 }}
       >
-        {isLoading ? (
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-[240px] animate-pulse rounded-2xl bg-neutral-100/80"
-                style={{ animationDelay: `${i * 80}ms` }}
-              />
-            ))}
-          </div>
-        ) : resultCount === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-            className="flex h-48 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-neutral-200 bg-white/50"
-          >
+        <BoneyardSkeleton
+          name="pos-product-grid"
+          loading={isLoading}
+          animate="shimmer"
+          fixture={<POSGridFixture />}
+        >
+          {resultCount === 0 ? (
             <motion.div
-              animate={{ y: [0, -4, 0] }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="flex h-48 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-neutral-200 bg-white/50"
             >
-              <Search className="h-6 w-6 text-neutral-300" />
-            </motion.div>
-            <p className="text-sm font-semibold text-neutral-400">
-              No se encontraron productos
-            </p>
-            {isFiltering && (
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.15, duration: 0.2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleClearAll}
-                className="mt-1 text-xs font-bold text-rose-400 transition-colors hover:text-rose-500"
+              <motion.div
+                animate={{ y: [0, -4, 0] }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               >
-                Limpiar filtros
-              </motion.button>
-            )}
-          </motion.div>
-        ) : (
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-            {(products ?? []).map((product) => (
-              <POSProductCard
-                key={product.id}
-                product={product}
-                onAdd={onAdd}
-                onEdit={onEditProduct}
-              />
-            ))}
-          </div>
-        )}
+                <Search className="h-6 w-6 text-neutral-300" />
+              </motion.div>
+              <p className="text-sm font-semibold text-neutral-400">
+                No se encontraron productos
+              </p>
+              {isFiltering && (
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.15, duration: 0.2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleClearAll}
+                  className="mt-1 text-xs font-bold text-rose-400 transition-colors hover:text-rose-500"
+                >
+                  Limpiar filtros
+                </motion.button>
+              )}
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+              {(products ?? []).map((product) => (
+                <POSProductCard
+                  key={product.id}
+                  product={product}
+                  onAdd={onAdd}
+                  onEdit={onEditProduct}
+                />
+              ))}
+            </div>
+          )}
+        </BoneyardSkeleton>
       </motion.div>
     </motion.div>
   )

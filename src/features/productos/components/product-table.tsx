@@ -19,9 +19,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { sileo } from "sileo"
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
 
 import { useProducts, useCategories } from "../queries"
+import { ProductTableFixture } from "./fixtures/product-table-fixture"
 import { deleteProduct } from "../actions"
 import type { ProductWithDetails } from "../types"
 import { ProductCardMobile } from "./product-card-mobile"
@@ -77,7 +79,7 @@ export function ProductTable() {
     await deleteProduct(deleteTarget.id)
     setIsDeleting(false)
     setDeleteTarget(null)
-    toast.success("Producto eliminado")
+    sileo.success({ title: "Producto eliminado", description: "El producto fue removido del catalogo" })
     queryClient.invalidateQueries({ queryKey: ["products"] })
   }
 
@@ -173,32 +175,34 @@ export function ProductTable() {
 
             {/* Desktop table */}
             <div className="hidden sm:block">
-              <DataTable
-                columns={columns}
-                data={products}
-                isLoading={isLoading}
-                pageSize={10}
-                emptyState={
-                  search || categoryId ? (
-                    <EmptyState
-                      icon={Search}
-                      title="Sin resultados"
-                      description="Intenta con otros terminos de busqueda o filtros."
-                    />
-                  ) : (
-                    <EmptyState
-                      icon={Package}
-                      title="No hay productos"
-                      description="Agrega tu primer producto para comenzar."
-                    >
-                      <Button size="sm" nativeButton={false} render={<Link href="/productos/nuevo" />}>
-                        <Plus className="mr-1.5 size-4" />
-                        Nuevo producto
-                      </Button>
-                    </EmptyState>
-                  )
-                }
-              />
+              <BoneyardSkeleton name="products-table" loading={isLoading} animate="shimmer" fixture={<ProductTableFixture />}>
+                <DataTable
+                  columns={columns}
+                  data={products}
+                  isLoading={false}
+                  pageSize={10}
+                  emptyState={
+                    search || categoryId ? (
+                      <EmptyState
+                        icon={Search}
+                        title="Sin resultados"
+                        description="Intenta con otros terminos de busqueda o filtros."
+                      />
+                    ) : (
+                      <EmptyState
+                        icon={Package}
+                        title="No hay productos"
+                        description="Agrega tu primer producto para comenzar."
+                      >
+                        <Button size="sm" nativeButton={false} render={<Link href="/productos/nuevo" />}>
+                          <Plus className="mr-1.5 size-4" />
+                          Nuevo producto
+                        </Button>
+                      </EmptyState>
+                    )
+                  }
+                />
+              </BoneyardSkeleton>
             </div>
           </div>
 

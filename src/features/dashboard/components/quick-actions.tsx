@@ -8,7 +8,7 @@ const SPRING = { type: "spring" as const, stiffness: 100, damping: 20 }
 
 const actions = [
   {
-    href: "/pos",
+    href: "/pos?action=new",
     label: "Nueva venta",
     subtitle: "Acceder a caja",
     icon: PlusCircle,
@@ -26,7 +26,7 @@ const actions = [
     hoverShadow: "hover:shadow-[0_4px_20px_rgba(37,166,182,0.12)]",
   },
   {
-    href: "/clientes",
+    href: "/clientes?action=new",
     label: "Registrar cliente",
     subtitle: "Nuevo cliente",
     icon: UserPlus,

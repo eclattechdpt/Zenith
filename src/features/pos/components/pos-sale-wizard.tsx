@@ -4,7 +4,7 @@ import { useState, useCallback } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { X, Check } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { sileo } from "sileo"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 
 import {
@@ -110,9 +110,7 @@ export function POSSaleWizard({
 
   const handleCompleteSale = useCallback(async () => {
     if (!isOnline) {
-      toast.error("Sin conexion", {
-        description: "Revisa tu conexion a internet e intenta de nuevo.",
-      })
+      sileo.error({ title: "Sin conexion", description: "Revisa tu conexion a internet e intenta de nuevo." })
       return
     }
     try {
@@ -130,11 +128,11 @@ export function POSSaleWizard({
             "_form" in result.error
               ? (result.error._form as string[])[0]
               : "Error al completar la venta"
-          toast.error(msg)
+          sileo.error({ title: msg })
           return
         }
         setSaleResult({ sale_number: result.data!.sale_number })
-        toast.success(`Venta ${result.data!.sale_number} completada`)
+        sileo.success({ title: `Venta ${result.data!.sale_number} completada`, description: "La venta fue registrada y el inventario actualizado" })
       } else {
         const saleItems = items.map((item) => ({
           product_variant_id: item.variantId,
@@ -161,11 +159,11 @@ export function POSSaleWizard({
             "_form" in result.error
               ? (result.error._form as string[])[0]
               : "Error al crear la venta"
-          toast.error(msg)
+          sileo.error({ title: msg })
           return
         }
         setSaleResult({ sale_number: result.data!.sale_number })
-        toast.success(`Venta ${result.data!.sale_number} completada`)
+        sileo.success({ title: `Venta ${result.data!.sale_number} completada`, description: "La venta fue registrada y el inventario actualizado" })
         clear()
       }
       queryClient.invalidateQueries({ queryKey: ["sales"] })
@@ -174,9 +172,7 @@ export function POSSaleWizard({
       queryClient.invalidateQueries({ queryKey: ["pos"] })
       queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
     } catch {
-      toast.error("Error de conexion", {
-        description: "No se pudo conectar con el servidor. Intenta de nuevo.",
-      })
+      sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
   }, [mode, pendingSale, items, customer, globalDiscount, notes, payments, clear, queryClient, isOnline])
 
@@ -184,9 +180,7 @@ export function POSSaleWizard({
 
   const handlePendingSale = useCallback(async () => {
     if (!isOnline) {
-      toast.error("Sin conexion", {
-        description: "Revisa tu conexion a internet e intenta de nuevo.",
-      })
+      sileo.error({ title: "Sin conexion", description: "Revisa tu conexion a internet e intenta de nuevo." })
       return
     }
     try {
@@ -210,21 +204,17 @@ export function POSSaleWizard({
           "_form" in result.error
             ? (result.error._form as string[])[0]
             : "Error al guardar venta pendiente"
-        toast.error(msg)
+        sileo.error({ title: msg })
         return
       }
       setSaleResult({ sale_number: result.data!.sale_number })
-      toast.success("Venta guardada como pendiente", {
-        description: "Recuerda cobrar esta venta desde la seccion de ventas pendientes.",
-      })
+      sileo.success({ title: "Venta guardada como pendiente", description: "Recuerda cobrar esta venta desde la seccion de ventas pendientes." })
       clear()
       queryClient.invalidateQueries({ queryKey: ["sales"] })
       queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
       queryClient.invalidateQueries({ queryKey: ["pos"] })
     } catch {
-      toast.error("Error de conexion", {
-        description: "No se pudo conectar con el servidor. Intenta de nuevo.",
-      })
+      sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
   }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline])
 
@@ -406,46 +396,51 @@ export function POSSaleWizard({
     if (!saleResult || !onPrint) return
     const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
 
-    if (mode === "complete-pending" && pendingSale) {
-      onPrint({
-        saleNumber: saleResult.sale_number,
-        date: new Date().toISOString(),
-        customerName: pendingSale.customer?.name ?? null,
-        items: pendingSale.items.map((i) => ({
-          product_name: i.product_name,
-          variant_label: i.variant_label,
-          quantity: i.quantity,
-          unit_price: i.unit_price,
-          discount: i.discount,
-          line_total: i.line_total,
-        })),
-        payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
-        subtotal: pendingSale.subtotal,
-        discountAmount: pendingSale.discount_amount,
-        total: pendingSale.total,
-        change: Math.max(0, paymentTotal - pendingSale.total),
-      })
-    } else {
-      const subtotal = getTotal() + getItemsDiscount() + globalDiscount
-      const totalVal = getTotal()
-      onPrint({
-        saleNumber: saleResult.sale_number,
-        date: new Date().toISOString(),
-        customerName: customer?.name ?? null,
-        items: items.map((i) => ({
-          product_name: i.productName,
-          variant_label: i.variantLabel,
-          quantity: i.quantity,
-          unit_price: i.unitPrice,
-          discount: i.discount,
-          line_total: Math.max(0, i.unitPrice * i.quantity - i.discount),
-        })),
-        payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
-        subtotal,
-        discountAmount: getItemsDiscount() + globalDiscount,
-        total: totalVal,
-        change: Math.max(0, paymentTotal - totalVal),
-      })
+    try {
+      if (mode === "complete-pending" && pendingSale) {
+        onPrint({
+          saleNumber: saleResult.sale_number,
+          date: new Date().toISOString(),
+          customerName: pendingSale.customer?.name ?? null,
+          items: pendingSale.items.map((i) => ({
+            product_name: i.product_name,
+            variant_label: i.variant_label,
+            quantity: i.quantity,
+            unit_price: i.unit_price,
+            discount: i.discount,
+            line_total: i.line_total,
+          })),
+          payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
+          subtotal: pendingSale.subtotal,
+          discountAmount: pendingSale.discount_amount,
+          total: pendingSale.total,
+          change: Math.max(0, paymentTotal - pendingSale.total),
+        })
+      } else {
+        const subtotal = getTotal() + getItemsDiscount() + globalDiscount
+        const totalVal = getTotal()
+        onPrint({
+          saleNumber: saleResult.sale_number,
+          date: new Date().toISOString(),
+          customerName: customer?.name ?? null,
+          items: items.map((i) => ({
+            product_name: i.productName,
+            variant_label: i.variantLabel,
+            quantity: i.quantity,
+            unit_price: i.unitPrice,
+            discount: i.discount,
+            line_total: Math.max(0, i.unitPrice * i.quantity - i.discount),
+          })),
+          payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
+          subtotal,
+          discountAmount: getItemsDiscount() + globalDiscount,
+          total: totalVal,
+          change: Math.max(0, paymentTotal - totalVal),
+        })
+      }
+      sileo.success({ title: "Recibo enviado a impresion", description: "El recibo se abrio en la ventana de impresion" })
+    } catch {
+      sileo.error({ title: "Error al imprimir", description: "No se pudo abrir la ventana de impresion" })
     }
   }, [onPrint, saleResult, mode, pendingSale, payments, items, customer, globalDiscount, getTotal, getItemsDiscount])
 

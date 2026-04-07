@@ -227,6 +227,7 @@ export async function createReturn(input: CreateReturnInput) {
       return_number: string
       total_refund: number
       sale_status: string
+      credit_note_number?: string
     },
   }
 }
