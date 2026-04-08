@@ -156,12 +156,12 @@ export function Sidebar() {
         {/* Logo */}
         {/* Logo */}
         <div className="relative h-[60px] pb-2 pt-7">
-          <div className="absolute left-5 top-7 flex items-center gap-1">
+          <div className="absolute left-5 top-7 flex items-center gap-2.5">
             <Image
-              src="/ZenitLogo_Icon.svg"
-              alt="Zenith"
-              width={32}
-              height={29}
+              src="/Eclat_Decorative_Emblem.svg"
+              alt="Eclat"
+              width={38}
+              height={39}
               priority
               className="shrink-0"
             />
@@ -172,10 +172,10 @@ export function Sidebar() {
               className="whitespace-nowrap"
             >
               <Image
-                src="/ZenitLogo_Text.svg"
-                alt="enith"
+                src="/Eclat_Text_Dark.svg"
+                alt="Eclat"
                 width={95}
-                height={31}
+                height={26}
                 priority
                 className="shrink-0"
               />

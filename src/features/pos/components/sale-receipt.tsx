@@ -60,8 +60,8 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         <div style={{ marginBottom: "24px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/ZenitLogo_DarkWithPink.svg"
-            alt="Zenith"
+            src="/EclatLogo_DarkWithPink.svg"
+            alt="Eclat"
             style={{ height: "26px", display: "block", marginBottom: "8px" }}
           />
           <div
@@ -435,8 +435,8 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
             Powered by
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/ZenitLogo_DarkWithPink.svg"
-              alt="Zenith POS"
+              src="/EclatLogo_DarkWithPink.svg"
+              alt="Eclat POS"
               style={{ height: "12px", opacity: 0.5 }}
             />
           </div>

@@ -124,10 +124,10 @@ export function MobileNav() {
         {/* Logo */}
         <div className="flex items-center px-6 pb-2 pt-7">
           <Image
-            src="/ZenitLogo_DarkWithPink.svg"
-            alt="Zenith"
-            width={95}
-            height={31}
+            src="/EclatLogo_DarkWithPink.svg"
+            alt="Eclat"
+            width={140}
+            height={47}
           />
         </div>
 

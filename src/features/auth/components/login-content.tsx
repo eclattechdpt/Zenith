@@ -18,10 +18,10 @@ export function LoginContent() {
       {/* Logo */}
       <FadeScaleIn delay={0.05} className="mb-10 lg:absolute lg:top-8 lg:mb-0">
         <Image
-          src="/ZenitLogo_DarkWithPink.svg"
-          alt="Zenith"
-          width={130}
-          height={43}
+          src="/EclatLogo_DarkWithPink.svg"
+          alt="Eclat"
+          width={160}
+          height={54}
           priority
         />
       </FadeScaleIn>
