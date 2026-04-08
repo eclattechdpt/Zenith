@@ -410,6 +410,7 @@ export async function exportTransitExcel() {
         Semana: week.week_number,
         Etiqueta: week.label ?? "",
         Producto: "—",
+        Marca: "—",
         Variante: "—",
         Cantidad: 0,
         "Precio unitario": 0,
@@ -425,6 +426,7 @@ export async function exportTransitExcel() {
           Semana: week.week_number,
           Etiqueta: week.label ?? "",
           Producto: pv?.products?.name ?? "—",
+          Marca: pv?.products?.brand ?? "—",
           Variante: pv?.name ?? pv?.sku ?? "—",
           Cantidad: item.quantity,
           "Precio unitario": Number(item.unit_price),
@@ -436,7 +438,7 @@ export async function exportTransitExcel() {
   }
 
   const ws = XLSX.utils.json_to_sheet(rows)
-  formatSheet(ws, { currencyCols: [7, 8, 9] })
+  formatSheet(ws, { currencyCols: [8, 9, 10] })
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Inventario Transito")
   downloadWorkbook(wb, `inventario-transito-${today()}.xlsx`)
@@ -577,6 +579,7 @@ export async function exportTransitRangeExcel(from: Date, to: Date) {
         Semana: week.week_number,
         Etiqueta: week.label ?? "",
         Producto: "—",
+        Marca: "—",
         Variante: "—",
         Cantidad: 0,
         "Precio unitario": 0,
@@ -592,6 +595,7 @@ export async function exportTransitRangeExcel(from: Date, to: Date) {
           Semana: week.week_number,
           Etiqueta: week.label ?? "",
           Producto: pv?.products?.name ?? "—",
+          Marca: pv?.products?.brand ?? "—",
           Variante: pv?.name ?? pv?.sku ?? "—",
           Cantidad: item.quantity,
           "Precio unitario": Number(item.unit_price),
@@ -603,7 +607,7 @@ export async function exportTransitRangeExcel(from: Date, to: Date) {
   }
 
   const ws = XLSX.utils.json_to_sheet(rows)
-  formatSheet(ws, { currencyCols: [7, 8, 9] })
+  formatSheet(ws, { currencyCols: [8, 9, 10] })
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Inventario Transito")
   const label = `${format(from, "yyyy-MM-dd")}_${format(to, "yyyy-MM-dd")}`
