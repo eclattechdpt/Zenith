@@ -19,7 +19,7 @@ const FONT_BOLD = "Helvetica-Bold"
 // ── Constants ──
 
 const VALID_STATUSES = ["completed", "partially_returned", "fully_returned"]
-const BUSINESS_NAME = "Eclat"
+const BUSINESS_NAME = "Ideal y Eclat"
 
 // Warm neutral palette from design system
 const N = {
@@ -351,17 +351,17 @@ function PaymentBreakdown({ methodTotals, totalRevenue, accent }: {
 
 // ── Stock status helpers ──
 
-function stockStatusColor(stock: number, stockMin: number): string {
-  if (stockMin <= 0) return "#059669"
-  if (stock <= stockMin * 0.3) return "#DC2626"
-  if (stock <= stockMin) return "#D97706"
+function stockStatusColor(stock: number): string {
+  if (stock === 0) return "#DC2626"
+  if (stock <= LOW_STOCK_THRESHOLD) return "#D97706"
   return "#059669"
 }
 
-function stockStatusLabel(stock: number, stockMin: number): string {
-  if (stockMin <= 0) return "OK"
-  if (stock <= stockMin * 0.3) return "Critico"
-  if (stock <= stockMin) return "Bajo"
+const LOW_STOCK_THRESHOLD = 5
+
+function stockStatusLabel(stock: number): string {
+  if (stock === 0) return "Sin stock"
+  if (stock <= LOW_STOCK_THRESHOLD) return "Bajo"
   return "OK"
 }
 
@@ -926,14 +926,9 @@ export async function exportInventoryPdf() {
     (s, v) => s + Number(v.price) * v.stock,
     0
   )
-  const critical = variants.filter(
-    (v) => v.stock_min > 0 && v.stock <= v.stock_min * 0.3
-  )
+  const critical = variants.filter((v) => v.stock === 0)
   const low = variants.filter(
-    (v) =>
-      v.stock_min > 0 &&
-      v.stock <= v.stock_min &&
-      v.stock > v.stock_min * 0.3
+    (v) => v.stock > 0 && v.stock <= LOW_STOCK_THRESHOLD
   )
 
   const accent = ACCENT.teal
@@ -963,7 +958,7 @@ export async function exportInventoryPdf() {
             { label: "SKUs activos", value: String(totalSKUs) },
             { label: "Valor en stock", value: currency(totalValue) },
             { label: "Stock bajo", value: String(low.length) },
-            { label: "Stock critico", value: String(critical.length) },
+            { label: "Sin stock", value: String(critical.length) },
           ]}
         />
 
@@ -984,7 +979,7 @@ export async function exportInventoryPdf() {
               <View style={{ flexDirection: "row", marginBottom: 4 }}>
                 <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#DC2626", marginRight: 6, marginTop: 1 }} />
                 <Text style={{ fontSize: 8.5, color: N[800] }}>
-                  {critical.length} producto{critical.length !== 1 ? "s" : ""} en nivel critico
+                  {critical.length} producto{critical.length !== 1 ? "s" : ""} sin stock
                 </Text>
               </View>
             )}
@@ -1002,8 +997,8 @@ export async function exportInventoryPdf() {
         <SectionLabel text="Inventario completo" accent={accent} />
         <TableHeader columns={tableColumns} accent={accent} />
         {variants.slice(0, 80).map((v, i) => {
-          const statusColor = stockStatusColor(v.stock, v.stock_min)
-          const statusText = stockStatusLabel(v.stock, v.stock_min)
+          const statusColor = stockStatusColor(v.stock)
+          const statusText = stockStatusLabel(v.stock)
           return (
             <TableRow
               key={i}

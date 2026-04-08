@@ -13,6 +13,60 @@ function today() {
   return format(new Date(), "yyyy-MM-dd")
 }
 
+const CURRENCY_FMT = "$#,##0.00"
+const PERCENT_FMT = "0%"
+
+/**
+ * Auto-fit column widths based on header + cell content, and apply
+ * currency number format to specified columns.
+ */
+function formatSheet(
+  ws: XLSX.WorkSheet,
+  opts: {
+    currencyCols?: number[]
+    percentCols?: number[]
+    minWidth?: number
+    padding?: number
+  } = {}
+) {
+  const { currencyCols = [], percentCols = [], minWidth = 10, padding = 3 } = opts
+  const ref = ws["!ref"]
+  if (!ref) return
+
+  const range = XLSX.utils.decode_range(ref)
+  const colWidths: number[] = []
+
+  // Calculate max width per column
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    let maxLen = minWidth
+    for (let r = range.s.r; r <= range.e.r; r++) {
+      const cell = ws[XLSX.utils.encode_cell({ r, c })]
+      if (!cell) continue
+      const val = cell.v != null ? String(cell.v) : ""
+      maxLen = Math.max(maxLen, val.length)
+    }
+    colWidths.push(Math.min(maxLen + padding, 40))
+  }
+
+  ws["!cols"] = colWidths.map((w) => ({ wch: w }))
+
+  // Apply number formats to data rows (skip header row 0)
+  for (let r = range.s.r + 1; r <= range.e.r; r++) {
+    for (const c of currencyCols) {
+      const addr = XLSX.utils.encode_cell({ r, c })
+      if (ws[addr] && typeof ws[addr].v === "number") {
+        ws[addr].z = CURRENCY_FMT
+      }
+    }
+    for (const c of percentCols) {
+      const addr = XLSX.utils.encode_cell({ r, c })
+      if (ws[addr] && typeof ws[addr].v === "number") {
+        ws[addr].z = PERCENT_FMT
+      }
+    }
+  }
+}
+
 // ── Sales Export ──
 
 export async function exportSalesExcel() {
@@ -38,14 +92,19 @@ export async function exportSalesExcel() {
         `${PAYMENT_METHODS[p.method as keyof typeof PAYMENT_METHODS] ?? p.method}: $${Number(p.amount).toFixed(2)}`
     )
 
+    const subtotal = Number(s.subtotal)
+    const discountAmt = Number(s.discount_amount)
+    const discountPct = subtotal > 0 ? discountAmt / subtotal : 0
+
     return {
       Numero: s.sale_number,
       Estado:
         SALE_STATUSES[s.status as keyof typeof SALE_STATUSES] ?? s.status,
       Cliente:
         (s.customers as unknown as { name: string } | null)?.name ?? "—",
-      Subtotal: Number(s.subtotal),
-      Descuento: Number(s.discount_amount),
+      Subtotal: subtotal,
+      Descuento: discountAmt,
+      "Descuento %": discountPct,
       Total: Number(s.total),
       Pagos: payments.join(", "),
       Notas: s.notes ?? "",
@@ -54,6 +113,7 @@ export async function exportSalesExcel() {
   })
 
   const ws = XLSX.utils.json_to_sheet(rows)
+  formatSheet(ws, { currencyCols: [3, 4, 6], percentCols: [5] })
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Ventas")
   downloadWorkbook(wb, `ventas-${today()}.xlsx`)
@@ -86,14 +146,19 @@ export async function exportSalesRangeExcel(from: Date, to: Date) {
         `${PAYMENT_METHODS[p.method as keyof typeof PAYMENT_METHODS] ?? p.method}: $${Number(p.amount).toFixed(2)}`
     )
 
+    const subtotal = Number(s.subtotal)
+    const discountAmt = Number(s.discount_amount)
+    const discountPct = subtotal > 0 ? discountAmt / subtotal : 0
+
     return {
       Numero: s.sale_number,
       Estado:
         SALE_STATUSES[s.status as keyof typeof SALE_STATUSES] ?? s.status,
       Cliente:
         (s.customers as unknown as { name: string } | null)?.name ?? "—",
-      Subtotal: Number(s.subtotal),
-      Descuento: Number(s.discount_amount),
+      Subtotal: subtotal,
+      Descuento: discountAmt,
+      "Descuento %": discountPct,
       Total: Number(s.total),
       Pagos: payments.join(", "),
       Notas: s.notes ?? "",
@@ -102,6 +167,7 @@ export async function exportSalesRangeExcel(from: Date, to: Date) {
   })
 
   const ws = XLSX.utils.json_to_sheet(rows)
+  formatSheet(ws, { currencyCols: [3, 4, 6], percentCols: [5] })
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Ventas")
   const label = `${format(from, "yyyy-MM-dd")}_${format(to, "yyyy-MM-dd")}`
@@ -140,10 +206,11 @@ export async function exportInventoryExcel() {
         | { name: string }[]
       const prodName = Array.isArray(prod) ? prod[0]?.name : prod?.name
 
+      const LOW_STOCK_THRESHOLD = 5
       const estado =
-        v.stock_min > 0 && v.stock <= v.stock_min * 0.3
-          ? "Critico"
-          : v.stock_min > 0 && v.stock <= v.stock_min
+        v.stock === 0
+          ? "Sin stock"
+          : v.stock <= LOW_STOCK_THRESHOLD
             ? "Bajo"
             : "OK"
 
@@ -161,6 +228,7 @@ export async function exportInventoryExcel() {
   )
 
   const ws = XLSX.utils.json_to_sheet(rows)
+  formatSheet(ws, { currencyCols: [3] })
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Inventario Fisico")
   downloadWorkbook(wb, `inventario-fisico-${today()}.xlsx`)
@@ -205,6 +273,7 @@ export async function exportCustomersExcel() {
   )
 
   const ws = XLSX.utils.json_to_sheet(rows)
+  formatSheet(ws)
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Clientes")
   downloadWorkbook(wb, `clientes-${today()}.xlsx`)
@@ -274,6 +343,7 @@ export async function exportProductsExcel() {
   }
 
   const ws = XLSX.utils.json_to_sheet(rows)
+  formatSheet(ws, { currencyCols: [5] })
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Productos")
   downloadWorkbook(wb, `productos-${today()}.xlsx`)
@@ -366,6 +436,7 @@ export async function exportTransitExcel() {
   }
 
   const ws = XLSX.utils.json_to_sheet(rows)
+  formatSheet(ws, { currencyCols: [7, 8, 9] })
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Inventario Transito")
   downloadWorkbook(wb, `inventario-transito-${today()}.xlsx`)
@@ -433,6 +504,7 @@ export async function exportInitialLoadExcel() {
     )
 
   const ws = XLSX.utils.json_to_sheet(rows)
+  formatSheet(ws, { currencyCols: [3, 4] })
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Carga Inicial")
   downloadWorkbook(wb, `inventario-carga-inicial-${today()}.xlsx`)
@@ -531,6 +603,7 @@ export async function exportTransitRangeExcel(from: Date, to: Date) {
   }
 
   const ws = XLSX.utils.json_to_sheet(rows)
+  formatSheet(ws, { currencyCols: [7, 8, 9] })
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Inventario Transito")
   const label = `${format(from, "yyyy-MM-dd")}_${format(to, "yyyy-MM-dd")}`
