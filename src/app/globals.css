@@ -75,7 +75,7 @@ input[type="number"] {
   --color-accent-800: var(--accent-800);
   --color-accent-900: var(--accent-900);
 
-  /* ── Zenith brand palettes ── */
+  /* ── Eclat brand palettes ── */
   --color-rose-50: #FFF0F3;
   --color-rose-100: #FFE0E8;
   --color-rose-200: #FFC2D4;
@@ -168,7 +168,7 @@ input[type="number"] {
 }
 
 :root {
-  /* ── Zenith light theme → shadcn semantic mapping ── */
+  /* ── Eclat light theme → shadcn semantic mapping ── */
   --background: #FDFBFA;
   --foreground: #1A1714;
   --card: #FFFFFF;

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ZENITH Iconography v1.0
+  ECLAT Iconography v1.0
   Librería base: Lucide Icons (https://lucide.dev)
 -->
 
-<zenith_iconography version="1.0" product="POS Cosmetics" brand="ZENITH">
+<eclat_iconography version="1.0" product="POS Cosmetics" brand="ECLAT">
 
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- LIBRERÍA BASE                                            -->
@@ -176,4 +176,4 @@
     <icon concept="caja"            lucide="landmark"          aliases="register, caja-registradora"/>
   </category>
 
-</zenith_iconography>
+</eclat_iconography>

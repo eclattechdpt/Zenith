@@ -4,7 +4,7 @@ When the user invokes `/think`, enter analysis mode. Do NOT write code or make c
 
 ## Context
 
-This is for **Zenith POS** — a beauty shop point-of-sale system built with Next.js, Supabase, TypeScript, Tailwind, and shadcn/ui. Always consider:
+This is for **Eclat POS** — a beauty shop point-of-sale system built with Next.js, Supabase, TypeScript, Tailwind, and shadcn/ui. Always consider:
 - The beauty shop user (shop owner/employee managing sales, inventory, clients)
 - The tech stack and existing architecture
 - The sprint plan and what's already built vs what's coming

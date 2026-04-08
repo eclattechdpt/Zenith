@@ -4,7 +4,7 @@ When the user invokes `/explain`, take the most recent technical discussion (fro
 
 ## Context
 
-The user is a business owner building **Zenith POS** with Claude's help. They are learning as they go and may not have deep experience with the tech stack (Next.js, React, Supabase, TypeScript). Clear understanding prevents miscommunication and avoids wasted time on wrong solutions.
+The user is a business owner building **Eclat POS** with Claude's help. They are learning as they go and may not have deep experience with the tech stack (Next.js, React, Supabase, TypeScript). Clear understanding prevents miscommunication and avoids wasted time on wrong solutions.
 
 ## Steps
 

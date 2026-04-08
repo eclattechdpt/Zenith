@@ -255,7 +255,7 @@ function Footer() {
       paddingTop: 8,
     }}>
       <Text style={{ fontSize: 7, color: N[500], textAlign: "center", fontFamily: FONT }}>
-        Generado por Zenith POS — {format(new Date(), "dd/MM/yyyy HH:mm")}
+        Generado por Eclat POS — {format(new Date(), "dd/MM/yyyy HH:mm")}
       </Text>
     </View>
   )

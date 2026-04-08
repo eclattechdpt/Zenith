@@ -50,7 +50,7 @@ export default function AyudaPage() {
           Centro de ayuda
         </h1>
         <p className="mt-2 text-sm text-neutral-500">
-          Encuentra respuestas sobre como usar Zenith POS
+          Encuentra respuestas sobre como usar Eclat POS
         </p>
       </motion.div>
 

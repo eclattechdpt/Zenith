@@ -2,14 +2,14 @@
 
 ## Proyecto
 
-**Zenith POS** — Sistema de punto de venta e inventario web para tienda de belleza y cosméticos. Stack: Next.js App Router + Supabase + TypeScript + Tailwind + shadcn/ui + Motion.
+**Eclat POS** — Sistema de punto de venta e inventario web para tienda de belleza y cosméticos. Stack: Next.js App Router + Supabase + TypeScript + Tailwind + shadcn/ui + Motion.
 
 ### Branding
 
-- El nombre del producto es **Zenith** (o **Zenith POS** cuando se necesite contexto).
-- Usar "Zenith" en toda la UI, títulos, meta tags, y documentación.
+- El nombre del producto es **Eclat** (o **Eclat POS** cuando se necesite contexto).
+- Usar "Eclat" en toda la UI, títulos, meta tags, y documentación.
 - Supabase project ID: `lccclwtwkegbvlpdwisu` | Org: `Zenith System`
-- La variable `NEXT_PUBLIC_APP_NAME` debe ser `"Zenith POS"`.
+- La variable `NEXT_PUBLIC_APP_NAME` debe ser `"Eclat POS"`.
 
 ## MCP (Model Context Protocol)
 

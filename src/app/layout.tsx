@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Zenith POS",
+  title: "Eclat POS",
   description: "Sistema de punto de venta inteligente",
   icons: {
     icon: "/PinkIcon.svg",

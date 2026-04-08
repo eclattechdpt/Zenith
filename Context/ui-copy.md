@@ -1,4 +1,4 @@
-# ZENITH — UI Copy & Microcopy
+# ECLAT — UI Copy & Microcopy
 
 ---
 
@@ -233,7 +233,7 @@ El separador es un punto medio (·) con espacio a cada lado.
 ```
 Formato:     ZN-XX-###
 Ejemplo:     ZN-LB-001
-ZN:          Prefijo ZENITH
+ZN:          Prefijo ECLAT
 XX:          Código de categoría (LB=Labios, OJ=Ojos, RO=Rostro, UN=Uñas, HR=Herramientas, ST=Sets, SK=Skincare)
 ###:         Secuencial de 3 dígitos
 ```
@@ -292,7 +292,7 @@ Stock:       24 unidades (no "24 u" ni "24 pcs")
 
 ```
 Encabezado:
-  ZENITH
+  ECLAT
   {Nombre de sucursal}
   {Dirección}
   RFC: {RFC de la sucursal}
@@ -319,5 +319,5 @@ Cuerpo:
 
 Pie:
   ¡Gracias por tu compra!
-  www.zenithcosmetics.mx
+  www.eclatcosmetics.mx
 ```

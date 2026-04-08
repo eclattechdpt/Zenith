@@ -1,4 +1,4 @@
-# Zenith POS
+# Eclat POS
 
 Sistema de punto de venta e inventario web para tienda de belleza y cosmeticos.
 
@@ -71,4 +71,4 @@ Built by [abbrix](https://abbrix.com). Design system tokens in `/Context/`.
 
 ---
 
-Powered by Zenith POS
+Powered by Eclat POS

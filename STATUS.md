@@ -1,4 +1,4 @@
-# Zenith POS — Project Status
+# Eclat POS — Project Status
 
 ## Environment Setup
 
@@ -9,7 +9,7 @@
 | shadcn/ui initialized | Done | 20+ components installed (button, input, dialog, table, etc.) |
 | Folder structure created | Done | Features, lib, components, hooks, providers, routes |
 | tsconfig with `@/*` alias | Done | Strict mode enabled |
-| Supabase project created | Done | `zenith-pos` (ID: `lccclwtwkegbvlpdwisu`, region: us-east-1) |
+| Supabase project created | Done | `eclat-pos` (ID: `lccclwtwkegbvlpdwisu`, region: us-east-1) |
 | Migration executed | Done | 17 tables, RLS, triggers, indexes, realtime, storage bucket |
 | Admin user created | Done | `admin@eclat.com` (ID: `12e008c4-890e-4032-a22d-f6a52cf7ce0e`) |
 | Seed data executed | Done | 11 categories, 4 variant types, 30 variant options, 3 price lists |

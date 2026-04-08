@@ -4,12 +4,12 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# Zenith POS — Agent Guidelines
+# Eclat POS — Agent Guidelines
 
 ## User Profile
 
 - Developer and designer, works under the brand **abbrix**
-- Building Zenith POS for a beauty/cosmetics shop client in Zapopan, Jalisco, Mexico
+- Building Eclat POS for a beauty/cosmetics shop client in Zapopan, Jalisco, Mexico
 - Communicates in English; product UI is entirely in Spanish (es-MX)
 - Comfortable with advanced frontend (Motion springs, layout animations, TanStack Query patterns)
 - Prefers to see results and iterate visually — provides screenshots for feedback

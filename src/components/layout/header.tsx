@@ -29,7 +29,7 @@ export async function Header() {
           Hola, {displayName}
         </h1>
         <p className="mt-0.5 text-[13px] text-neutral-400">
-          Bienvenido de vuelta a Zenith
+          Bienvenido de vuelta a Eclat
         </p>
       </div>
 

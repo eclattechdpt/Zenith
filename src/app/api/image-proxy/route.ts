@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     response = await fetch(url, {
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       headers: {
-        "User-Agent": "ZenithPOS/1.0 ImageProxy",
+        "User-Agent": "EclatPOS/1.0 ImageProxy",
         // Accept image/* but also generic types for CDNs that don't set proper Accept
         Accept: "image/webp,image/avif,image/*,*/*;q=0.8",
       },

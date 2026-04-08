@@ -4,7 +4,7 @@ When the user invokes `/diagnose`, enter investigation mode. Do NOT make any cod
 
 ## Context
 
-This is for **Zenith POS** — most code changes are made by Claude, not the user. Issues often stem from Claude misunderstanding a request, a side effect of a previous change, or a gap between what was intended and what was implemented. Always consider this when investigating.
+This is for **Eclat POS** — most code changes are made by Claude, not the user. Issues often stem from Claude misunderstanding a request, a side effect of a previous change, or a gap between what was intended and what was implemented. Always consider this when investigating.
 
 ## Steps
 

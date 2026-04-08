@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ZENITH Design System v2.0
+  ECLAT Design System v2.0
   AI-readable token reference.
   CSS variable names follow the pattern: --{category}-{step}
 -->
 
-<zenith_design_system version="2.0" product="POS Cosmetics" brand="ZENITH">
+<eclat_design_system version="2.0" product="POS Cosmetics" brand="ECLAT">
 
   <!-- ════════════════════════════════════════════ -->
   <!-- 01 · FONTS                                   -->
@@ -265,4 +265,4 @@
     <token name="2xl" value="1536px" rem="96rem"/>
   </breakpoints>
 
-</zenith_design_system>
+</eclat_design_system>

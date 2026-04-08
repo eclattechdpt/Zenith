@@ -57,7 +57,7 @@ test.describe("Auth — session (requires TEST_USER_EMAIL & TEST_USER_PASSWORD)"
   test("successful login redirects to /", async ({ page }) => {
     await loginAs(page, EMAIL, PASSWORD)
     await expect(page).toHaveURL("/")
-    await expect(page.getByText("Bienvenido a Zenith")).toBeVisible()
+    await expect(page.getByText("Bienvenido a Eclat")).toBeVisible()
   })
 
   test("authenticated user visiting /login is redirected to /", async ({
