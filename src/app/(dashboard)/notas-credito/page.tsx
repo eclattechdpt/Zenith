@@ -5,7 +5,6 @@ import { FileText, ArrowRightLeft, CheckCircle2 } from "lucide-react"
 
 import { PageHero } from "@/components/shared/page-hero"
 import { KpiCard } from "@/components/shared/kpi-card"
-import { SectionCard } from "@/components/shared/section-card"
 import { CreditNotesTable } from "@/features/notas-credito/components/credit-notes-table"
 import { CreateCreditNoteDialog } from "@/features/notas-credito/components/create-credit-note-dialog"
 import { useCreditNoteStats } from "@/features/notas-credito/queries"
@@ -53,16 +52,7 @@ export default function NotasCreditoPage() {
       </div>
 
       {/* Credit notes table */}
-      <SectionCard
-        label="Registro"
-        description="Prestamos e intercambios con distribuidores"
-        icon={FileText}
-        iconBg="bg-teal-50"
-        iconColor="text-teal-500"
-        delay={0.18}
-      >
-        <CreditNotesTable />
-      </SectionCard>
+      <CreditNotesTable />
 
       <CreateCreditNoteDialog
         open={createOpen}

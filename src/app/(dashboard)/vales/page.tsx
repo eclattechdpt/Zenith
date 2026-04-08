@@ -5,7 +5,6 @@ import { Ticket, Clock, CheckCircle2, AlertCircle } from "lucide-react"
 
 import { PageHero } from "@/components/shared/page-hero"
 import { KpiCard } from "@/components/shared/kpi-card"
-import { SectionCard } from "@/components/shared/section-card"
 import { ValesTable } from "@/features/vales/components/vales-table"
 import { useValeStats } from "@/features/vales/queries"
 
@@ -56,16 +55,7 @@ export default function ValesPage() {
       </div>
 
       {/* Vales table */}
-      <SectionCard
-        label="Registro"
-        description="Vales pendientes de entrega y completados"
-        icon={Ticket}
-        iconBg="bg-indigo-50"
-        iconColor="text-indigo-500"
-        delay={0.24}
-      >
-        <ValesTable />
-      </SectionCard>
+      <ValesTable />
     </div>
     </Suspense>
   )

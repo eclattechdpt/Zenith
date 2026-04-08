@@ -1,15 +1,14 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { Search, FileText, MoreHorizontal, CheckCircle2, XCircle, Package } from "lucide-react"
+import { useMemo, useRef, useState, useCallback } from "react"
+import { Search, FileText, MoreHorizontal, CheckCircle2, XCircle, Package, X } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { sileo } from "sileo"
 import { useQueryState, parseAsString } from "nuqs"
-import { motion } from "motion/react"
+import { motion, AnimatePresence } from "motion/react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +19,7 @@ import { DataTable } from "@/components/shared/data-table"
 import { EmptyState } from "@/components/shared/empty-state"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { DateFilterPills, type DateRange } from "@/components/shared/date-filter-pills"
-import { formatDate } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 import { CREDIT_NOTE_STATUSES, CREDIT_NOTE_TYPES } from "@/lib/constants"
 
 import { useCreditNotes } from "../queries"
@@ -59,7 +58,16 @@ export function CreditNotesTable() {
   const [cancelTarget, setCancelTarget] = useState<CreditNoteWithDetails | null>(null)
   const [isCancelling, setIsCancelling] = useState(false)
   const [dateRange, setDateRange] = useState<DateRange | null>(null)
+  const [isFocused, setIsFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
+
+  const SPRING_SNAPPY = { type: "spring" as const, stiffness: 400, damping: 30 }
+
+  const handleClear = useCallback(() => {
+    setSearch(null)
+    inputRef.current?.focus()
+  }, [setSearch])
 
   const {
     data: notes = [],
@@ -236,42 +244,114 @@ export function CreditNotesTable() {
   return (
     <>
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: hasLoadedOnce.current ? 1 : 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className="space-y-4 overflow-hidden rounded-2xl border border-teal-100 bg-gradient-to-b from-white to-teal-50/30 p-4 shadow-sm sm:p-6"
+        initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+        animate={{ opacity: hasLoadedOnce.current ? 1 : 0, y: hasLoadedOnce.current ? 0 : 12, filter: hasLoadedOnce.current ? "blur(0px)" : "blur(4px)" }}
+        transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.18 }}
+        className="rounded-2xl border border-neutral-200/60 bg-neutral-50 p-5 shadow-sm shadow-neutral-900/[0.03] sm:p-7"
       >
-        {/* Filters */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1 sm:max-w-sm">
-            <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
-            <Input
-              placeholder="Buscar (NC-0001) o nombre de distribuidor..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value || null)}
-              className="pl-9"
-            />
+        {/* ══════ Toolbar ══════ */}
+        <div className="rounded-xl border border-neutral-100/80 bg-white p-4 sm:p-5">
+          {/* Row 1: Title + Search */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[1.5px] text-neutral-400">
+              <FileText className="h-4 w-4 text-accent-400" />
+              Registro
+              <AnimatePresence mode="wait">
+                {!isLoading && (
+                  <motion.span
+                    key={notes.length}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.85 }}
+                    transition={SPRING_SNAPPY}
+                    className="ml-1 inline-flex h-5 min-w-[28px] items-center justify-center rounded-full bg-accent-50 px-1.5 text-[11px] font-bold tabular-nums text-accent-500"
+                  >
+                    {notes.length}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </h2>
+
+            {/* Search */}
+            <div className="relative w-full sm:w-72">
+              <motion.div
+                className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2"
+                animate={{
+                  scale: isFocused ? 1.08 : 1,
+                  color: isFocused
+                    ? "var(--accent-500, #25A6B6)"
+                    : search
+                      ? "rgb(163, 163, 163)"
+                      : "rgb(212, 212, 212)",
+                }}
+                transition={SPRING_SNAPPY}
+              >
+                <Search className="h-4 w-4" />
+              </motion.div>
+
+              <motion.div
+                animate={{
+                  boxShadow: isFocused
+                    ? "0 0 0 3px rgba(37, 166, 182, 0.06), 0 2px 8px rgba(0,0,0,0.03)"
+                    : "0 0 0 0px rgba(37, 166, 182, 0), 0 0px 0px rgba(0,0,0,0)",
+                }}
+                transition={SPRING_SNAPPY}
+                className="rounded-xl"
+              >
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value || null)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  placeholder="Numero de nota o nombre de distribuidor..."
+                  className="h-10 w-full rounded-xl border border-neutral-200/80 bg-neutral-50/80 pl-10 pr-9 text-[13px] font-medium text-neutral-700 outline-none transition-colors duration-150 placeholder:text-neutral-300 focus:border-accent-200"
+                />
+              </motion.div>
+
+              <AnimatePresence>
+                {search.length > 0 && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 35 }}
+                    whileTap={{ scale: 0.85 }}
+                    onClick={handleClear}
+                    className="absolute right-2.5 top-1/2 z-10 -translate-y-1/2 rounded-md p-0.5 text-neutral-300 transition-colors hover:text-neutral-500"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-          <div className="flex gap-1">
-            {STATUS_TABS.map((tab) => {
-              const isActive = statusFilter === tab.value
-              return (
-                <Button
-                  key={tab.value}
-                  variant={isActive ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setStatusFilter(tab.value || null)}
-                  className="text-xs"
-                >
-                  {tab.label}
-                </Button>
-              )
-            })}
+
+          {/* Row 2: Status tabs */}
+          <div className="mt-3 flex items-center gap-1 rounded-xl bg-accent-50/50 border border-accent-100/60 p-1">
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                onClick={() => setStatusFilter(tab.value || null)}
+                className={cn(
+                  "flex-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-all",
+                  statusFilter === tab.value
+                    ? "bg-accent-500 text-white shadow-sm"
+                    : "text-neutral-500 hover:bg-accent-50 hover:text-neutral-700"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Row 3: Date filters */}
+          <div className="mt-3">
+            <DateFilterPills onChange={setDateRange} defaultPreset="today" />
           </div>
         </div>
-
-        {/* Date filter */}
-        <DateFilterPills onChange={setDateRange} defaultPreset="today" />
 
         {/* Table */}
         <div
