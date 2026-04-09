@@ -5,8 +5,11 @@ import { updateSession } from "@/lib/supabase/proxy"
 export async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
 
-  // Allow boneyard CLI to access all pages for skeleton capture
-  if (request.headers.get("x-boneyard-build") === "true") {
+  // Allow boneyard CLI to access all pages for skeleton capture (dev only)
+  if (
+    process.env.NODE_ENV !== "production" &&
+    request.headers.get("x-boneyard-build") === "true"
+  ) {
     return supabaseResponse
   }
 

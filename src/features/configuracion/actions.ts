@@ -154,10 +154,20 @@ export async function getTableCounts() {
 }
 
 // ---------------------------------------------------------------------------
-// Destructive purge operations
+// Destructive purge operations (development only)
 // ---------------------------------------------------------------------------
 
+function requireDevMode() {
+  if (process.env.NODE_ENV === "production") {
+    return { error: "Operaciones de purga deshabilitadas en produccion" }
+  }
+  return null
+}
+
 export async function purgeProducts() {
+  const devCheck = requireDevMode()
+  if (devCheck) return devCheck
+
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -193,6 +203,9 @@ export async function purgeProducts() {
 }
 
 export async function purgeSales() {
+  const devCheck = requireDevMode()
+  if (devCheck) return devCheck
+
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -268,6 +281,9 @@ export async function purgeSales() {
 }
 
 export async function purgeCustomers() {
+  const devCheck = requireDevMode()
+  if (devCheck) return devCheck
+
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -296,6 +312,9 @@ export async function purgeCustomers() {
 }
 
 export async function purgeInventory() {
+  const devCheck = requireDevMode()
+  if (devCheck) return devCheck
+
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -345,6 +364,9 @@ export async function purgeInventory() {
 }
 
 export async function purgeAll() {
+  const devCheck = requireDevMode()
+  if (devCheck) return devCheck
+
   const supabase = await createServerClient()
   const {
     data: { user },

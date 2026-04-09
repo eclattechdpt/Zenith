@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 
+import { createServerClient } from "@/lib/supabase/server"
+
 const HARD_MAX_BYTES = 25 * 1024 * 1024 // 25 MB
 const FETCH_TIMEOUT_MS = 15_000
+
+// Block internal/private IP ranges to prevent SSRF
+const BLOCKED_HOSTNAMES = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|0\.0\.0\.0|169\.254\.|::1|\[::1\])/i
 
 // Content types that are valid images (some CDNs return non-standard types)
 const IMAGE_TYPES = new Set([
@@ -27,6 +32,13 @@ function isImageContentType(ct: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  // Auth check — only authenticated users can proxy images
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+  }
+
   let body: { url?: string }
   try {
     body = await req.json()
@@ -47,6 +59,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Solo se aceptan URLs http o https" },
         { status: 400 }
+      )
+    }
+    // Block internal/private IPs to prevent SSRF
+    if (BLOCKED_HOSTNAMES.test(parsedUrl.hostname)) {
+      return NextResponse.json(
+        { error: "URLs internas no permitidas" },
+        { status: 403 }
       )
     }
   } catch {
