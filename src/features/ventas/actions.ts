@@ -237,95 +237,22 @@ export async function cancelSale(input: CancelSaleInput) {
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
   const supabase = await createServerClient()
-
-  // Verify sale exists and is completed
-  const { data: sale, error: saleError } = await supabase
-    .from("sales")
-    .select("id, sale_number, status")
-    .eq("id", parsed.data.sale_id)
-    .is("deleted_at", null)
-    .single()
-
-  if (saleError || !sale) {
-    return { error: { _form: ["Venta no encontrada"] } }
-  }
-
-  if (sale.status !== "completed") {
-    return { error: { _form: ["Solo se pueden cancelar ventas completadas"] } }
-  }
-
-  // Check no returns exist
-  const { count } = await supabase
-    .from("returns")
-    .select("id", { count: "exact", head: true })
-    .eq("sale_id", parsed.data.sale_id)
-    .eq("status", "completed")
-    .is("deleted_at", null)
-
-  if (count && count > 0) {
-    return {
-      error: {
-        _form: ["No se puede cancelar una venta que tiene devoluciones"],
-      },
-    }
-  }
-
-  // Fetch sale items to reverse stock
-  const { data: items, error: itemsError } = await supabase
-    .from("sale_items")
-    .select("product_variant_id, quantity, product_name")
-    .eq("sale_id", parsed.data.sale_id)
-
-  if (itemsError || !items || items.length === 0) {
-    return {
-      error: { _form: ["No se pudieron obtener los productos de la venta"] },
-    }
-  }
-
   const userId = await getUserId()
 
-  // Reverse stock for each item
-  for (const item of items) {
-      const { data: variant } = await supabase
-        .from("product_variants")
-        .select("stock")
-        .eq("id", item.product_variant_id)
-        .single()
-
-      if (variant) {
-        const stockBefore = variant.stock
-        const stockAfter = stockBefore + item.quantity
-
-        await supabase
-          .from("product_variants")
-          .update({ stock: stockAfter })
-          .eq("id", item.product_variant_id)
-
-        await supabase.from("inventory_movements").insert({
-          tenant_id: TENANT_ID,
-          product_variant_id: item.product_variant_id,
-          type: "adjustment",
-          quantity: item.quantity,
-          stock_before: stockBefore,
-          stock_after: stockAfter,
-          reason: `Cancelacion de venta ${sale.sale_number}`,
-          created_by: userId,
-          inventory_source: "physical",
-        })
-      }
+  // Atomic: validate sale, reverse stock (bundle-aware), mark cancelled
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: resultJson, error } = await (supabase.rpc as any)(
+    "cancel_sale",
+    {
+      p_sale_id: parsed.data.sale_id,
+      p_tenant_id: TENANT_ID,
+      p_created_by: userId,
     }
+  )
 
-  // Mark sale as cancelled
-  // Note: stock reversal + status update are not atomic (no RPC).
-  // For MVP single-user, this is acceptable. If status update fails
-  // after stock reversal, manual correction is needed.
-  const { error: updateError } = await supabase
-    .from("sales")
-    .update({ status: "cancelled" })
-    .eq("id", parsed.data.sale_id)
-
-  if (updateError) {
-    return { error: { _form: [updateError.message] } }
+  if (error) {
+    const msg = error.message ?? "Error al cancelar la venta"
+    return { error: { _form: [msg] } }
   }
 
   revalidatePath("/ventas")
@@ -333,7 +260,7 @@ export async function cancelSale(input: CancelSaleInput) {
   revalidatePath("/")
   revalidatePath("/inventario")
 
-  return { data: { success: true } }
+  return { data: { success: true, sale_number: (resultJson as { sale_number: string })?.sale_number } }
 }
 
 export async function cancelReturn(input: CancelReturnInput) {
@@ -341,146 +268,29 @@ export async function cancelReturn(input: CancelReturnInput) {
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
   const supabase = await createServerClient()
-
-  // Fetch return with items
-  const { data: ret, error: retError } = await supabase
-    .from("returns")
-    .select("id, return_number, sale_id, status, return_items(*)")
-    .eq("id", parsed.data.return_id)
-    .is("deleted_at", null)
-    .single()
-
-  if (retError || !ret) {
-    return { error: { _form: ["Devolucion no encontrada"] } }
-  }
-
-  if (ret.status !== "completed") {
-    return { error: { _form: ["Solo se pueden cancelar devoluciones completadas"] } }
-  }
-
   const userId = await getUserId()
-  const items = (ret.return_items ?? []) as Array<{
-    product_variant_id: string
-    quantity: number
-    restock: boolean
-    replacement_variant_id: string | null
-  }>
 
-  // Reverse stock movements for each return item
-  for (const item of items) {
-    // If it was restocked, subtract the quantity back out
-    if (item.restock) {
-      const { data: variant } = await supabase
-        .from("product_variants")
-        .select("stock")
-        .eq("id", item.product_variant_id)
-        .single()
-
-      if (variant) {
-        const stockBefore = variant.stock
-        const stockAfter = stockBefore - item.quantity
-
-        await supabase
-          .from("product_variants")
-          .update({ stock: stockAfter })
-          .eq("id", item.product_variant_id)
-
-        await supabase.from("inventory_movements").insert({
-          tenant_id: TENANT_ID,
-          product_variant_id: item.product_variant_id,
-          type: "adjustment",
-          quantity: -item.quantity,
-          stock_before: stockBefore,
-          stock_after: stockAfter,
-          reason: `Cancelacion de devolucion ${ret.return_number}`,
-          created_by: userId,
-          inventory_source: "physical",
-        })
-      }
+  // Atomic: validate return, reverse stock (restock + replacements), update sale status
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: resultJson, error } = await (supabase.rpc as any)(
+    "cancel_return",
+    {
+      p_return_id: parsed.data.return_id,
+      p_tenant_id: TENANT_ID,
+      p_created_by: userId,
     }
-
-    // If a replacement was given, add its stock back
-    if (item.replacement_variant_id) {
-      const { data: repVariant } = await supabase
-        .from("product_variants")
-        .select("stock")
-        .eq("id", item.replacement_variant_id)
-        .single()
-
-      if (repVariant) {
-        const stockBefore = repVariant.stock
-        const stockAfter = stockBefore + item.quantity
-
-        await supabase
-          .from("product_variants")
-          .update({ stock: stockAfter })
-          .eq("id", item.replacement_variant_id)
-
-        await supabase.from("inventory_movements").insert({
-          tenant_id: TENANT_ID,
-          product_variant_id: item.replacement_variant_id,
-          type: "adjustment",
-          quantity: item.quantity,
-          stock_before: stockBefore,
-          stock_after: stockAfter,
-          reason: `Cancelacion de devolucion ${ret.return_number} (cambio revertido)`,
-          created_by: userId,
-          inventory_source: "physical",
-        })
-      }
-    }
-  }
-
-  // Mark return as cancelled
-  const { error: updateError } = await supabase
-    .from("returns")
-    .update({ status: "cancelled" })
-    .eq("id", ret.id)
-
-  if (updateError) {
-    return { error: { _form: [updateError.message] } }
-  }
-
-  // Recalculate sale status based on remaining non-cancelled returns
-  const { data: remainingReturns } = await supabase
-    .from("returns")
-    .select("return_items(quantity)")
-    .eq("sale_id", ret.sale_id)
-    .eq("status", "completed")
-    .is("deleted_at", null)
-
-  const { data: saleItems } = await supabase
-    .from("sale_items")
-    .select("quantity")
-    .eq("sale_id", ret.sale_id)
-
-  const totalSold = (saleItems ?? []).reduce((s, i) => s + i.quantity, 0)
-  const totalReturned = (remainingReturns ?? []).reduce(
-    (s, r) =>
-      s +
-      ((r.return_items as Array<{ quantity: number }>) ?? []).reduce(
-        (s2, ri) => s2 + ri.quantity,
-        0
-      ),
-    0
   )
 
-  let newSaleStatus = "completed"
-  if (totalReturned > 0 && totalReturned >= totalSold) {
-    newSaleStatus = "fully_returned"
-  } else if (totalReturned > 0) {
-    newSaleStatus = "partially_returned"
+  if (error) {
+    const msg = error.message ?? "Error al cancelar la devolucion"
+    return { error: { _form: [msg] } }
   }
-
-  await supabase
-    .from("sales")
-    .update({ status: newSaleStatus })
-    .eq("id", ret.sale_id)
 
   revalidatePath("/ventas")
   revalidatePath("/pos")
   revalidatePath("/")
   revalidatePath("/inventario")
 
-  return { data: { success: true, return_number: ret.return_number } }
+  const result = resultJson as { return_number: string; sale_status: string }
+  return { data: { success: true, return_number: result?.return_number } }
 }
