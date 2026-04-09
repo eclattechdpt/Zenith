@@ -375,6 +375,14 @@ No saltar sprints. Cada sprint depende del anterior.
 - **Security hardening** (2026-04-08): boneyard auth bypass restricted to dev only, image proxy SSRF protection + auth check, purge functions blocked in production
 - **Atomic cancel RPCs** (2026-04-08): `cancel_sale` and `cancel_return` RPCs replace non-atomic sequential loops. Bundle-aware stock reversal, FOR UPDATE row locks, sale status recalculation — all in single transaction
 - **POS UI polish** (2026-04-08): cofre component list in cart (indented left-border), pending sale completion shows correct totals, success screen differentiates pending vs completed, nested confirm dialogs dim wizard properly, partial OOS cofres show "X producto(s) sin stock" across all views, cofre edit loads existing bundle_items
+- **Backend test plan & hardening** (2026-04-09): 227 backend tests executed (223 passed, 3 accepted warnings)
+  - `TEST-PLAN.md` — 362 tests total (227 backend + 135 UI/UX manual)
+  - Auth hardening: `requireUserId()` added to all 57 server actions across 7 modules — expired sessions now return clean "Tu sesion expiro" error
+  - Fix: `cancel_sale` RPC — only restore stock for components with actual inventory movements (prevents phantom stock on partial OOS cofre cancel)
+  - Fix: `create_sale_transaction` RPC — validates payment total >= sale total at DB level
+  - Fix: `deleteProduct` blocks deletion of bundle component products
+  - Fix: `transit_weeks` partial unique index on `(tenant_id, year, month, week_number) WHERE deleted_at IS NULL`
+  - 3 accepted warnings: RLS-only tenant filtering (18.2), hard delete on config records (18.9), simple ID params without Zod (18.10)
 
 ### Sprint 8 — Decisiones arquitectonicas y sistemas clave
 

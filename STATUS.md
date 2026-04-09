@@ -136,8 +136,13 @@
 - **Security hardening** (2026-04-08): Boneyard bypass dev-only, image proxy auth+SSRF, purge functions dev-only, dropped duplicate RPC overload
 - **Atomic cancel RPCs** (2026-04-08): `cancel_sale` + `cancel_return` RPCs with bundle-aware stock reversal, replacing non-atomic loops
 - **POS UI polish** (2026-04-08): Cofre components in cart, pending sale totals fix, partial OOS labels, nested dialog overlays, cofre edit loads bundle_items
+- **Backend test plan & hardening** (2026-04-09): 227 backend tests (223 passed, 3 accepted warnings), 6 bugs found and fixed
+  - Auth: requireUserId() on all 57 server actions
+  - Fixes: cancel_sale phantom stock, RPC payment validation, bundle component delete guard, transit weeks unique constraint
+  - TEST-PLAN.md: 362 tests (227 backend complete, 135 UI/UX pending manual testing)
 
 ### Pending
+- UI/UX manual testing (135 tests in TEST-PLAN.md)
 - Design A for Inventario hub + Inventario Fisico
 - Final UX polish pass
 - Vercel deployment
