@@ -21,12 +21,13 @@ import type {
 
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
 
-async function getUserId() {
+async function requireUserId(): Promise<string> {
   const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  return user?.id ?? null
+  if (!user) throw new Error("NO_AUTH")
+  return user.id
 }
 
 export async function convertQuoteToSale(input: ConvertQuoteInput) {
@@ -82,7 +83,12 @@ export async function convertQuoteToSale(input: ConvertQuoteInput) {
     }
   }
 
-  const userId = await getUserId()
+  let userId: string
+  try {
+    userId = await requireUserId()
+  } catch {
+    return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  }
 
   // Create the sale using the same atomic RPC
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -188,7 +194,12 @@ export async function createReturn(input: CreateReturnInput) {
     }
   }
 
-  const userId = await getUserId()
+  let userId: string
+  try {
+    userId = await requireUserId()
+  } catch {
+    return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: resultJson, error: rpcError } = await (supabase.rpc as any)(
@@ -236,8 +247,14 @@ export async function cancelSale(input: CancelSaleInput) {
   const parsed = cancelSaleSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  let userId: string
+  try {
+    userId = await requireUserId()
+  } catch {
+    return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
 
   // Atomic: validate sale, reverse stock (bundle-aware), mark cancelled
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -267,8 +284,14 @@ export async function cancelReturn(input: CancelReturnInput) {
   const parsed = cancelReturnSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  let userId: string
+  try {
+    userId = await requireUserId()
+  } catch {
+    return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
 
   // Atomic: validate return, reverse stock (restock + replacements), update sale status
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

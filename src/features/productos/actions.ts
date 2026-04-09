@@ -25,14 +25,25 @@ async function getUserId() {
   return user?.id ?? null
 }
 
+async function requireUserId(): Promise<
+  { userId: string; error?: never } | { userId?: never; error: { _form: string[] } }
+> {
+  const id = await getUserId()
+  if (!id) return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  return { userId: id }
+}
+
 // --- CATEGORIAS ---
 
 export async function createCategory(input: CategoryInput) {
   const parsed = categorySchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const { data, error } = await supabase
     .from("categories")
@@ -60,6 +71,9 @@ export async function updateCategory(id: string, input: CategoryInput) {
   const parsed = categorySchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   const { data, error } = await supabase
@@ -83,6 +97,9 @@ export async function updateCategory(id: string, input: CategoryInput) {
 }
 
 export async function deleteCategory(id: string) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   // Check for active subcategories
@@ -130,6 +147,9 @@ export async function deleteCategory(id: string) {
 // --- PRODUCT ↔ CATEGORY ASSIGNMENTS ---
 
 export async function assignProductToCategory(productId: string, categoryId: string) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   // Validate: only leaf categories (no children) can have products
@@ -166,6 +186,9 @@ export async function assignProductToCategory(productId: string, categoryId: str
 }
 
 export async function removeProductFromCategory(productId: string, categoryId: string) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   const { error } = await supabase
@@ -184,6 +207,9 @@ export async function removeProductFromCategory(productId: string, categoryId: s
 export async function reorderCategories(
   items: { id: string; sort_order: number }[]
 ) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   for (const item of items) {
@@ -206,8 +232,11 @@ export async function createVariantType(input: VariantTypeInput) {
   const parsed = variantTypeSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const { data, error } = await supabase
     .from("variant_types")
@@ -229,8 +258,11 @@ export async function createVariantOption(input: VariantOptionInput) {
   const parsed = variantOptionSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const { data, error } = await supabase
     .from("variant_options")
@@ -255,6 +287,9 @@ export async function updateVariantOption(
   const parsed = variantOptionSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   const { data, error } = await supabase
@@ -275,6 +310,9 @@ export async function updateVariantOption(
 }
 
 export async function deleteVariantOption(id: string) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   const { error } = await supabase
@@ -294,8 +332,11 @@ export async function createProduct(input: CreateProductInput) {
   const parsed = createProductSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const isBundle = parsed.data.is_bundle
 
@@ -441,6 +482,9 @@ export async function updateProduct(id: string, input: CreateProductInput) {
   const parsed = createProductSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   // 1. Validate duplicate SKUs within the form
@@ -543,7 +587,6 @@ export async function updateProduct(id: string, input: CreateProductInput) {
 
       if (updateErr) return { error: { _form: [updateErr.message] } }
     } else {
-      const userId = await getUserId()
       const { error: insertErr } = await supabase.from("product_variants").insert({
         product_id: id,
         name: variant.name ?? null,
@@ -552,7 +595,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
         stock: isBundleProduct ? 0 : variant.stock,
         is_active: variant.is_active ?? true,
         tenant_id: TENANT_ID,
-        created_by: userId,
+        created_by: auth.userId,
       })
 
       if (insertErr) return { error: { _form: [insertErr.message] } }
@@ -573,7 +616,33 @@ export async function updateProduct(id: string, input: CreateProductInput) {
 }
 
 export async function deleteProduct(id: string) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
+
+  // Check if any variant of this product is used as a bundle component
+  const { data: variantIds } = await supabase
+    .from("product_variants")
+    .select("id")
+    .eq("product_id", id)
+    .is("deleted_at", null)
+
+  if (variantIds && variantIds.length > 0) {
+    const ids = variantIds.map((v) => v.id)
+    const { count: bundleCount } = await supabase
+      .from("bundle_items")
+      .select("*", { count: "exact", head: true })
+      .in("product_variant_id", ids)
+
+    if (bundleCount && bundleCount > 0) {
+      return {
+        error: {
+          _form: ["No se puede eliminar: este producto es componente de un cofre"],
+        },
+      }
+    }
+  }
 
   // Soft delete product
   const { error: productError } = await supabase

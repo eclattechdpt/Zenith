@@ -23,14 +23,25 @@ async function getUserId() {
   return user?.id ?? null
 }
 
+async function requireUserId(): Promise<
+  { userId: string; error?: never } | { userId?: never; error: { _form: string[] } }
+> {
+  const id = await getUserId()
+  if (!id) return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  return { userId: id }
+}
+
 // --- CUSTOMERS ---
 
 export async function createCustomer(input: CustomerInput) {
   const parsed = customerSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   // Normalize empty strings to null
   const data = {
@@ -61,6 +72,9 @@ export async function updateCustomer(id: string, input: CustomerInput) {
   const parsed = customerSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   const { data, error } = await supabase
@@ -87,6 +101,9 @@ export async function updateCustomer(id: string, input: CustomerInput) {
 }
 
 export async function deleteCustomer(id: string) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   // Check for active sales
@@ -121,8 +138,11 @@ export async function createPriceList(input: PriceListInput) {
   const parsed = priceListSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const { data, error } = await supabase
     .from("price_lists")
@@ -148,6 +168,9 @@ export async function createPriceList(input: PriceListInput) {
 export async function updatePriceList(id: string, input: PriceListInput) {
   const parsed = priceListSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
 
   const supabase = await createServerClient()
 
@@ -175,6 +198,9 @@ export async function updatePriceList(id: string, input: PriceListInput) {
 }
 
 export async function deletePriceList(id: string) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   // Check for customers using this price list
@@ -209,8 +235,11 @@ export async function setCustomerPrice(input: CustomerPriceInput) {
   const parsed = customerPriceSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const { data, error } = await supabase
     .from("customer_prices")
@@ -234,6 +263,9 @@ export async function setCustomerPrice(input: CustomerPriceInput) {
 }
 
 export async function removeCustomerPrice(id: string) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   const { error } = await supabase

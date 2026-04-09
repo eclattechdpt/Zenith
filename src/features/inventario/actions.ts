@@ -31,6 +31,14 @@ async function getUserId() {
   return user?.id ?? null
 }
 
+async function requireUserId(): Promise<
+  { userId: string; error?: never } | { userId?: never; error: { _form: string[] } }
+> {
+  const id = await getUserId()
+  if (!id) return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  return { userId: id }
+}
+
 function revalidateInventory() {
   revalidatePath("/inventario")
   revalidatePath("/inventario/fisico")
@@ -44,10 +52,13 @@ export async function adjustStock(input: StockAdjustmentInput) {
   const parsed = stockAdjustmentSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const { product_variant_id, new_stock, reason } = parsed.data
 
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const { data: variant, error: readError } = await supabase
     .from("product_variants")
@@ -103,10 +114,13 @@ export async function addStock(input: StockEntryInput) {
   const parsed = stockEntrySchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const { product_variant_id, quantity, reason } = parsed.data
 
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const { data: variant, error: readError } = await supabase
     .from("product_variants")
@@ -160,10 +174,13 @@ export async function adjustInitialStock(input: StockAdjustmentInput) {
   const parsed = stockAdjustmentSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const { product_variant_id, new_stock, reason } = parsed.data
 
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const { data: variant, error: readError } = await supabase
     .from("product_variants")
@@ -219,10 +236,13 @@ export async function addInitialStock(input: StockEntryInput) {
   const parsed = stockEntrySchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const { product_variant_id, quantity, reason } = parsed.data
 
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const { data: variant, error: readError } = await supabase
     .from("product_variants")
@@ -276,10 +296,13 @@ export async function upsertInitialLoadOverride(input: InitialLoadOverrideInput)
   const parsed = initialLoadOverrideSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const { product_variant_id, override_name, override_price, new_stock } = parsed.data
 
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   // Upsert override row
   const { error: overrideError } = await supabase
@@ -376,10 +399,13 @@ export async function createTransitWeek(input: CreateTransitWeekInput) {
   const parsed = createTransitWeekSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const { year, month, week_number, label, notes } = parsed.data
 
   const supabase = await createServerClient()
-  const userId = await getUserId()
+  const userId = auth.userId
 
   const { data, error } = await supabase
     .from("transit_weeks")
@@ -411,6 +437,9 @@ export async function updateTransitWeek(input: UpdateTransitWeekInput) {
   const parsed = updateTransitWeekSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const { id, label, notes } = parsed.data
 
   const supabase = await createServerClient()
@@ -429,6 +458,9 @@ export async function updateTransitWeek(input: UpdateTransitWeekInput) {
 }
 
 export async function deleteTransitWeek(weekId: string) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   const { error } = await supabase
@@ -446,6 +478,9 @@ export async function deleteTransitWeek(weekId: string) {
 export async function addTransitWeekItem(input: TransitWeekItemInput) {
   const parsed = transitWeekItemSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
 
   const { transit_week_id, product_variant_id, quantity, unit_price } = parsed.data
   const line_total = quantity * unit_price
@@ -476,6 +511,9 @@ export async function updateTransitWeekItem(input: UpdateTransitWeekItemInput) {
   const parsed = updateTransitWeekItemSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const { id, quantity, unit_price } = parsed.data
   const line_total = quantity * unit_price
 
@@ -505,6 +543,9 @@ export async function updateTransitWeekItem(input: UpdateTransitWeekItemInput) {
 }
 
 export async function deleteTransitWeekItem(itemId: string) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
   const supabase = await createServerClient()
 
   const { data: item, error: readError } = await supabase

@@ -7,6 +7,15 @@ import { createServerClient } from "@/lib/supabase/server"
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
 const BUCKET = "product-images"
 
+async function requireUserId(): Promise<
+  { userId: string; error?: never } | { userId?: never; error: { _form: string[] } }
+> {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  return { userId: user.id }
+}
+
 /**
  * Updates the image_url for a product (used after client-side optimize+upload).
  */
@@ -14,6 +23,9 @@ export async function updateProductImageUrl(
   productId: string,
   imageUrl: string
 ) {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error._form[0] }
+
   const supabase = await createServerClient()
 
   const { error } = await supabase
@@ -34,6 +46,9 @@ export async function updateProductImageUrl(
  * Returns storage paths.
  */
 export async function listStorageFiles() {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error._form[0] }
+
   const supabase = await createServerClient()
 
   const { data, error } = await supabase.storage
@@ -56,6 +71,9 @@ export async function listStorageFiles() {
  * Finds orphaned files: storage files not linked to any active product.
  */
 export async function findOrphanedFiles() {
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error._form[0] }
+
   const supabase = await createServerClient()
 
   // Get all storage files
@@ -103,6 +121,9 @@ export async function findOrphanedFiles() {
  */
 export async function deleteStorageFiles(paths: string[]) {
   if (paths.length === 0) return { data: 0 }
+
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error._form[0] }
 
   const supabase = await createServerClient()
 

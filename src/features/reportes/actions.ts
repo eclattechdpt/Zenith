@@ -10,11 +10,13 @@ export async function logExport(reportName: string, format: "excel" | "pdf") {
     data: { user },
   } = await supabase.auth.getUser()
 
+  if (!user) return { error: "Tu sesion expiro. Vuelve a iniciar sesion." }
+
   const { error } = await supabase.from("export_logs").insert({
     tenant_id: TENANT_ID,
     report_name: reportName,
     format,
-    exported_by: user?.id ?? null,
+    exported_by: user.id,
   })
 
   if (error) return { error: error.message }
