@@ -359,6 +359,18 @@ No saltar sprints. Cada sprint depende del anterior.
 - **UI consistency fixes** (2026-04-07): status tab buttons use `variant="default"` (not inline accent), mobile card borders normalized to `neutral-100`, mobile card layout fix (buttons on separate row from date/total)
 - **POS variant picker** (2026-04-07): multi-variant products now show picker dialog instead of silently adding first variant. Shows name, price, stock per variant. OOS flow preserved.
 - **Fix: cancelled returns counted in max_returnable** (2026-04-07): return dialog now excludes cancelled returns from already-returned quantity calculation
+- **Cofre (bundle) stock system** (2026-04-08): complete overhaul of how cofres manage stock
+  - Cofre stock is now derived: `min(component_stock)` — never stored manually
+  - Selling a cofre deducts stock from each component product (not the cofre variant)
+  - RPCs modified: `create_sale_transaction` (with `p_skip_components`), `create_pending_sale`, `complete_pending_sale`, `cancel_pending_sale` — all bundle-aware
+  - Partial OOS cofre + vale: sale at full cofre price (skip OOS components) + vale for OOS components at $0
+  - Removed "Cant." input from bundle manager (always 1 per component) and "Stock" input from cofre creation/edit
+  - Stock badges on bundle component items in product wizard
+  - POS product cards, catalog cards, list view, columns all derive cofre stock from components
+  - Inventory list view: cofre rows expandable to show component products with individual stock, actions disabled
+  - Inventory hub low stock alerts: bundle-aware stock derivation
+  - Excel export: cofres appended at end with derived stock and component names
+  - Key files: `src/features/pos/types.ts` (BundleComponent), `src/features/pos/queries.ts` (bundle_items join), `src/features/inventario/components/inventory-list-view.tsx` (expandable cofre rows)
 
 ### Sprint 8 — Decisiones arquitectonicas y sistemas clave
 
@@ -373,6 +385,7 @@ No saltar sprints. Cada sprint depende del anterior.
 - **Client number**: `client_number` column (unique per tenant).
 - **Global discount**: preset picker (from settings) + custom % o $. Disponible en wizard, CartPanel, PaymentDialog, WizardPaymentStep. Stacks con customer pricing.
 - **Sales PDF reports**: weekly (dialog con week picker) y monthly (4x3 month grid picker).
+- **Cofre stock system**: cofre stock = `min(component_stock)`, derived at read-time, never stored. Bundle quantity always 1. RPCs expand bundles for stock deduction. `p_skip_components` param for partial OOS cofre+vale sales. Inventory list view shows expandable cofre rows with component stock.
 
 ### Modulos completados (Sprints 1-7) — resumen
 

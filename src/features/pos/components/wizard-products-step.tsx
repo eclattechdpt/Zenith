@@ -61,7 +61,16 @@ export function WizardProductsStep({
       variant: POSProductWithImage["product_variants"][number]
     ) => {
       const existingItem = items.find((i) => i.variantId === variant.id)
-      const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
+
+      // For bundles, derive stock from components
+      const isBundle = product.is_bundle && product.bundle_items?.length > 0
+      const availableStock = isBundle
+        ? Math.min(
+            ...product.bundle_items.map((bi) =>
+              Math.max(0, bi.product_variants.stock - bi.product_variants.reserved_stock)
+            )
+          )
+        : Math.max(0, variant.stock - variant.reserved_stock)
 
       // For in-stock products, cap quantity at available stock
       // For out-of-stock products (vale candidates), allow unlimited quantity
@@ -91,6 +100,15 @@ export function WizardProductsStep({
         unitPrice: price,
         unitCost: variant.cost,
         stock: availableStock,
+        isBundle,
+        bundleComponents: isBundle
+          ? product.bundle_items.map((bi) => ({
+              variantId: bi.product_variant_id,
+              productName: bi.product_variants.products.name,
+              variantLabel: bi.product_variants.name ?? bi.product_variants.sku ?? "Unica",
+              stock: Math.max(0, bi.product_variants.stock - bi.product_variants.reserved_stock),
+            }))
+          : undefined,
       })
     },
     [addItem, customer, items]
@@ -109,7 +127,15 @@ export function WizardProductsStep({
 
       // Single variant → add directly (with OOS check)
       const variant = activeVariants[0]
-      const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
+      // For bundles, derive stock from components
+      const isBundle = product.is_bundle && product.bundle_items?.length > 0
+      const availableStock = isBundle
+        ? Math.min(
+            ...product.bundle_items.map((bi) =>
+              Math.max(0, bi.product_variants.stock - bi.product_variants.reserved_stock)
+            )
+          )
+        : Math.max(0, variant.stock - variant.reserved_stock)
       const existingItem = items.find((i) => i.variantId === variant.id)
 
       if (availableStock === 0 && !existingItem) {

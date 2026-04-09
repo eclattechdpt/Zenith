@@ -17,8 +17,12 @@ import type {
 
 const VARIANT_SELECT = `id, sku, name, price, stock, initial_stock, stock_min, is_active, product_id,
   products!inner(
-    id, name, brand, has_variants, image_url,
-    product_categories(categories(id, name))
+    id, name, brand, has_variants, is_bundle, image_url,
+    product_categories(categories(id, name)),
+    bundle_items(
+      product_variant_id,
+      product_variants:product_variant_id(id, stock, name, sku, products(name))
+    )
   )`
 
 // ── Search helpers ──
@@ -265,7 +269,15 @@ export function useLowStockAlerts() {
 
       if (error) throw error
 
-      const lowStock = ((data ?? []) as unknown as InventoryVariant[])
+      // Derive stock for bundles, then filter for low stock
+      const all = ((data ?? []) as unknown as InventoryVariant[]).map((v) => {
+        if (v.products.is_bundle && v.products.bundle_items?.length > 0) {
+          return { ...v, stock: Math.min(...v.products.bundle_items.map((bi) => bi.product_variants.stock)) }
+        }
+        return v
+      })
+
+      const lowStock = all
         .filter((v) => v.stock <= 5)
         .sort((a, b) => a.stock - b.stock)
 

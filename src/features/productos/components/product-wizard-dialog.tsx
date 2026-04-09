@@ -583,28 +583,20 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
                 {isBundle ? (
                   <div className="space-y-4">
                     <div className="rounded-xl border border-white/80 bg-white p-4 shadow-sm">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="flex flex-col gap-1.5">
-                          <Label className="text-xs font-medium text-neutral-500">Precio *</Label>
-                          <NumericInput
-                            decimal
-                            prefix="$"
-                            min={0}
-                            step="0.01"
-                            value={variants[0]?.price ?? 0}
-                            onChange={(v) => updateSingleVariant("price", v)}
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <Label className="text-xs font-medium text-neutral-500">Stock</Label>
-                          <NumericInput
-                            min={0}
-                            step="1"
-                            value={variants[0]?.stock ?? 0}
-                            onChange={(v) => updateSingleVariant("stock", v)}
-                          />
-                        </div>
+                      <div className="flex flex-col gap-1.5">
+                        <Label className="text-xs font-medium text-neutral-500">Precio *</Label>
+                        <NumericInput
+                          decimal
+                          prefix="$"
+                          min={0}
+                          step="0.01"
+                          value={variants[0]?.price ?? 0}
+                          onChange={(v) => updateSingleVariant("price", v)}
+                        />
                       </div>
+                      <p className="mt-2 text-xs text-neutral-400">
+                        El stock del cofre se calcula automaticamente del stock de sus productos.
+                      </p>
                     </div>
                     <div className="rounded-xl border border-white/80 bg-white p-4 shadow-sm">
                       <div className="mb-3 flex items-center gap-2">

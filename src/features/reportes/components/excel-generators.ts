@@ -183,7 +183,9 @@ export async function exportInventoryExcel() {
     .from("product_variants")
     .select(
       `id, sku, name, price, stock, stock_min, is_active,
-      products!inner(name, brand, deleted_at)`
+      products!inner(name, brand, is_bundle, deleted_at,
+        bundle_items(product_variant_id, product_variants:product_variant_id(stock, products(name)))
+      )`
     )
     .is("deleted_at", null)
     .is("products.deleted_at", null)
@@ -191,31 +193,43 @@ export async function exportInventoryExcel() {
 
   if (error) throw error
 
-  const rows = (data ?? []).map(
-    (v: {
-      sku: string | null
-      name: string | null
-      price: number
-      stock: number
-      stock_min: number
-      is_active: boolean
-      products: { name: string; brand: string | null }
-    }) => {
-      const prod = v.products as unknown as
-        | { name: string }
-        | { name: string }[]
-      const prodName = Array.isArray(prod) ? prod[0]?.name : prod?.name
+  // Separate regular products and bundles
+  const regularRows: Record<string, unknown>[] = []
+  const bundleRows: Record<string, unknown>[] = []
 
-      const LOW_STOCK_THRESHOLD = 5
-      const estado =
-        v.stock === 0
-          ? "Sin stock"
-          : v.stock <= LOW_STOCK_THRESHOLD
-            ? "Bajo"
-            : "OK"
+  for (const v of data ?? []) {
+    const prod = v.products as unknown as
+      | { name: string; brand: string | null; is_bundle: boolean; bundle_items: { product_variant_id: string; product_variants: { stock: number; products: { name: string } } }[] }
+      | { name: string; brand: string | null; is_bundle: boolean; bundle_items: { product_variant_id: string; product_variants: { stock: number; products: { name: string } } }[] }[]
+    const prodObj = Array.isArray(prod) ? prod[0] : prod
+    const prodName = prodObj?.name ?? "—"
+    const isBundle = prodObj?.is_bundle ?? false
 
-      return {
-        Producto: prodName ?? "—",
+    const LOW_STOCK_THRESHOLD = 5
+
+    if (isBundle) {
+      const components = prodObj?.bundle_items ?? []
+      const derivedStock = components.length > 0
+        ? Math.min(...components.map((bi) => bi.product_variants.stock))
+        : 0
+      const componentNames = components.map((bi) => bi.product_variants.products.name).join(", ")
+      const estado = derivedStock === 0 ? "Sin stock" : derivedStock <= LOW_STOCK_THRESHOLD ? "Bajo" : "OK"
+
+      bundleRows.push({
+        Producto: `${prodName} (Cofre)`,
+        Variante: v.name ?? "—",
+        Codigo: v.sku ?? "—",
+        Precio: Number(v.price),
+        Stock: derivedStock,
+        "Stock Minimo": v.stock_min,
+        Estado: estado,
+        Activo: v.is_active ? "Si" : "No",
+        Componentes: componentNames,
+      })
+    } else {
+      const estado = v.stock === 0 ? "Sin stock" : v.stock <= LOW_STOCK_THRESHOLD ? "Bajo" : "OK"
+      regularRows.push({
+        Producto: prodName,
         Variante: v.name ?? "—",
         Codigo: v.sku ?? "—",
         Precio: Number(v.price),
@@ -223,11 +237,14 @@ export async function exportInventoryExcel() {
         "Stock Minimo": v.stock_min,
         Estado: estado,
         Activo: v.is_active ? "Si" : "No",
-      }
+      })
     }
-  )
+  }
 
-  const ws = XLSX.utils.json_to_sheet(rows)
+  // Combine: regular first, then bundles at the end
+  const allRows = [...regularRows, ...bundleRows]
+
+  const ws = XLSX.utils.json_to_sheet(allRows)
   formatSheet(ws, { currencyCols: [3] })
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Inventario Fisico")

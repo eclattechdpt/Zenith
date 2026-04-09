@@ -132,6 +132,7 @@
 - **POS variant picker** (2026-04-07): Multi-variant products show picker dialog in wizard instead of auto-adding first variant
 - **Fix: max_returnable** (2026-04-07): Return dialog excludes cancelled returns from already-returned count
 - **31 manual tests passed** (2026-04-07): Cancel flows, stock reversal, cross-module checks, mobile layout
+- **Cofre stock system** (2026-04-08): Derived stock (`min(component_stock)`), bundle-aware RPCs, partial OOS cofre+vale, expandable inventory rows, stock badges in bundle manager
 
 ### Pending
 - Design A for Inventario hub + Inventario Fisico

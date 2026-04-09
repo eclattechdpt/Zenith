@@ -10,6 +10,8 @@ import {
   Pencil,
   ChevronDown,
   Layers,
+  Gift,
+  Package,
 } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 
@@ -285,6 +287,8 @@ function ProductRow({
   onEdit,
 }: ProductRowProps) {
   const isMulti = group.variants.length > 1
+  const isBundle = group.productInfo.is_bundle && group.productInfo.bundle_items?.length > 0
+  const isExpandable = isMulti || isBundle
   const status = getStatusConfig(group.worstStatus)
   const product = group.productInfo
 
@@ -322,13 +326,13 @@ function ProductRow({
     <>
       <tr
         className={`border-b border-neutral-100/70 transition-colors duration-150 ${status.rowBg} ${
-          isMulti ? "cursor-pointer" : ""
+          isExpandable ? "cursor-pointer" : ""
         }`}
-        onClick={isMulti ? onToggleExpand : undefined}
+        onClick={isExpandable ? onToggleExpand : undefined}
       >
         {/* Chevron */}
         <td className="py-3.5 pl-3 pr-3">
-          {isMulti ? (
+          {isExpandable ? (
             <motion.div
               animate={{ rotate: isExpanded ? 180 : 0 }}
               transition={{ type: "spring", stiffness: 500, damping: 35 }}
@@ -384,7 +388,12 @@ function ProductRow({
 
         {/* Variantes */}
         <td className="px-3 py-3.5">
-          {isMulti ? (
+          {isBundle ? (
+            <div className="inline-flex items-center gap-1.5 rounded-md bg-amber-50/80 px-2 py-1 text-[11px] font-semibold text-amber-700">
+              <Gift className="h-3 w-3 text-amber-500" />
+              {product.bundle_items.length} productos
+            </div>
+          ) : isMulti ? (
             <div className="inline-flex items-center gap-1.5 rounded-md bg-neutral-100/80 px-2 py-1 text-[11px] font-semibold text-neutral-600">
               <Layers className="h-3 w-3 text-neutral-400" />
               {group.variants.length} variantes
@@ -451,12 +460,12 @@ function ProductRow({
           </div>
         </td>
 
-        {/* Actions — only single-variant rows; multi-variant actions live on expanded sub-rows */}
+        {/* Actions — only single-variant non-bundle rows */}
         <td
           className="py-3.5 pl-3 pr-4"
           onClick={(e) => e.stopPropagation()}
         >
-          {!isMulti && singleVariant && (
+          {!isMulti && !isBundle && singleVariant && (
             <VariantActions
               variant={singleVariant}
               inventoryType={inventoryType}
@@ -469,9 +478,69 @@ function ProductRow({
         </td>
       </tr>
 
+      {/* Expanded: bundle component products */}
+      <AnimatePresence initial={false}>
+        {isBundle && isExpanded && (
+          <tr>
+            <td colSpan={8} className="p-0">
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="border-b border-neutral-100 bg-amber-50/30 px-4 py-3 pl-[76px]">
+                  <div className="mb-2 flex items-center gap-2 px-3 text-[9px] font-bold uppercase tracking-[0.8px] text-amber-600">
+                    <Package className="h-3 w-3" />
+                    Productos del cofre
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    {product.bundle_items.map((bi) => {
+                      const compStock = bi.product_variants.stock
+                      const compStatus = compStock <= 0 ? "sin_stock" : compStock <= 5 ? "bajo" : "ok"
+                      const cfg = getStatusConfig(compStatus as Status)
+                      return (
+                        <div
+                          key={bi.product_variant_id}
+                          className="flex items-center gap-3 rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-neutral-100"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[12px] font-semibold text-neutral-800">
+                              {bi.product_variants.products.name}
+                            </p>
+                            {(bi.product_variants.name || bi.product_variants.sku) && (
+                              <p className="truncate text-[10px] font-medium text-neutral-400">
+                                {bi.product_variants.name ?? bi.product_variants.sku}
+                              </p>
+                            )}
+                          </div>
+                          <div className="w-24 text-right">
+                            <span className={`text-[13px] font-black tabular-nums ${cfg.stockColor}`}>
+                              {compStock}
+                            </span>
+                          </div>
+                          <div className="flex w-24 items-center gap-1.5">
+                            <span className={`h-1.5 w-1.5 rounded-full ${cfg.dotColor}`} />
+                            <span className={`text-[10px] font-semibold ${cfg.textColor}`}>
+                              {cfg.label}
+                            </span>
+                          </div>
+                          <div className="w-8" />
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            </td>
+          </tr>
+        )}
+      </AnimatePresence>
+
       {/* Expanded variant sub-rows */}
       <AnimatePresence initial={false}>
-        {isMulti && isExpanded && (
+        {isMulti && !isBundle && isExpanded && (
           <tr>
             <td colSpan={8} className="p-0">
               <motion.div

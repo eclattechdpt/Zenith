@@ -64,8 +64,49 @@ export function WizardConfirmationStep({
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const getTotal = usePOSStore((s) => s.getTotal)
 
-  const inStockItems = items.filter((i) => i.stock > 0)
-  const outOfStockItems = items.filter((i) => i.stock === 0)
+  // Categorize items — bundles with partial OOS get split
+  const inStockItems: typeof items = []
+  const outOfStockItems: typeof items = []
+  // OOS component variant IDs for bundles (used by split sale to skip deduction)
+  const bundleSkipComponents: string[] = []
+
+  for (const item of items) {
+    if (item.isBundle && item.bundleComponents?.length) {
+      const oosComponents = item.bundleComponents.filter((c) => c.stock === 0)
+      const inStockComponents = item.bundleComponents.filter((c) => c.stock > 0)
+
+      if (oosComponents.length === 0) {
+        // All components in stock → normal sale
+        inStockItems.push(item)
+      } else if (inStockComponents.length === 0) {
+        // All components OOS → full vale for the cofre
+        outOfStockItems.push(item)
+      } else {
+        // Partial OOS → cofre goes to sale at full price, OOS components to vale
+        inStockItems.push(item)
+        for (const comp of oosComponents) {
+          bundleSkipComponents.push(comp.variantId)
+          outOfStockItems.push({
+            variantId: comp.variantId,
+            productId: item.productId,
+            productName: `${comp.productName} (cofre)`,
+            variantLabel: comp.variantLabel,
+            sku: null,
+            quantity: item.quantity,
+            basePrice: 0,
+            unitPrice: 0,
+            unitCost: 0,
+            discount: 0,
+            stock: 0,
+          })
+        }
+      }
+    } else {
+      if (item.stock > 0) inStockItems.push(item)
+      else outOfStockItems.push(item)
+    }
+  }
+
   const hasOutOfStock = outOfStockItems.length > 0
   const isMixedCart = inStockItems.length > 0 && outOfStockItems.length > 0
   const isAllOutOfStock = inStockItems.length === 0 && outOfStockItems.length > 0

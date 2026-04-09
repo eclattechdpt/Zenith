@@ -22,12 +22,26 @@ interface POSProductVariant {
   is_active: boolean
 }
 
+export interface POSBundleItem {
+  product_variant_id: string
+  product_variants: {
+    id: string
+    stock: number
+    reserved_stock: number
+    name: string | null
+    sku: string | null
+    products: { name: string }
+  }
+}
+
 export interface POSProduct {
   id: string
   name: string
   brand: string | null
   has_variants: boolean
+  is_bundle: boolean
   product_variants: POSProductVariant[]
+  bundle_items: POSBundleItem[]
 }
 
 export interface POSProductWithImage {
@@ -35,6 +49,7 @@ export interface POSProductWithImage {
   name: string
   brand: string | null
   has_variants: boolean
+  is_bundle: boolean
   image_url: string | null
   product_variants: {
     id: string
@@ -46,6 +61,7 @@ export interface POSProductWithImage {
     reserved_stock: number
     is_active: boolean
   }[]
+  bundle_items: POSBundleItem[]
 }
 
 // ---------------------------------------------------------------------------
@@ -74,9 +90,16 @@ export function usePOSProducts(search: string) {
       let query = supabase
         .from("products")
         .select(
-          `id, name, brand, has_variants,
+          `id, name, brand, has_variants, is_bundle,
           product_variants:product_variants!product_variants_product_id_fkey(
             id, sku, name, price, cost, stock, is_active
+          ),
+          bundle_items(
+            product_variant_id,
+            product_variants:product_variant_id(
+              id, stock, reserved_stock, name, sku,
+              products(name)
+            )
           )`
         )
         .is("deleted_at", null)
@@ -236,9 +259,16 @@ export function useTopSellingProducts(limit = 10) {
       const { data: products, error } = await supabase
         .from("products")
         .select(
-          `id, name, brand, has_variants, image_url,
+          `id, name, brand, has_variants, is_bundle, image_url,
           product_variants:product_variants!product_variants_product_id_fkey(
             id, sku, name, price, cost, stock, reserved_stock, is_active
+          ),
+          bundle_items(
+            product_variant_id,
+            product_variants:product_variant_id(
+              id, stock, reserved_stock, name, sku,
+              products(name)
+            )
           )`
         )
         .in("id", productIds)
@@ -341,9 +371,16 @@ export function useRecentlySoldProducts(limit = 10) {
       const { data: products, error } = await supabase
         .from("products")
         .select(
-          `id, name, brand, has_variants, image_url,
+          `id, name, brand, has_variants, is_bundle, image_url,
           product_variants:product_variants!product_variants_product_id_fkey(
             id, sku, name, price, cost, stock, reserved_stock, is_active
+          ),
+          bundle_items(
+            product_variant_id,
+            product_variants:product_variant_id(
+              id, stock, reserved_stock, name, sku,
+              products(name)
+            )
           )`
         )
         .in("id", orderedProductIds)
@@ -421,9 +458,16 @@ export function useAllPOSProducts(search: string, categoryIds: string[] | null) 
       let query = supabase
         .from("products")
         .select(
-          `id, name, brand, has_variants, image_url,
+          `id, name, brand, has_variants, is_bundle, image_url,
           product_variants:product_variants!product_variants_product_id_fkey(
             id, sku, name, price, cost, stock, reserved_stock, is_active
+          ),
+          bundle_items(
+            product_variant_id,
+            product_variants:product_variant_id(
+              id, stock, reserved_stock, name, sku,
+              products(name)
+            )
           )`
         )
         .eq("tenant_id", TENANT_ID)

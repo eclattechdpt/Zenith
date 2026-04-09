@@ -282,13 +282,50 @@ export function POSSaleWizard({
       return
     }
 
-    const inStockItems = items.filter((i) => i.stock > 0)
-    const outOfStockItems = items.filter((i) => i.stock === 0)
+    // Categorize items with bundle awareness (same logic as confirmation step)
+    const inStockItems: typeof items = []
+    const outOfStockItems: typeof items = []
+    const skipComponents: string[] = []
+
+    for (const item of items) {
+      if (item.isBundle && item.bundleComponents?.length) {
+        const oosComponents = item.bundleComponents.filter((c) => c.stock === 0)
+        const inStockComponents = item.bundleComponents.filter((c) => c.stock > 0)
+
+        if (oosComponents.length === 0) {
+          inStockItems.push(item)
+        } else if (inStockComponents.length === 0) {
+          outOfStockItems.push(item)
+        } else {
+          // Partial OOS: cofre to sale, OOS components to vale
+          inStockItems.push(item)
+          for (const comp of oosComponents) {
+            skipComponents.push(comp.variantId)
+            outOfStockItems.push({
+              variantId: comp.variantId,
+              productId: item.productId,
+              productName: `${comp.productName} (cofre)`,
+              variantLabel: comp.variantLabel,
+              sku: null,
+              quantity: item.quantity,
+              basePrice: 0,
+              unitPrice: 0,
+              unitCost: 0,
+              discount: 0,
+              stock: 0,
+            })
+          }
+        }
+      } else {
+        if (item.stock > 0) inStockItems.push(item)
+        else outOfStockItems.push(item)
+      }
+    }
 
     if (inStockItems.length === 0 || outOfStockItems.length === 0) return
 
     try {
-      // 1. Create sale for in-stock items
+      // 1. Create sale for in-stock items (bundles deduct components via RPC)
       const saleItems = inStockItems.map((item) => ({
         product_variant_id: item.variantId,
         product_name: item.productName,
@@ -323,6 +360,7 @@ export function POSSaleWizard({
         payments: adjustedPayments.filter((p) => p.amount > 0),
         discount_amount: 0,
         notes: notes || null,
+        skip_components: skipComponents.length > 0 ? skipComponents : undefined,
       })
 
       if (saleResult.error) {
@@ -334,7 +372,7 @@ export function POSSaleWizard({
         return
       }
 
-      // 2. Create vale for out-of-stock items
+      // 2. Create vale for out-of-stock items (includes OOS bundle components at $0)
       const valeItems = outOfStockItems.map((item) => ({
         product_variant_id: item.variantId,
         product_name: item.productName,

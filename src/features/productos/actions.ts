@@ -371,7 +371,7 @@ export async function createProduct(input: CreateProductInput) {
     const bundleRows = parsed.data.bundle_items.map((item) => ({
       bundle_id: product.id,
       product_variant_id: item.product_variant_id,
-      quantity: item.quantity,
+      quantity: 1,
     }))
 
     const { error: bundleError } = await supabase
@@ -385,13 +385,13 @@ export async function createProduct(input: CreateProductInput) {
     }
   }
 
-  // 5. Insert all variants
+  // 5. Insert all variants (bundles get stock=0 since stock is derived from components)
   const variantRows = parsed.data.variants.map((v) => ({
     product_id: product.id,
     name: v.name ?? null,
     sku: v.sku ?? null,
     price: v.price,
-    stock: v.stock,
+    stock: isBundle ? 0 : v.stock,
     is_active: v.is_active ?? true,
     tenant_id: TENANT_ID,
     created_by: userId,
@@ -501,6 +501,21 @@ export async function updateProduct(id: string, input: CreateProductInput) {
     )
   }
 
+  // 4b. Sync bundle items (delete + re-insert)
+  if (parsed.data.is_bundle) {
+    await supabase.from("bundle_items").delete().eq("bundle_id", id)
+    const bundleItems = parsed.data.bundle_items ?? []
+    if (bundleItems.length > 0) {
+      await supabase.from("bundle_items").insert(
+        bundleItems.map((item) => ({
+          bundle_id: id,
+          product_variant_id: item.product_variant_id,
+          quantity: 1,
+        }))
+      )
+    }
+  }
+
   // 5. Get existing variants
   const { data: existingVariants } = await supabase
     .from("product_variants")
@@ -510,7 +525,8 @@ export async function updateProduct(id: string, input: CreateProductInput) {
 
   const existingIds = (existingVariants ?? []).map((v) => v.id)
 
-  // 5. Update or insert variants
+  // 5. Update or insert variants (bundles always have stock=0, derived from components)
+  const isBundleProduct = parsed.data.is_bundle
   for (const variant of parsed.data.variants) {
     if (existingIds.length > 0) {
       const existingId = existingIds.shift()!
@@ -520,7 +536,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
           name: variant.name ?? null,
           sku: variant.sku ?? null,
           price: variant.price,
-          stock: variant.stock,
+          stock: isBundleProduct ? 0 : variant.stock,
           is_active: variant.is_active ?? true,
         })
         .eq("id", existingId)
@@ -533,7 +549,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
         name: variant.name ?? null,
         sku: variant.sku ?? null,
         price: variant.price,
-        stock: variant.stock,
+        stock: isBundleProduct ? 0 : variant.stock,
         is_active: variant.is_active ?? true,
         tenant_id: TENANT_ID,
         created_by: userId,

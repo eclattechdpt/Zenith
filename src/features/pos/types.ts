@@ -5,6 +5,13 @@ export type Sale = Tables<"sales">
 export type SaleItem = Tables<"sale_items">
 export type SalePayment = Tables<"sale_payments">
 
+export interface BundleComponent {
+  variantId: string
+  productName: string
+  variantLabel: string
+  stock: number
+}
+
 export interface CartItem {
   variantId: string
   productId: string
@@ -17,6 +24,8 @@ export interface CartItem {
   unitCost: number
   discount: number
   stock: number
+  isBundle?: boolean
+  bundleComponents?: BundleComponent[]
 }
 
 export interface CartCustomer {

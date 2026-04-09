@@ -22,8 +22,19 @@ export interface InventoryVariant {
     name: string
     brand: string | null
     has_variants: boolean
+    is_bundle: boolean
     image_url: string | null
     product_categories: { categories: { id: string; name: string } | null }[]
+    bundle_items: {
+      product_variant_id: string
+      product_variants: {
+        id: string
+        stock: number
+        name: string | null
+        sku: string | null
+        products: { name: string }
+      }
+    }[]
   }
   // Initial Load overrides (only present when querying initial_load inventory)
   override_name?: string | null

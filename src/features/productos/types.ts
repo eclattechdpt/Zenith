@@ -38,10 +38,22 @@ export type ProductCategoryWithName = {
   categories: Pick<Category, "id" | "name"> | null
 }
 
+export type BundleItemWithStock = {
+  product_variant_id: string
+  product_variants: {
+    id: string
+    stock: number
+    name: string | null
+    sku: string | null
+    products: { name: string }
+  }
+}
+
 export type ProductWithDetails = Product & {
   product_categories: ProductCategoryWithName[]
   product_variants: ProductVariantWithOptions[]
   product_images: ProductImage[]
+  bundle_items: BundleItemWithStock[]
 }
 
 // --- HELPERS ---

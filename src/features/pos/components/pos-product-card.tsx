@@ -39,6 +39,13 @@ function getColorIndex(name: string) {
 }
 
 function getAvailableStock(product: POSProductWithImage) {
+  if (product.is_bundle && product.bundle_items?.length > 0) {
+    return Math.min(
+      ...product.bundle_items.map((bi) =>
+        Math.max(0, bi.product_variants.stock - bi.product_variants.reserved_stock)
+      )
+    )
+  }
   return product.product_variants.reduce(
     (sum, v) => sum + (v.stock - v.reserved_stock),
     0

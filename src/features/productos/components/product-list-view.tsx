@@ -28,6 +28,11 @@ function getPriceRange(product: ProductWithDetails) {
 }
 
 function getTotalStock(product: ProductWithDetails) {
+  if (product.is_bundle && product.bundle_items?.length > 0) {
+    return Math.min(
+      ...product.bundle_items.map((bi) => bi.product_variants.stock)
+    )
+  }
   return product.product_variants
     .filter((v) => v.is_active)
     .reduce((sum, v) => sum + v.stock, 0)

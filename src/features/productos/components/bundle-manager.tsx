@@ -5,7 +5,6 @@ import { Plus, Trash2, Search, Package } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { EmptyState } from "@/components/shared/empty-state"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 
@@ -16,34 +15,6 @@ import type { ProductWithDetails } from "../types"
 interface BundleManagerProps {
   items: BundleItemInput[]
   onChange: (items: BundleItemInput[]) => void
-}
-
-function NumericInput({
-  value,
-  onChange,
-  ...props
-}: Omit<React.ComponentProps<typeof Input>, "value" | "onChange"> & {
-  value: number
-  onChange: (value: number) => void
-}) {
-  const [display, setDisplay] = useState(String(value))
-
-  function handleBlur() {
-    const parsed = parseInt(display)
-    const final = isNaN(parsed) ? 1 : Math.max(1, parsed)
-    onChange(final)
-    setDisplay(String(final))
-  }
-
-  return (
-    <Input
-      {...props}
-      type="number"
-      value={display}
-      onChange={(e) => setDisplay(e.target.value)}
-      onBlur={handleBlur}
-    />
-  )
 }
 
 export function BundleManager({ items, onChange }: BundleManagerProps) {
@@ -66,21 +37,13 @@ export function BundleManager({ items, onChange }: BundleManagerProps) {
   )
 
   function addItem(variant: { id: string }) {
-    onChange([...items, { product_variant_id: variant.id, quantity: 1 }])
+    onChange([...items, { product_variant_id: variant.id }])
     setShowSearch(false)
     setSearchQuery("")
   }
 
   function removeItem(variantId: string) {
     onChange(items.filter((i) => i.product_variant_id !== variantId))
-  }
-
-  function updateQuantity(variantId: string, quantity: number) {
-    onChange(
-      items.map((i) =>
-        i.product_variant_id === variantId ? { ...i, quantity } : i
-      )
-    )
   }
 
   // Resolve variant info from products data
@@ -131,18 +94,19 @@ export function BundleManager({ items, onChange }: BundleManagerProps) {
                     {info?.sku && ` · ${info.sku}`}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs text-neutral-500">Cant.</Label>
-                  <NumericInput
-                    min={1}
-                    step="1"
-                    value={item.quantity}
-                    onChange={(v) =>
-                      updateQuantity(item.product_variant_id, v)
-                    }
-                    className="w-16"
-                  />
-                </div>
+                {info && (
+                  <span
+                    className={`flex-shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
+                      info.stock === 0
+                        ? "bg-rose-50 text-rose-600"
+                        : info.stock <= 5
+                          ? "bg-amber-50 text-amber-600"
+                          : "bg-emerald-50 text-emerald-600"
+                    }`}
+                  >
+                    {info.stock === 0 ? "Sin stock" : `${info.stock} en stock`}
+                  </span>
+                )}
                 <Button
                   type="button"
                   variant="ghost"

@@ -47,7 +47,7 @@ export async function createSale(input: CreateSaleInput) {
   const parsed = createSaleSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  const { items, payments, customer_id, discount_amount, notes } = parsed.data
+  const { items, payments, customer_id, discount_amount, notes, skip_components } = parsed.data
 
   // Calculate totals
   const subtotal = items.reduce(
@@ -107,6 +107,7 @@ export async function createSale(input: CreateSaleInput) {
         amount: p.amount,
         reference: p.reference ?? null,
       })),
+      p_skip_components: skip_components ?? [],
     }
   )
 

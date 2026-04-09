@@ -255,16 +255,38 @@ export function InventoryTable({
   const activeQuery =
     inventoryType === "physical" ? physicalQuery : initialLoadQuery
 
-  const variants = activeQuery.data ?? []
+  // Post-process: override stock for bundles with derived min(component stocks)
+  const variants = useMemo(() => {
+    const raw = activeQuery.data ?? []
+    return raw.map((v) => {
+      if (v.products.is_bundle && v.products.bundle_items?.length > 0) {
+        const derivedStock = Math.min(
+          ...v.products.bundle_items.map((bi) => bi.product_variants.stock)
+        )
+        return { ...v, stock: derivedStock }
+      }
+      return v
+    })
+  }, [activeQuery.data])
+
   const isLoading = activeQuery.isLoading
   const isFetched = activeQuery.isFetched
   const isFetching = activeQuery.isFetching
   const hasLoadedOnce = isFetched
   const resultCount = variants.length
 
-  // ── Dialog state ──
+  // ── Dialog state (bundles can't adjust or add stock) ──
   const [adjustTarget, setAdjustTarget] = useState<InventoryVariant | null>(null)
-  const [entryTarget, setEntryTarget] = useState<InventoryVariant | null>(null)
+  const handleAdjust = useCallback((v: InventoryVariant | null) => {
+    if (v?.products.is_bundle) return
+    setAdjustTarget(v)
+  }, [])
+  const [entryTargetRaw, setEntryTarget] = useState<InventoryVariant | null>(null)
+  const handleAddStock = useCallback((v: InventoryVariant | null) => {
+    if (v?.products.is_bundle) return
+    setEntryTarget(v)
+  }, [])
+  const entryTarget = entryTargetRaw
   const [historyTarget, setHistoryTarget] = useState<InventoryVariant | null>(null)
   const [editTarget, setEditTarget] = useState<InventoryVariant | null>(null)
 
@@ -662,8 +684,8 @@ export function InventoryTable({
                     variant={v}
                     inventoryType={inventoryType}
                     visible={visible}
-                    onAdjust={setAdjustTarget}
-                    onAddStock={setEntryTarget}
+                    onAdjust={handleAdjust}
+                    onAddStock={handleAddStock}
                     onHistory={setHistoryTarget}
                     onEdit={inventoryType === "initial_load" ? setEditTarget : undefined}
                   />
@@ -698,8 +720,8 @@ export function InventoryTable({
                       variant={v}
                       inventoryType={inventoryType}
                       visible={visible}
-                      onAdjust={setAdjustTarget}
-                      onAddStock={setEntryTarget}
+                      onAdjust={handleAdjust}
+                      onAddStock={handleAddStock}
                       onHistory={setHistoryTarget}
                       onEdit={inventoryType === "initial_load" ? setEditTarget : undefined}
                     />
@@ -711,8 +733,8 @@ export function InventoryTable({
                 variants={variants}
                 inventoryType={inventoryType}
                 visible={visible}
-                onAdjust={setAdjustTarget}
-                onAddStock={setEntryTarget}
+                onAdjust={handleAdjust}
+                onAddStock={handleAddStock}
                 onHistory={setHistoryTarget}
                 onEdit={inventoryType === "initial_load" ? setEditTarget : undefined}
               />

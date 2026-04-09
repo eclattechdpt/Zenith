@@ -73,7 +73,6 @@ export const variantSchema = z.object({
 
 export const bundleItemSchema = z.object({
   product_variant_id: zUuid("Selecciona una variante"),
-  quantity: z.coerce.number().int().min(1, "Minimo 1 unidad"),
 })
 
 export const createProductSchema = productSchema.extend({

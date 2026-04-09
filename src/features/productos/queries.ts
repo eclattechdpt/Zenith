@@ -39,7 +39,8 @@ export function useProducts(filters?: ProductFilters) {
               )
             )
           ),
-          product_images:product_images(id, storage_path, sort_order)`
+          product_images:product_images(id, storage_path, sort_order),
+          bundle_items(product_variant_id, product_variants:product_variant_id(id, stock, name, sku, products(name)))`
         )
         .is("deleted_at", null)
         .is("product_variants.deleted_at", null)
@@ -119,7 +120,8 @@ export function useProduct(id: string) {
               )
             )
           ),
-          product_images:product_images(id, storage_path, sort_order)`
+          product_images:product_images(id, storage_path, sort_order),
+          bundle_items(product_variant_id, product_variants:product_variant_id(id, stock, name, sku, products(name)))`
         )
         .eq("id", id)
         .is("deleted_at", null)
