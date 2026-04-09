@@ -385,6 +385,16 @@ No saltar sprints. Cada sprint depende del anterior.
   - Fix (18.2): all UPDATE/SELECT/DELETE queries now include `tenant_id` filter — defense-in-depth with RLS. Child tables verify parent tenant via join
   - Fix (18.9): junction/config hard deletes (`removeCustomerPrice`, `removeProductFromCategory`, `deleteTransitWeekItem`) now tenant-scoped. Hard delete retained by design for stateless join records
   - Fix (18.10): shared `zUUID` schema (`src/lib/validation.ts`) with `validateId()`/`validateIds()` helpers. All 16 simple-param actions now validate IDs. `logExport` validates via dedicated schema
+- **Discount UI redesign** (2026-04-09): PriceListManager completely rewritten for design consistency with categories
+  - Teal-themed discount cards: gradient left stripe, large percentage badge, client count pill (Users icon), mini price example (strikethrough → discounted), hover-reveal actions
+  - Create/Edit dialog: hero header with teal gradient icon, two styled sections (info card + teal discount card), live price preview ($1,000 → discounted → savings)
+  - Empty state: dashed teal border, floating animated Percent icon, CTA button
+  - Add button: dashed teal outline, hover teal tint
+  - Staggered spring entrance animations, AnimatePresence for add/remove
+  - CustomerPriceEditor: teal gradient header, animated empty state, teal search results panel, "Precios activos" label with count badge
+  - `usePriceLists` query enhanced to include per-list `client_count` (backwards compatible)
+  - Customer detail sheet: added top spacing between close button and content
+  - Key files: `src/features/clientes/components/price-list-manager.tsx`, `src/features/clientes/components/customer-price-editor.tsx`, `src/features/clientes/queries.ts`
 
 ### Sprint 8 — Decisiones arquitectonicas y sistemas clave
 

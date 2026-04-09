@@ -227,7 +227,7 @@ export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps)
             {sale && (
             <div className="flex flex-col max-h-[90vh] overflow-y-auto">
               {/* ── Header ── */}
-              <div className="flex-shrink-0 px-6 pt-10 pb-4">
+              <div className="flex-shrink-0 px-6 pt-14 pb-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[2px] text-neutral-400">

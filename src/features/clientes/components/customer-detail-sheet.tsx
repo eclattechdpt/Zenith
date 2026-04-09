@@ -124,7 +124,7 @@ export function CustomerDetailSheet({
         {customer && (
           <div className="flex flex-1 flex-col overflow-hidden">
             {/* ── Client info card ── */}
-            <div className="flex-shrink-0 px-6 pb-5">
+            <div className="flex-shrink-0 px-6 pt-8 pb-5">
               <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50/60 to-white p-5">
                 <div className="flex items-start gap-4">
                   <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-teal-500/10">

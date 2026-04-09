@@ -168,10 +168,12 @@ export function useCustomerStats() {
 
 // --- PRICE LISTS ---
 
+export type PriceListWithClientCount = PriceList & { client_count: number }
+
 export function usePriceLists() {
   return useQuery({
     queryKey: ["price-lists"],
-    queryFn: async (): Promise<PriceList[]> => {
+    queryFn: async (): Promise<PriceListWithClientCount[]> => {
       const supabase = createClient()
 
       const { data, error } = await supabase
@@ -181,7 +183,25 @@ export function usePriceLists() {
         .order("name")
 
       if (error) throw error
-      return (data ?? []) as PriceList[]
+
+      // Get customer counts per price list
+      const { data: customers } = await supabase
+        .from("customers")
+        .select("price_list_id")
+        .is("deleted_at", null)
+        .not("price_list_id", "is", null)
+
+      const countMap = new Map<string, number>()
+      for (const c of customers ?? []) {
+        if (c.price_list_id) {
+          countMap.set(c.price_list_id, (countMap.get(c.price_list_id) ?? 0) + 1)
+        }
+      }
+
+      return (data ?? []).map((pl) => ({
+        ...pl,
+        client_count: countMap.get(pl.id) ?? 0,
+      })) as PriceListWithClientCount[]
     },
   })
 }

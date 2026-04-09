@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: "Eclat POS",
   description: "Sistema de punto de venta inteligente",
   icons: {
-    icon: "/PinkIcon.svg",
+    icon: "/Eclat_Decorative_Emblem.svg",
   },
 }
 

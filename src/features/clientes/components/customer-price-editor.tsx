@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useRef } from "react"
 import { useQueryClient } from "@tanstack/react-query"
-import { Search, Trash2, Loader2, Tag, X } from "lucide-react"
+import { Search, Trash2, Loader2, Tag, X, Package } from "lucide-react"
+import { motion, AnimatePresence } from "motion/react"
 import { sileo } from "sileo"
 
 import { Button } from "@/components/ui/button"
@@ -177,31 +178,37 @@ export function CustomerPriceEditor({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Tag className="size-4" />
-              Precios: {priceList.name}
-            </DialogTitle>
-            <p className="text-xs text-neutral-500">
-              {Number(priceList.discount_percent) > 0
-                ? `Descuento base: ${priceList.discount_percent}%. Los precios especificos tienen prioridad sobre el descuento.`
-                : "Sin descuento base. Agrega precios especificos por variante."}
-            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 shadow-md shadow-teal-500/20">
+                <Tag className="size-4.5 text-white" strokeWidth={2.5} />
+              </div>
+              <div>
+                <DialogTitle className="text-base">
+                  Precios: {priceList.name}
+                </DialogTitle>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  {Number(priceList.discount_percent) > 0
+                    ? `Descuento base: ${priceList.discount_percent}% · Los precios especificos tienen prioridad`
+                    : "Sin descuento base · Agrega precios especificos por variante"}
+                </p>
+              </div>
+            </div>
           </DialogHeader>
 
           {/* Search to add new overrides */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-neutral-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-teal-400" />
             <Input
               placeholder="Buscar producto para agregar precio..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-9"
+              className="pl-9 pr-9 focus-visible:ring-teal-300"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
               >
                 <X className="size-3.5" />
               </button>
@@ -209,25 +216,35 @@ export function CustomerPriceEditor({
           </div>
 
           {/* Search results */}
-          {search.trim() && (
-            <div className="max-h-48 overflow-y-auto rounded-lg border border-input divide-y divide-neutral-100">
-              {filteredVariants.length === 0 ? (
-                <p className="px-4 py-3 text-sm text-neutral-500">
-                  No se encontraron productos
-                </p>
-              ) : (
-                filteredVariants.map((v) => (
-                  <SearchResultRow
-                    key={v.variantId}
-                    variant={v}
-                    discountPercent={Number(priceList.discount_percent)}
-                    isSaving={savingVariantId === v.variantId}
-                    onSetPrice={(price) => handleSetPrice(v.variantId, price)}
-                  />
-                ))
-              )}
-            </div>
-          )}
+          <AnimatePresence>
+            {search.trim() && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.15 }}
+                className="overflow-hidden"
+              >
+                <div className="max-h-48 overflow-y-auto rounded-xl border border-teal-100 bg-teal-50/30 divide-y divide-teal-100/60">
+                  {filteredVariants.length === 0 ? (
+                    <p className="px-4 py-3 text-sm text-neutral-500">
+                      No se encontraron productos
+                    </p>
+                  ) : (
+                    filteredVariants.map((v) => (
+                      <SearchResultRow
+                        key={v.variantId}
+                        variant={v}
+                        discountPercent={Number(priceList.discount_percent)}
+                        isSaving={savingVariantId === v.variantId}
+                        onSetPrice={(price) => handleSetPrice(v.variantId, price)}
+                      />
+                    ))
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Existing overrides */}
           <div className="flex-1 min-h-0 overflow-y-auto">
@@ -236,20 +253,30 @@ export function CustomerPriceEditor({
                 <Loader2 className="size-5 animate-spin text-neutral-400" />
               </div>
             ) : customerPrices.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <Tag className="size-8 text-neutral-300 mb-2" />
-                <p className="text-sm text-neutral-500">
+              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-teal-200/50 bg-teal-50/20 py-10 text-center">
+                <motion.div
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+                >
+                  <Package className="size-8 text-teal-300" strokeWidth={1.5} />
+                </motion.div>
+                <p className="mt-3 text-sm font-medium text-neutral-500">
                   Sin precios especificos
                 </p>
-                <p className="text-xs text-neutral-400 mt-1">
-                  Busca un producto arriba para agregar un precio
+                <p className="mt-1 text-xs text-neutral-400">
+                  Busca un producto arriba para agregar un precio personalizado
                 </p>
               </div>
             ) : (
               <div className="divide-y divide-neutral-100">
-                <p className="text-xs font-medium text-neutral-500 px-1 pb-2">
-                  {customerPrices.length} precio{customerPrices.length !== 1 && "s"} especifico{customerPrices.length !== 1 && "s"}
-                </p>
+                <div className="flex items-center gap-2 px-1 pb-2.5">
+                  <p className="text-[10px] font-bold uppercase tracking-[1.5px] text-neutral-400">
+                    Precios activos
+                  </p>
+                  <Badge variant="secondary" className="bg-teal-100/60 text-teal-700 text-[9px] px-1.5 py-0">
+                    {customerPrices.length}
+                  </Badge>
+                </div>
                 {customerPrices.map((cp) => (
                   <OverrideRow
                     key={cp.id}

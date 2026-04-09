@@ -140,6 +140,8 @@
   - Auth: requireUserId() on all 57 server actions
   - Fixes: cancel_sale phantom stock, RPC payment validation, bundle component delete guard, transit weeks unique constraint
   - TEST-PLAN.md: 362 tests (227 backend complete, 135 UI/UX pending manual testing)
+- **Discount UI redesign** (2026-04-09): PriceListManager rewritten — teal-themed cards with gradient stripes, percentage badges, client counts, hover-reveal actions, live price preview in dialog, animated empty state, CustomerPriceEditor polished with teal header and animated states
+- **Customer detail sheet spacing** (2026-04-09): Added top padding between close button and content
 
 ### Pending
 - UI/UX manual testing (135 tests in TEST-PLAN.md)
