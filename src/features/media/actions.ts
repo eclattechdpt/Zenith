@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { createServerClient } from "@/lib/supabase/server"
+import { validateId } from "@/lib/validation"
 
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
 const BUCKET = "product-images"
@@ -23,6 +24,9 @@ export async function updateProductImageUrl(
   productId: string,
   imageUrl: string
 ) {
+  const idErr = validateId(productId)
+  if (idErr) return { error: "ID con formato invalido" }
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error._form[0] }
 

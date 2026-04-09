@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { createServerClient } from "@/lib/supabase/server"
+import { validateId } from "@/lib/validation"
 
 import {
   createSaleSchema,
@@ -303,6 +304,9 @@ export async function completePendingSale(input: CompletePendingSaleInput) {
 }
 
 export async function cancelPendingSale(saleId: string) {
+  const idErr = validateId(saleId)
+  if (idErr) return idErr
+
   let userId: string
   try {
     userId = await requireUserId()

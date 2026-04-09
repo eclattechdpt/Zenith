@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { createServerClient } from "@/lib/supabase/server"
+import { validateId } from "@/lib/validation"
 
 import {
   stockAdjustmentSchema,
@@ -388,6 +389,7 @@ async function recalcWeekTotal(supabase: Awaited<ReturnType<typeof createServerC
     .from("transit_weeks")
     .update({ total_value: total })
     .eq("id", weekId)
+    .eq("tenant_id", TENANT_ID)
     .is("deleted_at", null)
 
   if (updateError) {
@@ -448,6 +450,7 @@ export async function updateTransitWeek(input: UpdateTransitWeekInput) {
     .from("transit_weeks")
     .update({ label: label ?? null, notes: notes ?? null })
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
     .select()
     .single()
 
@@ -458,6 +461,9 @@ export async function updateTransitWeek(input: UpdateTransitWeekInput) {
 }
 
 export async function deleteTransitWeek(weekId: string) {
+  const idErr = validateId(weekId)
+  if (idErr) return idErr
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
@@ -467,6 +473,7 @@ export async function deleteTransitWeek(weekId: string) {
     .from("transit_weeks")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", weekId)
+    .eq("tenant_id", TENANT_ID)
 
   if (error) return { error: { _form: [error.message] } }
 
@@ -543,18 +550,26 @@ export async function updateTransitWeekItem(input: UpdateTransitWeekItemInput) {
 }
 
 export async function deleteTransitWeekItem(itemId: string) {
+  const idErr = validateId(itemId)
+  if (idErr) return idErr
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
   const supabase = await createServerClient()
 
+  // Fetch item + verify parent week belongs to this tenant
   const { data: item, error: readError } = await supabase
     .from("transit_week_items")
-    .select("transit_week_id")
+    .select("transit_week_id, transit_weeks!inner(tenant_id)")
     .eq("id", itemId)
     .single()
 
   if (readError || !item) return { error: { _form: ["No se encontró el item"] } }
+
+  // Defense-in-depth: verify tenant ownership via parent
+  const parentTenant = (item as unknown as { transit_weeks: { tenant_id: string } }).transit_weeks.tenant_id
+  if (parentTenant !== TENANT_ID) return { error: { _form: ["No se encontró el item"] } }
 
   const { error } = await supabase
     .from("transit_week_items")

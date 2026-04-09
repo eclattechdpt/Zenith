@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { createServerClient } from "@/lib/supabase/server"
+import { validateId } from "@/lib/validation"
 
 import {
   customerSchema,
@@ -69,6 +70,9 @@ export async function createCustomer(input: CustomerInput) {
 }
 
 export async function updateCustomer(id: string, input: CustomerInput) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const parsed = customerSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
@@ -89,6 +93,7 @@ export async function updateCustomer(id: string, input: CustomerInput) {
       price_list_id: parsed.data.price_list_id || null,
     })
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
     .is("deleted_at", null)
     .select()
     .single()
@@ -101,6 +106,9 @@ export async function updateCustomer(id: string, input: CustomerInput) {
 }
 
 export async function deleteCustomer(id: string) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
@@ -111,6 +119,7 @@ export async function deleteCustomer(id: string) {
     .from("sales")
     .select("*", { count: "exact", head: true })
     .eq("customer_id", id)
+    .eq("tenant_id", TENANT_ID)
     .is("deleted_at", null)
 
   if (count && count > 0) {
@@ -125,6 +134,7 @@ export async function deleteCustomer(id: string) {
     .from("customers")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
 
   if (error) return { error: { _form: [error.message] } }
 
@@ -166,6 +176,9 @@ export async function createPriceList(input: PriceListInput) {
 }
 
 export async function updatePriceList(id: string, input: PriceListInput) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const parsed = priceListSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
@@ -182,6 +195,7 @@ export async function updatePriceList(id: string, input: PriceListInput) {
       discount_percent: parsed.data.discount_percent,
     })
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
     .is("deleted_at", null)
     .select()
     .single()
@@ -198,6 +212,9 @@ export async function updatePriceList(id: string, input: PriceListInput) {
 }
 
 export async function deletePriceList(id: string) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
@@ -208,6 +225,7 @@ export async function deletePriceList(id: string) {
     .from("customers")
     .select("*", { count: "exact", head: true })
     .eq("price_list_id", id)
+    .eq("tenant_id", TENANT_ID)
     .is("deleted_at", null)
 
   if (count && count > 0) {
@@ -222,6 +240,7 @@ export async function deletePriceList(id: string) {
     .from("price_lists")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
 
   if (error) return { error: { _form: [error.message] } }
 
@@ -263,6 +282,9 @@ export async function setCustomerPrice(input: CustomerPriceInput) {
 }
 
 export async function removeCustomerPrice(id: string) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
@@ -272,6 +294,7 @@ export async function removeCustomerPrice(id: string) {
     .from("customer_prices")
     .delete()
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
 
   if (error) return { error: { _form: [error.message] } }
 

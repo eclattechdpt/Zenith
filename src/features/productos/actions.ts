@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { createServerClient } from "@/lib/supabase/server"
+import { validateId, validateIds } from "@/lib/validation"
 
 import {
   categorySchema,
@@ -68,6 +69,9 @@ export async function createCategory(input: CategoryInput) {
 }
 
 export async function updateCategory(id: string, input: CategoryInput) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const parsed = categorySchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
@@ -80,6 +84,7 @@ export async function updateCategory(id: string, input: CategoryInput) {
     .from("categories")
     .update(parsed.data)
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
     .is("deleted_at", null)
     .select()
     .single()
@@ -97,6 +102,9 @@ export async function updateCategory(id: string, input: CategoryInput) {
 }
 
 export async function deleteCategory(id: string) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
@@ -107,6 +115,7 @@ export async function deleteCategory(id: string) {
     .from("categories")
     .select("*", { count: "exact", head: true })
     .eq("parent_id", id)
+    .eq("tenant_id", TENANT_ID)
     .is("deleted_at", null)
 
   if (childCount && childCount > 0) {
@@ -122,6 +131,7 @@ export async function deleteCategory(id: string) {
     .from("product_categories")
     .select("*, products!inner(id)", { count: "exact", head: true })
     .eq("category_id", id)
+    .eq("tenant_id", TENANT_ID)
     .is("products.deleted_at", null)
 
   if (count && count > 0) {
@@ -136,6 +146,7 @@ export async function deleteCategory(id: string) {
     .from("categories")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
 
   if (error) return { error: { _form: [error.message] } }
 
@@ -147,6 +158,9 @@ export async function deleteCategory(id: string) {
 // --- PRODUCT ↔ CATEGORY ASSIGNMENTS ---
 
 export async function assignProductToCategory(productId: string, categoryId: string) {
+  const idErr = validateIds({ productId, categoryId })
+  if (idErr) return idErr
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
@@ -157,6 +171,7 @@ export async function assignProductToCategory(productId: string, categoryId: str
     .from("categories")
     .select("*", { count: "exact", head: true })
     .eq("parent_id", categoryId)
+    .eq("tenant_id", TENANT_ID)
     .is("deleted_at", null)
 
   if (childCount && childCount > 0) {
@@ -169,6 +184,7 @@ export async function assignProductToCategory(productId: string, categoryId: str
     .select("*", { count: "exact", head: true })
     .eq("product_id", productId)
     .eq("category_id", categoryId)
+    .eq("tenant_id", TENANT_ID)
 
   if (count && count > 0) {
     return { error: { _form: ["El producto ya pertenece a esta categoria"] } }
@@ -186,6 +202,9 @@ export async function assignProductToCategory(productId: string, categoryId: str
 }
 
 export async function removeProductFromCategory(productId: string, categoryId: string) {
+  const idErr = validateIds({ productId, categoryId })
+  if (idErr) return idErr
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
@@ -196,6 +215,7 @@ export async function removeProductFromCategory(productId: string, categoryId: s
     .delete()
     .eq("product_id", productId)
     .eq("category_id", categoryId)
+    .eq("tenant_id", TENANT_ID)
 
   if (error) return { error: { _form: [error.message] } }
 
@@ -217,6 +237,7 @@ export async function reorderCategories(
       .from("categories")
       .update({ sort_order: item.sort_order })
       .eq("id", item.id)
+      .eq("tenant_id", TENANT_ID)
 
     if (error) return { error: { _form: [error.message] } }
   }
@@ -284,6 +305,9 @@ export async function updateVariantOption(
   id: string,
   input: VariantOptionInput
 ) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const parsed = variantOptionSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
@@ -300,6 +324,7 @@ export async function updateVariantOption(
       sort_order: parsed.data.sort_order,
     })
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
     .select()
     .single()
 
@@ -310,6 +335,9 @@ export async function updateVariantOption(
 }
 
 export async function deleteVariantOption(id: string) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
@@ -319,6 +347,7 @@ export async function deleteVariantOption(id: string) {
     .from("variant_options")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
 
   if (error) return { error: { _form: [error.message] } }
 
@@ -479,6 +508,9 @@ export async function createProduct(input: CreateProductInput) {
 }
 
 export async function updateProduct(id: string, input: CreateProductInput) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const parsed = createProductSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
@@ -526,6 +558,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
       is_bundle: parsed.data.is_bundle,
     })
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
     .is("deleted_at", null)
     .select()
     .single()
@@ -533,7 +566,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
   if (error) return { error: { _form: [error.message] } }
 
   // 4. Sync category associations (delete + re-insert)
-  await supabase.from("product_categories").delete().eq("product_id", id)
+  await supabase.from("product_categories").delete().eq("product_id", id).eq("tenant_id", TENANT_ID)
   const categoryIds = parsed.data.category_ids ?? []
   if (categoryIds.length > 0) {
     await supabase.from("product_categories").insert(
@@ -584,6 +617,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
           is_active: variant.is_active ?? true,
         })
         .eq("id", existingId)
+        .eq("tenant_id", TENANT_ID)
 
       if (updateErr) return { error: { _form: [updateErr.message] } }
     } else {
@@ -608,6 +642,7 @@ export async function updateProduct(id: string, input: CreateProductInput) {
       .from("product_variants")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", leftoverId)
+      .eq("tenant_id", TENANT_ID)
   }
 
   revalidatePath("/productos")
@@ -616,6 +651,9 @@ export async function updateProduct(id: string, input: CreateProductInput) {
 }
 
 export async function deleteProduct(id: string) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
@@ -626,6 +664,7 @@ export async function deleteProduct(id: string) {
     .from("product_variants")
     .select("id")
     .eq("product_id", id)
+    .eq("tenant_id", TENANT_ID)
     .is("deleted_at", null)
 
   if (variantIds && variantIds.length > 0) {
@@ -649,6 +688,7 @@ export async function deleteProduct(id: string) {
     .from("products")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
 
   if (productError) return { error: { _form: [productError.message] } }
 
@@ -657,12 +697,14 @@ export async function deleteProduct(id: string) {
     .from("product_variants")
     .update({ deleted_at: new Date().toISOString() })
     .eq("product_id", id)
+    .eq("tenant_id", TENANT_ID)
 
   // Clean up category assignments so counts stay accurate
   await supabase
     .from("product_categories")
     .delete()
     .eq("product_id", id)
+    .eq("tenant_id", TENANT_ID)
 
   revalidatePath("/productos")
   revalidatePath("/configuracion")
