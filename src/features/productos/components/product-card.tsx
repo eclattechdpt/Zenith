@@ -165,9 +165,19 @@ export const ProductCard = memo(function ProductCard({
                 {priceRange}
               </p>
             )}
-            <p className="text-[10px] tabular-nums text-neutral-400">
-              <span className="font-bold text-neutral-500">{totalStock}</span> en stock
-            </p>
+            {product.is_bundle && product.bundle_items?.length > 0 && totalStock === 0 ? (() => {
+              const oosCount = product.bundle_items.filter((bi) => bi.product_variants.stock === 0).length
+              const isAllOos = oosCount === product.bundle_items.length
+              return (
+                <p className="text-[10px] font-bold text-rose-500">
+                  {isAllOos ? "Sin stock" : `${oosCount} producto${oosCount !== 1 ? "s" : ""} sin stock`}
+                </p>
+              )
+            })() : (
+              <p className="text-[10px] tabular-nums text-neutral-400">
+                <span className="font-bold text-neutral-500">{totalStock}</span> en stock
+              </p>
+            )}
           </div>
 
           {/* Variants toggle */}

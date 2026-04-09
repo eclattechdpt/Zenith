@@ -89,6 +89,9 @@ function productToFormValues(product: ProductWithDetails): Partial<CreateProduct
       stock: v.stock,
       is_active: v.is_active,
     })),
+    bundle_items: (product.bundle_items ?? []).map((bi) => ({
+      product_variant_id: bi.product_variant_id,
+    })),
   }
 }
 

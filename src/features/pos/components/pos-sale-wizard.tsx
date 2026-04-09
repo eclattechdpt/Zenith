@@ -65,6 +65,7 @@ export function POSSaleWizard({
   const [saleResult, setSaleResult] = useState<{ sale_number: string } | null>(
     null
   )
+  const [wasPending, setWasPending] = useState(false)
 
   const queryClient = useQueryClient()
   const isOnline = useOnlineStatus()
@@ -207,6 +208,7 @@ export function POSSaleWizard({
         sileo.error({ title: msg })
         return
       }
+      setWasPending(true)
       setSaleResult({ sale_number: result.data!.sale_number })
       sileo.success({ title: "Venta guardada como pendiente", description: "Recuerda cobrar esta venta desde la seccion de ventas pendientes." })
       clear()
@@ -482,6 +484,7 @@ export function POSSaleWizard({
     setStepIndex(0)
     setPayments([])
     setSaleResult(null)
+    setWasPending(false)
     onClose()
   }, [onClose])
 
@@ -601,6 +604,8 @@ export function POSSaleWizard({
                   onBack={goBack}
                   onClose={handleClose}
                   saleResult={saleResult}
+                  pendingSale={mode === "complete-pending" && pendingSale ? { subtotal: pendingSale.subtotal, discount_amount: pendingSale.discount_amount, total: pendingSale.total } : null}
+                  wasPending={wasPending}
                 />
               )}
             </motion.div>

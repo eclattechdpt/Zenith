@@ -96,7 +96,13 @@ export const POSProductCard = memo(function POSProductCard({
       {/* Stock badge — always visible */}
       {outOfStock ? (
         <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-md bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-600">
-          Sin stock
+          {(() => {
+            if (product.is_bundle && product.bundle_items?.length > 0) {
+              const oosCount = product.bundle_items.filter((bi) => bi.product_variants.stock - bi.product_variants.reserved_stock <= 0).length
+              if (oosCount < product.bundle_items.length) return `${oosCount} producto${oosCount !== 1 ? "s" : ""} sin stock`
+            }
+            return "Sin stock"
+          })()}
         </span>
       ) : lowStock ? (
         <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-600">

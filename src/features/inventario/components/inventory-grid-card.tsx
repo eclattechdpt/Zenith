@@ -109,7 +109,13 @@ export function InventoryGridCard({
       {isOutOfStock && (
         <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-md bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-600">
           <AlertCircle className="h-3 w-3" />
-          Sin stock
+          {(() => {
+            if (v.products.is_bundle && v.products.bundle_items?.length > 0) {
+              const oosCount = v.products.bundle_items.filter((bi) => bi.product_variants.stock <= 0).length
+              if (oosCount < v.products.bundle_items.length) return `${oosCount} producto${oosCount !== 1 ? "s" : ""} sin stock`
+            }
+            return "Sin stock"
+          })()}
         </span>
       )}
 

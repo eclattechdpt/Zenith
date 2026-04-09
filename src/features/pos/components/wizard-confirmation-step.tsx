@@ -20,7 +20,6 @@ import { cn } from "@/lib/utils"
 import { formatCurrency } from "@/lib/utils"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 import { PAYMENT_METHODS } from "@/lib/constants"
-import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { usePOSStore } from "../store"
 import type { CartPayment } from "../types"
 
@@ -45,6 +44,10 @@ interface WizardConfirmationStepProps {
   onBack: () => void
   onClose: () => void
   saleResult: { sale_number: string } | null
+  /** When completing a pending sale, pass its data so totals display correctly */
+  pendingSale?: { subtotal: number; discount_amount: number; total: number } | null
+  /** Whether this was saved as pending (for success screen message) */
+  wasPending?: boolean
 }
 
 export function WizardConfirmationStep({
@@ -57,6 +60,8 @@ export function WizardConfirmationStep({
   onBack,
   onClose,
   saleResult,
+  pendingSale,
+  wasPending,
 }: WizardConfirmationStepProps) {
   const items = usePOSStore((s) => s.items)
   const customer = usePOSStore((s) => s.customer)
@@ -221,8 +226,13 @@ export function WizardConfirmationStep({
           className="text-center"
         >
           <h2 className="text-3xl font-bold tracking-tight text-neutral-900">
-            Venta completada
+            {wasPending ? "Venta guardada" : "Venta completada"}
           </h2>
+          {wasPending && (
+            <p className="mt-1 text-sm text-amber-600 font-medium">
+              Pendiente de cobro
+            </p>
+          )}
           <p className="mt-2 text-lg text-neutral-500">
             Folio:{" "}
             <span className="font-bold text-neutral-800">
@@ -258,8 +268,8 @@ export function WizardConfirmationStep({
 
   // ── Confirmation view ──
   return (
-    <>
-      <div className="flex h-full flex-col">
+    <div className="relative flex h-full flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         {/* Header */}
         <div className="flex-shrink-0 bg-white px-6 pt-8 pb-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] sm:px-8">
           <h2 className="text-2xl font-bold tracking-tight text-neutral-900">
@@ -392,14 +402,14 @@ export function WizardConfirmationStep({
               <div className="flex justify-between text-sm">
                 <span className="text-neutral-500">Subtotal</span>
                 <span className="font-semibold tabular-nums text-neutral-700">
-                  {formatCurrency(getSubtotal())}
+                  {formatCurrency(pendingSale ? pendingSale.subtotal : getSubtotal())}
                 </span>
               </div>
-              {getItemsDiscount() > 0 && (
+              {(pendingSale ? pendingSale.discount_amount > 0 : getItemsDiscount() > 0) && (
                 <div className="flex justify-between text-sm">
                   <span className="text-teal-600">Descuento</span>
                   <span className="font-semibold tabular-nums text-teal-600">
-                    -{formatCurrency(getItemsDiscount())}
+                    -{formatCurrency(pendingSale ? pendingSale.discount_amount : getItemsDiscount())}
                   </span>
                 </div>
               )}
@@ -408,7 +418,7 @@ export function WizardConfirmationStep({
                   Total
                 </span>
                 <span className="text-2xl font-extrabold tabular-nums tracking-tight text-rose-600">
-                  {formatCurrency(getTotal())}
+                  {formatCurrency(pendingSale ? pendingSale.total : getTotal())}
                 </span>
               </div>
             </div>
@@ -545,21 +555,42 @@ export function WizardConfirmationStep({
         </div>
       </div>
 
-      {/* ── Confirmation dialogs ── */}
-      <ConfirmDialog
-        open={confirmAction === "pending"}
-        onOpenChange={(open) => !open && setConfirmAction(null)}
-        title="Guardar como pendiente"
-        description="La venta se guardara sin procesar el pago. Podras completarla mas tarde desde la seccion de ventas pendientes. No se descontara stock hasta que se complete."
-        confirmLabel="Guardar pendiente"
-        cancelLabel="Cancelar"
-        isLoading={submitting === "pending"}
-        onConfirm={handlePending}
-      />
+      {/* ── Confirmation dialogs (inline overlays — nested inside wizard, can't use portaled Dialog) ── */}
+      {confirmAction === "pending" && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-black/40">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-neutral-900">
+              Guardar como pendiente
+            </h3>
+            <p className="mt-3 text-sm text-neutral-500">
+              La venta se guardara sin procesar el pago. Podras completarla mas tarde desde la seccion de ventas pendientes. No se descontara stock hasta que se complete.
+            </p>
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmAction(null)}
+                disabled={submitting !== null}
+                className="h-10 rounded-lg border border-neutral-200 bg-white px-4 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-40"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handlePending}
+                disabled={submitting !== null}
+                className="flex h-10 items-center gap-2 rounded-lg bg-accent-500 px-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-accent-600 active:scale-[0.98] disabled:opacity-40"
+              >
+                {submitting === "pending" && <Loader2 className="h-4 w-4 animate-spin" />}
+                Guardar pendiente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Split dialog — sale + vale, asks vale payment status */}
       {confirmAction === "split" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-black/40">
           <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-1 flex items-center gap-2">
               <Check className="h-5 w-5 text-accent-500" />
@@ -620,7 +651,7 @@ export function WizardConfirmationStep({
 
       {/* Vale dialog — asks paid or pending */}
       {confirmAction === "vale" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-black/40">
           <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-1 flex items-center gap-2">
               <Ticket className="h-5 w-5 text-indigo-500" />
@@ -674,6 +705,6 @@ export function WizardConfirmationStep({
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }

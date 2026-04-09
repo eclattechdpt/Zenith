@@ -276,6 +276,15 @@ export function WizardProductsStep({
                             <p className="truncate text-[13px] font-semibold leading-tight text-neutral-800">
                               {item.productName}
                             </p>
+                            {item.isBundle && item.bundleComponents && (
+                              <div className="mt-1 space-y-0.5 border-l-2 border-neutral-200 pl-2.5">
+                                {item.bundleComponents.map((c) => (
+                                  <p key={c.variantId} className="text-[11px] text-neutral-400">
+                                    {c.productName}
+                                  </p>
+                                ))}
+                              </div>
+                            )}
                             <p className="mt-0.5 flex items-center gap-1.5 text-xs">
                               {item.basePrice > item.unitPrice ? (
                                 <>

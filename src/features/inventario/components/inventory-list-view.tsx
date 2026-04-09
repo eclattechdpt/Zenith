@@ -455,7 +455,13 @@ function ProductRow({
           <div className="inline-flex items-center gap-1.5">
             <span className={`h-1.5 w-1.5 rounded-full ${status.dotColor}`} />
             <span className={`text-[11px] font-semibold ${status.textColor}`}>
-              {status.label}
+              {isBundle && group.worstStatus === "sin_stock"
+                ? (() => {
+                    const oosCount = product.bundle_items.filter((bi) => bi.product_variants.stock <= 0).length
+                    if (oosCount >= product.bundle_items.length) return status.label
+                    return `${oosCount} producto${oosCount !== 1 ? "s" : ""} sin stock`
+                  })()
+                : status.label}
             </span>
           </div>
         </td>

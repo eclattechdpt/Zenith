@@ -79,7 +79,13 @@ export function InventoryCardMobile({
                 {displayName}
               </span>
               <Badge variant="outline" className={`${status.bg} ${status.text} ${status.border} text-[10px] shrink-0`}>
-                {status.label}
+                {(() => {
+                  if (v.products.is_bundle && v.products.bundle_items?.length > 0 && stockValue <= 0) {
+                    const oosCount = v.products.bundle_items.filter((bi) => bi.product_variants.stock <= 0).length
+                    if (oosCount < v.products.bundle_items.length) return `${oosCount} prod. sin stock`
+                  }
+                  return status.label
+                })()}
               </Badge>
             </div>
             {v.products.brand && (
