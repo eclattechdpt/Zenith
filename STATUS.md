@@ -133,6 +133,9 @@
 - **Fix: max_returnable** (2026-04-07): Return dialog excludes cancelled returns from already-returned count
 - **31 manual tests passed** (2026-04-07): Cancel flows, stock reversal, cross-module checks, mobile layout
 - **Cofre stock system** (2026-04-08): Derived stock (`min(component_stock)`), bundle-aware RPCs, partial OOS cofre+vale, expandable inventory rows, stock badges in bundle manager
+- **Security hardening** (2026-04-08): Boneyard bypass dev-only, image proxy auth+SSRF, purge functions dev-only, dropped duplicate RPC overload
+- **Atomic cancel RPCs** (2026-04-08): `cancel_sale` + `cancel_return` RPCs with bundle-aware stock reversal, replacing non-atomic loops
+- **POS UI polish** (2026-04-08): Cofre components in cart, pending sale totals fix, partial OOS labels, nested dialog overlays, cofre edit loads bundle_items
 
 ### Pending
 - Design A for Inventario hub + Inventario Fisico

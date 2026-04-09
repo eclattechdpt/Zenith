@@ -372,6 +372,10 @@ No saltar sprints. Cada sprint depende del anterior.
   - Excel export: cofres appended at end with derived stock and component names
   - Key files: `src/features/pos/types.ts` (BundleComponent), `src/features/pos/queries.ts` (bundle_items join), `src/features/inventario/components/inventory-list-view.tsx` (expandable cofre rows)
 
+- **Security hardening** (2026-04-08): boneyard auth bypass restricted to dev only, image proxy SSRF protection + auth check, purge functions blocked in production
+- **Atomic cancel RPCs** (2026-04-08): `cancel_sale` and `cancel_return` RPCs replace non-atomic sequential loops. Bundle-aware stock reversal, FOR UPDATE row locks, sale status recalculation — all in single transaction
+- **POS UI polish** (2026-04-08): cofre component list in cart (indented left-border), pending sale completion shows correct totals, success screen differentiates pending vs completed, nested confirm dialogs dim wizard properly, partial OOS cofres show "X producto(s) sin stock" across all views, cofre edit loads existing bundle_items
+
 ### Sprint 8 — Decisiones arquitectonicas y sistemas clave
 
 - **Module-scoped accent colors**: `[data-module]` en `<html>` con CSS variable scopes. Source of truth: `src/lib/module-accent.ts`. Mapping: `/inventario` → amber, `/inventario/transito` → blue, `/inventario/carga-inicial` → slate, `/clientes` + `/notas-credito` → teal, `/reportes` + `/configuracion` → neutral, default → rose. Accent variables DEBEN estar en `@layer base` (Tailwind v4 tree-shakes unlayered custom properties). Utilities: `bg-accent-50`..`bg-accent-900`, `text-accent-*`, `border-accent-*`.
