@@ -11,11 +11,15 @@ import { es } from "date-fns/locale"
 import { createElement as h } from "react"
 
 import { PAYMENT_METHODS } from "@/lib/constants"
+import { registerPdfFonts, PDF_FONT } from "@/lib/pdf-fonts"
 import type { ReceiptData } from "./sale-receipt"
 
-// ── Fonts (built-in Helvetica) ──
-const F = "Helvetica"
-const FB = "Helvetica-Bold"
+// ── Register custom fonts ──
+registerPdfFonts()
+
+// ── Font aliases ──
+const F = PDF_FONT
+const FB = PDF_FONT
 
 // ── Colors ──
 const C = {
@@ -49,18 +53,18 @@ const s = StyleSheet.create({
     color: C.dark,
     width: W,
   },
-  brandName: { fontSize: 14, fontFamily: FB, color: C.black, letterSpacing: -0.3 },
+  brandName: { fontSize: 14, fontFamily: FB, fontWeight: 700, color: C.black, letterSpacing: -0.3 },
   brandSub: { fontSize: 7.5, color: C.light, marginTop: 4, lineHeight: 1.6 },
   accentLine: { height: 2, backgroundColor: C.rose, borderRadius: 1, marginTop: 16, marginBottom: 18 },
   infoBox: { backgroundColor: C.bg, borderRadius: 6, padding: 10, marginBottom: 18 },
   infoRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   label: { fontSize: 7.5, color: C.light, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 },
-  folio: { fontSize: 13, fontFamily: FB, color: C.black, letterSpacing: -0.3 },
+  folio: { fontSize: 13, fontFamily: FB, fontWeight: 700, color: C.black, letterSpacing: -0.3 },
   dateText: { fontSize: 8.5, color: C.mid, textAlign: "right" },
   timeText: { fontSize: 8.5, color: C.light, textAlign: "right" },
   clientRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 8, marginTop: 8, borderTopWidth: 1, borderTopColor: C.line },
   clientLabel: { fontSize: 7.5, color: C.light, textTransform: "uppercase", letterSpacing: 0.5 },
-  clientName: { fontSize: 9, fontFamily: FB, color: C.black },
+  clientName: { fontSize: 9, fontFamily: FB, fontWeight: 700, color: C.black },
   tableHeader: { flexDirection: "row", justifyContent: "space-between", paddingBottom: 5, borderBottomWidth: 1, borderBottomColor: C.line, marginBottom: 6 },
   tableHeaderText: { fontSize: 7.5, color: C.light, textTransform: "uppercase", letterSpacing: 0.5 },
   itemRow: { paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: C.lineFaint },
@@ -69,22 +73,22 @@ const s = StyleSheet.create({
   itemName: { fontFamily: F, fontSize: 9, color: C.black },
   itemVariant: { fontSize: 7.5, color: C.light },
   itemQty: { fontSize: 8, color: C.mid, marginTop: 1 },
-  itemTotal: { fontFamily: FB, fontSize: 9, color: C.black },
+  itemTotal: { fontFamily: FB, fontWeight: 700, fontSize: 9, color: C.black },
   discountLine: { flexDirection: "row", justifyContent: "space-between", marginTop: 2 },
   discountText: { fontSize: 8, color: C.rose },
   subtotalRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: C.line },
   subtotalText: { fontSize: 9, color: C.mid },
   subtotalValue: { fontSize: 9, color: C.mid },
   totalBox: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: C.roseBg, borderRadius: 6, padding: 10, marginTop: 10 },
-  totalLabel: { fontSize: 10, fontFamily: FB, color: C.black, textTransform: "uppercase", letterSpacing: 0.5 },
-  totalValue: { fontSize: 15, fontFamily: FB, color: C.black, letterSpacing: -0.5 },
+  totalLabel: { fontSize: 10, fontFamily: FB, fontWeight: 700, color: C.black, textTransform: "uppercase", letterSpacing: 0.5 },
+  totalValue: { fontSize: 15, fontFamily: FB, fontWeight: 700, color: C.black, letterSpacing: -0.5 },
   payBox: { backgroundColor: C.bgPay, borderRadius: 5, padding: 10, marginTop: 8 },
   payLabel: { fontSize: 7.5, color: C.light, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 },
   payRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 2 },
   payMethod: { fontSize: 9, color: C.mid },
-  payAmount: { fontSize: 9, fontFamily: FB, color: C.mid },
+  payAmount: { fontSize: 9, fontFamily: FB, fontWeight: 700, color: C.mid },
   changeRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 5, paddingTop: 5, borderTopWidth: 1, borderTopColor: C.line },
-  changeText: { fontSize: 9, fontFamily: FB, color: C.teal },
+  changeText: { fontSize: 9, fontFamily: FB, fontWeight: 700, color: C.teal },
   footer: { textAlign: "center", paddingTop: 12, marginTop: 16, borderTopWidth: 1, borderTopColor: C.lineFaint },
   footerThanks: { fontSize: 8.5, color: C.mid, fontFamily: FB },
   footerPowered: { fontSize: 7.5, color: C.subtle, marginTop: 5 },

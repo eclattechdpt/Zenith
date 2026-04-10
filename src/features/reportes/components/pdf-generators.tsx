@@ -11,10 +11,14 @@ import { es } from "date-fns/locale"
 
 import { createClient } from "@/lib/supabase/client"
 import { SALE_STATUSES, PAYMENT_METHODS } from "@/lib/constants"
+import { registerPdfFonts, PDF_FONT } from "@/lib/pdf-fonts"
 
-// ── Font aliases (built-in Helvetica — guaranteed to render) ──
-const FONT = "Helvetica"
-const FONT_BOLD = "Helvetica-Bold"
+// ── Register custom fonts ──
+registerPdfFonts()
+
+// ── Font aliases ──
+const FONT = PDF_FONT
+const FONT_BOLD = PDF_FONT
 
 // ── Constants ──
 
@@ -88,10 +92,10 @@ function downloadBlob(blob: Blob, filename: string) {
 function Header({ title, subtitle, accent }: { title: string; subtitle: string; accent: AccentColors }) {
   return (
     <View style={{ marginBottom: 24 }}>
-      <Text style={{ fontSize: 24, fontFamily: FONT_BOLD, color: N[950], letterSpacing: -0.5 }}>
+      <Text style={{ fontSize: 24, fontFamily: FONT_BOLD, fontWeight: 700, color: N[950], letterSpacing: -0.5 }}>
         {BUSINESS_NAME}
       </Text>
-      <Text style={{ fontSize: 11, color: accent.fill, marginTop: 2, fontFamily: FONT_BOLD }}>
+      <Text style={{ fontSize: 11, color: accent.fill, marginTop: 2, fontFamily: FONT_BOLD, fontWeight: 700 }}>
         {title}
       </Text>
       <View style={{ height: 3, backgroundColor: accent.fill, marginTop: 12, borderRadius: 2 }} />
@@ -125,7 +129,7 @@ function KpiCards({ metrics, accent }: { metrics: { label: string; value: string
             borderLeftColor: accent.fill,
           }}
         >
-          <Text style={{ fontSize: 16, fontFamily: FONT_BOLD, color: N[950] }}>
+          <Text style={{ fontSize: 16, fontFamily: FONT_BOLD, fontWeight: 700, color: N[950] }}>
             {m.value}
           </Text>
           <View style={{ height: 1.5, width: 24, backgroundColor: accent.muted, marginTop: 6, marginBottom: 6, borderRadius: 1 }} />
@@ -177,7 +181,7 @@ function TableHeader({ columns, accent }: { columns: { label: string; flex?: num
 
             style={{
               fontSize: 7,
-              fontFamily: FONT_BOLD,
+              fontFamily: FONT_BOLD, fontWeight: 700,
               color: N[200],
               textAlign: col.align ?? "left",
               textTransform: "uppercase",
@@ -216,7 +220,7 @@ function TableRow({ cells, columns, index }: {
                 fontSize: 8.5,
                 color: col.color ?? N[800],
                 textAlign: col.align ?? "left",
-                fontFamily: col.bold ? FONT_BOLD : FONT,
+                fontFamily: FONT, fontWeight: col.bold ? 700 : 400,
               }}
             >
               {cell}
@@ -296,7 +300,7 @@ function TotalRow({ cells, columns, accent }: {
                 fontSize: 8.5,
                 color: accent.text,
                 textAlign: col.align ?? "left",
-                fontFamily: FONT_BOLD,
+                fontFamily: FONT_BOLD, fontWeight: 700,
               }}
             >
               {cell}
@@ -339,7 +343,7 @@ function PaymentBreakdown({ methodTotals, totalRevenue, accent }: {
               <Text style={{ fontSize: 8.5, color: N[800], fontFamily: FONT }}>
                 {PAYMENT_METHODS[method as keyof typeof PAYMENT_METHODS] ?? method}
               </Text>
-              <Text style={{ fontSize: 8.5, fontFamily: FONT_BOLD, color: N[950] }}>
+              <Text style={{ fontSize: 8.5, fontFamily: FONT_BOLD, fontWeight: 700, color: N[950] }}>
                 {currency(total)} ({pct.toFixed(1)}%)
               </Text>
             </View>
@@ -795,7 +799,7 @@ export async function exportWeeklySalesPdf(weekStart: Date) {
               <Text style={{ flex: 1, fontSize: 8.5, color: N[800] }}>{d.label}</Text>
               <Text style={{ flex: 1, fontSize: 8.5, color: N[800] }}>{d.date}</Text>
               <Text style={{ flex: 1, fontSize: 8.5, color: N[800], textAlign: "right" }}>{d.count}</Text>
-              <Text style={{ flex: 1, fontSize: 8.5, color: N[800], textAlign: "right", fontFamily: FONT_BOLD }}>
+              <Text style={{ flex: 1, fontSize: 8.5, color: N[800], textAlign: "right", fontFamily: FONT_BOLD, fontWeight: 700 }}>
                 {currency(d.revenue)}
               </Text>
               <View style={{ flex: 1.5, justifyContent: "center", paddingLeft: 8 }}>
@@ -848,7 +852,7 @@ export async function exportWeeklySalesPdf(weekStart: Date) {
                 }}>
                   <Text style={{
                     fontSize: 9,
-                    fontFamily: FONT_BOLD,
+                    fontFamily: FONT_BOLD, fontWeight: 700,
                     color: accent.fill,
                     textAlign: "center",
                   }}>
@@ -856,7 +860,7 @@ export async function exportWeeklySalesPdf(weekStart: Date) {
                   </Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 8.5, color: N[950], fontFamily: FONT_BOLD }}>{name}</Text>
+                  <Text style={{ fontSize: 8.5, color: N[950], fontFamily: FONT_BOLD, fontWeight: 700 }}>{name}</Text>
                   <Text style={{ fontSize: 7.5, color: N[600], marginTop: 1 }}>
                     {data.units} uds  —  {currency(data.revenue)}
                   </Text>
@@ -979,7 +983,7 @@ export async function exportInventoryPdf() {
               color: N[600],
               textTransform: "uppercase",
               letterSpacing: 1,
-              fontFamily: FONT_BOLD,
+              fontFamily: FONT_BOLD, fontWeight: 700,
               marginBottom: 8,
             }}>
               Alertas de inventario
