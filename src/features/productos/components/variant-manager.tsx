@@ -77,26 +77,27 @@ interface VariantManagerProps {
   variants: VariantInput[]
   onChange: (variants: VariantInput[]) => void
   errors?: FieldErrors<CreateProductInput>["variants"]
-}
-
-function autoSku() {
-  const suffix = String(Math.floor(Math.random() * 9000) + 1000)
-  return `VAR-${suffix}`
+  onConfirmingChange?: (isConfirming: boolean) => void
 }
 
 function emptyVariant(): VariantInput {
   return {
     name: "",
-    sku: autoSku(),
+    sku: "",
     price: 0,
     stock: 0,
     is_active: true,
   }
 }
 
-export function VariantManager({ variants, onChange, errors }: VariantManagerProps) {
+export function VariantManager({ variants, onChange, errors, onConfirmingChange }: VariantManagerProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
+
+  const setDeleteIndexWithCallback = (index: number | null) => {
+    setDeleteIndex(index)
+    onConfirmingChange?.(index !== null)
+  }
 
   function addVariant() {
     const updated = [...variants, emptyVariant()]
@@ -245,7 +246,7 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
                     type="button"
                     variant="destructive"
                     size="xs"
-                    onClick={() => setDeleteIndex(index)}
+                    onClick={() => setDeleteIndexWithCallback(index)}
                   >
                     <Trash2 className="mr-1 size-3" />
                     Eliminar
@@ -264,7 +265,7 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
 
       <ConfirmDialog
         open={deleteIndex !== null}
-        onOpenChange={(open) => !open && setDeleteIndex(null)}
+        onOpenChange={(open) => !open && setDeleteIndexWithCallback(null)}
         title="Eliminar variante"
         description={`Se eliminara la variante "${deleteIndex !== null ? getVariantLabel(variants[deleteIndex]) : ""}". Esta accion no se puede deshacer.`}
         confirmLabel="Eliminar"
@@ -273,7 +274,7 @@ export function VariantManager({ variants, onChange, errors }: VariantManagerPro
         onConfirm={() => {
           if (deleteIndex !== null) {
             removeVariant(deleteIndex)
-            setDeleteIndex(null)
+            setDeleteIndexWithCallback(null)
           }
         }}
       />

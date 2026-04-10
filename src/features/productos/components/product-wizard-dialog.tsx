@@ -81,6 +81,7 @@ interface ProductWizardDialogProps {
 export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [isConfirming, setIsConfirming] = useState(false)
 
   // Section open states
   const [infoOpen, setInfoOpen] = useState(true)
@@ -273,6 +274,9 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
         showCloseButton={false}
         className="flex h-[85vh] w-[95vw] flex-col gap-0 overflow-hidden bg-neutral-50 p-0 sm:max-w-3xl sm:rounded-2xl"
       >
+        {isConfirming && (
+          <div className="absolute inset-0 z-10 rounded-2xl bg-black/40" />
+        )}
         <DialogTitle className="sr-only">Nuevo producto</DialogTitle>
 
         {/* ── Header ── */}
@@ -616,6 +620,7 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
                       variants={variants}
                       onChange={handleVariantsChange}
                       errors={errors.variants}
+                      onConfirmingChange={setIsConfirming}
                     />
                     {errors.variants && (
                       <p className="mt-2 text-xs text-destructive">

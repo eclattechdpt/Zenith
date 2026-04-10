@@ -63,11 +63,6 @@ function slugify(text: string) {
     .replace(/^-+|-+$/g, "")
 }
 
-function generateSku(name: string, brand?: string | null) {
-  const prefix = (brand ?? name).toUpperCase().replace(/[^A-Z]/g, "").slice(0, 3)
-  const suffix = String(Math.floor(Math.random() * 9000) + 1000)
-  return `${prefix || "PRD"}-${suffix}`
-}
 
 function productToFormValues(product: ProductWithDetails): Partial<CreateProductInput> {
   return {
@@ -106,6 +101,7 @@ interface ProductEditDialogProps {
 export function ProductEditDialog({ open, productId, onClose }: ProductEditDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [isConfirming, setIsConfirming] = useState(false)
 
   const [infoOpen, setInfoOpen] = useState(true)
   const [pricingOpen, setPricingOpen] = useState(true)
@@ -164,15 +160,6 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
   function ensureAutoFields() {
     const current = getValues()
     if (!current.slug) setValue("slug", slugify(current.name))
-    let changed = false
-    const updated = current.variants.map((v, i) => {
-      if (!v.sku) {
-        changed = true
-        return { ...v, sku: generateSku(current.name, current.brand) + (i > 0 ? `-${i}` : "") }
-      }
-      return v
-    })
-    if (changed) setValue("variants", updated)
   }
 
   function updateSingleVariant(field: keyof VariantInput, value: unknown) {
@@ -215,10 +202,6 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
   async function handleFormSubmit() {
     const data = getValues()
     if (!data.slug) data.slug = slugify(data.name)
-    data.variants = data.variants.map((v, i) => {
-      if (!v.sku) return { ...v, sku: generateSku(data.name, data.brand) + (i > 0 ? `-${i}` : "") }
-      return v
-    })
 
     const result = createProductSchema.safeParse(data)
     if (!result.success) {
@@ -246,6 +229,9 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
         showCloseButton={false}
         className="flex h-[85vh] w-[95vw] flex-col gap-0 overflow-hidden bg-neutral-50 p-0 sm:max-w-3xl sm:rounded-2xl"
       >
+        {isConfirming && (
+          <div className="absolute inset-0 z-10 rounded-2xl bg-black/40" />
+        )}
         <DialogTitle className="sr-only">Editar producto</DialogTitle>
 
         {/* ── Header ── */}
@@ -424,13 +410,10 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
                       <div className={`flex items-center gap-3 ${isBundle ? "opacity-40" : ""}`}>
                         <Switch id="edit_variants" checked={hasVariants} disabled={isBundle} onCheckedChange={(c) => {
                           setValue("has_variants", c, { shouldDirty: true })
-                          const cur = getValues("variants")
                           if (!c) {
+                            const cur = getValues("variants")
                             const f = cur[0] ?? { name: "", sku: "", price: 0, stock: 0 }
                             setValue("variants", [{ ...f, name: "" }], { shouldDirty: true })
-                          } else if (!cur[0]?.sku) {
-                            const n = getValues("name"); const b = getValues("brand")
-                            setValue("variants", [{ ...(cur[0] ?? { name: "", sku: "", price: 0, stock: 0, is_active: true }), sku: generateSku(n, b) }], { shouldDirty: true })
                           }
                         }} />
                         <Label htmlFor="edit_variants" className="text-sm">Tiene variantes</Label>
@@ -473,7 +456,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
                   </div>
                 ) : hasVariants ? (
                   <div className="rounded-xl border border-white/80 bg-white p-4 shadow-sm">
-                    <VariantManager variants={variants} onChange={handleVariantsChange} errors={errors.variants} />
+                    <VariantManager variants={variants} onChange={handleVariantsChange} errors={errors.variants} onConfirmingChange={setIsConfirming} />
                     {errors.variants && <p className="mt-2 text-xs text-destructive">{typeof errors.variants.message === "string" ? errors.variants.message : "Revisa las variantes"}</p>}
                   </div>
                 ) : (
