@@ -48,10 +48,10 @@
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 1.7 | Login form shows validation errors on empty submit | Field-level errors visible | ☐ | |
-| 1.8 | Login form shows server error on bad credentials | Toast or inline error message | ☐ | |
-| 1.9 | Successful login redirects to dashboard | Smooth redirect, no flash | ☐ | |
-| 1.10 | Login page responsive on mobile | Form centered, usable on small screens | ☐ | |
+| 1.7 | Login form shows validation errors on empty submit | Field-level errors visible | ✅ | Manual test passed 2026-04-09 |
+| 1.8 | Login form shows server error on bad credentials | Toast or inline error message | ✅ | Manual test passed 2026-04-09 |
+| 1.9 | Successful login redirects to dashboard | Smooth redirect, no flash | ✅ | Manual test passed 2026-04-09 |
+| 1.10 | Login page responsive on mobile | Form centered, usable on small screens | ✅ | Manual test passed 2026-04-09 |
 
 ---
 
@@ -72,13 +72,13 @@
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 2.7 | PageHero shows personalized greeting (time-based) | Correct greeting for morning/afternoon/evening | ☐ | |
-| 2.8 | 4 KPI cards render with correct data and mini-visualizations | No NaN, no missing data | ☐ | |
-| 2.9 | SalesChart renders with data | Chart visible, axes labeled | ☐ | |
-| 2.10 | ActivityFeed shows recent transactions | Clickable entries, relative timestamps | ☐ | |
-| 2.11 | QuickActions navigate to correct routes | Each card links to right page | ☐ | |
-| 2.12 | Inline skeletons show while loading (not full-page) | Per-section shimmer, no blank screen | ☐ | |
-| 2.13 | Ready vales banner appears when vales are ready | Banner visible, dismissible, persists in localStorage | ☐ | |
+| 2.7 | PageHero shows personalized greeting (time-based) | Correct greeting for morning/afternoon/evening | ✅ | Manual test passed 2026-04-09 |
+| 2.8 | 4 KPI cards render with correct data and mini-visualizations | No NaN, no missing data | ✅ | Manual test passed 2026-04-09 |
+| 2.9 | SalesChart renders with data | Chart visible, axes labeled | ✅ | Manual test passed 2026-04-09 |
+| 2.10 | ActivityFeed shows recent transactions | Clickable entries, relative timestamps | ✅ | Manual test passed 2026-04-09 |
+| 2.11 | QuickActions navigate to correct routes | Each card links to right page | ✅ | Manual test passed 2026-04-09 |
+| 2.12 | Inline skeletons show while loading (not full-page) | Per-section shimmer, no blank screen | ✅ | Manual test passed 2026-04-09 |
+| 2.13 | Ready vales banner appears when vales are ready | Banner visible, dismissible, persists in localStorage | ✅ | Manual test passed 2026-04-09 |
 
 ---
 

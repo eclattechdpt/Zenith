@@ -38,6 +38,10 @@ export function ValeReadyBanner() {
       sileo.success({
         title: `${vale.vale_number} — ${vale.customers?.name ?? "Cliente"}`,
         description: "Producto disponible para entrega",
+        button: {
+          title: "Ver vales",
+          onClick: () => window.location.assign("/vales"),
+        },
       })
     }
   }, [readyVales])

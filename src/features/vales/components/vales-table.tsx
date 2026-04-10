@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useRef, useState, useCallback } from "react"
-import { Search, Ticket, MoreHorizontal, CheckCircle2, XCircle, X } from "lucide-react"
+import { Search, Ticket, MoreHorizontal, CheckCircle2, XCircle, X, Eye } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { sileo } from "sileo"
 import { useQueryState, parseAsString } from "nuqs"
@@ -27,6 +27,7 @@ import { cancelVale } from "../actions"
 import type { ValeWithDetails } from "../types"
 import { ValesCardMobile } from "./vales-card-mobile"
 import { ValeCompleteDialog } from "./vale-complete-dialog"
+import { ValeDetailModal } from "./vale-detail-modal"
 
 import type { ColumnDef } from "@tanstack/react-table"
 
@@ -57,6 +58,7 @@ export function ValesTable() {
     parseAsString.withDefault("")
   )
   const [completeValeId, setCompleteValeId] = useState<string | null>(null)
+  const [detailValeId, setDetailValeId] = useState<string | null>(null)
   const [cancelTarget, setCancelTarget] = useState<ValeWithDetails | null>(null)
   const [isCancelling, setIsCancelling] = useState(false)
   const [dateRange, setDateRange] = useState<DateRange | null>(null)
@@ -198,7 +200,6 @@ export function ValesTable() {
       cell: ({ row }) => {
         const vale = row.original
         const canAct = vale.status === "pending" || vale.status === "ready"
-        if (!canAct) return null
         return (
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -209,17 +210,25 @@ export function ValesTable() {
               <MoreHorizontal className="size-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setCompleteValeId(vale.id)}>
-                <CheckCircle2 className="mr-2 size-3.5 text-emerald-500" />
-                Entregar vale
+              <DropdownMenuItem onClick={() => setDetailValeId(vale.id)}>
+                <Eye className="mr-2 size-3.5 text-neutral-500" />
+                Ver detalle
               </DropdownMenuItem>
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => setCancelTarget(vale)}
-              >
-                <XCircle className="mr-2 size-3.5" />
-                Cancelar vale
-              </DropdownMenuItem>
+              {canAct && (
+                <>
+                  <DropdownMenuItem onClick={() => setCompleteValeId(vale.id)}>
+                    <CheckCircle2 className="mr-2 size-3.5 text-emerald-500" />
+                    Entregar vale
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => setCancelTarget(vale)}
+                  >
+                    <XCircle className="mr-2 size-3.5" />
+                    Cancelar vale
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -394,6 +403,12 @@ export function ValesTable() {
           </div>
         </div>
       </motion.div>
+
+      <ValeDetailModal
+        valeId={detailValeId}
+        open={!!detailValeId}
+        onClose={() => setDetailValeId(null)}
+      />
 
       <ValeCompleteDialog
         valeId={completeValeId}
