@@ -194,7 +194,7 @@ export function BulkActionToolbar({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-wrap items-center gap-2 rounded-xl border border-violet-200/60 bg-violet-50/50 p-3"
+            className="flex flex-wrap items-center gap-2 rounded-xl border border-violet-200/60 bg-gradient-to-r from-violet-50/80 to-white p-3 shadow-sm shadow-violet-500/[0.04]"
           >
             {/* Selection count */}
             <div className="flex items-center gap-2">
