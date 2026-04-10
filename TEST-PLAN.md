@@ -343,8 +343,8 @@
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 8.13 | Inventory hub — KPIs and summary cards | Correct totals, low stock breakdown (agotados/bajo) | ☐ | |
-| 8.14 | Inventory hub — brand split (Ideal/Eclat) | Value split visible in toolbar | ☐ | |
+| 8.13 | Inventory hub — KPIs and summary cards | Correct totals, low stock breakdown (agotados/bajo) | ✅ | Playwright 2026-04-09 — Total $165,120, Fisico $86,940, Transito $9,180, Carga inicial $69,000, 8 alertas (5 agotados / 3 bajo) |
+| 8.14 | Inventory hub — brand split (Ideal/Eclat) | Value split visible in toolbar | ✅ | Playwright 2026-04-09 — Ideal $37,200 / Eclat $49,740 |
 | 8.15 | Inventory list — cofre rows expandable | Click to expand, shows component products with individual stock | ☐ | |
 | 8.16 | Inventory list — cofre actions disabled | Cannot adjust stock on cofres directly | ☐ | |
 | 8.17 | Adjust stock dialog — increase/decrease | Stock updated, toast confirmation | ☐ | |
@@ -379,10 +379,10 @@
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 9.10 | Transit page — month hierarchy view | Months expandable to weeks to items | ☐ | |
+| 9.10 | Transit page — month hierarchy view | Months expandable to weeks to items | ✅ | Playwright 2026-04-09 — months + weeks visible |
 | 9.11 | Create week dialog | Form works, week saved | ☐ | |
 | 9.12 | Add item to week | Product/variant picker, quantity input | ☐ | |
-| 9.13 | Module accent = blue | Page uses blue accent color scheme | ☐ | |
+| 9.13 | Module accent = blue | Page uses blue accent color scheme | ✅ | Playwright 2026-04-09 — accent-500 = #3b82f6 (blue) |
 
 ---
 
@@ -406,9 +406,9 @@
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 10.5 | Initial load list — override column visible | Shows override or base stock | ☐ | |
+| 10.5 | Initial load list — override column visible | Shows override or base stock | ✅ | Playwright 2026-04-09 — 19 product rows visible |
 | 10.6 | Set override dialog | Enter value, saved correctly | ☐ | |
-| 10.7 | Module accent = slate | Page uses slate accent color scheme | ☐ | |
+| 10.7 | Module accent = slate | Page uses slate accent color scheme | ✅ | Playwright 2026-04-09 — accent-500 = #64748b (slate) |
 
 ---
 
@@ -549,11 +549,11 @@
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 14.6 | Tab navigation — Categorias/Descuentos/Imagenes | Tabs switch content correctly | ☐ | |
+| 14.6 | Tab navigation — Categorias/Descuentos/Imagenes | Tabs switch content correctly | ✅ | Playwright 2026-04-09 — 3 tabs visible, switching to Descuentos shows price list manager |
 | 14.7 | Categorias tab — CRUD categories | Create, rename, delete, reorder | ☐ | |
 | 14.8 | Descuentos tab — manage price lists | Create, edit, delete price lists | ☐ | |
 | 14.9 | Health check section — shows DB status | Online badge, latency number | ☐ | |
-| 14.10 | Module accent = neutral | Page uses neutral accent color scheme | ☐ | |
+| 14.10 | Module accent = neutral | Page uses neutral accent color scheme | ✅ | Playwright 2026-04-09 — accent-500 = #8a7f76 (warm neutral) |
 
 ---
 
@@ -616,7 +616,7 @@ These tests verify that actions in one module correctly affect other modules.
 |---|------|----------|--------|-------|
 | 16.20 | Sidebar navigation — all routes work | Every menu item navigates correctly | ✅ | Playwright 2026-04-09 — All 10 sidebar links point to correct hrefs |
 | 16.21 | Module accent colors change per route | Amber for inventario, teal for clientes, rose for POS, etc. | ✅ | Playwright 2026-04-09 — data-module attribute updates: inventario, clientes, inventario-transito |
-| 16.22 | Sidebar collapse — persists in localStorage | Collapsed state survives page refresh | ☐ | |
+| 16.22 | Sidebar collapse — persists in localStorage | Collapsed state survives page refresh | ✅ | Playwright 2026-04-09 — sidebar-collapsed flips false→true, persists across reload |
 | 16.23 | Mobile sidebar — sheet nav works | Hamburger opens, links navigate, sheet closes | ☐ | |
 | 16.24 | TanStack Query invalidation after mutations | Creating sale → sales list refreshes, inventory refreshes, dashboard refreshes | ☐ | |
 | 16.25 | Back navigation — no stale data | Browser back button shows fresh data | ☐ | |
