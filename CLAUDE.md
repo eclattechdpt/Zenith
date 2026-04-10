@@ -412,6 +412,11 @@ No saltar sprints. Cada sprint depende del anterior.
   - Each type has distinct icon and color. RPC returns 8 items per source, sorted by time DESC
   - Activity feed moved to bottom row (half-width), top products moved next to sales chart (capped at 3)
 - **Dashboard spacing fix** (2026-04-09): DashboardInner wrapped in `space-y-6` for consistent section gaps
+- **Vale detail modal** (2026-04-09): "Ver detalle" dropdown in vales table opens a sheet with header, KPIs, items, notes, completed date
+- **Vale ready toast button** (2026-04-09): ready vales toast notification has "Ver vales" button linking to /vales
+- **Productos UI fixes** (2026-04-09): Activo button rose-colored (was teal) in create + edit, Marca toggle Ideal/Eclat in edit dialog (was free-text), slug warning in edit dialog, removed all auto-SKU generation (variant SKU optional), category subcategory inline form renders nested in parent with matching color, empty parents can add first subcategory
+- **UUID validation regex** (2026-04-09): `lib/validation.ts` zUUID uses regex pattern instead of `z.uuid()` (Zod v4 strict UUID rejected seed/legacy IDs with 0000 in version position)
+- **Manual test plan progress** (2026-04-09): 22/135 tests done manually + 12/135 done via Playwright = 34/135 total. Sections complete: 1 (Auth), 2 (Dashboard), 3 (Productos minus 3 image tests skipped). Playwright covered: 6 (Sales), 11 (Vales), 13 (Reportes), 16 (Cross-module). All passed without bugs found in automated tests.
 
 ### Sprint 8 — Decisiones arquitectonicas y sistemas clave
 

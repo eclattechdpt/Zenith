@@ -147,9 +147,12 @@
 - **Plus Jakarta Sans for PDFs** (2026-04-09): local TTF fonts registered via shared pdf-fonts.ts module, matches design system
 - **Activity feed expansion** (2026-04-09): sales, returns, vales, credit notes, exports — 8 items, swapped to bottom row with inventory alerts
 - **Dashboard layout** (2026-04-09): top products (capped 3) next to sales chart, activity feed + alerts on bottom row, space-y-6 section gaps
+- **Vale detail modal** (2026-04-09): "Ver detalle" dropdown opens sheet with header, KPIs, items, notes, completed date
+- **Productos UI fixes** (2026-04-09): Activo button rose, Marca toggle in edit dialog, slug warning in edit, no auto-SKU, nested subcategory inline form, UUID regex validation
+- **Manual + Playwright UI tests** (2026-04-09): 34/135 tests complete (22 manual sections 1-3 + 12 Playwright sections 6/11/13/16). 3 image tests skipped (not used in production).
 
 ### Pending
-- UI/UX manual testing (135 tests in TEST-PLAN.md)
+- UI/UX manual testing (101 tests remaining in TEST-PLAN.md, 3 image tests skipped)
 - Design A for Inventario hub + Inventario Fisico
 - Final UX polish pass
 - Vercel deployment

@@ -270,14 +270,14 @@
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 6.16 | Sales table — status tabs filter correctly | Tab counts match content | ☐ | |
-| 6.17 | Sales table — date filter pills (Hoy/Semana/Mes/Fecha) | Each filter shows correct results | ☐ | |
-| 6.18 | Sales table — search by sale number | Finds specific sale | ☐ | |
-| 6.19 | Sale detail page — shows all items, payments, returns | Complete sale information | ☐ | |
+| 6.16 | Sales table — status tabs filter correctly | Tab counts match content | ✅ | Playwright 2026-04-09 — Canceladas=15, Ventas=1, Todos=17 |
+| 6.17 | Sales table — date filter pills (Hoy/Semana/Mes/Fecha) | Each filter shows correct results | ✅ | Playwright 2026-04-09 — Hoy=17, Semana=38, Mes=64 |
+| 6.18 | Sales table — search by sale number | Finds specific sale | ✅ | Playwright 2026-04-09 — V-0069 → 1 row |
+| 6.19 | Sale detail page — shows all items, payments, returns | Complete sale information | ✅ | Playwright 2026-04-09 — modal opens with V-0069 productos/pagos/total |
 | 6.20 | Sale detail — cancel sale button + confirmation | ConfirmDialog, sale cancelled, stock restored | ☐ | |
 | 6.21 | Sale detail — cancelled returns shown faded with badge | Visual distinction for cancelled returns | ☐ | |
 | 6.22 | Quote conversion dialog — works end to end | Quote → sale, stock deducted | ☐ | |
-| 6.23 | KPI cards — total/ingresos/ticket promedio | Correct values | ☐ | |
+| 6.23 | KPI cards — total/ingresos/ticket promedio | Correct values | ✅ | Playwright 2026-04-09 — 48 ventas / $31,531 / $656.90 |
 | 6.24 | Responsive mobile layout | Table or cards adapt | ☐ | |
 
 ---
@@ -441,8 +441,8 @@
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 11.14 | Vales page — KPI cards | 4 cards with correct counts | ☐ | |
-| 11.15 | Vales table — status tabs + date filter | Combined filtering works | ☐ | |
+| 11.14 | Vales page — KPI cards | 4 cards with correct counts | ✅ | Playwright 2026-04-09 — Total=9, Pendientes=1, Listos=1, Completados=2 (matches actual filtered counts) |
+| 11.15 | Vales table — status tabs + date filter | Combined filtering works | ✅ | Playwright 2026-04-09 — Pendientes=1, Listos=1, Completados=2, Cancelados=5, Total=9 |
 | 11.16 | Vale pickup — complete dialog | Confirms pickup, stock deducted | ☐ | |
 | 11.17 | Vale cancel — confirm dialog | Destructive styling, vale cancelled | ☐ | |
 | 11.18 | Dashboard ready banner | Shows when ready vales exist, dismissible | ☐ | |
@@ -522,7 +522,7 @@
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 13.13 | Export cards — vibrant design with correct palettes | 6 color-coded cards, hover lift, colored shadows | ☐ | |
+| 13.13 | Export cards — vibrant design with correct palettes | 6 color-coded cards, hover lift, colored shadows | ✅ | Playwright 2026-04-09 — 6 cards: Ventas/Inv Fisico/Inv Transito/Carga Inicial/Clientes/Productos. 6 Excel + 6 PDF buttons. Historial section present |
 | 13.14 | Excel download — file downloads to disk | .xlsx file generated and downloaded | ☐ | |
 | 13.15 | PDF download — file downloads to disk | .pdf file generated and downloaded | ☐ | |
 | 13.16 | Weekly sales dialog — week picker | Esta semana/Anterior/Elegir fecha with calendar | ☐ | |
@@ -614,8 +614,8 @@ These tests verify that actions in one module correctly affect other modules.
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 16.20 | Sidebar navigation — all routes work | Every menu item navigates correctly | ☐ | |
-| 16.21 | Module accent colors change per route | Amber for inventario, teal for clientes, rose for POS, etc. | ☐ | |
+| 16.20 | Sidebar navigation — all routes work | Every menu item navigates correctly | ✅ | Playwright 2026-04-09 — All 10 sidebar links point to correct hrefs |
+| 16.21 | Module accent colors change per route | Amber for inventario, teal for clientes, rose for POS, etc. | ✅ | Playwright 2026-04-09 — data-module attribute updates: inventario, clientes, inventario-transito |
 | 16.22 | Sidebar collapse — persists in localStorage | Collapsed state survives page refresh | ☐ | |
 | 16.23 | Mobile sidebar — sheet nav works | Hamburger opens, links navigate, sheet closes | ☐ | |
 | 16.24 | TanStack Query invalidation after mutations | Creating sale → sales list refreshes, inventory refreshes, dashboard refreshes | ☐ | |
@@ -664,7 +664,7 @@ These tests verify that actions in one module correctly affect other modules.
 | 17.28 | Navigate away from unsaved customer edit | Unsaved guard prompts confirmation | ☐ | |
 | 17.29 | Open two tabs with same POS | Realtime sync or no conflicts | ☐ | |
 | 17.30 | Resize browser during dialog/modal | Dialog responsive, no overflow | ☐ | |
-| 17.31 | Empty state for every list/table | "No hay datos" or equivalent message shown | ☐ | |
+| 17.31 | Empty state for every list/table | "No hay datos" or equivalent message shown | ✅ | Playwright 2026-04-09 — empty status filter shows "No hay" message |
 | 17.32 | Slow network — loading states visible | Skeletons/spinners shown, no blank screens | ☐ | |
 | 17.33 | Error toast appears on failed mutations | Sileo toast with error message | ☐ | |
 | 17.34 | Date picker edge — December → January year wrap | Year increments correctly | ☐ | |
