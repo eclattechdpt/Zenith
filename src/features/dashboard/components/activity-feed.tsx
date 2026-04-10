@@ -1,6 +1,15 @@
 "use client"
 
-import { ShoppingBag, RotateCcw, ClipboardList } from "lucide-react"
+import {
+  ShoppingBag,
+  RotateCcw,
+  Ticket,
+  FileText,
+  Download,
+  XCircle,
+  Clock,
+  CheckCircle2,
+} from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 
@@ -16,13 +25,25 @@ interface ActivityItem {
 const iconMap: Record<string, LucideIcon> = {
   venta: ShoppingBag,
   devolucion: RotateCcw,
-  ajuste: ClipboardList,
+  vale: Ticket,
+  vale_completado: CheckCircle2,
+  nota_credito: FileText,
+  nota_liquidada: CheckCircle2,
+  exportacion: Download,
+  cancelacion: XCircle,
+  pendiente: Clock,
 }
 
 const styleMap: Record<string, { bg: string; color: string }> = {
   venta: { bg: "bg-neutral-100", color: "text-neutral-600" },
-  devolucion: { bg: "bg-warning-light", color: "text-warning" },
-  ajuste: { bg: "bg-info-light", color: "text-info" },
+  devolucion: { bg: "bg-amber-50", color: "text-amber-600" },
+  vale: { bg: "bg-indigo-50", color: "text-indigo-500" },
+  vale_completado: { bg: "bg-emerald-50", color: "text-emerald-600" },
+  nota_credito: { bg: "bg-teal-50", color: "text-teal-600" },
+  nota_liquidada: { bg: "bg-emerald-50", color: "text-emerald-600" },
+  exportacion: { bg: "bg-violet-50", color: "text-violet-500" },
+  cancelacion: { bg: "bg-rose-50", color: "text-rose-500" },
+  pendiente: { bg: "bg-amber-50", color: "text-amber-500" },
 }
 
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
@@ -57,15 +78,15 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
               {item.monto !== null ? (
                 <span
                   className={`text-[13px] font-bold tabular-nums ${
-                    isNegative ? "text-warning-dark" : "text-neutral-900"
+                    isNegative ? "text-rose-500" : "text-neutral-900"
                   }`}
                 >
                   {isNegative ? "-" : ""}
                   {formatCurrency(Math.abs(item.monto))}
                 </span>
               ) : (
-                <span className="text-[11px] font-semibold text-info">
-                  ajuste
+                <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-600">
+                  exportado
                 </span>
               )}
               <p className="text-[10px] text-neutral-400">{item.hora}</p>

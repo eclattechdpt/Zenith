@@ -116,7 +116,31 @@ interface RawDashboardData {
       return_number: string
       total_refund: number
       created_at: string
+      status: string
       sale_number: string | null
+    }[]
+    vales: {
+      id: string
+      vale_number: string
+      total: number
+      created_at: string
+      status: string
+      customer_name: string | null
+    }[]
+    credit_notes: {
+      id: string
+      credit_note_number: string
+      total: number
+      created_at: string
+      status: string
+      credit_type: string
+      customer_name: string | null
+    }[]
+    exports: {
+      id: string
+      report_name: string
+      format: string
+      created_at: string
     }[]
   }
   top_products: TopProduct[]
@@ -236,7 +260,7 @@ function transformDashboardData(raw: RawDashboardData): DashboardData {
   const salesChart: SalesChartData = { totalMes, cambioMes, semanas }
 
   // ── Activity Feed ──
-  const act = raw.activity ?? { sales: [], returns: [] }
+  const act = raw.activity ?? { sales: [], returns: [], vales: [], credit_notes: [], exports: [] }
   const activityItems: ActivityItem[] = []
 
   for (const s of act.sales ?? []) {
@@ -245,24 +269,88 @@ function transformDashboardData(raw: RawDashboardData): DashboardData {
       .map((m) => PAYMENT_LABELS[m] ?? m)
       .join(", ")
 
-    activityItems.push({
-      id: s.id,
-      tipo: "venta",
-      descripcion: `Venta ${s.sale_number}`,
-      detalle: `${s.item_count} producto${s.item_count !== 1 ? "s" : ""} — ${methodLabel || "Sin pago"}`,
-      monto: Number(s.total),
-      hora: format(new Date(s.created_at), "HH:mm"),
-    })
+    if (s.status === "cancelled") {
+      activityItems.push({
+        id: s.id,
+        tipo: "cancelacion",
+        descripcion: `Cancelada ${s.sale_number}`,
+        detalle: s.customer_name ?? "Sin cliente",
+        monto: -Number(s.total),
+        hora: format(new Date(s.created_at), "HH:mm"),
+      })
+    } else if (s.status === "pending") {
+      activityItems.push({
+        id: s.id,
+        tipo: "pendiente",
+        descripcion: `Pendiente ${s.sale_number}`,
+        detalle: `${s.item_count} producto${s.item_count !== 1 ? "s" : ""} — Pendiente de cobro`,
+        monto: Number(s.total),
+        hora: format(new Date(s.created_at), "HH:mm"),
+      })
+    } else {
+      activityItems.push({
+        id: s.id,
+        tipo: "venta",
+        descripcion: `Venta ${s.sale_number}`,
+        detalle: `${s.item_count} producto${s.item_count !== 1 ? "s" : ""} — ${methodLabel || "Sin pago"}`,
+        monto: Number(s.total),
+        hora: format(new Date(s.created_at), "HH:mm"),
+      })
+    }
   }
 
   for (const r of act.returns ?? []) {
     activityItems.push({
       id: r.id,
-      tipo: "devolucion",
-      descripcion: `Devolucion ${r.return_number}`,
+      tipo: r.status === "cancelled" ? "cancelacion" : "devolucion",
+      descripcion: r.status === "cancelled"
+        ? `Dev. cancelada ${r.return_number}`
+        : `Devolucion ${r.return_number}`,
       detalle: r.sale_number ? `De venta ${r.sale_number}` : "Devolucion",
       monto: -Number(r.total_refund),
       hora: format(new Date(r.created_at), "HH:mm"),
+    })
+  }
+
+  for (const v of act.vales ?? []) {
+    activityItems.push({
+      id: v.id,
+      tipo: v.status === "completed" ? "vale_completado" : v.status === "cancelled" ? "cancelacion" : "vale",
+      descripcion: v.status === "completed"
+        ? `Vale entregado ${v.vale_number}`
+        : v.status === "cancelled"
+          ? `Vale cancelado ${v.vale_number}`
+          : `Vale ${v.vale_number}`,
+      detalle: v.customer_name ?? "Sin cliente",
+      monto: Number(v.total),
+      hora: format(new Date(v.created_at), "HH:mm"),
+    })
+  }
+
+  for (const cn of act.credit_notes ?? []) {
+    const typeLabel = cn.credit_type === "lending" ? "Prestamo" : "Intercambio"
+    activityItems.push({
+      id: cn.id,
+      tipo: cn.status === "settled" ? "nota_liquidada" : cn.status === "cancelled" ? "cancelacion" : "nota_credito",
+      descripcion: cn.status === "settled"
+        ? `Liquidada ${cn.credit_note_number}`
+        : cn.status === "cancelled"
+          ? `NC cancelada ${cn.credit_note_number}`
+          : `${typeLabel} ${cn.credit_note_number}`,
+      detalle: cn.customer_name ?? "Sin cliente",
+      monto: Number(cn.total),
+      hora: format(new Date(cn.created_at), "HH:mm"),
+    })
+  }
+
+  for (const e of act.exports ?? []) {
+    activityItems.push({
+      id: e.id,
+      tipo: "exportacion",
+      descripcion: `${e.report_name}`,
+      detalle: e.format.toUpperCase(),
+      monto: null,
+      hora: format(new Date(e.created_at), "HH:mm"),
     })
   }
 

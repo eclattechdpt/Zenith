@@ -46,7 +46,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
   const { kpiData, salesChart, activity, topProducts, inventoryAlerts } = data
 
   return (
-    <>
+    <div className="space-y-6">
         {/* KPI Grid */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
           <KpiCard
@@ -186,6 +186,6 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             <InventoryAlertsGrid alerts={inventoryAlerts} />
           </SectionCard>
         </div>
-      </>
+      </div>
   )
 }
