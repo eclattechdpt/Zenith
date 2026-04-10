@@ -20,7 +20,6 @@ import { createVale } from "@/features/vales/actions"
 import type { PendingSaleWithSummary, CartPayment } from "../types"
 
 import type { ReceiptData } from "./sale-receipt"
-import { printReceiptPdf } from "./sale-receipt-pdf"
 import { WizardCustomerStep } from "./wizard-customer-step"
 import { WizardProductsStep } from "./wizard-products-step"
 import { WizardPaymentStep } from "./wizard-payment-step"
@@ -36,6 +35,7 @@ interface POSSaleWizardProps {
   onClose: () => void
   mode: WizardMode
   pendingSale?: PendingSaleWithSummary | null
+  onPrint?: (data: ReceiptData) => void
 }
 
 const STEPS_BY_MODE: Record<WizardMode, StepKey[]> = {
@@ -58,6 +58,7 @@ export function POSSaleWizard({
   onClose,
   mode,
   pendingSale,
+  onPrint,
 }: POSSaleWizardProps) {
   const [stepIndex, setStepIndex] = useState(0)
   const [payments, setPayments] = useState<CartPayment[]>([])
@@ -483,15 +484,15 @@ export function POSSaleWizard({
 
   // ── Print (uses snapshot captured before store clear) ──
 
-  const handlePrint = useCallback(async () => {
-    if (!receiptSnapshot) return
+  const handlePrint = useCallback(() => {
+    if (!receiptSnapshot || !onPrint) return
     try {
-      await printReceiptPdf(receiptSnapshot)
+      onPrint(receiptSnapshot)
       sileo.success({ title: "Recibo enviado a impresion", description: "El recibo se abrio en la ventana de impresion" })
     } catch {
       sileo.error({ title: "Error al imprimir", description: "No se pudo abrir la ventana de impresion" })
     }
-  }, [receiptSnapshot])
+  }, [onPrint, receiptSnapshot])
 
   // ── Close & reset ──
 
