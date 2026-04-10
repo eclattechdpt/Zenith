@@ -20,6 +20,7 @@ import { createVale } from "@/features/vales/actions"
 import type { PendingSaleWithSummary, CartPayment } from "../types"
 
 import type { ReceiptData } from "./sale-receipt"
+import { printReceiptPdf } from "./sale-receipt-pdf"
 import { WizardCustomerStep } from "./wizard-customer-step"
 import { WizardProductsStep } from "./wizard-products-step"
 import { WizardPaymentStep } from "./wizard-payment-step"
@@ -35,7 +36,6 @@ interface POSSaleWizardProps {
   onClose: () => void
   mode: WizardMode
   pendingSale?: PendingSaleWithSummary | null
-  onPrint?: (data: ReceiptData) => void
 }
 
 const STEPS_BY_MODE: Record<WizardMode, StepKey[]> = {
@@ -58,13 +58,13 @@ export function POSSaleWizard({
   onClose,
   mode,
   pendingSale,
-  onPrint,
 }: POSSaleWizardProps) {
   const [stepIndex, setStepIndex] = useState(0)
   const [payments, setPayments] = useState<CartPayment[]>([])
   const [saleResult, setSaleResult] = useState<{ sale_number: string } | null>(
     null
   )
+  const [receiptSnapshot, setReceiptSnapshot] = useState<ReceiptData | null>(null)
   const [wasPending, setWasPending] = useState(false)
 
   const queryClient = useQueryClient()
@@ -107,6 +107,52 @@ export function POSSaleWizard({
     [goNext]
   )
 
+  // ── Receipt snapshot helper (captures store data before clear) ──
+
+  const buildReceiptSnapshot = useCallback((saleNumber: string): ReceiptData => {
+    const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
+    if (mode === "complete-pending" && pendingSale) {
+      return {
+        saleNumber,
+        date: new Date().toISOString(),
+        customerName: pendingSale.customer?.name ?? null,
+        items: pendingSale.items.map((i) => ({
+          product_name: i.product_name,
+          variant_label: i.variant_label,
+          quantity: i.quantity,
+          unit_price: i.unit_price,
+          discount: i.discount,
+          line_total: i.line_total,
+        })),
+        payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
+        subtotal: pendingSale.subtotal,
+        discountAmount: pendingSale.discount_amount,
+        total: pendingSale.total,
+        change: Math.max(0, paymentTotal - pendingSale.total),
+      }
+    }
+    const subtotal = getTotal() + getItemsDiscount() + globalDiscount
+    const totalVal = getTotal()
+    return {
+      saleNumber,
+      date: new Date().toISOString(),
+      customerName: customer?.name ?? null,
+      items: items.map((i) => ({
+        product_name: i.productName,
+        variant_label: i.variantLabel,
+        quantity: i.quantity,
+        unit_price: i.unitPrice,
+        discount: i.discount,
+        line_total: Math.max(0, i.unitPrice * i.quantity - i.discount),
+      })),
+      payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
+      subtotal,
+      discountAmount: getItemsDiscount() + globalDiscount,
+      total: totalVal,
+      change: Math.max(0, paymentTotal - totalVal),
+    }
+  }, [mode, pendingSale, items, customer, payments, globalDiscount, getTotal, getItemsDiscount])
+
   // ── Sale completion ──
 
   const handleCompleteSale = useCallback(async () => {
@@ -132,7 +178,9 @@ export function POSSaleWizard({
           sileo.error({ title: msg })
           return
         }
+        const snap = buildReceiptSnapshot(result.data!.sale_number)
         setSaleResult({ sale_number: result.data!.sale_number })
+        setReceiptSnapshot(snap)
         sileo.success({ title: `Venta ${result.data!.sale_number} completada`, description: "La venta fue registrada y el inventario actualizado" })
       } else {
         const saleItems = items.map((item) => ({
@@ -163,7 +211,9 @@ export function POSSaleWizard({
           sileo.error({ title: msg })
           return
         }
+        const snap = buildReceiptSnapshot(result.data!.sale_number)
         setSaleResult({ sale_number: result.data!.sale_number })
+        setReceiptSnapshot(snap)
         sileo.success({ title: `Venta ${result.data!.sale_number} completada`, description: "La venta fue registrada y el inventario actualizado" })
         clear()
       }
@@ -175,7 +225,7 @@ export function POSSaleWizard({
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
-  }, [mode, pendingSale, items, customer, globalDiscount, notes, payments, clear, queryClient, isOnline])
+  }, [mode, pendingSale, items, customer, globalDiscount, notes, payments, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Pending sale ──
 
@@ -209,7 +259,9 @@ export function POSSaleWizard({
         return
       }
       setWasPending(true)
+      const snap = buildReceiptSnapshot(result.data!.sale_number)
       setSaleResult({ sale_number: result.data!.sale_number })
+      setReceiptSnapshot(snap)
       sileo.success({ title: "Venta guardada como pendiente", description: "Recuerda cobrar esta venta desde la seccion de ventas pendientes." })
       clear()
       queryClient.invalidateQueries({ queryKey: ["sales"] })
@@ -218,7 +270,7 @@ export function POSSaleWizard({
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
-  }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline])
+  }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Create vale ──
 
@@ -256,7 +308,9 @@ export function POSSaleWizard({
         sileo.error({ title: msg })
         return
       }
+      const snap = buildReceiptSnapshot(result.data!.vale_number)
       setSaleResult({ sale_number: result.data!.vale_number })
+      setReceiptSnapshot(snap)
       sileo.success({
         title: `Vale ${result.data!.vale_number} creado`,
         description: paymentStatus === "paid"
@@ -270,7 +324,7 @@ export function POSSaleWizard({
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
-  }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline])
+  }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Split sale (in-stock → sale, out-of-stock → vale) ──
 
@@ -399,14 +453,17 @@ export function POSSaleWizard({
             ? (valeResult.error._form as string[])[0]
             : "Error al crear el vale"
         sileo.error({ title: `Venta creada pero error en vale: ${msg}` })
+        const snap = buildReceiptSnapshot(saleResult.data!.sale_number)
         setSaleResult({ sale_number: saleResult.data!.sale_number })
+        setReceiptSnapshot(snap)
         clear()
         return
       }
 
-      setSaleResult({
-        sale_number: `${saleResult.data!.sale_number} + ${valeResult.data!.vale_number}`,
-      })
+      const combinedNumber = `${saleResult.data!.sale_number} + ${valeResult.data!.vale_number}`
+      const snap = buildReceiptSnapshot(combinedNumber)
+      setSaleResult({ sale_number: combinedNumber })
+      setReceiptSnapshot(snap)
       sileo.success({
         title: "Venta y vale creados",
         description: `Venta ${saleResult.data!.sale_number} completada. Vale ${valeResult.data!.vale_number} ${valePaymentStatus === "paid" ? "pagado" : "pendiente de pago"}.`,
@@ -422,61 +479,19 @@ export function POSSaleWizard({
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
-  }, [items, customer, payments, notes, globalDiscount, clear, queryClient, isOnline])
+  }, [items, customer, payments, notes, globalDiscount, clear, queryClient, isOnline, buildReceiptSnapshot])
 
-  // ── Print ──
+  // ── Print (uses snapshot captured before store clear) ──
 
-  const handlePrint = useCallback(() => {
-    if (!saleResult || !onPrint) return
-    const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
-
+  const handlePrint = useCallback(async () => {
+    if (!receiptSnapshot) return
     try {
-      if (mode === "complete-pending" && pendingSale) {
-        onPrint({
-          saleNumber: saleResult.sale_number,
-          date: new Date().toISOString(),
-          customerName: pendingSale.customer?.name ?? null,
-          items: pendingSale.items.map((i) => ({
-            product_name: i.product_name,
-            variant_label: i.variant_label,
-            quantity: i.quantity,
-            unit_price: i.unit_price,
-            discount: i.discount,
-            line_total: i.line_total,
-          })),
-          payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
-          subtotal: pendingSale.subtotal,
-          discountAmount: pendingSale.discount_amount,
-          total: pendingSale.total,
-          change: Math.max(0, paymentTotal - pendingSale.total),
-        })
-      } else {
-        const subtotal = getTotal() + getItemsDiscount() + globalDiscount
-        const totalVal = getTotal()
-        onPrint({
-          saleNumber: saleResult.sale_number,
-          date: new Date().toISOString(),
-          customerName: customer?.name ?? null,
-          items: items.map((i) => ({
-            product_name: i.productName,
-            variant_label: i.variantLabel,
-            quantity: i.quantity,
-            unit_price: i.unitPrice,
-            discount: i.discount,
-            line_total: Math.max(0, i.unitPrice * i.quantity - i.discount),
-          })),
-          payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
-          subtotal,
-          discountAmount: getItemsDiscount() + globalDiscount,
-          total: totalVal,
-          change: Math.max(0, paymentTotal - totalVal),
-        })
-      }
+      await printReceiptPdf(receiptSnapshot)
       sileo.success({ title: "Recibo enviado a impresion", description: "El recibo se abrio en la ventana de impresion" })
     } catch {
       sileo.error({ title: "Error al imprimir", description: "No se pudo abrir la ventana de impresion" })
     }
-  }, [onPrint, saleResult, mode, pendingSale, payments, items, customer, globalDiscount, getTotal, getItemsDiscount])
+  }, [receiptSnapshot])
 
   // ── Close & reset ──
 
@@ -484,6 +499,7 @@ export function POSSaleWizard({
     setStepIndex(0)
     setPayments([])
     setSaleResult(null)
+    setReceiptSnapshot(null)
     setWasPending(false)
     onClose()
   }, [onClose])
@@ -604,6 +620,7 @@ export function POSSaleWizard({
                   onBack={goBack}
                   onClose={handleClose}
                   saleResult={saleResult}
+                  receiptSnapshot={receiptSnapshot}
                   pendingSale={mode === "complete-pending" && pendingSale ? { subtotal: pendingSale.subtotal, discount_amount: pendingSale.discount_amount, total: pendingSale.total } : null}
                   wasPending={wasPending}
                 />

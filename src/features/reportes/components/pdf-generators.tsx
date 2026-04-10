@@ -253,9 +253,18 @@ function Footer() {
       borderTopWidth: 1,
       borderTopColor: N[200],
       paddingTop: 8,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     }}>
-      <Text style={{ fontSize: 7, color: N[500], textAlign: "center", fontFamily: FONT }}>
-        Generado por Eclat POS — {format(new Date(), "dd/MM/yyyy HH:mm")}
+      <Text style={{ fontSize: 7, color: N[500], fontFamily: FONT }}>
+        Powered by Eclat POS
+      </Text>
+      <Text style={{ fontSize: 7, color: N[500], fontFamily: FONT }}>
+        {format(new Date(), "dd/MM/yyyy HH:mm")}
+      </Text>
+      <Text style={{ fontSize: 7, color: N[400], fontFamily: FONT }}>
+        Abbrix
       </Text>
     </View>
   )

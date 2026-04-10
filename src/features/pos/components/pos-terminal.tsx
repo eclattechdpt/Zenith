@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback, useMemo } from "react"
-import { useReactToPrint } from "react-to-print"
+import { useState, useMemo } from "react"
 import { ShoppingCart, X } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 
@@ -14,14 +13,11 @@ import { ProductSearch } from "./product-search"
 import { CartPanel } from "./cart-panel"
 import { CustomerPicker } from "./customer-picker"
 import { PaymentDialog } from "./payment-dialog"
-import { SaleReceipt, type ReceiptData } from "./sale-receipt"
 import { usePOSStore } from "../store"
 
 export function POSTerminal() {
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [mobileCartOpen, setMobileCartOpen] = useState(false)
-  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null)
-  const receiptRef = useRef<HTMLDivElement>(null)
 
   // Subscribe to items directly so the component re-renders when cart changes
   const items = usePOSStore((s) => s.items)
@@ -36,22 +32,6 @@ export function POSTerminal() {
   useRealtimeSync("product_variants", stockKeys)
   const salesKeys = useMemo(() => [["sales"], ["dashboard"]], [])
   useRealtimeSync("sales", salesKeys)
-
-  const handlePrint = useReactToPrint({
-    contentRef: receiptRef,
-    documentTitle: receiptData?.saleNumber ?? "ticket",
-  })
-
-  const handleSaleComplete = useCallback(
-    (saleNumber: string, data: ReceiptData) => {
-      setReceiptData(data)
-      setMobileCartOpen(false)
-      setTimeout(() => {
-        handlePrint()
-      }, 300)
-    },
-    [handlePrint]
-  )
 
   return (
     <>
@@ -164,15 +144,7 @@ export function POSTerminal() {
       <PaymentDialog
         open={checkoutOpen}
         onOpenChange={setCheckoutOpen}
-        onSaleComplete={handleSaleComplete}
       />
-
-      {/* Hidden receipt for printing */}
-      {receiptData && (
-        <div className="hidden">
-          <SaleReceipt ref={receiptRef} data={receiptData} />
-        </div>
-      )}
     </>
   )
 }

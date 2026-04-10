@@ -32,6 +32,7 @@ import { NumericInput } from "@/features/productos/components/variant-manager"
 
 import { usePOSStore } from "../store"
 import { createSale } from "../actions"
+import { printReceiptPdf } from "./sale-receipt-pdf"
 import type { CartPayment } from "../types"
 import type { ReceiptData } from "./sale-receipt"
 
@@ -47,13 +48,11 @@ const QUICK_METHODS: PaymentMethod[] = ["cash", "card", "transfer"]
 interface PaymentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSaleComplete: (saleNumber: string, receiptData: ReceiptData) => void
 }
 
 export function PaymentDialog({
   open,
   onOpenChange,
-  onSaleComplete,
 }: PaymentDialogProps) {
   const queryClient = useQueryClient()
   const items = usePOSStore((s) => s.items)
@@ -193,7 +192,7 @@ export function PaymentDialog({
 
     clear()
     onOpenChange(false)
-    onSaleComplete(sale.sale_number, receiptData)
+    printReceiptPdf(receiptData)
   }
 
   return (

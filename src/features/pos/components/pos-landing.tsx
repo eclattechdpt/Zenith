@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useCallback, useRef, useEffect } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { AnimatePresence, motion } from "motion/react"
 import { Flame, Clock } from "lucide-react"
 import { PageHero } from "@/components/shared/page-hero"
-import { useReactToPrint } from "react-to-print"
 
 import { useRealtimeSync } from "@/hooks/use-realtime"
 
@@ -17,7 +16,6 @@ import {
 } from "../queries"
 import type { POSProductWithImage } from "../queries"
 import type { PendingSaleWithSummary } from "../types"
-import type { ReceiptData } from "./sale-receipt"
 
 import { POSKpiWidgets } from "./pos-kpi-widgets"
 import { POSPendingSales } from "./pos-pending-sales"
@@ -25,7 +23,6 @@ import { POSProductCarousel } from "./pos-product-carousel"
 import { POSProductGrid } from "./pos-product-grid"
 import { POSSlidingCart, POSCartFAB } from "./pos-sliding-cart"
 import { POSSaleWizard } from "./pos-sale-wizard"
-import { SaleReceipt } from "./sale-receipt"
 import { ProductEditDialog } from "@/features/productos/components/product-edit-dialog"
 
 // ── Types ──
@@ -61,15 +58,6 @@ export function POSLanding() {
 
   // ── Product edit dialog ──
   const [editProductId, setEditProductId] = useState<string | null>(null)
-
-  // ── Receipt printing ──
-  const receiptRef = useRef<HTMLDivElement>(null)
-  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null)
-
-  const handlePrint = useReactToPrint({
-    contentRef: receiptRef,
-    documentTitle: receiptData ? `Recibo-${receiptData.saleNumber}` : "Recibo",
-  })
 
   // ── Store ──
   const items = usePOSStore((s) => s.items)
@@ -158,17 +146,6 @@ export function POSLanding() {
     setPendingSale(null)
   }, [])
 
-  // ── Print trigger from wizard ──
-  const triggerPrint = useCallback(
-    (data: ReceiptData) => {
-      setReceiptData(data)
-      setTimeout(() => {
-        handlePrint()
-      }, 200)
-    },
-    [handlePrint]
-  )
-
   const hasCarousels =
     (topProducts && topProducts.length > 0) ||
     (recentProducts && recentProducts.length > 0)
@@ -250,15 +227,7 @@ export function POSLanding() {
         onClose={closeWizard}
         mode={wizardMode}
         pendingSale={pendingSale}
-        onPrint={triggerPrint}
       />
-
-      {/* ── Hidden receipt for printing ── */}
-      {receiptData && (
-        <div className="hidden">
-          <SaleReceipt ref={receiptRef} data={receiptData} />
-        </div>
-      )}
 
       {/* ── Product edit dialog ── */}
       <ProductEditDialog

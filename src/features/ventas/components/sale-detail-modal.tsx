@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "motion/react"
 import {
@@ -11,6 +11,7 @@ import {
   PackageCheck,
   PackageX,
   Printer,
+  Download,
   MoreVertical,
   Receipt,
   ShoppingBag,
@@ -22,7 +23,6 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
-import { useReactToPrint } from "react-to-print"
 
 import {
   Dialog,
@@ -53,8 +53,8 @@ import { useSaleDetail } from "../queries"
 import { cancelSale } from "../actions"
 import { ReturnDialog } from "./return-dialog"
 import { SaleDetailFixture } from "./fixtures/sale-detail-fixture"
-import { SaleReceipt } from "@/features/pos/components/sale-receipt"
 import type { ReceiptData } from "@/features/pos/components/sale-receipt"
+import { downloadReceiptPdf, printReceiptPdf } from "@/features/pos/components/sale-receipt-pdf"
 
 // ── Status badge colors ──
 
@@ -122,9 +122,7 @@ export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
 
-  // ── Print ──
-
-  const receiptRef = useRef<HTMLDivElement>(null)
+  // ── Receipt data ──
 
   const receiptData = useMemo<ReceiptData | null>(() => {
     if (!sale) return null
@@ -155,17 +153,15 @@ export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps)
     }
   }, [sale])
 
-  const handlePrint = useReactToPrint({
-    contentRef: receiptRef,
-    documentTitle: receiptData
-      ? `Recibo-${receiptData.saleNumber}`
-      : "Recibo",
-  })
-
-  const triggerPrint = useCallback(() => {
+  const triggerPrint = useCallback(async () => {
     if (!receiptData) return
-    setTimeout(() => handlePrint(), 150)
-  }, [receiptData, handlePrint])
+    await printReceiptPdf(receiptData)
+  }, [receiptData])
+
+  const handleDownloadPdf = useCallback(async () => {
+    if (!receiptData) return
+    await downloadReceiptPdf(receiptData)
+  }, [receiptData])
 
   // ── Actions ──
 
@@ -264,6 +260,15 @@ export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps)
                     >
                       <Printer className="size-3.5" />
                       Imprimir
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 rounded-xl"
+                      onClick={handleDownloadPdf}
+                    >
+                      <Download className="size-3.5" />
+                      PDF
                     </Button>
                     {showActions && (
                       <DropdownMenu>
@@ -526,13 +531,6 @@ export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps)
           </BoneyardSkeleton>
         </DialogContent>
       </Dialog>
-
-      {/* Hidden receipt for printing */}
-      {receiptData && (
-        <div className="hidden">
-          <SaleReceipt ref={receiptRef} data={receiptData} />
-        </div>
-      )}
 
       {/* Dialogs */}
       <ReturnDialog

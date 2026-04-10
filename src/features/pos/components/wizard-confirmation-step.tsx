@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import {
   Check,
   Clock,
   Printer,
+  Download,
   Loader2,
   ArrowLeft,
   User,
@@ -21,6 +22,8 @@ import { formatCurrency } from "@/lib/utils"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 import { PAYMENT_METHODS } from "@/lib/constants"
 import { usePOSStore } from "../store"
+import { downloadReceiptPdf } from "./sale-receipt-pdf"
+import type { ReceiptData } from "./sale-receipt"
 import type { CartPayment } from "../types"
 
 const THIN_SCROLL =
@@ -44,6 +47,8 @@ interface WizardConfirmationStepProps {
   onBack: () => void
   onClose: () => void
   saleResult: { sale_number: string } | null
+  /** Snapshot of receipt data captured before store clear */
+  receiptSnapshot?: ReceiptData | null
   /** When completing a pending sale, pass its data so totals display correctly */
   pendingSale?: { subtotal: number; discount_amount: number; total: number } | null
   /** Whether this was saved as pending (for success screen message) */
@@ -60,6 +65,7 @@ export function WizardConfirmationStep({
   onBack,
   onClose,
   saleResult,
+  receiptSnapshot,
   pendingSale,
   wasPending,
 }: WizardConfirmationStepProps) {
@@ -68,6 +74,11 @@ export function WizardConfirmationStep({
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const getTotal = usePOSStore((s) => s.getTotal)
+
+  const handleDownloadPdf = useCallback(async () => {
+    if (!receiptSnapshot) return
+    await downloadReceiptPdf(receiptSnapshot)
+  }, [receiptSnapshot])
 
   // Categorize items — bundles with partial OOS get split
   const inStockItems: typeof items = []
@@ -241,16 +252,27 @@ export function WizardConfirmationStep({
           </p>
         </motion.div>
 
-        <motion.button
+        <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35, duration: 0.3 }}
-          type="button"
-          onClick={onPrint}
-          className="flex h-12 items-center gap-2.5 rounded-xl border-2 border-neutral-200 px-8 text-base font-bold text-neutral-700 transition-all hover:border-neutral-300 hover:bg-neutral-50 active:scale-[0.98]"
+          className="flex gap-3"
         >
-          <Printer className="h-5 w-5" /> Imprimir ticket
-        </motion.button>
+          <button
+            type="button"
+            onClick={onPrint}
+            className="flex h-12 items-center gap-2.5 rounded-xl border-2 border-neutral-200 px-8 text-base font-bold text-neutral-700 transition-all hover:border-neutral-300 hover:bg-neutral-50 active:scale-[0.98]"
+          >
+            <Printer className="h-5 w-5" /> Imprimir
+          </button>
+          <button
+            type="button"
+            onClick={handleDownloadPdf}
+            className="flex h-12 items-center gap-2.5 rounded-xl border-2 border-rose-200 px-8 text-base font-bold text-rose-600 transition-all hover:border-rose-300 hover:bg-rose-50 active:scale-[0.98]"
+          >
+            <Download className="h-5 w-5" /> Descargar PDF
+          </button>
+        </motion.div>
 
         <motion.button
           initial={{ opacity: 0 }}
