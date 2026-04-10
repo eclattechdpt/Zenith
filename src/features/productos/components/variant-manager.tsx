@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
-import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 
 /**
  * Formatted numeric input with live thousand separators.
@@ -77,7 +76,7 @@ interface VariantManagerProps {
   variants: VariantInput[]
   onChange: (variants: VariantInput[]) => void
   errors?: FieldErrors<CreateProductInput>["variants"]
-  onConfirmingChange?: (isConfirming: boolean) => void
+  onDeleteRequest?: (index: number, label: string) => void
 }
 
 function emptyVariant(): VariantInput {
@@ -90,14 +89,8 @@ function emptyVariant(): VariantInput {
   }
 }
 
-export function VariantManager({ variants, onChange, errors, onConfirmingChange }: VariantManagerProps) {
+export function VariantManager({ variants, onChange, errors, onDeleteRequest }: VariantManagerProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
-  const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
-
-  const setDeleteIndexWithCallback = (index: number | null) => {
-    setDeleteIndex(index)
-    onConfirmingChange?.(index !== null)
-  }
 
   function addVariant() {
     const updated = [...variants, emptyVariant()]
@@ -246,7 +239,7 @@ export function VariantManager({ variants, onChange, errors, onConfirmingChange 
                     type="button"
                     variant="destructive"
                     size="xs"
-                    onClick={() => setDeleteIndexWithCallback(index)}
+                    onClick={() => onDeleteRequest?.(index, getVariantLabel(variants[index]))}
                   >
                     <Trash2 className="mr-1 size-3" />
                     Eliminar
@@ -263,21 +256,6 @@ export function VariantManager({ variants, onChange, errors, onConfirmingChange 
         Agregar variante
       </Button>
 
-      <ConfirmDialog
-        open={deleteIndex !== null}
-        onOpenChange={(open) => !open && setDeleteIndexWithCallback(null)}
-        title="Eliminar variante"
-        description={`Se eliminara la variante "${deleteIndex !== null ? getVariantLabel(variants[deleteIndex]) : ""}". Esta accion no se puede deshacer.`}
-        confirmLabel="Eliminar"
-        cancelLabel="Cancelar"
-        variant="destructive"
-        onConfirm={() => {
-          if (deleteIndex !== null) {
-            removeVariant(deleteIndex)
-            setDeleteIndexWithCallback(null)
-          }
-        }}
-      />
     </div>
   )
 }

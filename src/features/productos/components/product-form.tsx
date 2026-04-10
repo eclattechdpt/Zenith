@@ -108,7 +108,6 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
 
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [slugFocused, setSlugFocused] = useState(false)
-  const [isConfirming, setIsConfirming] = useState(false)
   const pendingFileRef = useRef<File | null>(null)
   const imageUrl = watch("image_url")
   const brand = watch("brand")
@@ -520,7 +519,6 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
                 variants={variants}
                 onChange={handleVariantsChange}
                 errors={errors.variants}
-                onConfirmingChange={setIsConfirming}
               />
               {errors.variants && (
                 <p className="mt-2 text-xs text-destructive">

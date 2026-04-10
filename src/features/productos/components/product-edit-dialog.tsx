@@ -101,7 +101,7 @@ interface ProductEditDialogProps {
 export function ProductEditDialog({ open, productId, onClose }: ProductEditDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [isConfirming, setIsConfirming] = useState(false)
+  const [deleteVariant, setDeleteVariant] = useState<{ index: number; label: string } | null>(null)
 
   const [infoOpen, setInfoOpen] = useState(true)
   const [pricingOpen, setPricingOpen] = useState(true)
@@ -229,8 +229,35 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
         showCloseButton={false}
         className="flex h-[85vh] w-[95vw] flex-col gap-0 overflow-hidden bg-neutral-50 p-0 sm:max-w-3xl sm:rounded-2xl"
       >
-        {isConfirming && (
-          <div className="absolute inset-0 z-10 rounded-2xl bg-black/40" />
+        {deleteVariant && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-black/40">
+            <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+              <h3 className="text-lg font-bold text-neutral-900">Eliminar variante</h3>
+              <p className="mt-3 text-sm text-neutral-500">
+                Se eliminara la variante &quot;{deleteVariant.label}&quot;. Esta accion no se puede deshacer.
+              </p>
+              <div className="mt-5 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setDeleteVariant(null)}
+                  className="h-10 rounded-lg border border-neutral-200 bg-white px-4 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updated = variants.filter((_, i) => i !== deleteVariant.index)
+                    handleVariantsChange(updated)
+                    setDeleteVariant(null)
+                  }}
+                  className="h-10 rounded-lg bg-rose-500 px-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-rose-600 active:scale-[0.98]"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
         )}
         <DialogTitle className="sr-only">Editar producto</DialogTitle>
 
@@ -456,7 +483,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
                   </div>
                 ) : hasVariants ? (
                   <div className="rounded-xl border border-white/80 bg-white p-4 shadow-sm">
-                    <VariantManager variants={variants} onChange={handleVariantsChange} errors={errors.variants} onConfirmingChange={setIsConfirming} />
+                    <VariantManager variants={variants} onChange={handleVariantsChange} errors={errors.variants} onDeleteRequest={(index, label) => setDeleteVariant({ index, label })} />
                     {errors.variants && <p className="mt-2 text-xs text-destructive">{typeof errors.variants.message === "string" ? errors.variants.message : "Revisa las variantes"}</p>}
                   </div>
                 ) : (
