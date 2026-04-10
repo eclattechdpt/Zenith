@@ -132,7 +132,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
           </KpiCard>
         </div>
 
-        {/* Sales Chart + Activity Feed */}
+        {/* Sales Chart + Top Products */}
         <div className="grid min-w-0 gap-5 xl:grid-cols-5">
           <SectionCard
             label="Rendimiento de ventas"
@@ -150,29 +150,29 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
           </SectionCard>
 
           <SectionCard
-            label="Actividad reciente"
-            description="Hoy"
-            icon={Activity}
-            iconBg="bg-blush-50"
-            iconColor="text-blush-500"
-            delay={0.30}
-            className="xl:col-span-2"
-          >
-            <ActivityFeed items={activity!} />
-          </SectionCard>
-        </div>
-
-        {/* Top Products + Inventory Alerts */}
-        <div className="grid min-w-0 gap-5 xl:grid-cols-2">
-          <SectionCard
             label="Productos mas vendidos"
             description="Este mes"
             icon={Award}
             iconBg="bg-teal-50"
             iconColor="text-teal-500"
+            delay={0.30}
+            className="xl:col-span-2"
+          >
+            <TopProductsGrid products={topProducts!.slice(0, 3)} />
+          </SectionCard>
+        </div>
+
+        {/* Activity Feed + Inventory Alerts */}
+        <div className="grid min-w-0 gap-5 xl:grid-cols-2">
+          <SectionCard
+            label="Actividad reciente"
+            description="Hoy"
+            icon={Activity}
+            iconBg="bg-blush-50"
+            iconColor="text-blush-500"
             delay={0.36}
           >
-            <TopProductsGrid products={topProducts!} />
+            <ActivityFeed items={activity!} />
           </SectionCard>
 
           <SectionCard

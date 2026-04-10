@@ -142,6 +142,11 @@
   - TEST-PLAN.md: 362 tests (227 backend complete, 135 UI/UX pending manual testing)
 - **Discount UI redesign** (2026-04-09): PriceListManager rewritten — teal-themed cards with gradient stripes, percentage badges, client counts, hover-reveal actions, live price preview in dialog, animated empty state, CustomerPriceEditor polished with teal header and animated states
 - **Customer detail sheet spacing** (2026-04-09): Added top padding between close button and content
+- **Receipt PDF system** (2026-04-09): @react-pdf/renderer ticket receipts (80mm wide, dynamic height), Descargar PDF + Imprimir buttons, receipt data snapshot fix, print-color-adjust for visible backgrounds
+- **PDF footer credits** (2026-04-09): "Powered by Eclat POS" + "Abbrix" on all report PDFs
+- **Plus Jakarta Sans for PDFs** (2026-04-09): local TTF fonts registered via shared pdf-fonts.ts module, matches design system
+- **Activity feed expansion** (2026-04-09): sales, returns, vales, credit notes, exports — 8 items, swapped to bottom row with inventory alerts
+- **Dashboard layout** (2026-04-09): top products (capped 3) next to sales chart, activity feed + alerts on bottom row, space-y-6 section gaps
 
 ### Pending
 - UI/UX manual testing (135 tests in TEST-PLAN.md)

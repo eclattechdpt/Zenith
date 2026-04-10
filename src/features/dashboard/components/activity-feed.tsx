@@ -49,7 +49,7 @@ const styleMap: Record<string, { bg: string; color: string }> = {
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
   return (
     <div className="space-y-0.5">
-      {items.slice(0, 4).map((item) => {
+      {items.map((item) => {
         const Icon = iconMap[item.tipo] ?? ShoppingBag
         const styles = styleMap[item.tipo] ?? styleMap.venta
         const isNegative = item.monto !== null && item.monto < 0

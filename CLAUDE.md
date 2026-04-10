@@ -396,6 +396,23 @@ No saltar sprints. Cada sprint depende del anterior.
   - Customer detail sheet: added top spacing between close button and content
   - Key files: `src/features/clientes/components/price-list-manager.tsx`, `src/features/clientes/components/customer-price-editor.tsx`, `src/features/clientes/queries.ts`
 
+- **Receipt PDF system** (2026-04-09): ticket-sized PDF receipts with @react-pdf/renderer
+  - New `sale-receipt-pdf.ts` with dynamic page height (80mm wide, content-fit tall)
+  - Filename: `Recibo-V-XXXX` (sales), `Recibo-D-XXXX` (returns)
+  - "Descargar PDF" button in wizard confirmation, sale detail, sale detail modal
+  - "Imprimir" still uses react-to-print (browser print dialog with HTML receipt)
+  - Receipt data snapshot before store `clear()` — fixes empty receipt bug
+  - `print-color-adjust: exact` on HTML receipt for visible backgrounds in print
+- **PDF footer credits** (2026-04-09): all report PDFs show "Powered by Eclat POS" (left) + timestamp (center) + "Abbrix" (right)
+- **Plus Jakarta Sans for PDFs** (2026-04-09): registered local TTF fonts (Regular/Medium/SemiBold/Bold) for @react-pdf/renderer
+  - Shared `src/lib/pdf-fonts.ts` registration module used by report exports and receipt PDF
+  - Font files in `public/fonts/` — matches design system typography
+- **Activity feed expansion** (2026-04-09): covers all modules, not just sales/returns
+  - New types: vales (created/completed/cancelled), credit notes (lending/exchange/settled), export logs, cancelled sales, pending sales
+  - Each type has distinct icon and color. RPC returns 8 items per source, sorted by time DESC
+  - Activity feed moved to bottom row (half-width), top products moved next to sales chart (capped at 3)
+- **Dashboard spacing fix** (2026-04-09): DashboardInner wrapped in `space-y-6` for consistent section gaps
+
 ### Sprint 8 — Decisiones arquitectonicas y sistemas clave
 
 - **Module-scoped accent colors**: `[data-module]` en `<html>` con CSS variable scopes. Source of truth: `src/lib/module-accent.ts`. Mapping: `/inventario` → amber, `/inventario/transito` → blue, `/inventario/carga-inicial` → slate, `/clientes` + `/notas-credito` → teal, `/reportes` + `/configuracion` → neutral, default → rose. Accent variables DEBEN estar en `@layer base` (Tailwind v4 tree-shakes unlayered custom properties). Utilities: `bg-accent-50`..`bg-accent-900`, `text-accent-*`, `border-accent-*`.
