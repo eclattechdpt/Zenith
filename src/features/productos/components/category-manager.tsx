@@ -172,18 +172,20 @@ export function CategoryManager() {
                 onDelete={setDeleteTarget}
                 onAddChild={handleAddChild}
                 allCategories={categories}
+                creatingAt={creatingAt}
+                onCloseCreate={() => setCreatingAt(false)}
               />
             ))}
           </div>
         </SortableContext>
       </DndContext>
 
-      {/* Inline create row */}
+      {/* Inline create row — only for top-level categories. Subcategories are rendered inside their parent's children container. */}
       <AnimatePresence>
-        {creatingAt !== false && (
+        {creatingAt === null && (
           <InlineCreateRow
-            key={creatingAt ?? "top"}
-            parentId={typeof creatingAt === "string" ? creatingAt : null}
+            key="top"
+            parentId={null}
             autoColorIndex={topLevel.length}
             onClose={() => setCreatingAt(false)}
           />

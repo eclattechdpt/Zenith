@@ -1,6 +1,6 @@
 # Eclat POS — Test Plan
 
-> **Legend**: ☐ = Pending | ✅ = Passed | ❌ = Failed | ⚠️ = Partial/Known issue
+> **Legend**: ☐ = Pending | ✅ = Passed | ❌ = Failed | ⚠️ = Partial/Known issue | ⏭️ = Skipped (not applicable to production usage)
 >
 > **Roles**: 🖥️ = UI/UX (manual, human tester) | ⚙️ = Backend (Claude — server actions, RPCs, queries, data integrity)
 >
@@ -120,20 +120,20 @@
 
 | # | Test | Expected | Status | Notes |
 |---|------|----------|--------|-------|
-| 3.23 | Product wizard — create simple product flow | All steps complete, product saved | ☐ | |
-| 3.24 | Product wizard — create product with variants | Variant step appears, options selectable | ☐ | |
-| 3.25 | Product wizard — create cofre (bundle) | Bundle manager shows, components selectable | ☐ | |
-| 3.26 | Product wizard — image upload (Supabase) | Image compressed to WebP, uploaded, visible | ☐ | |
-| 3.27 | Product wizard — image URL (direct link) | URL saved, image displayed | ☐ | |
-| 3.28 | Product wizard — deferred upload on new product | Image uploads only after product creation succeeds | ☐ | |
-| 3.29 | Product edit — loads existing data including bundle_items | All fields pre-populated | ☐ | |
-| 3.30 | Slug warning — amber warning on slug field focus | Warning appears in both create and edit forms | ☐ | |
-| 3.31 | Brand toggle — Ideal/Eclat selector | Toggle works, value saved correctly | ☐ | |
-| 3.32 | Product list — search, category filter, brand filter | Filters work independently and combined | ☐ | |
-| 3.33 | Product list — stock badges (Sin stock / Bajo / none) | Correct colors: red ≤ 0, amber 1-5, hidden > 5 | ☐ | |
-| 3.34 | Product list — cofre stock shows derived value | min(component_stock) displayed | ☐ | |
-| 3.35 | Category manager — CRUD + reorder | Create, rename, delete, drag-to-reorder | ☐ | |
-| 3.36 | Product list — responsive on mobile | Cards or table adapt, all actions accessible | ☐ | |
+| 3.23 | Product wizard — create simple product flow | All steps complete, product saved | ✅ | Manual test passed 2026-04-09 |
+| 3.24 | Product wizard — create product with variants | Variant step appears, options selectable | ✅ | Manual test passed 2026-04-09. Fixed: removed random SKU auto-gen, dim overlay on variant delete |
+| 3.25 | Product wizard — create cofre (bundle) | Bundle manager shows, components selectable | ✅ | Manual test passed 2026-04-09 |
+| 3.26 | Product wizard — image upload (Supabase) | Image compressed to WebP, uploaded, visible | ⏭️ | Skipped — system used without product images in production |
+| 3.27 | Product wizard — image URL (direct link) | URL saved, image displayed | ⏭️ | Skipped — system used without product images in production |
+| 3.28 | Product wizard — deferred upload on new product | Image uploads only after product creation succeeds | ⏭️ | Skipped — system used without product images in production |
+| 3.29 | Product edit — loads existing data including bundle_items | All fields pre-populated | ✅ | Manual test passed 2026-04-09 |
+| 3.30 | Slug warning — amber warning on slug field focus | Warning appears in both create and edit forms | ✅ | Manual test passed 2026-04-09. Added warning to edit dialog. |
+| 3.31 | Brand toggle — Ideal/Eclat selector | Toggle works, value saved correctly | ✅ | Manual test passed 2026-04-09. Added toggle to edit dialog. Fixed UUID validation regex (Zod v4 was rejecting seed UUIDs). |
+| 3.32 | Product list — search, category filter, brand filter | Filters work independently and combined | ✅ | Manual test passed 2026-04-09 |
+| 3.33 | Product list — stock badges (Sin stock / Bajo / none) | Correct colors: red ≤ 0, amber 1-5, hidden > 5 | ✅ | Manual test passed 2026-04-09 |
+| 3.34 | Product list — cofre stock shows derived value | min(component_stock) displayed | ✅ | Manual test passed 2026-04-09 |
+| 3.35 | Category manager — CRUD + reorder | Create, rename, delete, drag-to-reorder | ✅ | Manual test passed 2026-04-09. Fixed: subcategory inline form now renders nested in parent with matching color, works on empty parents. |
+| 3.36 | Product list — responsive on mobile | Cards or table adapt, all actions accessible | ✅ | Manual test passed 2026-04-09 |
 
 ---
 

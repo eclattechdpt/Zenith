@@ -534,7 +534,7 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
                           onClick={() => setValue("is_active", true, { shouldDirty: true })}
                           className={`rounded-md px-3 py-1.5 text-[12px] font-semibold transition-colors ${
                             isActive
-                              ? "bg-teal-500 text-white shadow-sm"
+                              ? "bg-rose-500 text-white shadow-sm"
                               : "text-neutral-400 hover:text-neutral-600"
                           }`}
                         >

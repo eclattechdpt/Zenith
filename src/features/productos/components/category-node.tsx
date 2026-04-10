@@ -54,6 +54,9 @@ interface CategoryNodeProps {
   parentColorName?: string | null
   /** For subcategories: total siblings count (for HSL spread) */
   totalSiblings?: number
+  /** Currently-creating parent ID (or null/false). Used to render inline create form inside expanded children. */
+  creatingAt?: string | null | false
+  onCloseCreate?: () => void
 }
 
 export function CategoryNode({
@@ -68,6 +71,8 @@ export function CategoryNode({
   allCategories,
   parentColorName,
   totalSiblings = 1,
+  creatingAt,
+  onCloseCreate,
 }: CategoryNodeProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [showProducts, setShowProducts] = useState(false)
@@ -246,7 +251,7 @@ export function CategoryNode({
 
             {/* Children (expandable) */}
             <AnimatePresence initial={false}>
-              {expanded && hasChildren && (
+              {expanded && (hasChildren || creatingAt === category.id) && (
                 <motion.div
                   key="children"
                   initial={{ height: 0, opacity: 0 }}
@@ -272,6 +277,14 @@ export function CategoryNode({
                         totalSiblings={childCategories.length}
                       />
                     ))}
+                    {creatingAt === category.id && onCloseCreate && (
+                      <InlineCreateRow
+                        parentId={category.id}
+                        autoColorIndex={childCategories.length}
+                        onClose={onCloseCreate}
+                        defaultColorName={resolvedColorName}
+                      />
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -381,11 +394,13 @@ interface InlineCreateRowProps {
   parentId: string | null
   autoColorIndex: number
   onClose: () => void
+  /** Override default color (used when creating subcategories — inherits parent color) */
+  defaultColorName?: string | null
 }
 
-export function InlineCreateRow({ parentId, autoColorIndex, onClose }: InlineCreateRowProps) {
+export function InlineCreateRow({ parentId, autoColorIndex, onClose, defaultColorName }: InlineCreateRowProps) {
   const queryClient = useQueryClient()
-  const defaultColor = getAutoColor(autoColorIndex).name
+  const defaultColor = defaultColorName ?? getAutoColor(autoColorIndex).name
 
   const {
     register,

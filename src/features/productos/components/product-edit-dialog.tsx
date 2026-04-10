@@ -18,6 +18,7 @@ import {
   Pencil,
   ShoppingBag,
   CheckCircle2,
+  AlertTriangle,
 } from "lucide-react"
 import { sileo } from "sileo"
 
@@ -27,6 +28,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,6 +104,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [deleteVariant, setDeleteVariant] = useState<{ index: number; label: string } | null>(null)
+  const [slugFocused, setSlugFocused] = useState(false)
 
   const [infoOpen, setInfoOpen] = useState(true)
   const [pricingOpen, setPricingOpen] = useState(true)
@@ -135,6 +138,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
 
   const categoryIds: string[] = watch("category_ids") ?? []
   const isActive = watch("is_active")
+  const brand = watch("brand")
   const hasVariants = watch("has_variants") ?? false
   const isBundle = watch("is_bundle") ?? false
   const variants = watch("variants")
@@ -370,11 +374,23 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <Label className="text-xs font-medium text-neutral-500">Marca</Label>
-                      <Input
-                        placeholder="Ej: Eclat, Ideal"
-                        className="rounded-xl border-neutral-200/80 bg-neutral-50/80 focus:border-rose-200/80"
-                        {...register("brand")}
-                      />
+                      <div className="flex items-center gap-2 rounded-xl border border-neutral-200/80 bg-neutral-50/80 p-1">
+                        {(["Ideal", "Eclat"] as const).map((b) => (
+                          <button
+                            key={b}
+                            type="button"
+                            onClick={() => setValue("brand", b, { shouldDirty: true })}
+                            className={cn(
+                              "flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-all",
+                              brand === b
+                                ? "bg-rose-500 text-white shadow-sm"
+                                : "text-neutral-500 hover:bg-rose-50 hover:text-rose-700"
+                            )}
+                          >
+                            {b}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <Label className="text-xs font-medium text-neutral-500">Categoria</Label>
@@ -427,7 +443,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
                     </div>
                     <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
                       <div className="flex items-center gap-1.5 rounded-lg border border-neutral-200/80 bg-neutral-50/60 p-1">
-                        <button type="button" onClick={() => setValue("is_active", true, { shouldDirty: true })} className={`rounded-md px-3 py-1.5 text-[12px] font-semibold transition-colors ${isActive ? "bg-teal-500 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-600"}`}>
+                        <button type="button" onClick={() => setValue("is_active", true, { shouldDirty: true })} className={`rounded-md px-3 py-1.5 text-[12px] font-semibold transition-colors ${isActive ? "bg-rose-500 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-600"}`}>
                           Activo
                         </button>
                         <button type="button" onClick={() => setValue("is_active", false, { shouldDirty: true })} className={`rounded-md px-3 py-1.5 text-[12px] font-semibold transition-colors ${!isActive ? "bg-neutral-400 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-600"}`}>
@@ -515,8 +531,26 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="flex flex-col gap-1.5">
                       <Label className="text-xs font-medium text-neutral-500">Slug (URL)</Label>
-                      <Input placeholder="crema-dia-y-noche" className="rounded-xl border-neutral-200/80 bg-neutral-50/80 font-mono text-sm focus:border-rose-200/80" {...register("slug")} />
+                      <Input
+                        placeholder="crema-dia-y-noche"
+                        className="rounded-xl border-neutral-200/80 bg-neutral-50/80 font-mono text-sm focus:border-rose-200/80"
+                        {...register("slug")}
+                        onFocus={() => setSlugFocused(true)}
+                        onBlur={() => setSlugFocused(false)}
+                      />
                       {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
+                      {slugFocused ? (
+                        <div className="flex items-start gap-1.5 rounded-lg bg-amber-50 border border-amber-200/60 px-2.5 py-2">
+                          <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-amber-500 mt-0.5" />
+                          <p className="text-[11px] leading-relaxed text-amber-700">
+                            El slug se genera automaticamente desde el nombre. Cambiarlo puede afectar URLs existentes.
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-neutral-400">
+                          Generado desde el nombre del producto
+                        </p>
+                      )}
                     </div>
                     {!hasVariants && (
                       <div className="flex flex-col gap-1.5">

@@ -1,7 +1,12 @@
 import { z } from "zod"
 
-/** Validates a single UUID string. Use for all server action ID parameters. */
-export const zUUID = z.string().uuid("ID con formato invalido")
+/**
+ * Validates a single UUID string. Use for all server action ID parameters.
+ * Uses regex (not z.uuid()) because Zod v4 strictly enforces version bits,
+ * which rejects seed/legacy UUIDs that use 0000 in the version position.
+ */
+const UUID_PATTERN = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
+export const zUUID = z.string().regex(UUID_PATTERN, "ID con formato invalido")
 
 /** Validates a non-empty trimmed string (for names, labels, etc.) */
 export const zNonEmpty = z.string().min(1, "Campo requerido").trim()
