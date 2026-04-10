@@ -68,7 +68,17 @@
       "Bash(sed 's/\\(.*//')",
       "Bash(sed \"s/.*\\\\.rpc\\('//\")",
       "Bash(sed \"s/'.*$//\")",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(echo \"feat: Discount UI redesign — teal-themed cards, animated dialog, price preview\")",
+      "Bash(echo \"\")",
+      "Bash(echo \"- PriceListManager rewritten: gradient stripe cards, percentage badges, client count pills, hover-reveal actions, staggered spring animations\")",
+      "Bash(echo \"- Create/Edit dialog: hero header with teal gradient icon, live price preview \\(original -> discounted -> savings\\)\")",
+      "Bash(echo \"- Empty state: animated floating Percent icon with dashed teal border\")",
+      "Bash(echo \"feat: Media Manager UI redesign — animated cards, violet theming, polished browser\")",
+      "Bash(echo \"- StorageOverview: colored KPI cards with spring animations, animated coverage bar, legend with counts\")",
+      "Bash(echo \"- MediaBrowser: toolbar in styled card, staggered grid/list entrance animations, violet view toggle\")",
+      "Bash(echo \"- Grid cards: hover lift + violet shadow, better placeholder, violet checkbox hints\")",
+      "Bash(echo \"- Empty state: animated floating icon in violet gradient, dashed border \\(matches categories/discounts\\)\")"
     ]
   },
   "enableAllProjectMcpServers": true,
