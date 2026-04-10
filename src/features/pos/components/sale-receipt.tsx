@@ -54,6 +54,8 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
           color: "#1a1a1a",
           lineHeight: 1.5,
           background: "#ffffff",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
         }}
       >
         {/* ── Section 1: Branding ── */}
@@ -91,7 +93,7 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         {/* ── Section 2: Info (Folio + Fecha + Cliente) ── */}
         <div
           style={{
-            background: "#f9f9f9",
+            background: "#f2f0ee",
             borderRadius: "8px",
             padding: "12px 14px",
             marginBottom: "24px",
@@ -340,7 +342,7 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
           {/* Payment method */}
           <div
             style={{
-              background: "#fafafa",
+              background: "#f2f0ee",
               borderRadius: "6px",
               padding: "10px 14px",
             }}
