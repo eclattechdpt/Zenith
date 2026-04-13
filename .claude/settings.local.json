@@ -111,7 +111,8 @@
       "mcp__playwright__browser_tabs",
       "mcp__playwright__browser_hover",
       "mcp__playwright__browser_drag",
-      "mcp__playwright__browser_navigate_back"
+      "mcp__playwright__browser_navigate_back",
+      "Bash(printf 'chore: Resolve all npm audit vulnerabilities \\(10 -> 0\\)\\\\n\\\\n- boneyard-js 1.6.7 -> 1.7.5 \\(cascades fix for @chenglou/pretext, hono, @hono/node-server\\)\\\\n- next + eslint-config-next 16.2.1 -> 16.2.3 \\(Server Components DoS CVE\\)\\\\n- xlsx 0.18.5 -> SheetJS CDN tarball 0.20.3 \\(npm version abandoned, prototype pollution + ReDoS\\)\\\\n- Add scoped overrides for transitive deps that cannot be fixed by parent bumps:\\\\n  brace-expansion@1/@5, path-to-regexp@8, picomatch@2/@4, lodash, hono, @hono/node-server\\\\n- Verified: type-check clean \\(after .next regen\\), production build OK, 22 static pages\\\\n\\\\nCo-Authored-By: Claude Opus 4.6 \\(1M context\\) <noreply@anthropic.com>\\\\n')"
     ]
   },
   "enableAllProjectMcpServers": true,
