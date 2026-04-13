@@ -244,7 +244,7 @@ No saltar sprints. Cada sprint depende del anterior.
 
 ## Progreso actual
 
-**Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-06)
+**Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-13)
 
 ### Sprint 8 — En progreso
 - **Module-scoped accent colors** (2026-04-04): `[data-module]` attribute on `<html>` drives per-route accent theming via CSS variable scopes. Inline blocking script in root layout sets the attribute before first paint (no flash); `ModuleAccentScope` client component syncs on route changes. Dropdowns, popovers, tooltips, scrollbars, and focus rings automatically adopt the right accent via CSS cascade through portals.
@@ -417,6 +417,10 @@ No saltar sprints. Cada sprint depende del anterior.
 - **Productos UI fixes** (2026-04-09): Activo button rose-colored (was teal) in create + edit, Marca toggle Ideal/Eclat in edit dialog (was free-text), slug warning in edit dialog, removed all auto-SKU generation (variant SKU optional), category subcategory inline form renders nested in parent with matching color, empty parents can add first subcategory
 - **UUID validation regex** (2026-04-09): `lib/validation.ts` zUUID uses regex pattern instead of `z.uuid()` (Zod v4 strict UUID rejected seed/legacy IDs with 0000 in version position)
 - **Manual test plan progress** (2026-04-09): 22/135 tests done manually + 12/135 done via Playwright = 34/135 total. Sections complete: 1 (Auth), 2 (Dashboard), 3 (Productos minus 3 image tests skipped). Playwright covered: 6 (Sales), 11 (Vales), 13 (Reportes), 16 (Cross-module). All passed without bugs found in automated tests.
+- **npm audit cleanup** (2026-04-13): de 10 vulnerabilidades (3 moderate + 7 high) a `found 0 vulnerabilities`
+  - Direct deps: `boneyard-js` 1.6.7→1.7.5 (cascada @chenglou/pretext + hono + @hono/node-server), `next` + `eslint-config-next` 16.2.1→16.2.3 (DoS Server Components CVE), `xlsx` 0.18.5→tarball oficial `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz` (npm version abandoned, prototype pollution + ReDoS — API idéntica, sin cambios en `excel-generators.ts` ni `media-export.ts`)
+  - Overrides scoped por major en `package.json` para transitivas que no se podían fijar bumpando padres: `brace-expansion@1` (eslint→minimatch@3), `brace-expansion@5` (typescript-eslint + @ts-morph→minimatch@10), `path-to-regexp@8` (shadcn→express@5→router@2), `picomatch@2` (fast-glob→micromatch), `picomatch@4` (tinyglobby + @dotenvx/dotenvx), `lodash` (recharts), `hono` + `@hono/node-server` (defensa en profundidad)
+  - Verificado: type-check limpio (después de borrar `.next/` para regenerar validators con la nueva versión), `next build` exitoso, 22 páginas estáticas generadas
 
 ### Sprint 8 — Decisiones arquitectonicas y sistemas clave
 

@@ -150,6 +150,10 @@
 - **Vale detail modal** (2026-04-09): "Ver detalle" dropdown opens sheet with header, KPIs, items, notes, completed date
 - **Productos UI fixes** (2026-04-09): Activo button rose, Marca toggle in edit dialog, slug warning in edit, no auto-SKU, nested subcategory inline form, UUID regex validation
 - **Manual + Playwright UI tests** (2026-04-09): 34/135 tests complete (22 manual sections 1-3 + 12 Playwright sections 6/11/13/16). 3 image tests skipped (not used in production).
+- **npm audit cleanup** (2026-04-13): 10 vulnerabilities → 0
+  - Direct: bumped `boneyard-js` 1.6.7→1.7.5, `next` + `eslint-config-next` 16.2.1→16.2.3, replaced `xlsx` with official SheetJS CDN tarball (npm version abandoned)
+  - Overrides scoped by major: `brace-expansion@1`/`@5`, `path-to-regexp@8`, `picomatch@2`/`@4`, `lodash`, `hono`, `@hono/node-server`
+  - Verified: type-check clean, production build OK (Next 16.2.3, 22 static pages generated)
 
 ### Pending
 - UI/UX manual testing (101 tests remaining in TEST-PLAN.md, 3 image tests skipped)
