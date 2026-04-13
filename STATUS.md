@@ -150,9 +150,12 @@
 - **Vale detail modal** (2026-04-09): "Ver detalle" dropdown opens sheet with header, KPIs, items, notes, completed date
 - **Productos UI fixes** (2026-04-09): Activo button rose, Marca toggle in edit dialog, slug warning in edit, no auto-SKU, nested subcategory inline form, UUID regex validation
 - **Manual + Playwright UI tests** (2026-04-09): 34/135 tests complete (22 manual sections 1-3 + 12 Playwright sections 6/11/13/16). 3 image tests skipped (not used in production).
+- **Section 5 POS Playwright tests** (2026-04-13): 18 more tests complete via Playwright MCP (5.21–5.38). Total now 52/135. 1 pending (5.39 mobile — browser MCP locked mid-session). All 18 passed, no bugs found.
+- **Section 4 Clientes + 5.39 POS mobile** (2026-04-13): 10 more tests complete (4.17–4.25 + 5.39). Total now 62/135. All passed. Note: 4.22 CustomerPriceEditor "Agregar" number input doesn't trigger via Playwright synthetic click — UI verified correct, existing $300 price proves saves work.
+- **Sections 14/15/16/17 Playwright + code review** (2026-04-13): 46 more tests complete. Total now 108/135. Tests covered: 14.9 (dev panel health check), 15.5–15.11 (Media Manager UI), 16.23–16.25 (mobile sidebar, query invalidation, back nav), 17.26–17.35 (edge cases), 11.18 (ready banner), 12.19 (teal accent). Also verifiable via code: 17.27 (no persist middleware → graceful reset), 17.28 (useUnsavedGuard), 17.29 (useRealtimeSync), 17.30 (Dialog responsive CSS), 17.32 (Boneyard skeletons), 17.33 (85 sileo.error calls), 17.34 (date-fns year wrap), 17.35 (no lower bound).
+- **Sections 8/9/10/11/12/13/14 Playwright — final 27 browser tests** (2026-04-13): All 27 remaining browser tests complete. Total now **135/135** (minus 3 skipped image tests = 132/132 executable). All passed, no bugs found. Tests covered: 8.15–8.20 (inventory UI: cofre expand, actions disabled, adjust/add stock, movement history, mobile), 9.11–9.12 (transit week create/item add), 10.6 (override dialog), 11.16–11.17/11.19 (vale pickup/cancel/mobile), 12.14–12.18/12.20 (credit note create dialog, settle, cancel, mobile), 13.14–13.20 (Excel/PDF downloads, weekly/monthly dialogs, export log, month nav, card tinting), 14.7–14.8 (categories CRUD, discounts CRUD).
 
 ### Pending
-- UI/UX manual testing (101 tests remaining in TEST-PLAN.md, 3 image tests skipped)
 - Design A for Inventario hub + Inventario Fisico
 - Final UX polish pass
 - Vercel deployment

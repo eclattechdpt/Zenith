@@ -190,6 +190,73 @@ const form = useForm<ProductInput>({
 - Animaciones: usar Motion (framer-motion) para transiciones de página, AnimatePresence para modals, y layout animations.
 - Charts: usar Tremor para todas las gráficas del dashboard.
 
+### Animaciones con Motion — Prevención de Layout Shift
+
+Los layout shifts son el bug más frecuente al combinar Framer Motion con Tailwind. Tres patrones concretos que han ocurrido en este proyecto — reconocerlos evita horas de debugging:
+
+#### Regla 1 — `space-y-*` + `AnimatePresence`: el margen sobrevive al elemento
+
+`space-y-N` aplica `margin-top` CSS a todos los hijos excepto el primero. Si uno de esos hijos es un `motion.div` controlado por `AnimatePresence` (mount/unmount), ese margen persiste mientras dura la animación exit. Cuando `height` llega a 0 y el contenido es invisible, el margen sigue ocupando espacio en el flujo. Cuando `AnimatePresence` desmonta el elemento al terminar la animación, el margen desaparece en un solo frame → jump visible.
+
+**Fix**: eliminar `space-y-*` del contenedor padre. Mover el spacing como `mt-N` al div interno del `motion.div`, dentro del `overflow-hidden`. Cuando `height: 0`, `overflow: hidden` clipea el contenido incluyendo márgenes de hijos → contribución al layout = 0. Al desmontar: 0 → 0, sin jump.
+
+```tsx
+// ❌ MAL — margin-top del motion.div persiste al colapsar, salta al desmontar
+<div className="space-y-4">
+  <div>contenido permanente</div>
+  <AnimatePresence>
+    {open && <motion.div className="overflow-hidden" ...>panel</motion.div>}
+  </AnimatePresence>
+</div>
+
+// ✅ BIEN — spacing vive dentro del overflow-hidden, queda clipeado cuando height=0
+<div>
+  <div>contenido permanente</div>
+  <AnimatePresence>
+    {open && (
+      <motion.div className="overflow-hidden" ...>
+        <div className="mt-4 ...">panel</div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</div>
+```
+
+#### Regla 2 — `AnimatePresence mode="wait"`: height mismatch entre componentes intercambiados
+
+Cuando tabs o rutas intercambian componentes con `AnimatePresence mode="wait"`, todos los componentes intercambiables **deben tener la misma altura**. Una diferencia de altura (aunque sea 20px) hace que todo lo que está debajo del contenedor salte al hacer el swap, porque el contenedor cambia de tamaño en un solo render.
+
+La causa más común: un solo componente tiene contenido extra que los demás no tienen (un badge, un chevron, un children slot). Para elementos interactivos que solo existen en una variante, usar `position: absolute` para sacarlos del flujo normal — sin costo de altura.
+
+```tsx
+// ❌ MAL — children suma ~28px al KpiCard, esa tab es más alta que las demás
+<KpiCard ...>
+  <div>Ver desglose ↓</div>
+</KpiCard>
+
+// ✅ BIEN — absolute queda fuera del flujo, la card tiene la misma altura que sus hermanas
+<div className="relative">
+  <KpiCard ... />
+  <div className="pointer-events-none absolute bottom-5 right-5 ...">
+    Ver desglose ↓
+  </div>
+</div>
+```
+
+#### Regla 3 — Exit `y: -N` junto a elementos adyacentes: shift perceptual aunque no haya layout shift real
+
+Un exit con `y: -8` desliza el contenido hacia arriba mientras desaparece. Los elementos debajo no se mueven en layout (CSS transform no afecta el flujo), pero el ojo interpreta el contenido acercándose a ellos como que "los empuja" — percepción de shift aunque las coordenadas del DOM no cambien.
+
+**Fix**: en contenedores cuya altura afecta elementos directamente adyacentes (KPI widgets sobre tab pills, secciones sobre footers), usar exit sin transformación Y. `opacity` + `filter: blur` es suficiente y no crea esta ilusión óptica.
+
+```tsx
+// ❌ MAL — y: -8 crea percepción de que los elementos de abajo saltan
+exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
+
+// ✅ BIEN — fade+blur in-place, sin movimiento vertical
+exit={{ opacity: 0, filter: "blur(4px)" }}
+```
+
 ### Estilos
 
 - SIEMPRE Tailwind. No CSS modules, no styled-components, no CSS-in-JS.

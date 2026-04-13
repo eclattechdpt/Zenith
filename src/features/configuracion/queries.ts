@@ -126,6 +126,13 @@ export interface DevStats {
   estado: "ok" | "error"
   latenciaMs: number
   registrosTotales: number
+  breakdown: {
+    products: number
+    productVariants: number
+    customers: number
+    sales: number
+    inventoryMovements: number
+  }
 }
 
 export function useDevStats() {
@@ -135,33 +142,43 @@ export function useDevStats() {
       const supabase = createClient()
       const start = Date.now()
 
-      const tables = [
-        "products",
-        "product_variants",
-        "customers",
-        "sales",
-        "inventory_movements",
-      ] as const
-
       const { error } = await supabase
         .from("products")
         .select("*", { count: "exact", head: true })
 
       const latenciaMs = Date.now() - start
 
+      const emptyBreakdown = { products: 0, productVariants: 0, customers: 0, sales: 0, inventoryMovements: 0 }
+
       if (error) {
-        return { estado: "error", latenciaMs, registrosTotales: 0 }
+        return { estado: "error", latenciaMs, registrosTotales: 0, breakdown: emptyBreakdown }
       }
 
-      let registrosTotales = 0
-      for (const table of tables) {
-        const { count } = await supabase
-          .from(table)
-          .select("*", { count: "exact", head: true })
-        registrosTotales += count ?? 0
+      const [
+        { count: products },
+        { count: productVariants },
+        { count: customers },
+        { count: sales },
+        { count: inventoryMovements },
+      ] = await Promise.all([
+        supabase.from("products").select("*", { count: "exact", head: true }),
+        supabase.from("product_variants").select("*", { count: "exact", head: true }),
+        supabase.from("customers").select("*", { count: "exact", head: true }),
+        supabase.from("sales").select("*", { count: "exact", head: true }),
+        supabase.from("inventory_movements").select("*", { count: "exact", head: true }),
+      ])
+
+      const breakdown = {
+        products: products ?? 0,
+        productVariants: productVariants ?? 0,
+        customers: customers ?? 0,
+        sales: sales ?? 0,
+        inventoryMovements: inventoryMovements ?? 0,
       }
 
-      return { estado: "ok", latenciaMs, registrosTotales }
+      const registrosTotales = Object.values(breakdown).reduce((a, b) => a + b, 0)
+
+      return { estado: "ok", latenciaMs, registrosTotales, breakdown }
     },
     staleTime: 60_000,
   })
