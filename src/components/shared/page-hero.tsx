@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 
 interface PageHeroProps {
   title: string
-  subtitle?: string
+  subtitle?: React.ReactNode
   ctaLabel?: string
   onCta?: () => void
   ctaHref?: string
@@ -43,7 +43,7 @@ export function PageHero({ title, subtitle, ctaLabel, onCta, ctaHref }: PageHero
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-1.5 text-sm text-neutral-500">{subtitle}</p>
+          <div className="mt-1.5 text-sm text-neutral-500">{subtitle}</div>
         )}
       </div>
 

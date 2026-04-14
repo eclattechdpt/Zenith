@@ -47,16 +47,17 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
 
   return (
     <div className="space-y-6">
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
+        {/* KPI Grid — hero anchor + 3 secondary */}
+        <div className="grid grid-cols-1 gap-4 sm:gap-5">
           <KpiCard
+            variant="hero"
+            heroGradient="from-rose-500 to-rose-600"
+            heroShadow="shadow-rose-500/15"
             title="Ventas del dia"
             value={kpiData.ventasDelDia}
             format={formatCurrency}
             subtitle="hoy"
             icon={DollarSign}
-            iconBg="bg-rose-50"
-            iconColor="text-rose-500"
             badge={{
               label: `+${kpiData.ventasDelDiaCambio}% vs ayer`,
               trend: "up",
@@ -66,70 +67,73 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
               today={kpiData.ventasDelDia}
               yesterday={kpiData.ventasAyer}
               max={kpiData.ventasMaxDia}
+              variant="dark"
             />
           </KpiCard>
 
-          <KpiCard
-            title="Vendidos esta semana"
-            value={kpiData.productosVendidos}
-            subtitle="productos"
-            icon={Package}
-            iconBg="bg-teal-50"
-            iconColor="text-teal-500"
-            badge={{
-              label: `+${kpiData.productosVendidosCambio} vs ayer`,
-              trend: "up",
-            }}
-            delay={0.06}
-          >
-            <WeeklyBarChart
-              data={kpiData.vendidosPorDia}
-              labels={kpiData.vendidosDias}
-              currentDayIndex={kpiData.vendidosDiaActual}
-            />
-          </KpiCard>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+            <KpiCard
+              title="Vendidos esta semana"
+              value={kpiData.productosVendidos}
+              subtitle="productos"
+              icon={Package}
+              iconBg="bg-teal-50"
+              iconColor="text-teal-500"
+              badge={{
+                label: `+${kpiData.productosVendidosCambio} vs ayer`,
+                trend: "up",
+              }}
+              delay={0.06}
+            >
+              <WeeklyBarChart
+                data={kpiData.vendidosPorDia}
+                labels={kpiData.vendidosDias}
+                currentDayIndex={kpiData.vendidosDiaActual}
+              />
+            </KpiCard>
 
-          <KpiCard
-            title="Transacciones"
-            value={kpiData.transacciones}
-            subtitle="operaciones"
-            icon={ShoppingBag}
-            iconBg="bg-blush-50"
-            iconColor="text-rose-400"
-            badge={{
-              label: `+${kpiData.transaccionesCambio} vs ayer`,
-              trend: "up",
-            }}
-            delay={0.12}
-          >
-            <PaymentBreakdown
-              methods={[
-                { label: "Tarjeta", count: kpiData.pagoTarjeta, dotColor: "#E87A95" },
-                { label: "Efectivo", count: kpiData.pagoEfectivo, dotColor: "#FF96AE" },
-                { label: "Transf.", count: kpiData.pagoTransferencia, dotColor: "#FFC4CF" },
-              ]}
-            />
-          </KpiCard>
+            <KpiCard
+              title="Transacciones"
+              value={kpiData.transacciones}
+              subtitle="operaciones"
+              icon={ShoppingBag}
+              iconBg="bg-blush-50"
+              iconColor="text-blush-500"
+              badge={{
+                label: `+${kpiData.transaccionesCambio} vs ayer`,
+                trend: "up",
+              }}
+              delay={0.12}
+            >
+              <PaymentBreakdown
+                methods={[
+                  { label: "Tarjeta", count: kpiData.pagoTarjeta, dotColor: "#E87A95" },
+                  { label: "Efectivo", count: kpiData.pagoEfectivo, dotColor: "#FF96AE" },
+                  { label: "Transf.", count: kpiData.pagoTransferencia, dotColor: "#FFC4CF" },
+                ]}
+              />
+            </KpiCard>
 
-          <KpiCard
-            title="Stock bajo"
-            value={kpiData.stockBajoAlertas}
-            subtitle="alertas activas"
-            icon={AlertTriangle}
-            iconBg="bg-amber-50"
-            iconColor="text-amber-500"
-            badge={{
-              label: `${kpiData.stockBajoAlertas} alertas`,
-              trend: "neutral",
-            }}
-            delay={0.18}
-          >
-            <InventoryHealth
-              ok={kpiData.inventarioOk}
-              bajo={kpiData.inventarioBajo}
-              critico={kpiData.inventarioCritico}
-            />
-          </KpiCard>
+            <KpiCard
+              title="Stock bajo"
+              value={kpiData.stockBajoAlertas}
+              subtitle="alertas activas"
+              icon={AlertTriangle}
+              iconBg="bg-amber-50"
+              iconColor="text-amber-500"
+              badge={{
+                label: `${kpiData.stockBajoAlertas} alertas`,
+                trend: "neutral",
+              }}
+              delay={0.18}
+            >
+              <InventoryHealth
+                ok={kpiData.inventarioOk}
+                bajo={kpiData.inventarioBajo}
+                critico={kpiData.inventarioCritico}
+              />
+            </KpiCard>
+          </div>
         </div>
 
         {/* Sales Chart + Top Products */}
@@ -137,8 +141,9 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
           <SectionCard
             label="Rendimiento de ventas"
             icon={TrendingUp}
-            iconBg="bg-rose-50"
-            iconColor="text-rose-400"
+            iconBg="bg-rose-100"
+            iconColor="text-rose-500"
+            tint="rose"
             delay={0.24}
             className="xl:col-span-3"
           >
@@ -153,8 +158,9 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             label="Productos mas vendidos"
             description="Este mes"
             icon={Award}
-            iconBg="bg-teal-50"
-            iconColor="text-teal-500"
+            iconBg="bg-teal-100"
+            iconColor="text-teal-600"
+            tint="teal"
             delay={0.30}
             className="xl:col-span-2"
           >
@@ -168,8 +174,9 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             label="Actividad reciente"
             description="Hoy"
             icon={Activity}
-            iconBg="bg-blush-50"
-            iconColor="text-blush-500"
+            iconBg="bg-blush-100"
+            iconColor="text-blush-600"
+            tint="blush"
             delay={0.36}
           >
             <ActivityFeed items={activity!} />
@@ -179,8 +186,9 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             label="Alertas de inventario"
             description={`${inventoryAlerts.length} alertas`}
             icon={AlertTriangle}
-            iconBg="bg-amber-50"
-            iconColor="text-amber-500"
+            iconBg="bg-amber-100"
+            iconColor="text-amber-600"
+            tint="amber"
             delay={0.42}
           >
             <InventoryAlertsGrid alerts={inventoryAlerts} />

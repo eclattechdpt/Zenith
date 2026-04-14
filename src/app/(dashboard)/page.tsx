@@ -3,6 +3,7 @@ import { createServerClient } from "@/lib/supabase/server"
 import { PageHero } from "@/components/shared/page-hero"
 import { QuickActions } from "@/features/dashboard/components/quick-actions"
 import { DashboardContent } from "@/features/dashboard/components/dashboard-content"
+import { DashboardHeroSubtitle } from "@/features/dashboard/components/dashboard-hero-subtitle"
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -28,7 +29,7 @@ export default async function DashboardPage() {
     <div className="min-w-0 flex-1 space-y-8 p-5 sm:p-8">
       <PageHero
         title={`${greeting}, ${displayName}`}
-        subtitle="Aqui va tu resumen del dia"
+        subtitle={<DashboardHeroSubtitle />}
       />
 
       <QuickActions />

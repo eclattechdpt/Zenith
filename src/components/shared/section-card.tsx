@@ -3,6 +3,8 @@
 import { motion } from "motion/react"
 import type { LucideIcon } from "lucide-react"
 
+type SectionTint = "rose" | "teal" | "blush" | "amber" | "emerald" | "violet"
+
 interface SectionCardProps {
   label?: string
   description?: string
@@ -16,9 +18,20 @@ interface SectionCardProps {
   delay?: number
   /** Additional classes for the root element (e.g. grid column spans) */
   className?: string
+  /** Optional semantic tint — overrides the default white background + neutral border */
+  tint?: SectionTint
 }
 
 const SPRING = { type: "spring" as const, stiffness: 100, damping: 20 }
+
+const TINT_CLASSES: Record<SectionTint, string> = {
+  rose: "border-rose-200/60 bg-rose-50/40",
+  teal: "border-teal-200/60 bg-teal-50/40",
+  blush: "border-blush-200/60 bg-blush-50/40",
+  amber: "border-amber-200/60 bg-amber-50/40",
+  emerald: "border-emerald-200/60 bg-emerald-50/40",
+  violet: "border-violet-200/60 bg-violet-50/40",
+}
 
 export function SectionCard({
   label,
@@ -29,13 +42,15 @@ export function SectionCard({
   children,
   delay = 0,
   className,
+  tint,
 }: SectionCardProps) {
+  const surface = tint ? TINT_CLASSES[tint] : "border-neutral-200/60 bg-white"
   return (
     <motion.div
       initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       transition={{ ...SPRING, delay }}
-      className={`rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-sm shadow-neutral-900/[0.03] ${className ?? ""}`}
+      className={`rounded-2xl border p-6 shadow-sm shadow-neutral-900/[0.03] ${surface} ${className ?? ""}`}
     >
       {label && (
         <div className="mb-5 flex items-center gap-2">

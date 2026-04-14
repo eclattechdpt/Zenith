@@ -160,7 +160,6 @@
   - Verified: type-check clean, production build OK (Next 16.2.3, 22 static pages generated)
 
 ### Pending
-- Design A for Inventario hub + Inventario Fisico
 - Final UX polish pass
 - Vercel deployment
 
