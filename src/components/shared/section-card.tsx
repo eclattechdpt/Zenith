@@ -25,12 +25,12 @@ interface SectionCardProps {
 const SPRING = { type: "spring" as const, stiffness: 100, damping: 20 }
 
 const TINT_CLASSES: Record<SectionTint, string> = {
-  rose: "border-rose-200/60 bg-rose-50/40",
-  teal: "border-teal-200/60 bg-teal-50/40",
-  blush: "border-blush-200/60 bg-blush-50/40",
-  amber: "border-amber-200/60 bg-amber-50/40",
-  emerald: "border-emerald-200/60 bg-emerald-50/40",
-  violet: "border-violet-200/60 bg-violet-50/40",
+  rose: "border-rose-200/60 bg-gradient-to-br from-rose-50/70 via-white to-white",
+  teal: "border-teal-200/60 bg-gradient-to-br from-teal-50/70 via-white to-white",
+  blush: "border-blush-200/60 bg-gradient-to-br from-blush-50/70 via-white to-white",
+  amber: "border-amber-200/60 bg-gradient-to-br from-amber-50/70 via-white to-white",
+  emerald: "border-emerald-200/60 bg-gradient-to-br from-emerald-50/70 via-white to-white",
+  violet: "border-violet-200/60 bg-gradient-to-br from-violet-50/70 via-white to-white",
 }
 
 export function SectionCard({

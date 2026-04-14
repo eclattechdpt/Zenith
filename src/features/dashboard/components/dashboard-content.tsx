@@ -53,6 +53,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             variant="hero"
             heroGradient="from-rose-500 to-rose-600"
             heroShadow="shadow-rose-500/15"
+            delay={0}
             title="Ventas del dia"
             value={kpiData.ventasDelDia}
             format={formatCurrency}
@@ -79,11 +80,13 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
               icon={Package}
               iconBg="bg-teal-50"
               iconColor="text-teal-500"
+              ringColor="border-teal-100/70"
+              ringAnchor="tr"
               badge={{
                 label: `+${kpiData.productosVendidosCambio} vs ayer`,
                 trend: "up",
               }}
-              delay={0.06}
+              delay={0.18}
             >
               <WeeklyBarChart
                 data={kpiData.vendidosPorDia}
@@ -99,11 +102,13 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
               icon={ShoppingBag}
               iconBg="bg-blush-50"
               iconColor="text-blush-500"
+              ringColor="border-blush-100/70"
+              ringAnchor="tr"
               badge={{
                 label: `+${kpiData.transaccionesCambio} vs ayer`,
                 trend: "up",
               }}
-              delay={0.12}
+              delay={0.26}
             >
               <PaymentBreakdown
                 methods={[
@@ -121,11 +126,13 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
               icon={AlertTriangle}
               iconBg="bg-amber-50"
               iconColor="text-amber-500"
+              ringColor="border-amber-100/70"
+              ringAnchor="bl"
               badge={{
                 label: `${kpiData.stockBajoAlertas} alertas`,
                 trend: "neutral",
               }}
-              delay={0.18}
+              delay={0.34}
             >
               <InventoryHealth
                 ok={kpiData.inventarioOk}
@@ -144,7 +151,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             iconBg="bg-rose-100"
             iconColor="text-rose-500"
             tint="rose"
-            delay={0.24}
+            delay={0.42}
             className="xl:col-span-3"
           >
             <SalesChart
@@ -161,7 +168,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             iconBg="bg-teal-100"
             iconColor="text-teal-600"
             tint="teal"
-            delay={0.30}
+            delay={0.48}
             className="xl:col-span-2"
           >
             <TopProductsGrid products={topProducts!.slice(0, 3)} />
@@ -177,7 +184,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             iconBg="bg-blush-100"
             iconColor="text-blush-600"
             tint="blush"
-            delay={0.36}
+            delay={0.54}
           >
             <ActivityFeed items={activity!} />
           </SectionCard>
@@ -189,7 +196,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             iconBg="bg-amber-100"
             iconColor="text-amber-600"
             tint="amber"
-            delay={0.42}
+            delay={0.60}
           >
             <InventoryAlertsGrid alerts={inventoryAlerts} />
           </SectionCard>

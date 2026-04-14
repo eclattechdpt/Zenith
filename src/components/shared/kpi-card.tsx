@@ -32,6 +32,10 @@ interface KpiCardProps {
   heroGradient?: string
   /** Override hero shadow class, e.g. "shadow-rose-500/10" */
   heroShadow?: string
+  /** Optional decorative ring on default variant — border color class, e.g. "border-teal-100/70" */
+  ringColor?: string
+  /** Ring anchor — "tr" (top-right, default) or "bl" (bottom-left) */
+  ringAnchor?: "tr" | "bl"
   /** Optional children rendered below subtitle (e.g. mini-visualizations) */
   children?: React.ReactNode
 }
@@ -49,6 +53,8 @@ export function KpiCard({
   badge,
   heroGradient,
   heroShadow,
+  ringColor,
+  ringAnchor = "tr",
   children,
 }: KpiCardProps) {
   if (variant === "hero") {
@@ -95,6 +101,11 @@ export function KpiCard({
     )
   }
 
+  const ringPosition =
+    ringAnchor === "bl"
+      ? "-bottom-12 -left-10"
+      : "-right-10 -top-10"
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -102,43 +113,50 @@ export function KpiCard({
       transition={{ ...SPRING, delay }}
       className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm shadow-neutral-900/[0.03]"
     >
-      <div className="flex items-center gap-2">
+      {ringColor && (
         <div
-          className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconBg}`}
-        >
-          <Icon className={`h-4 w-4 ${iconColor}`} />
-        </div>
-        <p className="text-[11px] font-bold uppercase tracking-[2px] text-neutral-400">
-          {title}
-        </p>
-      </div>
-
-      <CountUp
-        value={value}
-        format={formatFn}
-        className="mt-2 block font-display text-[36px] font-semibold tracking-[-1px] text-neutral-900 sm:text-[42px]"
-      />
-
-      {badge && (
-        <span
-          className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-[3px] text-[12px] font-medium leading-[16px] ${
-            badge.trend === "up"
-              ? "bg-rose-50 text-rose-600"
-              : "bg-amber-50 text-amber-600"
-          }`}
-        >
-          {badge.trend === "up" && (
-            <ArrowUpRight className="h-3 w-3" />
-          )}
-          {badge.label}
-        </span>
+          className={`pointer-events-none absolute ${ringPosition} h-40 w-40 rounded-full border-[18px] ${ringColor}`}
+        />
       )}
+      <div className="relative">
+        <div className="flex items-center gap-2">
+          <div
+            className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconBg}`}
+          >
+            <Icon className={`h-4 w-4 ${iconColor}`} />
+          </div>
+          <p className="text-[11px] font-bold uppercase tracking-[2px] text-neutral-400">
+            {title}
+          </p>
+        </div>
 
-      <p className="mt-1.5 text-[13px] font-medium text-neutral-400">
-        {subtitle}
-      </p>
+        <CountUp
+          value={value}
+          format={formatFn}
+          className="mt-2 block font-display text-[36px] font-semibold tracking-[-1px] text-neutral-900 sm:text-[42px]"
+        />
 
-      {children && <div className="mt-3">{children}</div>}
+        {badge && (
+          <span
+            className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-[3px] text-[12px] font-medium leading-[16px] ${
+              badge.trend === "up"
+                ? "bg-rose-50 text-rose-600"
+                : "bg-amber-50 text-amber-600"
+            }`}
+          >
+            {badge.trend === "up" && (
+              <ArrowUpRight className="h-3 w-3" />
+            )}
+            {badge.label}
+          </span>
+        )}
+
+        <p className="mt-1.5 text-[13px] font-medium text-neutral-400">
+          {subtitle}
+        </p>
+
+        {children && <div className="mt-3">{children}</div>}
+      </div>
     </motion.div>
   )
 }
