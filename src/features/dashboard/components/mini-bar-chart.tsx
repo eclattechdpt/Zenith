@@ -35,22 +35,42 @@ export function SalesProgress({ today, yesterday, max, variant = "light" }: Sale
         </span>
       </div>
       {/* Overlapping bars */}
-      <div className="relative h-[15px] w-full">
+      <div className="relative h-[15px] w-full overflow-hidden rounded-sm">
         {/* Yesterday bar (background, lighter) */}
         <div
           className="absolute inset-y-0 left-0 rounded-sm"
           style={{
             width: `${yesterdayPct}%`,
-            backgroundColor: dark ? "rgba(255,255,255,0.2)" : "#FFE0E8",
+            background: dark
+              ? "rgba(255,255,255,0.2)"
+              : "linear-gradient(90deg, #FFE0E8 0%, #FFCBD9 100%)",
           }}
         />
         {/* Today bar (foreground, darker, on top) */}
         <motion.div
           className="absolute inset-y-0 left-0 rounded-sm"
-          style={{ backgroundColor: dark ? "rgba(255,255,255,0.8)" : "#F43F6B" }}
+          style={{
+            background: dark
+              ? "linear-gradient(90deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.95) 100%)"
+              : "linear-gradient(90deg, #FB6E89 0%, #E11D52 100%)",
+            boxShadow: dark
+              ? "0 0 8px rgba(255,255,255,0.3)"
+              : "0 0 10px rgba(225,29,82,0.35)",
+          }}
           initial={{ width: 0 }}
           animate={{ width: `${todayPct}%` }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ type: "spring", stiffness: 90, damping: 18, delay: 0.2 }}
+        />
+        {/* Highlight stripe */}
+        <motion.div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.6 }}
+          transition={{ delay: 0.6, duration: 0.4 }}
+          style={{
+            background:
+              "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)",
+          }}
         />
       </div>
       {/* Scale labels */}

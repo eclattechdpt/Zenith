@@ -158,6 +158,21 @@
   - Direct: bumped `boneyard-js` 1.6.7→1.7.5, `next` + `eslint-config-next` 16.2.1→16.2.3, replaced `xlsx` with official SheetJS CDN tarball (npm version abandoned)
   - Overrides scoped by major: `brace-expansion@1`/`@5`, `path-to-regexp@8`, `picomatch@2`/`@4`, `lodash`, `hono`, `@hono/node-server`
   - Verified: type-check clean, production build OK (Next 16.2.3, 22 static pages generated)
+- **Dashboard widgets — sin gradientes + Activity expand modal** (2026-04-15): Removed gradient backgrounds from 4 home SectionCards (Sales chart, Top products, Activity, Inventory alerts) — clean white minimalist look
+  - `SectionCard` gained `action` prop slot for header buttons
+  - Expand button on Activity widget opens new `ActivityFeedDialog` (85vh × max-w-2xl)
+  - Dialog: search, filter chips with sliding `layoutId` pill, items grouped by day with sticky `DayHeader` (bold title + sublabel + count badge), staggered fade-in, hover lift, empty state, skeleton loading
+  - DayHeader redesigned after first attempt (was invisible) — now prominent with border-bottom and count pill
+  - New Supabase RPC `get_activity_feed(p_tenant_id, p_days_back default 30)` — union of sales/returns/vales/credit_notes/exports last 30 days, cap 200/source, tenant-scoped
+  - `useActivityFeed` hook with `enabled: open` (only fires when modal opens), 60s stale time
+- **Wave 1 — chart polish (gradients + glow + motion)** (2026-04-15): First pass of "less boring" charts on the dashboard, zero new dependencies
+  - `SalesChart` rewritten from plain CSS to motion-driven: stagger spring entrance, escalating rose CSS gradients, glow box-shadow on active week + best week, white-ringed tip dot at right edge of each bar (lives inside motion.div for natural movement), continuous pulse ring on active week, amber ★ marker on best week, animated CountUp on monthly total, highlight stripe on top of each bar
+  - Removed SVG line overlay (broken coordinates with preserveAspectRatio="none" + responsive calc bugs) and background grid lines (crossed through bars at unaligned positions) for clean minimal look
+  - `SalesProgress` (mini hero): rose gradient + glow + highlight stripe + spring transition
+  - `WeeklyBarChart` (sparkline): teal gradient bars escalating by day, glow + pulse on current day, spring entrance
+  - `InventoryHealth` (stacked bar): all 3 segments with their own linear gradients + glow + highlight stripes
+  - `CountUp` enhanced: post-mount value changes now trigger a subtle scale pulse (`[1, 1.04, 1]`) via `useAnimationControls` — visual confirmation that the number updated. First mount still uses blur+fade entrance.
+  - Note: research recommended `motion.AnimateNumber` but it doesn't exist in motion v12.38; the existing custom `CountUp` (useMotionValue + useSpring + direct textContent) was enhanced instead
 
 ### Pending
 - Final UX polish pass

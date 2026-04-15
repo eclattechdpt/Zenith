@@ -488,6 +488,25 @@ No saltar sprints. Cada sprint depende del anterior.
   - Direct deps: `boneyard-js` 1.6.7→1.7.5 (cascada @chenglou/pretext + hono + @hono/node-server), `next` + `eslint-config-next` 16.2.1→16.2.3 (DoS Server Components CVE), `xlsx` 0.18.5→tarball oficial `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz` (npm version abandoned, prototype pollution + ReDoS — API idéntica, sin cambios en `excel-generators.ts` ni `media-export.ts`)
   - Overrides scoped por major en `package.json` para transitivas que no se podían fijar bumpando padres: `brace-expansion@1` (eslint→minimatch@3), `brace-expansion@5` (typescript-eslint + @ts-morph→minimatch@10), `path-to-regexp@8` (shadcn→express@5→router@2), `picomatch@2` (fast-glob→micromatch), `picomatch@4` (tinyglobby + @dotenvx/dotenvx), `lodash` (recharts), `hono` + `@hono/node-server` (defensa en profundidad)
   - Verificado: type-check limpio (después de borrar `.next/` para regenerar validators con la nueva versión), `next build` exitoso, 22 páginas estáticas generadas
+- **Dashboard widgets — sin gradientes + Activity expand modal** (2026-04-15): los 4 SectionCards del home (Rendimiento de ventas, Productos mas vendidos, Actividad reciente, Alertas de inventario) ahora tienen fondo blanco limpio sin tints, look más profesional/minimalista
+  - `SectionCard` ganó un prop `action` para renderizar acciones en el header (botón Expandir vive ahí)
+  - Botón Expandir motion-driven en el header de Actividad reciente (hover scale + tap feedback)
+  - `ActivityFeedDialog` nuevo: dialog 85vh × max-w-2xl con search, filter chips (LayoutGroup con sliding pill), items agrupados por día, sticky DayHeader con count badge, empty state animado, skeleton mientras carga
+  - DayHeader prominente: title bold + sublabel fecha corta (Hoy/Ayer) + count pill + border bottom — resuelve el "header invisible" del primer intento
+  - Stagger fade-in en items, hover lift `x: 2`, icon scale on hover, key del wrapper solo depende del filtro (no del search) para no remountar en cada keystroke
+  - Nuevo RPC Supabase `get_activity_feed(p_tenant_id, p_days_back default 30)` — union de sales/returns/vales/credit_notes/exports últimos 30 días, cap 200/source, scoped por tenant_id
+  - Hook `useActivityFeed({ daysBack, enabled })` con TanStack Query, dispara solo al abrir el modal (`enabled: open`), staleTime 60s
+  - Activity maps (`activityIconMap`/`activityStyleMap`) exportados desde `activity-feed.tsx` para reuso en el dialog
+  - Key files: `src/features/dashboard/components/activity-feed-dialog.tsx`, `src/components/shared/section-card.tsx`, `src/features/dashboard/queries.ts`
+- **Wave 1 — chart polish (gradients + glow + motion)** (2026-04-15): primera ronda de "menos aburrido" en las visualizaciones del home, sin nuevas dependencies
+  - `SalesChart` reescrito de plano CSS a motion-driven: bars con stagger spring (delay incremental por bar), CSS linear-gradients escalando rose left→right, box-shadow glow más intenso en active week + best week, dot blanco-ringed en el borde derecho de cada bar (vive dentro del motion.div para moverse con el bar sin coordinate math), pulse ring continuo en active week, ★ marker amber en best week, CountUp animado en el total mensual, highlight stripe blanca arriba de cada bar
+  - **Removed**: SVG line overlay y grid lines horizontales — el SVG path overlay tenía bugs de coordenadas (`preserveAspectRatio="none"` distorsionaba Y, calc() hardcoded para mobile no respondía a desktop), las grid lines pasaban por el medio de las bars en posiciones no-alineadas con los gaps. Mantra: clean & minimal.
+  - `SalesProgress` (mini hero): gradient fill rosa en today bar (#FB6E89→#E11D52), glow rgba(225,29,82,0.35), highlight stripe arriba, spring transition en lugar de easeOut
+  - `WeeklyBarChart` (mini sparkline teal): gradient teal por bar (escalado de intensidad por día), glow + pulse ring en current day, spring entrance
+  - `InventoryHealth` (stacked bar): los tres segmentos (OK/Bajo/Critico) con linear-gradients propios + box-shadow glow + highlight stripes, springs en vez de easeOut
+  - `CountUp`: nuevo behavior — primer mount sigue con blur+fade entrance, pero a partir del segundo mount cualquier cambio de valor dispara un scale pulse (`scale: [1, 1.04, 1]` con cubic-bezier .22,1,.36,1) via useAnimationControls. Confirmación visual de que el número se actualizó.
+  - Decisión arquitectónica: el research recomendaba `motion.AnimateNumber` pero NO existe en motion v12.38 (es API más nueva). El `CountUp` custom del proyecto ya usa `useMotionValue + useSpring + textContent direct` (zero re-renders), así que se mejoró en lugar de reemplazar.
+  - Key files: `src/features/dashboard/components/sales-chart.tsx` (rewrite), `src/features/dashboard/components/mini-bar-chart.tsx`, `src/features/dashboard/components/mini-sparkline.tsx`, `src/features/dashboard/components/mini-progress-bar.tsx`, `src/features/pos/components/count-up.tsx`
 
 ### Sprint 8 — Decisiones arquitectonicas y sistemas clave
 

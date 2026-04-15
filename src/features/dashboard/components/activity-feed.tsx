@@ -22,7 +22,7 @@ interface ActivityItem {
   hora: string
 }
 
-const iconMap: Record<string, LucideIcon> = {
+export const activityIconMap: Record<string, LucideIcon> = {
   venta: ShoppingBag,
   devolucion: RotateCcw,
   vale: Ticket,
@@ -34,7 +34,7 @@ const iconMap: Record<string, LucideIcon> = {
   pendiente: Clock,
 }
 
-const styleMap: Record<string, { bg: string; color: string }> = {
+export const activityStyleMap: Record<string, { bg: string; color: string }> = {
   venta: { bg: "bg-neutral-100", color: "text-neutral-600" },
   devolucion: { bg: "bg-amber-50", color: "text-amber-600" },
   vale: { bg: "bg-indigo-50", color: "text-indigo-500" },
@@ -45,6 +45,9 @@ const styleMap: Record<string, { bg: string; color: string }> = {
   cancelacion: { bg: "bg-rose-50", color: "text-rose-500" },
   pendiente: { bg: "bg-amber-50", color: "text-amber-500" },
 }
+
+const iconMap = activityIconMap
+const styleMap = activityStyleMap
 
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
   return (

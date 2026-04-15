@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { format, getDate, endOfMonth } from "date-fns"
+import { format } from "date-fns"
 import { es } from "date-fns/locale"
 
 import { createClient } from "@/lib/supabase/client"
@@ -414,5 +414,143 @@ export function useDashboardData() {
     },
     staleTime: 30_000,
     refetchInterval: 60_000,
+  })
+}
+
+// ── Full Activity Feed (expanded modal) ──
+
+export interface FullActivityItem {
+  id: string
+  tipo: string
+  descripcion: string
+  detalle: string
+  monto: number | null
+  createdAt: string // ISO
+}
+
+type RawActivityFeed = RawDashboardData["activity"]
+
+function transformActivityFeed(raw: RawActivityFeed): FullActivityItem[] {
+  const items: FullActivityItem[] = []
+  const act = raw ?? { sales: [], returns: [], vales: [], credit_notes: [], exports: [] }
+
+  for (const s of act.sales ?? []) {
+    const uniqueMethods = [...new Set(s.methods ?? [])]
+    const methodLabel = uniqueMethods
+      .map((m) => PAYMENT_LABELS[m] ?? m)
+      .join(", ")
+
+    if (s.status === "cancelled") {
+      items.push({
+        id: s.id,
+        tipo: "cancelacion",
+        descripcion: `Cancelada ${s.sale_number}`,
+        detalle: s.customer_name ?? "Sin cliente",
+        monto: -Number(s.total),
+        createdAt: s.created_at,
+      })
+    } else if (s.status === "pending") {
+      items.push({
+        id: s.id,
+        tipo: "pendiente",
+        descripcion: `Pendiente ${s.sale_number}`,
+        detalle: `${s.item_count} producto${s.item_count !== 1 ? "s" : ""} — Pendiente de cobro`,
+        monto: Number(s.total),
+        createdAt: s.created_at,
+      })
+    } else {
+      items.push({
+        id: s.id,
+        tipo: "venta",
+        descripcion: `Venta ${s.sale_number}`,
+        detalle: `${s.customer_name ?? "Sin cliente"} · ${s.item_count} producto${s.item_count !== 1 ? "s" : ""} · ${methodLabel || "Sin pago"}`,
+        monto: Number(s.total),
+        createdAt: s.created_at,
+      })
+    }
+  }
+
+  for (const r of act.returns ?? []) {
+    items.push({
+      id: r.id,
+      tipo: r.status === "cancelled" ? "cancelacion" : "devolucion",
+      descripcion: r.status === "cancelled"
+        ? `Dev. cancelada ${r.return_number}`
+        : `Devolucion ${r.return_number}`,
+      detalle: r.sale_number ? `De venta ${r.sale_number}` : "Devolucion",
+      monto: -Number(r.total_refund),
+      createdAt: r.created_at,
+    })
+  }
+
+  for (const v of act.vales ?? []) {
+    items.push({
+      id: v.id,
+      tipo: v.status === "completed" ? "vale_completado" : v.status === "cancelled" ? "cancelacion" : "vale",
+      descripcion: v.status === "completed"
+        ? `Vale entregado ${v.vale_number}`
+        : v.status === "cancelled"
+          ? `Vale cancelado ${v.vale_number}`
+          : `Vale ${v.vale_number}`,
+      detalle: v.customer_name ?? "Sin cliente",
+      monto: Number(v.total),
+      createdAt: v.created_at,
+    })
+  }
+
+  for (const cn of act.credit_notes ?? []) {
+    const typeLabel = cn.credit_type === "lending" ? "Prestamo" : "Intercambio"
+    items.push({
+      id: cn.id,
+      tipo: cn.status === "settled" ? "nota_liquidada" : cn.status === "cancelled" ? "cancelacion" : "nota_credito",
+      descripcion: cn.status === "settled"
+        ? `Liquidada ${cn.credit_note_number}`
+        : cn.status === "cancelled"
+          ? `NC cancelada ${cn.credit_note_number}`
+          : `${typeLabel} ${cn.credit_note_number}`,
+      detalle: cn.customer_name ?? "Sin cliente",
+      monto: Number(cn.total),
+      createdAt: cn.created_at,
+    })
+  }
+
+  for (const e of act.exports ?? []) {
+    items.push({
+      id: e.id,
+      tipo: "exportacion",
+      descripcion: e.report_name,
+      detalle: e.format.toUpperCase(),
+      monto: null,
+      createdAt: e.created_at,
+    })
+  }
+
+  items.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
+
+  return items
+}
+
+export function useActivityFeed(opts: { daysBack?: number; enabled?: boolean } = {}) {
+  const { daysBack = 30, enabled = true } = opts
+  return useQuery({
+    queryKey: ["activity-feed", daysBack],
+    enabled,
+    queryFn: async (): Promise<FullActivityItem[]> => {
+      const supabase = createClient()
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase.rpc as any)(
+        "get_activity_feed",
+        { p_tenant_id: TENANT_ID, p_days_back: daysBack }
+      )
+
+      if (error) throw error
+
+      const parsed = typeof data === "string" ? JSON.parse(data) : data
+      return transformActivityFeed(parsed as RawActivityFeed)
+    },
+    staleTime: 60_000,
   })
 }

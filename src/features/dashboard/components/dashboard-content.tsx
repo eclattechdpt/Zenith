@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+import { motion } from "motion/react"
 import {
   DollarSign,
   Package,
@@ -8,6 +10,7 @@ import {
   TrendingUp,
   Activity,
   Award,
+  Maximize2,
 } from "lucide-react"
 
 import { Skeleton as BoneyardSkeleton } from "boneyard-js/react"
@@ -24,6 +27,7 @@ import { PaymentBreakdown } from "./mini-progress-ring"
 import { InventoryHealth } from "./mini-progress-bar"
 import { SalesChart } from "./sales-chart"
 import { ActivityFeed } from "./activity-feed"
+import { ActivityFeedDialog } from "./activity-feed-dialog"
 import { TopProductsGrid } from "./top-products-grid"
 import { InventoryAlertsGrid } from "./inventory-alerts-grid"
 
@@ -42,8 +46,24 @@ export function DashboardContent() {
   )
 }
 
+function ExpandActivityButton({ onClick }: { onClick: () => void }) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className="group flex h-8 items-center gap-1.5 rounded-lg border border-neutral-200/70 bg-white px-2.5 text-[11px] font-semibold text-neutral-500 shadow-sm shadow-neutral-900/[0.02] transition-colors hover:border-neutral-300 hover:text-neutral-800"
+    >
+      <Maximize2 className="size-3.5" strokeWidth={2.25} />
+      Expandir
+    </motion.button>
+  )
+}
+
 function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashboardData>["data"]> }) {
   const { kpiData, salesChart, activity, topProducts, inventoryAlerts } = data
+  const [activityOpen, setActivityOpen] = useState(false)
 
   return (
     <div className="space-y-6">
@@ -150,7 +170,6 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             icon={TrendingUp}
             iconBg="bg-rose-100"
             iconColor="text-rose-500"
-            tint="rose"
             delay={0.42}
             className="xl:col-span-3"
           >
@@ -167,7 +186,6 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             icon={Award}
             iconBg="bg-teal-100"
             iconColor="text-teal-600"
-            tint="teal"
             delay={0.48}
             className="xl:col-span-2"
           >
@@ -183,8 +201,10 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             icon={Activity}
             iconBg="bg-blush-100"
             iconColor="text-blush-600"
-            tint="blush"
             delay={0.54}
+            action={
+              <ExpandActivityButton onClick={() => setActivityOpen(true)} />
+            }
           >
             <ActivityFeed items={activity!} />
           </SectionCard>
@@ -195,12 +215,16 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             icon={AlertTriangle}
             iconBg="bg-amber-100"
             iconColor="text-amber-600"
-            tint="amber"
             delay={0.60}
           >
             <InventoryAlertsGrid alerts={inventoryAlerts} />
           </SectionCard>
         </div>
+
+        <ActivityFeedDialog
+          open={activityOpen}
+          onOpenChange={setActivityOpen}
+        />
       </div>
   )
 }

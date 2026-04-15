@@ -20,6 +20,8 @@ interface SectionCardProps {
   className?: string
   /** Optional semantic tint — overrides the default white background + neutral border */
   tint?: SectionTint
+  /** Optional action element rendered on the right side of the header (e.g. expand button) */
+  action?: React.ReactNode
 }
 
 const SPRING = { type: "spring" as const, stiffness: 100, damping: 20 }
@@ -43,6 +45,7 @@ export function SectionCard({
   delay = 0,
   className,
   tint,
+  action,
 }: SectionCardProps) {
   const surface = tint ? TINT_CLASSES[tint] : "border-neutral-200/60 bg-white"
   return (
@@ -61,7 +64,7 @@ export function SectionCard({
               <Icon className={`h-4 w-4 ${iconColor}`} />
             </div>
           )}
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="text-[11px] font-bold uppercase tracking-[2px] text-neutral-400">
               {label}
             </p>
@@ -71,6 +74,7 @@ export function SectionCard({
               </p>
             )}
           </div>
+          {action && <div className="shrink-0">{action}</div>}
         </div>
       )}
       {children}
