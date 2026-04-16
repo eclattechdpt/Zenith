@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { motion } from "motion/react"
 import { sileo } from "sileo"
@@ -33,13 +33,22 @@ export function StockAdjustmentDialog({
   inventoryType = "physical",
   onOpenChange,
 }: StockAdjustmentDialogProps) {
+  const submittingRef = useRef(false)
   return (
-    <Dialog open={!!variant} onOpenChange={onOpenChange}>
+    <Dialog
+      open={!!variant}
+      onOpenChange={(next) => {
+        if (!next && submittingRef.current) return
+        onOpenChange(next)
+      }}
+    >
       {variant && (
         <StockAdjustmentForm
+          key={variant.id}
           variant={variant}
           inventoryType={inventoryType}
           onOpenChange={onOpenChange}
+          submittingRef={submittingRef}
         />
       )}
     </Dialog>
@@ -50,16 +59,19 @@ function StockAdjustmentForm({
   variant,
   inventoryType,
   onOpenChange,
+  submittingRef,
 }: {
   variant: InventoryVariant
   inventoryType: InventoryType
   onOpenChange: (open: boolean) => void
+  submittingRef: React.MutableRefObject<boolean>
 }) {
   const currentStock =
     inventoryType === "initial_load" ? variant.initial_stock : variant.stock
   const [newStock, setNewStock] = useState(currentStock)
   const [reason, setReason] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [idempotencyKey] = useState(() => crypto.randomUUID())
   const queryClient = useQueryClient()
 
   const difference = newStock - currentStock
@@ -69,16 +81,19 @@ function StockAdjustmentForm({
     inventoryType === "initial_load" ? adjustInitialStock : adjustStock
 
   async function handleSubmit() {
-    if (!canSubmit) return
+    if (!canSubmit || isSubmitting) return
     setIsSubmitting(true)
+    submittingRef.current = true
 
     const result = await action({
       product_variant_id: variant.id,
       new_stock: newStock,
       reason: reason.trim(),
+      idempotency_key: idempotencyKey,
     })
 
     setIsSubmitting(false)
+    submittingRef.current = false
 
     if ("error" in result && result.error) {
       const msg =

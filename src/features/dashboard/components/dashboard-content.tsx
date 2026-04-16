@@ -67,18 +67,19 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
 
   return (
     <div className="space-y-6">
-        {/* KPI Grid — hero anchor + 3 secondary */}
+        {/* KPI Grid — Tier-1 hero + 3 Tier-3 peers, all collapsible */}
         <div className="grid grid-cols-1 gap-4 sm:gap-5">
           <KpiCard
             variant="hero"
             heroGradient="from-rose-500 to-rose-600"
-            heroShadow="shadow-rose-500/15"
+            heroShadow="shadow-rose-500/20"
             delay={0}
             title="Ventas del dia"
             value={kpiData.ventasDelDia}
             format={formatCurrency}
             subtitle="hoy"
             icon={DollarSign}
+            collapsible
             badge={{
               label: `+${kpiData.ventasDelDiaCambio}% vs ayer`,
               trend: "up",
@@ -100,8 +101,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
               icon={Package}
               iconBg="bg-teal-50"
               iconColor="text-teal-500"
-              ringColor="border-teal-100/70"
-              ringAnchor="tr"
+              collapsible
               badge={{
                 label: `+${kpiData.productosVendidosCambio} vs ayer`,
                 trend: "up",
@@ -122,8 +122,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
               icon={ShoppingBag}
               iconBg="bg-blush-50"
               iconColor="text-blush-500"
-              ringColor="border-blush-100/70"
-              ringAnchor="tr"
+              collapsible
               badge={{
                 label: `+${kpiData.transaccionesCambio} vs ayer`,
                 trend: "up",
@@ -146,8 +145,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
               icon={AlertTriangle}
               iconBg="bg-amber-50"
               iconColor="text-amber-500"
-              ringColor="border-amber-100/70"
-              ringAnchor="bl"
+              collapsible
               badge={{
                 label: `${kpiData.stockBajoAlertas} alertas`,
                 trend: "neutral",
@@ -194,7 +192,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
         </div>
 
         {/* Activity Feed + Inventory Alerts */}
-        <div className="grid min-w-0 gap-5 xl:grid-cols-2">
+        <div className="grid min-w-0 items-start gap-5 xl:grid-cols-2">
           <SectionCard
             label="Actividad reciente"
             description="Hoy"
@@ -202,6 +200,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             iconBg="bg-blush-100"
             iconColor="text-blush-600"
             delay={0.54}
+            collapsible
             action={
               <ExpandActivityButton onClick={() => setActivityOpen(true)} />
             }
@@ -216,6 +215,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             iconBg="bg-amber-100"
             iconColor="text-amber-600"
             delay={0.60}
+            collapsible
           >
             <InventoryAlertsGrid alerts={inventoryAlerts} />
           </SectionCard>

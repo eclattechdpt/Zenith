@@ -22,6 +22,23 @@ export async function logExport(reportName: string, format: "excel" | "pdf") {
 
   if (!user) return { error: "Tu sesion expiro. Vuelve a iniciar sesion." }
 
+  // Dedup window: same user + report + format within the last 5 seconds is
+  // treated as one export. A double-click on a report button should not write
+  // two audit rows.
+  const fiveSecondsAgo = new Date(Date.now() - 5000).toISOString()
+  const { data: recent } = await supabase
+    .from("export_logs")
+    .select("id")
+    .eq("tenant_id", TENANT_ID)
+    .eq("exported_by", user.id)
+    .eq("report_name", parsed.data.reportName)
+    .eq("format", parsed.data.format)
+    .gte("created_at", fiveSecondsAgo)
+    .limit(1)
+    .maybeSingle()
+
+  if (recent) return { data: true }
+
   const { error } = await supabase.from("export_logs").insert({
     tenant_id: TENANT_ID,
     report_name: parsed.data.reportName,

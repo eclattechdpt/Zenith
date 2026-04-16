@@ -47,6 +47,22 @@ function revalidateInventory() {
   revalidatePath("/")
 }
 
+// Returns existing movement if the idempotency_key was already processed.
+// Use BEFORE doing any read-modify-write to prevent stale-stock re-reads on retry.
+async function lookupExistingMovement(
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  idempotencyKey: string | undefined,
+) {
+  if (!idempotencyKey) return null
+  const { data } = await supabase
+    .from("inventory_movements")
+    .select("*")
+    .eq("tenant_id", TENANT_ID)
+    .eq("idempotency_key", idempotencyKey)
+    .maybeSingle()
+  return data
+}
+
 // ── Physical Inventory ──
 
 export async function adjustStock(input: StockAdjustmentInput) {
@@ -56,10 +72,13 @@ export async function adjustStock(input: StockAdjustmentInput) {
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
-  const { product_variant_id, new_stock, reason } = parsed.data
+  const { product_variant_id, new_stock, reason, idempotency_key } = parsed.data
 
   const supabase = await createServerClient()
   const userId = auth.userId
+
+  const existing = await lookupExistingMovement(supabase, idempotency_key)
+  if (existing) return { data: { movement: existing, new_stock: existing.stock_after } }
 
   const { data: variant, error: readError } = await supabase
     .from("product_variants")
@@ -99,11 +118,16 @@ export async function adjustStock(input: StockAdjustmentInput) {
       reason,
       created_by: userId,
       inventory_source: "physical",
+      idempotency_key: idempotency_key ?? null,
     })
     .select()
     .single()
 
   if (movementError) {
+    if (movementError.code === "23505" && idempotency_key) {
+      const raced = await lookupExistingMovement(supabase, idempotency_key)
+      if (raced) return { data: { movement: raced, new_stock: raced.stock_after } }
+    }
     return { error: { _form: [movementError.message] } }
   }
 
@@ -118,10 +142,13 @@ export async function addStock(input: StockEntryInput) {
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
-  const { product_variant_id, quantity, reason } = parsed.data
+  const { product_variant_id, quantity, reason, idempotency_key } = parsed.data
 
   const supabase = await createServerClient()
   const userId = auth.userId
+
+  const existing = await lookupExistingMovement(supabase, idempotency_key)
+  if (existing) return { data: { movement: existing, new_stock: existing.stock_after } }
 
   const { data: variant, error: readError } = await supabase
     .from("product_variants")
@@ -157,11 +184,16 @@ export async function addStock(input: StockEntryInput) {
       reason: reason ?? null,
       created_by: userId,
       inventory_source: "physical",
+      idempotency_key: idempotency_key ?? null,
     })
     .select()
     .single()
 
   if (movementError) {
+    if (movementError.code === "23505" && idempotency_key) {
+      const raced = await lookupExistingMovement(supabase, idempotency_key)
+      if (raced) return { data: { movement: raced, new_stock: raced.stock_after } }
+    }
     return { error: { _form: [movementError.message] } }
   }
 
@@ -178,10 +210,13 @@ export async function adjustInitialStock(input: StockAdjustmentInput) {
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
-  const { product_variant_id, new_stock, reason } = parsed.data
+  const { product_variant_id, new_stock, reason, idempotency_key } = parsed.data
 
   const supabase = await createServerClient()
   const userId = auth.userId
+
+  const existing = await lookupExistingMovement(supabase, idempotency_key)
+  if (existing) return { data: { movement: existing, new_stock: existing.stock_after } }
 
   const { data: variant, error: readError } = await supabase
     .from("product_variants")
@@ -221,11 +256,16 @@ export async function adjustInitialStock(input: StockAdjustmentInput) {
       reason,
       created_by: userId,
       inventory_source: "initial_load",
+      idempotency_key: idempotency_key ?? null,
     })
     .select()
     .single()
 
   if (movementError) {
+    if (movementError.code === "23505" && idempotency_key) {
+      const raced = await lookupExistingMovement(supabase, idempotency_key)
+      if (raced) return { data: { movement: raced, new_stock: raced.stock_after } }
+    }
     return { error: { _form: [movementError.message] } }
   }
 
@@ -240,10 +280,13 @@ export async function addInitialStock(input: StockEntryInput) {
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
-  const { product_variant_id, quantity, reason } = parsed.data
+  const { product_variant_id, quantity, reason, idempotency_key } = parsed.data
 
   const supabase = await createServerClient()
   const userId = auth.userId
+
+  const existing = await lookupExistingMovement(supabase, idempotency_key)
+  if (existing) return { data: { movement: existing, new_stock: existing.stock_after } }
 
   const { data: variant, error: readError } = await supabase
     .from("product_variants")
@@ -279,11 +322,16 @@ export async function addInitialStock(input: StockEntryInput) {
       reason: reason ?? null,
       created_by: userId,
       inventory_source: "initial_load",
+      idempotency_key: idempotency_key ?? null,
     })
     .select()
     .single()
 
   if (movementError) {
+    if (movementError.code === "23505" && idempotency_key) {
+      const raced = await lookupExistingMovement(supabase, idempotency_key)
+      if (raced) return { data: { movement: raced, new_stock: raced.stock_after } }
+    }
     return { error: { _form: [movementError.message] } }
   }
 
@@ -300,7 +348,7 @@ export async function upsertInitialLoadOverride(input: InitialLoadOverrideInput)
   const auth = await requireUserId()
   if (auth.error) return { error: auth.error }
 
-  const { product_variant_id, override_name, override_price, new_stock } = parsed.data
+  const { product_variant_id, override_name, override_price, new_stock, idempotency_key } = parsed.data
 
   const supabase = await createServerClient()
   const userId = auth.userId
@@ -324,6 +372,12 @@ export async function upsertInitialLoadOverride(input: InitialLoadOverrideInput)
 
   // Update stock if provided
   if (new_stock !== undefined && new_stock !== null) {
+    const existing = await lookupExistingMovement(supabase, idempotency_key)
+    if (existing) {
+      revalidateInventory()
+      return { data: { success: true } }
+    }
+
     const { data: variant, error: readError } = await supabase
       .from("product_variants")
       .select("initial_stock")
@@ -358,9 +412,17 @@ export async function upsertInitialLoadOverride(input: InitialLoadOverrideInput)
           reason: "Edicion de carga inicial",
           created_by: userId,
           inventory_source: "initial_load",
+          idempotency_key: idempotency_key ?? null,
         })
 
       if (movementError) {
+        if (movementError.code === "23505" && idempotency_key) {
+          const raced = await lookupExistingMovement(supabase, idempotency_key)
+          if (raced) {
+            revalidateInventory()
+            return { data: { success: true } }
+          }
+        }
         return { error: { _form: [movementError.message] } }
       }
     }

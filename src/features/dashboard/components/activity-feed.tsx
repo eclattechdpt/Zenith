@@ -34,7 +34,10 @@ export const activityIconMap: Record<string, LucideIcon> = {
   pendiente: Clock,
 }
 
-export const activityStyleMap: Record<string, { bg: string; color: string }> = {
+export const activityStyleMap: Record<
+  string,
+  { bg: string; color: string }
+> = {
   venta: { bg: "bg-neutral-100", color: "text-neutral-600" },
   devolucion: { bg: "bg-amber-50", color: "text-amber-600" },
   vale: { bg: "bg-indigo-50", color: "text-indigo-500" },
@@ -51,37 +54,39 @@ const styleMap = activityStyleMap
 
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
   return (
-    <div className="space-y-0.5">
+    <div className="space-y-3.5">
       {items.map((item) => {
         const Icon = iconMap[item.tipo] ?? ShoppingBag
         const styles = styleMap[item.tipo] ?? styleMap.venta
         const isNegative = item.monto !== null && item.monto < 0
+
         return (
-          <div
-            key={item.id}
-            className="flex items-center gap-3 rounded-xl px-3 py-3"
-          >
+          <div key={item.id} className="flex items-center gap-3">
             <div
-              className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${styles.bg}`}
+              className={`flex size-10 shrink-0 items-center justify-center rounded-full ${styles.bg}`}
             >
               <Icon
-                className={`size-4 ${styles.color}`}
+                className={`size-[17px] ${styles.color}`}
                 strokeWidth={1.75}
               />
             </div>
+
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold text-neutral-800">
+              <p className="truncate text-[13px] font-semibold text-neutral-900">
                 {item.descripcion}
               </p>
               <p className="truncate text-[11px] text-neutral-500">
-                {item.detalle}
+                <span className="truncate">{item.detalle}</span>
+                <span className="mx-1.5 text-accent-500">•</span>
+                <span className="text-neutral-400">{item.hora}</span>
               </p>
             </div>
-            <div className="shrink-0 text-right">
+
+            <div className="shrink-0">
               {item.monto !== null ? (
                 <span
-                  className={`text-[13px] font-bold tabular-nums ${
-                    isNegative ? "text-rose-500" : "text-neutral-900"
+                  className={`font-display text-[17px] font-semibold tabular-nums tracking-[-0.5px] ${
+                    isNegative ? "text-rose-500" : "text-neutral-950"
                   }`}
                 >
                   {isNegative ? "-" : ""}
@@ -92,7 +97,6 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
                   exportado
                 </span>
               )}
-              <p className="text-[10px] text-neutral-400">{item.hora}</p>
             </div>
           </div>
         )

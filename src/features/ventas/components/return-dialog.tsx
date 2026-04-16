@@ -59,6 +59,7 @@ export function ReturnDialog({
   const [items, setItems] = useState<ReturnItemState[]>([])
   const [reason, setReason] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID())
 
   // Compute returnable quantities from sale data
   const returnableItems = useMemo(() => {
@@ -102,6 +103,11 @@ export function ReturnDialog({
     setIsSubmitting(false)
   }, [saleId, returnableItems])
 
+  // Fresh idempotency key per dialog session (keeps same key for retries within the session)
+  useEffect(() => {
+    setIdempotencyKey(crypto.randomUUID())
+  }, [saleId])
+
   const selectedItems = items.filter((i) => i.quantity > 0)
   const totalRefund = selectedItems.reduce(
     (sum, i) => sum + i.unit_price * i.quantity,
@@ -144,6 +150,7 @@ export function ReturnDialog({
         replacement_product_name: i.replacement_product_name,
         replacement_variant_label: i.replacement_variant_label,
       })),
+      idempotency_key: idempotencyKey,
     })
 
     setIsSubmitting(false)
@@ -173,7 +180,13 @@ export function ReturnDialog({
   }
 
   return (
-    <Dialog open={!!saleId} onOpenChange={onOpenChange}>
+    <Dialog
+      open={!!saleId}
+      onOpenChange={(next) => {
+        if (!next && isSubmitting) return
+        onOpenChange(next)
+      }}
+    >
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

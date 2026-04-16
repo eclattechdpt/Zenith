@@ -43,21 +43,15 @@ const statusConfig: Record<
   },
 }
 
-const debugStates: HealthStatus[] = ["online", "warning", "error"]
-
 function StatusPill() {
-  const isDebug = process.env.NODE_ENV === "development"
   const [status, setStatus] = useState<HealthStatus>("online")
   const [message, setMessage] = useState<string | undefined>()
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [debugOverride, setDebugOverride] = useState(false)
 
   const checkHealth = useCallback(async () => {
-    if (debugOverride) return
-
     try {
-      const res = await fetch("/api/health")
+      const res = await fetch("/api/health", { cache: "no-store" })
       if (!res.ok) {
         setStatus("error")
         setMessage("El servidor devolvio un error inesperado.")
@@ -81,7 +75,7 @@ function StatusPill() {
     } finally {
       setLoading(false)
     }
-  }, [debugOverride])
+  }, [])
 
   useEffect(() => {
     checkHealth()
@@ -92,30 +86,6 @@ function StatusPill() {
   const config = statusConfig[status]
   const hasDetails = status !== "online"
 
-  function cycleStatus() {
-    if (!isDebug) return
-    setDebugOverride(true)
-    const nextIndex =
-      (debugStates.indexOf(status) + 1) % debugStates.length
-    const next = debugStates[nextIndex]
-    setStatus(next)
-    setMessage(
-      next === "online"
-        ? undefined
-        : next === "warning"
-          ? "Debug: estado de warning simulado."
-          : "Debug: estado de error simulado."
-    )
-    setExpanded(next !== "online")
-  }
-
-  function resetDebug() {
-    if (!isDebug || !debugOverride) return
-    setDebugOverride(false)
-    setLoading(true)
-    checkHealth()
-  }
-
   const StatusIcon = config.icon
 
   return (
@@ -124,10 +94,9 @@ function StatusPill() {
       <motion.button
         type="button"
         onClick={hasDetails ? () => setExpanded((v) => !v) : undefined}
-        onDoubleClick={isDebug ? cycleStatus : undefined}
         className={`flex items-center gap-2.5 rounded-full bg-white/10 px-4 py-2 ring-1 ring-white/15 backdrop-blur-md transition-colors ${
           hasDetails ? "cursor-pointer hover:bg-white/15" : ""
-        } ${isDebug ? "active:scale-95" : ""}`}
+        }`}
       >
         {loading ? (
           <Loader2 className="size-3 animate-spin text-white/50" />
@@ -205,23 +174,6 @@ function StatusPill() {
         )}
       </AnimatePresence>
 
-      {/* Debug hint */}
-      {isDebug && (
-        <div className="mt-2 flex flex-col gap-1">
-          <span className="text-[9px] uppercase tracking-widest text-white/20">
-            Debug: doble clic para cambiar estado
-          </span>
-          {debugOverride && (
-            <button
-              type="button"
-              onClick={resetDebug}
-              className="text-[9px] uppercase tracking-widest text-white/30 underline hover:text-white/50"
-            >
-              Volver a check real
-            </button>
-          )}
-        </div>
-      )}
     </div>
   )
 }

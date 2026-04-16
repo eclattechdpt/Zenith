@@ -1,7 +1,8 @@
 "use client"
 
-import { motion } from "motion/react"
-import type { LucideIcon } from "lucide-react"
+import { useState } from "react"
+import { AnimatePresence, motion } from "motion/react"
+import { ChevronDown, type LucideIcon } from "lucide-react"
 
 type SectionTint = "rose" | "teal" | "blush" | "amber" | "emerald" | "violet"
 
@@ -22,6 +23,10 @@ interface SectionCardProps {
   tint?: SectionTint
   /** Optional action element rendered on the right side of the header (e.g. expand button) */
   action?: React.ReactNode
+  /** When true, header gets a chevron toggle and the body folds/unfolds */
+  collapsible?: boolean
+  /** Initial collapsed state when collapsible is true */
+  defaultCollapsed?: boolean
 }
 
 const SPRING = { type: "spring" as const, stiffness: 100, damping: 20 }
@@ -46,8 +51,17 @@ export function SectionCard({
   className,
   tint,
   action,
+  collapsible = false,
+  defaultCollapsed = false,
 }: SectionCardProps) {
   const surface = tint ? TINT_CLASSES[tint] : "border-neutral-200/60 bg-white"
+  const [collapsed, setCollapsed] = useState(defaultCollapsed)
+  const headerSpacingClass = collapsible
+    ? collapsed
+      ? ""
+      : "mb-5"
+    : "mb-5"
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
@@ -56,7 +70,7 @@ export function SectionCard({
       className={`rounded-2xl border p-6 shadow-sm shadow-neutral-900/[0.03] ${surface} ${className ?? ""}`}
     >
       {label && (
-        <div className="mb-5 flex items-center gap-2">
+        <div className={`flex items-center gap-2 ${headerSpacingClass}`}>
           {Icon && (
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconBg}`}
@@ -75,9 +89,45 @@ export function SectionCard({
             )}
           </div>
           {action && <div className="shrink-0">{action}</div>}
+          {collapsible && (
+            <motion.button
+              type="button"
+              onClick={() => setCollapsed((v) => !v)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              aria-expanded={!collapsed}
+              aria-label={collapsed ? "Expandir" : "Colapsar"}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-neutral-200/70 bg-white text-neutral-500 shadow-sm shadow-neutral-900/[0.02] transition-colors hover:border-neutral-300 hover:text-neutral-800"
+            >
+              <motion.span
+                animate={{ rotate: collapsed ? -90 : 0 }}
+                transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                className="flex"
+              >
+                <ChevronDown className="size-4" strokeWidth={2.25} />
+              </motion.span>
+            </motion.button>
+          )}
         </div>
       )}
-      {children}
+      {collapsible ? (
+        <AnimatePresence initial={false}>
+          {!collapsed && (
+            <motion.div
+              key="content"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ height: { duration: 0.28, ease: [0.32, 0.72, 0, 1] }, opacity: { duration: 0.18 } }}
+              className="overflow-hidden"
+            >
+              {children}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ) : (
+        children
+      )}
     </motion.div>
   )
 }

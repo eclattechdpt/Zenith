@@ -394,6 +394,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          idempotency_key: string | null
           inventory_source: string
           product_variant_id: string
           quantity: number
@@ -409,6 +410,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          idempotency_key?: string | null
           inventory_source?: string
           product_variant_id: string
           quantity: number
@@ -424,6 +426,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          idempotency_key?: string | null
           inventory_source?: string
           product_variant_id?: string
           quantity?: number
@@ -766,6 +769,7 @@ export type Database = {
           customer_id: string | null
           deleted_at: string | null
           id: string
+          idempotency_key: string | null
           reason: string | null
           return_number: string
           sale_id: string
@@ -780,6 +784,7 @@ export type Database = {
           customer_id?: string | null
           deleted_at?: string | null
           id?: string
+          idempotency_key?: string | null
           reason?: string | null
           return_number: string
           sale_id: string
@@ -794,6 +799,7 @@ export type Database = {
           customer_id?: string | null
           deleted_at?: string | null
           id?: string
+          idempotency_key?: string | null
           reason?: string | null
           return_number?: string
           sale_id?: string

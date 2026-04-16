@@ -18,21 +18,20 @@ export function PaymentBreakdown({ methods }: PaymentBreakdownProps) {
       {methods.map((method, i) => (
         <motion.div
           key={method.label}
-          className="inline-flex items-center gap-[5px] rounded-[20px] px-3 py-[5px]"
-          style={{
-            backgroundColor: "#FFFFFF",
-            border: "0.5px solid #FFDDE3",
-          }}
+          className="inline-flex items-center gap-1.5 rounded-full bg-neutral-50 px-2.5 py-1"
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, ease: "easeInOut", delay: i * 0.08 }}
+          transition={{ duration: 0.25, delay: i * 0.07 }}
         >
           <span
             className="size-[7px] shrink-0 rounded-full"
             style={{ backgroundColor: method.dotColor }}
           />
-          <span className="text-[11px] font-semibold tracking-[0.3px]" style={{ color: "#9E4A60" }}>
-            {method.label} {method.count}
+          <span className="text-[11px] font-semibold tabular-nums text-neutral-700">
+            {method.label}
+            <span className="ml-1 font-medium text-neutral-400">
+              {method.count}
+            </span>
           </span>
         </motion.div>
       ))}

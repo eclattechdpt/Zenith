@@ -303,24 +303,28 @@ export function DevPanel() {
             title="Eliminar productos"
             description="Elimina todos los productos, variantes e imagenes"
             icon={Package}
+            confirmWord="ELIMINAR PRODUCTOS"
             onExecute={purgeProducts}
           />
           <DangerZoneCard
             title="Eliminar ventas"
             description="Elimina todas las ventas, devoluciones y notas de credito"
             icon={ShoppingCart}
+            confirmWord="ELIMINAR VENTAS"
             onExecute={purgeSales}
           />
           <DangerZoneCard
             title="Eliminar clientes"
             description="Elimina todos los clientes y sus precios personalizados"
             icon={Users}
+            confirmWord="ELIMINAR CLIENTES"
             onExecute={purgeCustomers}
           />
           <DangerZoneCard
             title="Eliminar inventario"
             description="Elimina todos los movimientos, semanas de transito y carga inicial"
             icon={HardDrive}
+            confirmWord="ELIMINAR INVENTARIO"
             onExecute={purgeInventory}
           />
           <DangerZoneCard

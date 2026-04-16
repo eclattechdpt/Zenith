@@ -6,12 +6,14 @@ export const stockAdjustmentSchema = z.object({
   product_variant_id: z.string().regex(uuidPattern, "UUID inválido"),
   new_stock: z.coerce.number().int().min(0, "El stock no puede ser negativo"),
   reason: z.string().min(1, "El motivo es requerido").max(500),
+  idempotency_key: z.string().regex(uuidPattern).optional(),
 })
 
 export const stockEntrySchema = z.object({
   product_variant_id: z.string().regex(uuidPattern, "UUID inválido"),
   quantity: z.coerce.number().int().positive("La cantidad debe ser positiva"),
   reason: z.string().max(500).optional().nullable(),
+  idempotency_key: z.string().regex(uuidPattern).optional(),
 })
 
 export type StockAdjustmentInput = z.infer<typeof stockAdjustmentSchema>
@@ -24,6 +26,7 @@ export const initialLoadOverrideSchema = z.object({
   override_name: z.string().max(200).optional().nullable(),
   override_price: z.coerce.number().min(0).optional().nullable(),
   new_stock: z.coerce.number().int().min(0, "El stock no puede ser negativo").optional(),
+  idempotency_key: z.string().regex(uuidPattern).optional(),
 })
 
 export type InitialLoadOverrideInput = z.infer<typeof initialLoadOverrideSchema>

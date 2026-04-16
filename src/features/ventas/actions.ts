@@ -172,9 +172,30 @@ export async function createReturn(input: CreateReturnInput) {
   const parsed = createReturnSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  const { sale_id, reason, items } = parsed.data
+  const { sale_id, reason, items, idempotency_key } = parsed.data
 
   const supabase = await createServerClient()
+
+  // Idempotency pre-check: if the same key already created a return, return it
+  if (idempotency_key) {
+    const { data: existing } = await supabase
+      .from("returns")
+      .select("id, return_number, total_refund, sale_id, sales(status)")
+      .eq("tenant_id", TENANT_ID)
+      .eq("idempotency_key", idempotency_key)
+      .maybeSingle()
+    if (existing) {
+      const saleStatus = (existing as { sales: { status: string } | null }).sales?.status ?? "completed"
+      return {
+        data: {
+          return_id: existing.id,
+          return_number: existing.return_number,
+          total_refund: Number(existing.total_refund),
+          sale_status: saleStatus,
+        },
+      }
+    }
+  }
 
   // Verify the sale is returnable
   const { data: sale, error: saleError } = await supabase
@@ -227,20 +248,31 @@ export async function createReturn(input: CreateReturnInput) {
     return { error: { _form: [(rpcError as { message: string }).message] } }
   }
 
+  const result = resultJson as {
+    return_id: string
+    return_number: string
+    total_refund: number
+    sale_status: string
+    credit_note_number?: string
+  }
+
+  // Tag the return with the idempotency key so retries are deduped.
+  // If a parallel request already claimed this key, the unique index will surface 23505;
+  // we swallow it — our return is still valid, the parallel response simply "wins" future lookups.
+  if (idempotency_key) {
+    await supabase
+      .from("returns")
+      .update({ idempotency_key })
+      .eq("id", result.return_id)
+      .eq("tenant_id", TENANT_ID)
+  }
+
   revalidatePath("/ventas")
   revalidatePath("/pos")
   revalidatePath("/")
   revalidatePath("/inventario")
 
-  return {
-    data: resultJson as {
-      return_id: string
-      return_number: string
-      total_refund: number
-      sale_status: string
-      credit_note_number?: string
-    },
-  }
+  return { data: result }
 }
 
 export async function cancelSale(input: CancelSaleInput) {

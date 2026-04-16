@@ -120,23 +120,26 @@ export async function cancelVale(input: CancelValeInput) {
   const parsed = cancelValeSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
+  let userId: string
+  try {
+    userId = await requireUserId()
+  } catch {
+    return { error: { _form: ["Tu sesion expiro. Vuelve a iniciar sesion."] } }
+  }
+
   const supabase = await createServerClient()
 
-  const { data, error } = await supabase
-    .from("vales")
-    .update({ status: "cancelled" })
-    .eq("id", parsed.data.vale_id)
-    .eq("tenant_id", TENANT_ID)
-    .in("status", ["pending", "ready"])
-    .is("deleted_at", null)
-    .select("id, vale_number")
-    .single()
+  // Atomic: FOR UPDATE lock + status re-check inside transaction
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)("cancel_vale", {
+    p_vale_id: parsed.data.vale_id,
+    p_tenant_id: TENANT_ID,
+    p_created_by: userId,
+  })
 
-  if (error || !data) {
-    return { error: { _form: ["Vale no encontrado o ya fue completado"] } }
-  }
+  if (error) return extractError(error, "Error al cancelar el vale")
 
   revalidatePath("/vales")
 
-  return { data }
+  return { data: data as { id: string; vale_number: string; cancelled_at?: string; already_cancelled?: boolean } }
 }

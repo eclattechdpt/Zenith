@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "motion/react"
 import {
   Menu,
   LayoutDashboard,
-  Monitor,
+  ScanBarcode,
   Package,
   Warehouse,
   Users,
@@ -87,7 +87,7 @@ function NavScoopBottom() {
 
 const navItems = [
   { href: "/", label: "Inicio", icon: LayoutDashboard },
-  { href: "/pos", label: "Punto de venta", icon: Monitor },
+  { href: "/pos", label: "Punto de venta", icon: ScanBarcode },
   { href: "/productos", label: "Productos", icon: Package },
   { href: "/inventario", label: "Inventario", icon: Warehouse },
   { href: "/clientes", label: "Clientes", icon: Users },

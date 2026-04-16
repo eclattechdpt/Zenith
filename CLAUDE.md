@@ -13,45 +13,33 @@
 
 ## MCP (Model Context Protocol)
 
-Este proyecto usa Supabase MCP para interactuar con la base de datos. La configuración está en `.mcp.json` en la raíz del repo.
-
-**Al iniciar una sesión**, verifica que el MCP de Supabase esté conectado. Si no lo está o falla alguna operación de Supabase MCP, indica al usuario:
+Supabase MCP configurado en `.mcp.json` en la raíz. Al iniciar sesión, verificar conexión; si falla:
 
 1. Ejecutar `/mcp` en Claude Code para autenticarse vía navegador.
-2. Confirmar que `.mcp.json` existe en la raíz con el contenido correcto:
-   ```json
-   {
-     "mcpServers": {
-       "supabase": {
-         "type": "http",
-         "url": "https://mcp.supabase.com/mcp"
-       }
-     }
-   }
-   ```
-3. La autenticación es por máquina — cada vez que se clone el repo en una máquina nueva, hay que ejecutar `/mcp` de nuevo.
+2. Confirmar `.mcp.json` con `{ "mcpServers": { "supabase": { "type": "http", "url": "https://mcp.supabase.com/mcp" } } }`.
+3. Autenticación por máquina — tras clonar en máquina nueva, re-ejecutar `/mcp`.
 
 ## Documentación del proyecto
 
-Los archivos de spec están en `/docs/spec/`. SIEMPRE léelos antes de implementar cualquier feature:
+Specs en `/docs/spec/`. SIEMPRE léelos antes de implementar cualquier feature:
 
 - `01-PRODUCT-SPEC.md` — Alcance, tech stack, arquitectura, auth
 - `02-DATA-MODEL.md` — 17 tablas con tipos PostgreSQL, índices, triggers
 - `03-BUSINESS-RULES.md` — Lógica de negocio: precios, ventas, devoluciones, inventario
 - `04-PROJECT-STRUCTURE.md` — Estructura de carpetas, sprints, patrones de código
-- `05-MIGRATION.sql` — Migración SQL consolidada (ya ejecutada en Supabase)
-- `06-SEED-DATA.sql` — Datos iniciales (ya ejecutado en Supabase)
+- `05-MIGRATION.sql` — Migración SQL consolidada (ya ejecutada)
+- `06-SEED-DATA.sql` — Datos iniciales (ya ejecutado)
 - `07-API-SPEC.md` — Server Actions, Zod schemas, Supabase queries, constantes
 
 ## Contexto de diseño
 
-Los archivos en `/Context/` definen el toolbox visual del sistema. Consultarlos al construir cualquier componente UI:
+Archivos en `/Context/` — toolbox visual. Consultarlos al construir cualquier componente UI:
 
 - `zenith-design-system.xml` — Tokens: colores, tipografía, spacing, shadows, motion, radii, z-index, breakpoints
 - `iconography.xml` — Catálogo de íconos Lucide con mapeo concepto → nombre
 - `ui-copy.md` — Tono, microcopy, glosario del dominio, formatos de datos
 
-**Estos archivos definen QUÉ herramientas existen, no DÓNDE usarlas.** Usar los tokens creativamente — no aplicar colores o íconos de forma mecánica ni predecible.
+**Definen QUÉ herramientas existen, no DÓNDE usarlas.** Usar los tokens creativamente — no aplicar colores o íconos de forma mecánica.
 
 ## Comandos
 
@@ -60,34 +48,33 @@ npm run dev          # Servidor de desarrollo (http://localhost:3000)
 npm run build        # Build de producción
 npm run lint         # ESLint
 npm run type-check   # tsc --noEmit
-npm run bones        # Regenerar skeletons de boneyard (requiere dev server corriendo)
-npm run bones:force  # Regenerar skeletons forzando recaptura completa
-npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/database.ts  # Regenerar tipos
+npm run bones        # Regenerar skeletons de boneyard (requiere dev server)
+npm run bones:force  # Regenerar forzando recaptura completa
+npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/database.ts
 ```
 
 ### Skeleton loading (boneyard-js)
 
-- **Despues de cambios en la UI** de cualquier componente que tenga `<BoneyardSkeleton>`, ejecutar `npm run bones:force` (con el dev server corriendo) para regenerar los skeletons.
-- Los archivos `.bones.json` en `src/bones/` estan git-tracked — commitearlos despues de regenerar.
-- El CLI usa un header `x-boneyard-build: true` para bypass auth (configurado en `boneyard.config.json` y checkeado en `src/proxy.ts`).
-- Componentes en dialogs/modals/tabs que no son alcanzables via crawling se capturan en la pagina dedicada `/boneyard-capture`.
-- Para agregar un nuevo skeleton: crear fixture en `fixtures/`, wrappear con `<BoneyardSkeleton name="..." loading={...} animate="shimmer" fixture={<Fixture />}>`, agregar a `/boneyard-capture` si no es una pagina principal, y correr `npm run bones:force`.
+- Después de cambios en UI de componentes con `<BoneyardSkeleton>`, correr `npm run bones:force` con el dev server corriendo. Los `.bones.json` en `src/bones/` están git-tracked — commitearlos.
+- CLI usa header `x-boneyard-build: true` para bypass auth (configurado en `boneyard.config.json` y chequeado en `src/proxy.ts`, restringido a dev only).
+- Componentes en dialogs/modals/tabs no alcanzables via crawling se capturan en `/boneyard-capture`.
+- Para nuevo skeleton: fixture en `fixtures/`, wrappear con `<BoneyardSkeleton name="..." loading={...} animate="shimmer" fixture={<Fixture />}>`, agregar a `/boneyard-capture` si no es página principal, y `npm run bones:force`.
 
 ## Convenciones estrictas
 
 ### TypeScript
 
-- Strict mode habilitado. No usar `any` — usar `unknown` y type guards si es necesario.
-- Tipos de base de datos se importan de `@/types/database`. Nunca definir tipos de tablas manualmente.
-- Inferir tipos de Zod schemas con `z.infer<typeof schema>` para inputs de formularios.
+- Strict mode habilitado. No usar `any` — usar `unknown` y type guards.
+- Tipos de DB se importan de `@/types/database`. Nunca definir tipos de tablas manualmente.
+- Inferir tipos de Zod con `z.infer<typeof schema>` para inputs de formularios.
 
 ### Estructura de archivos
 
-- **Rutas** van en `app/`. Solo contienen `page.tsx`, `layout.tsx`, y `loading.tsx`. No poner lógica de negocio aquí.
-- **Features** van en `src/features/{modulo}/`. Cada módulo tiene: `actions.ts`, `queries.ts`, `schemas.ts`, `types.ts`, `components/`.
+- **Rutas** van en `app/`. Solo `page.tsx`, `layout.tsx`, `loading.tsx`. No poner lógica aquí.
+- **Features** van en `src/features/{modulo}/` — cada uno con: `actions.ts`, `queries.ts`, `schemas.ts`, `types.ts`, `components/`.
 - **Componentes compartidos** van en `src/components/shared/`.
 - **shadcn/ui** vive en `src/components/ui/` — no modificar estos archivos.
-- **Supabase clients** viven en `src/lib/supabase/` — `client.ts` (browser), `server.ts` (server).
+- **Supabase clients** en `src/lib/supabase/` — `client.ts` (browser), `server.ts` (server).
 
 ### Imports
 
@@ -106,12 +93,11 @@ import { cn } from "@/lib/utils"                              // utilidades
 - SIEMPRE validar input con Zod schema antes de tocar la base de datos.
 - SIEMPRE retornar `{ data }` en éxito o `{ error }` en fallo. Nunca throw.
 - SIEMPRE llamar `revalidatePath()` después de mutaciones exitosas.
-- Para operaciones multi-tabla, usar transacciones via `supabase.rpc()` o queries encadenadas.
-- Obtener `tenant_id` de la variable de entorno `NEXT_PUBLIC_TENANT_ID` en MVP.
-- Obtener `created_by` de la sesión: `const { data: { user } } = await supabase.auth.getUser()`.
+- Operaciones multi-tabla: usar `supabase.rpc()` o queries encadenadas.
+- `tenant_id` de `NEXT_PUBLIC_TENANT_ID` (MVP). `created_by` de `supabase.auth.getUser()`.
+- SIEMPRE `requireUserId()` al inicio — retorna "Tu sesión expiró" limpio si la sesión expiró.
 
 ```typescript
-// Patrón estándar:
 export async function createThing(input: ThingInput) {
   const parsed = thingSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
@@ -132,41 +118,34 @@ export async function createThing(input: ThingInput) {
 }
 ```
 
-### Queries (TanStack Query)
+### Queries
 
-- En Client Components: SIEMPRE usar `useQuery` / `useMutation` de TanStack Query.
-- Query keys siguen el patrón: `[modulo, filtros]` — ejemplo: `["products", { search, categoryId }]`.
-- Después de una mutación exitosa (Server Action), invalidar queries relacionadas:
+- **Client Components**: SIEMPRE `useQuery` / `useMutation` de TanStack Query. Query keys: `[modulo, filtros]` — ej. `["products", { search, categoryId }]`. Tras mutación, invalidar queries relacionadas:
 
 ```typescript
 const queryClient = useQueryClient()
-// Después de crear venta:
 queryClient.invalidateQueries({ queryKey: ["sales"] })
 queryClient.invalidateQueries({ queryKey: ["inventory"] })
 queryClient.invalidateQueries({ queryKey: ["dashboard"] })
 ```
 
-### Queries (Server Components)
-
-- En Server Components: queries directas a Supabase SIN TanStack Query.
-- Usar `createServerClient` de `@/lib/supabase/server`.
+- **Server Components**: queries directas a Supabase sin TanStack Query. Usar `createServerClient` de `@/lib/supabase/server`.
 
 ### State management
 
 - **Zustand**: SOLO para el carrito del POS (`src/features/pos/store.ts`). No crear stores para otros módulos.
-- **nuqs**: Para TODOS los filtros de URL (paginación, búsqueda, fechas, categorías). Patrón:
+- **nuqs**: Para TODOS los filtros de URL (paginación, búsqueda, fechas, categorías):
 
 ```typescript
 const [search, setSearch] = useQueryState("q", parseAsString.withDefault(""))
 const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1))
 ```
 
-- **React state (useState)**: Para estado local de UI (modals abiertos, formularios en edición).
+- **React state (useState)**: Para estado local de UI (modals, formularios en edición).
 
 ### Formularios
 
-- SIEMPRE usar React Hook Form + Zod resolver.
-- Los schemas Zod están definidos en `07-API-SPEC.md` — usarlos tal cual.
+- SIEMPRE React Hook Form + Zod resolver. Schemas definidos en `07-API-SPEC.md`.
 
 ```typescript
 const form = useForm<ProductInput>({
@@ -177,28 +156,29 @@ const form = useForm<ProductInput>({
 
 ### Supabase
 
-- Soft delete: TODAS las queries deben incluir `.is("deleted_at", null)` excepto cuando se busca explícitamente registros eliminados.
-- `tenant_id`: SIEMPRE incluir en INSERT y en WHERE de queries.
-- RLS está habilitado — los clients de Supabase ya filtran por usuario autenticado.
-- Realtime: habilitado en `sales`, `sale_items`, `inventory_movements`, `product_variants`.
+- Soft delete: TODAS las queries incluyen `.is("deleted_at", null)` excepto cuando se buscan explícitamente eliminados.
+- `tenant_id`: SIEMPRE en INSERT y en WHERE de UPDATE/SELECT/DELETE — defense-in-depth con RLS. Child tables verifican parent tenant via join.
+- RLS habilitado — los clients ya filtran por usuario autenticado.
+- Realtime habilitado en: `sales`, `sale_items`, `inventory_movements`, `product_variants`.
+- IDs: usar `zUUID` compartido (`src/lib/validation.ts`) con regex pattern (no `z.uuid()` — Zod v4 strict rechaza seed/legacy IDs con `0000` en posición de versión). Helpers `validateId()`/`validateIds()` para todos los simple-param actions.
 
 ### UI y componentes
 
-- Usar componentes de shadcn/ui siempre que existan para el caso de uso.
-- Tablas de datos: usar el patrón DataTable de shadcn (basado en TanStack Table).
-- Toasts: usar `sileo` para notificaciones de usuario (éxito, error, warning). API: `sileo.success({ title: "..." })`, `sileo.error({ title: "...", description: "..." })`.
-- Animaciones: usar Motion (framer-motion) para transiciones de página, AnimatePresence para modals, y layout animations.
-- Charts: usar Tremor para todas las gráficas del dashboard.
+- Usar componentes de shadcn/ui cuando existan.
+- Tablas: patrón DataTable de shadcn (basado en TanStack Table).
+- Toasts: `sileo.success({ title: "..." })`, `sileo.error({ title, description })`.
+- Animaciones: Motion (framer-motion) para transiciones, AnimatePresence para modals, layout animations.
+- Charts: Tremor para gráficas del dashboard.
 
 ### Animaciones con Motion — Prevención de Layout Shift
 
-Los layout shifts son el bug más frecuente al combinar Framer Motion con Tailwind. Tres patrones concretos que han ocurrido en este proyecto — reconocerlos evita horas de debugging:
+Los layout shifts son el bug más frecuente al combinar Framer Motion con Tailwind. Tres patrones que han ocurrido en este proyecto — reconocerlos evita horas de debugging:
 
 #### Regla 1 — `space-y-*` + `AnimatePresence`: el margen sobrevive al elemento
 
-`space-y-N` aplica `margin-top` CSS a todos los hijos excepto el primero. Si uno de esos hijos es un `motion.div` controlado por `AnimatePresence` (mount/unmount), ese margen persiste mientras dura la animación exit. Cuando `height` llega a 0 y el contenido es invisible, el margen sigue ocupando espacio en el flujo. Cuando `AnimatePresence` desmonta el elemento al terminar la animación, el margen desaparece en un solo frame → jump visible.
+`space-y-N` aplica `margin-top` a todos los hijos excepto el primero. Si uno es un `motion.div` controlado por `AnimatePresence`, ese margen persiste durante el exit: cuando `height` llega a 0, el margen sigue ocupando espacio, y al desmontar desaparece en un frame → jump visible.
 
-**Fix**: eliminar `space-y-*` del contenedor padre. Mover el spacing como `mt-N` al div interno del `motion.div`, dentro del `overflow-hidden`. Cuando `height: 0`, `overflow: hidden` clipea el contenido incluyendo márgenes de hijos → contribución al layout = 0. Al desmontar: 0 → 0, sin jump.
+**Fix**: eliminar `space-y-*` del padre. Mover el spacing como `mt-N` al div interno del `motion.div`, dentro del `overflow-hidden`. Con `height: 0`, `overflow: hidden` clipea el contenido incluyendo márgenes → contribución al layout = 0. Al desmontar: 0 → 0, sin jump.
 
 ```tsx
 // ❌ MAL — margin-top del motion.div persiste al colapsar, salta al desmontar
@@ -209,7 +189,7 @@ Los layout shifts son el bug más frecuente al combinar Framer Motion con Tailwi
   </AnimatePresence>
 </div>
 
-// ✅ BIEN — spacing vive dentro del overflow-hidden, queda clipeado cuando height=0
+// ✅ BIEN — spacing vive dentro del overflow-hidden
 <div>
   <div>contenido permanente</div>
   <AnimatePresence>
@@ -222,19 +202,19 @@ Los layout shifts son el bug más frecuente al combinar Framer Motion con Tailwi
 </div>
 ```
 
-#### Regla 2 — `AnimatePresence mode="wait"`: height mismatch entre componentes intercambiados
+#### Regla 2 — `AnimatePresence mode="wait"`: componentes intercambiados deben tener igual altura
 
-Cuando tabs o rutas intercambian componentes con `AnimatePresence mode="wait"`, todos los componentes intercambiables **deben tener la misma altura**. Una diferencia de altura (aunque sea 20px) hace que todo lo que está debajo del contenedor salte al hacer el swap, porque el contenedor cambia de tamaño en un solo render.
+Cuando tabs o rutas intercambian componentes con `mode="wait"`, todos deben tener la **misma altura**. Una diferencia de 20px hace saltar todo lo que está debajo al swap, porque el contenedor cambia de tamaño en un solo render.
 
-La causa más común: un solo componente tiene contenido extra que los demás no tienen (un badge, un chevron, un children slot). Para elementos interactivos que solo existen en una variante, usar `position: absolute` para sacarlos del flujo normal — sin costo de altura.
+Causa común: un componente tiene contenido extra (badge, chevron, children slot). Para elementos que solo existen en una variante, usar `position: absolute` para sacarlos del flujo normal.
 
 ```tsx
-// ❌ MAL — children suma ~28px al KpiCard, esa tab es más alta que las demás
+// ❌ MAL — children suma ~28px a una sola variante
 <KpiCard ...>
   <div>Ver desglose ↓</div>
 </KpiCard>
 
-// ✅ BIEN — absolute queda fuera del flujo, la card tiene la misma altura que sus hermanas
+// ✅ BIEN — absolute queda fuera del flujo
 <div className="relative">
   <KpiCard ... />
   <div className="pointer-events-none absolute bottom-5 right-5 ...">
@@ -243,17 +223,17 @@ La causa más común: un solo componente tiene contenido extra que los demás no
 </div>
 ```
 
-#### Regla 3 — Exit `y: -N` junto a elementos adyacentes: shift perceptual aunque no haya layout shift real
+#### Regla 3 — Exit `y: -N` junto a elementos adyacentes: shift perceptual
 
-Un exit con `y: -8` desliza el contenido hacia arriba mientras desaparece. Los elementos debajo no se mueven en layout (CSS transform no afecta el flujo), pero el ojo interpreta el contenido acercándose a ellos como que "los empuja" — percepción de shift aunque las coordenadas del DOM no cambien.
+`y: -8` en exit desliza el contenido hacia arriba. Los elementos debajo no se mueven en layout (transform no afecta flujo), pero el ojo interpreta el contenido acercándose como que "los empuja" — ilusión de shift aunque las coordenadas DOM no cambien.
 
-**Fix**: en contenedores cuya altura afecta elementos directamente adyacentes (KPI widgets sobre tab pills, secciones sobre footers), usar exit sin transformación Y. `opacity` + `filter: blur` es suficiente y no crea esta ilusión óptica.
+**Fix**: en contenedores cuya altura afecta elementos adyacentes (KPI widgets sobre tab pills, secciones sobre footers), usar exit sin transformación Y. `opacity` + `filter: blur` es suficiente.
 
 ```tsx
-// ❌ MAL — y: -8 crea percepción de que los elementos de abajo saltan
+// ❌ MAL — y: -8 crea percepción de que los de abajo saltan
 exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
 
-// ✅ BIEN — fade+blur in-place, sin movimiento vertical
+// ✅ BIEN — fade+blur in-place
 exit={{ opacity: 0, filter: "blur(4px)" }}
 ```
 
@@ -261,276 +241,153 @@ exit={{ opacity: 0, filter: "blur(4px)" }}
 
 - SIEMPRE Tailwind. No CSS modules, no styled-components, no CSS-in-JS.
 - Usar `cn()` de `@/lib/utils` para clases condicionales.
-- No hardcodear colores — usar CSS variables de Tailwind o de shadcn.
+- No hardcodear colores — usar CSS variables de Tailwind/shadcn. Utilities per-módulo: `bg-accent-50..900`, `text-accent-*`, `border-accent-*`.
+- **Tailwind v4 gotcha**: declaraciones de CSS custom properties (ej. `--accent-*`) DEBEN vivir en `@layer base` o Tailwind las tree-shakea del build.
 
 ### Manejo de errores
 
 - Server Actions retornan `{ error }`, nunca throw.
-- En el cliente, mostrar errores con Sileo toast: `sileo.error({ title: "Error", description: message })`.
-- Para errores de formulario, React Hook Form los muestra automáticamente por campo.
+- En cliente: `sileo.error({ title: "Error", description: message })`.
+- Errores de formulario: React Hook Form los muestra automáticamente por campo.
 
-### PDFs
+### Utilidades
 
-- Usar `@react-pdf/renderer` con dynamic import (lazy loading):
-
-```typescript
-const SaleReceipt = dynamic(() => import("./sale-receipt-pdf"), { ssr: false })
-```
-
-### Impresión
-
-- Usar `react-to-print` para tickets. El componente de impresión se renderiza oculto (`display: none`) y se envía a la impresora.
-
-### Exportaciones
-
-- Excel/CSV: usar `xlsx` (SheetJS). Generar en el cliente, descargar como blob.
-
-### Fechas
-
-- SIEMPRE usar `date-fns` para formateo y cálculos. No usar `.toLocaleDateString()` ni manipulación manual.
-- Zona horaria: guardar en UTC (Supabase lo hace por defecto con `timestamptz`). Mostrar en hora local.
-
-### Números y moneda
-
-- Formatear moneda con: `new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)`
-- Nunca usar `toFixed()` para mostrar dinero — usar Intl.
+- **PDFs**: `@react-pdf/renderer` con dynamic import: `dynamic(() => import("./sale-receipt-pdf"), { ssr: false })`. Fonts Plus Jakarta Sans registradas en `src/lib/pdf-fonts.ts` (matches design system).
+- **Impresión**: `react-to-print` para tickets. Componente oculto (`display: none`) enviado a impresora. Usar `print-color-adjust: exact` para backgrounds visibles en print.
+- **Exportaciones**: `xlsx` (SheetJS, tarball oficial `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz` — la versión npm está abandonada). Generar cliente-side, descargar como blob.
+- **Fechas**: SIEMPRE `date-fns`. No `.toLocaleDateString()` ni manipulación manual. UTC en DB (`timestamptz`), hora local en UI. Para filtros "Hoy": usar `endOfDay().toISOString()` (naive strings producen bugs de timezone).
+- **Moneda**: `new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)`. Nunca `toFixed()`.
 
 ### Prioridades de implementación
 
-Seguir el orden de sprints del archivo `04-PROJECT-STRUCTURE.md`:
-1. Fundación (auth, layout, providers)
-2. Catálogo de productos
-3. Clientes y precios
-4. POS (el más complejo)
-5. Inventario
-6. Devoluciones y créditos
-7. Dashboard y reportes
-8. Polish
+Seguir el orden de sprints de `04-PROJECT-STRUCTURE.md`:
+1. Fundación (auth, layout, providers) · 2. Catálogo de productos · 3. Clientes y precios · 4. POS · 5. Inventario · 6. Devoluciones y créditos · 7. Dashboard y reportes · 8. Polish
 
-No saltar sprints. Cada sprint depende del anterior.
+No saltar sprints. Cada uno depende del anterior.
 
-## Progreso actual
+## Progreso actual — Sprint 8 (Polish, EN PROGRESO · 2026-04-15)
 
-**Sprint 8 — Polish: EN PROGRESO** (actualizado 2026-04-13)
+### Sistemas clave y decisiones arquitectónicas
 
-### Sprint 8 — En progreso
-- **Module-scoped accent colors** (2026-04-04): `[data-module]` attribute on `<html>` drives per-route accent theming via CSS variable scopes. Inline blocking script in root layout sets the attribute before first paint (no flash); `ModuleAccentScope` client component syncs on route changes. Dropdowns, popovers, tooltips, scrollbars, and focus rings automatically adopt the right accent via CSS cascade through portals.
-- Module mapping: `/inventario` → amber, `/inventario/transito` → blue, `/inventario/carga-inicial` → slate, `/clientes` + `/notas-credito` → teal, `/reportes` + `/configuracion` → neutral, everything else → rose (brand default). Longer prefixes match first.
-- Amber scrollbar anchored to amber-500 (not amber-300 like other palettes) because amber's scale shifts yellow→orange and the 300 shade diverges from the UI's orange identity.
-- Key files: `src/lib/module-accent.ts` (single source of truth for mapping + inline script generator), `src/components/shared/module-accent-scope.tsx` (route-change sync), `src/app/globals.css` (per-module `[data-module="..."]` scopes with `--accent-*` tokens + shadcn `--accent`/`--ring` overrides)
-- Stripped redundant manual accent overrides from 9 inventario dialog/picker files (scrollbar colors, focus-visible ring colors) — the module scope system now drives them automatically. Same dialog components adopt different accents depending on the sub-module they're opened from.
-- New Tailwind utilities exposed: `bg-accent-50`..`bg-accent-900`, `text-accent-*`, `border-accent-*` — all auto-theme per module.
-- **Image handling system** (2026-04-03): proxy API (`/api/image-proxy`), tiered validation (≤15MB ok, 15-25MB warn, >25MB block), WebP compression (~10KB target), URL choice panel (download+optimize vs direct link), deferred upload en new product wizard, SUPABASE/URL Externa badges, compression size badges
-- Key files: `src/app/api/image-proxy/route.ts`, `src/lib/supabase/storage.ts`, `src/features/productos/components/product-image-picker.tsx`
-- `next.config.ts`: remotePatterns para Supabase storage hostname (fix next/image en POS)
-- Tested: URL download+optimize, direct link, new product deferred upload, POS page rendering, proxy API
-- **Media Manager** (2026-04-04): nueva seccion en `/configuracion` para administrar imagenes de productos
-  - Phase A: StorageOverview (4 KPI cards: total, Supabase, externas, sin imagen) + coverage bar + MediaBrowser (grid/list con filtros por tipo/categoria, sort, search)
-  - Phase B: Bulk actions — batch optimize (URL→Supabase), re-compress, orphan cleanup (scan bucket vs DB), export audit (Excel con 2 sheets)
-  - Selection system: checkboxes en grid/list, select all, violet highlight, BulkActionToolbar con progress tracking
-  - Server actions: `updateProductImageUrl`, `findOrphanedFiles`, `deleteStorageFiles`, `listStorageFiles` en `src/features/media/actions.ts`
-  - Phases C (multi-image gallery) y D (variant images) diferidos a Sprint 9+ — ver `Build/09-IMAGE-HANDLING.md`
-- **Design A standardization** (2026-04-04): sistema de diseño unificado en todas las paginas
-  - 3 shared components: `PageHero` (date pill + Zodiak title + subtitle + CTA), `KpiCard` (default variant con CountUp, badge, children slot), `SectionCard` (labeled content wrapper con className)
-  - Refactored: Productos, POS landing, Configuracion (mismo output visual, menos codigo)
-  - Design A aplicado: Clientes (KPIs: total/con descuento/sin descuento), Ventas (KPIs: total ventas/ingresos/ticket promedio), Notas de credito (KPIs: total/saldo activo/aplicadas), Reportes (SectionCards Excel/PDF)
-  - Configuracion: tab navigation (Categorias/Descuentos/Imagenes) en vez de secciones apiladas
-  - Client create/edit convertido a dialog overlay (mismo patron que Product wizard) — `/clientes/nuevo` y `/clientes/[id]` ahora redirigen a `/clientes`
-  - CustomerDialog con icon labels, success animation, auto-close, pre-populated data en edit mode
-  - Bug fix: ConvertQuoteDialog null check en sale_items, ReportsGrid split en ExcelExports + PdfExports
-- **Dashboard Design A migration** (2026-04-04): home page migrada a shared Design A components
-  - PageHero con greeting personalizado (hora del dia + nombre) + subtitle
-  - 4 KpiCards default (rose/teal/blush/amber) con mini-visualizations como children (SalesProgress, WeeklyBarChart, PaymentBreakdown, InventoryHealth) y trend badges
-  - SectionCards wrapping SalesChart (3cols), ActivityFeed (2cols), TopProducts, InventoryAlerts
-  - QuickActions rediseñados: white cards con colored icon containers (match Design A)
-  - DashboardContent client wrapper para server/client boundary (icon serialization)
-  - Eliminados: greeting-section, kpi-card (custom), kpi-grid, dashboard-shell (4 files)
-  - SalesProgress con variant light/dark para adaptarse al contexto del card
-- **Reportes page vibrant redesign** (2026-04-06): export cards rediseñados con colores vibrantes
-  - ExportCard ahora acepta `color` prop con paleta completa (cardBg, cardBorder, iconBg, iconColor, hoverShadow, buttonClass)
-  - 6 paletas: rose (Ventas), teal (Inv. Fisico), amber (Inv. Transito), violet (Inv. Carga Inicial), blush/pink (Clientes), emerald (Productos)
-  - Botones de descarga coloreados (filled accent) en vez de outline neutro
-  - Hover lift (y: -2) con colored shadow por card (mismo patron que QuickActions del dashboard)
-  - Iconos mas grandes (size-11) con fondos de color mas fuertes (e.g. bg-rose-100)
-  - Staggered entrance animations con Motion (spring)
-  - SectionCards con tinted backgrounds: emerald-50/30 para Excel, rose-50/30 para PDF
-- **Export log system** (2026-04-06): historial persistente de exportaciones en la pagina de Reportes
-  - Supabase table `export_logs` (report_name, format, exported_by, created_at) con RLS
-  - Server action `logExport()` registra cada descarga exitosa automaticamente
-  - `useExportLogs()` query hook con TanStack Query, invalidacion automatica despues de cada export
-  - ExportLog component: empty state, loading skeleton, entries con relative timestamps (date-fns es), format badges
-  - SectionCard "Historial de exportaciones" al fondo de la pagina de Reportes
-- **Fix: accent color variables stripped by Tailwind v4** (2026-04-06): hero KPI cards mostraban gris oscuro en POS, Productos, Clientes, Ventas, Notas de credito
-  - Root cause: Tailwind v4 tree-shakes unlayered CSS custom properties — las declaraciones `--accent-*` en `:root` y `[data-module]` eran removidas del build
-  - Fix: envolver todas las declaraciones de accent variables en `@layer base` para que Tailwind las preserve
-- **Dashboard performance optimization** (2026-04-06): pagina de inicio cargaba lento con full-page skeleton
-  - Single `get_dashboard_data` Supabase RPC reemplaza 13+ queries server-side en un solo round-trip
-  - Convertido a client-side TanStack Query (`useDashboardData` hook) — page shell renderiza instantaneamente
-  - Skeletons inline por seccion (KPIs, chart, activity, products, alerts) en vez de full-page loading.tsx
-  - 30s stale time, 60s auto-refresh, cache instantaneo al re-navegar
-  - Eliminado `loading.tsx` (reemplazado por isPending skeletons en DashboardContent)
-- **Export log monthly filter** (2026-04-06): historial de exportaciones filtrado por mes
-  - Month navigator con chevron left/right + label "Abril 2026"
-  - Export count label por mes, empty state contextual
-  - Query filtrada por dateFrom/dateTo del mes seleccionado
-- **Ventas date filters** (2026-04-06): pills de fecha en la tabla de ventas
-  - Layout: Hoy (default) | Esta semana | < Mes > | Fecha (custom date picker)
-  - Month navigator con chevrons para navegar meses anteriores
-  - Se combinan con status tabs existentes (Todos/Cotizaciones/Ventas/Devoluciones/Canceladas)
-  - dateFrom/dateTo filters agregados a `useSales` query
-- **Fix: sidebar scoop color mismatch** (2026-04-06): active tab pill y scoops usaban `white` (#FFF) en vez de `var(--background)` (#FDFBFA), creando seam visible contra el fondo neutral-50 del content area
-- **Cart discount visibility** (2026-04-06): POS wizard cart shows savings banner, before/after totals, per-item strikethrough prices when customer discount active
-- **Slug UX warning** (2026-04-06): amber warning on slug focus in product forms (create + edit), SKU/Slug order swapped, updated placeholders
-- **Weekly sales PDF report** (2026-04-06): full report (summary, daily breakdown, payment methods, top 5 products, sales detail) with dialog-based week picker (Esta semana/Anterior/Elegir fecha with inline calendar + timeline bar)
-- **Monthly sales report dialog** (2026-04-06): month picker with 4x3 month grid, year navigation, rose theming. exportSalesPdf accepts optional month param
-- **Brand system** (2026-04-06): Ideal/Eclat toggle replaces free-text brand input in product forms. Physical inventory shows Ideal/Eclat value split in toolbar and hub page
-- **Client number** (2026-04-06): `client_number` column added to customers (unique per tenant). Field in customer dialog, DB migration applied
-- **Customer dialog redesign** (2026-04-06): collapsible sections (Informacion + Detalles adicionales), white cards, teal accents, large success animation — matches product wizard design
-- **Customer detail sheet** (2026-04-06): slide-over panel with client info + purchase history. Clickable names in table, "Ver detalle" dropdown. Date filters: Todo/Este mes/Anterior + Elegir with year nav + month grid. useCustomerSales query with server-side year/month filtering
-- **Global discount system** (2026-04-06): preset discount picker (from settings price lists) + custom % or $ input. Available in wizard products step, CartPanel, PaymentDialog, and WizardPaymentStep. Stacks with customer pricing
-- **POS product card cleanup** (2026-04-06): removed edit pencil icon from product cards in POS views
-- **Vales system** (2026-04-07): customer backorder vouchers for out-of-stock products
-  - New `/vales` page with KPIs, DataTable, status tabs, date filter, search
-  - POS wizard: "Vale" button in confirmation step (paid/pending), out-of-stock products selectable with confirmation dialog
-  - Mixed cart: "Venta + Vale" auto-split — sale for in-stock items + vale for out-of-stock items
-  - Stock badges always visible on POS product cards (green/amber/red), out-of-stock clickable with indigo + button
-  - Vale pickup: complete dialog deducts stock. DB trigger auto-updates status to "ready" when stock available
-  - Ready banner in dashboard layout, localStorage-persisted dismissal
-  - DB: `vales` + `vale_items` tables, `create_vale` + `complete_vale` RPCs, `check_vales_on_stock_change` trigger
-  - Key files: `src/features/vales/`, `src/app/(dashboard)/vales/page.tsx`, `src/features/pos/components/wizard-confirmation-step.tsx`
-- **Notas de Credito repurposed** (2026-04-07): distributor lending/exchange (replaces old monetary credit notes from returns)
-  - Full-screen split-panel create dialog, all customers + products visible immediately (client-side filtering)
-  - Two modes: Prestamo (lending — stock out, settle to restock) and Intercambio (exchange — stock adjusts both ways)
-  - Settle dialog, status tabs (Activas/Liquidadas), date filter pills, search by NC- number or distributor name
-  - DB: `credit_note_items` table, `credit_type`/`settled_at` on `credit_notes`, `create_distributor_credit_note` + `settle_credit_note` RPCs
-  - Old return-type credit notes hidden (filtered by `credit_type IN ('lending','exchange')`)
-  - Key files: `src/features/notas-credito/`, `src/features/notas-credito/components/create-credit-note-dialog.tsx`
-- **Devoluciones restructured** (2026-04-07): returns as product swaps, no monetary credit
-  - Return dialog: "Producto vendible" toggle + "Cambio para el cliente" section (defaults same product, "Sin cambio" option)
-  - Stock movement breakdown summary with net effect. RPC: no auto credit note, supports replacement product stock deduction
-  - DB: `replacement_variant_id`/`replacement_product_name`/`replacement_variant_label` on `return_items`
-  - Key files: `src/features/ventas/components/return-dialog.tsx`, `create_return_transaction` RPC modified
-- **Credit note payment removed** (2026-04-07): removed from payment dialog + wizard payment step dropdown. Kept in DB/constants for historical display
-- **Stock threshold unified** (2026-04-07): hardcoded threshold of 5 across products, POS, inventory, dashboard RPC
-  - 0 stock: "Sin stock" (red), 1-5: "Bajo" (amber), 6+: no badge. Inventory hub alerts card shows agotados/bajo breakdown
-- **Shared DateFilterPills** (2026-04-07): extracted reusable date filter component, added to Vales + Notas de Credito pages
-- **Ventas date fix** (2026-04-07): timezone bug in "Hoy" filter fixed (`endOfDay().toISOString()` instead of naive string)
-- **Search fixes** (2026-04-07): client-side filtering via `useMemo` for vales + credit notes (PostgREST joined table limitation)
-- **Boneyard skeleton loading** (2026-04-07): replaced all 17 manual skeleton loading states with boneyard-js auto-generated pixel-perfect shimmer skeletons. 15 `.bones.json` files captured across 6 breakpoints. Dedicated `/boneyard-capture` route for dialog/modal fixtures.
-- **Cancel actions for all transactional modules** (2026-04-07): consistent cancel/delete across Vales, Notas de Credito, and Devoluciones
-  - Vales: cancel UI wired (action existed), "Cancelados" tab, ConfirmDialog, mobile card support
-  - Notas de Credito: `cancelCreditNote` action + schema, cancel UI for active notes (lending + exchange), "Canceladas" tab
-  - Devoluciones: `cancelReturn` action with full stock reversal (restock + replacement), cancel button on return cards in sale detail, cancelled returns shown faded with badge
-  - Sale status recalculation after return cancel (completed/partially_returned/fully_returned)
-  - All modules now follow same pattern: ConfirmDialog, destructive variant, XCircle icon, toast/sileo feedback, query invalidation
-- **UI consistency fixes** (2026-04-07): status tab buttons use `variant="default"` (not inline accent), mobile card borders normalized to `neutral-100`, mobile card layout fix (buttons on separate row from date/total)
-- **POS variant picker** (2026-04-07): multi-variant products now show picker dialog instead of silently adding first variant. Shows name, price, stock per variant. OOS flow preserved.
-- **Fix: cancelled returns counted in max_returnable** (2026-04-07): return dialog now excludes cancelled returns from already-returned quantity calculation
-- **Cofre (bundle) stock system** (2026-04-08): complete overhaul of how cofres manage stock
-  - Cofre stock is now derived: `min(component_stock)` — never stored manually
-  - Selling a cofre deducts stock from each component product (not the cofre variant)
-  - RPCs modified: `create_sale_transaction` (with `p_skip_components`), `create_pending_sale`, `complete_pending_sale`, `cancel_pending_sale` — all bundle-aware
-  - Partial OOS cofre + vale: sale at full cofre price (skip OOS components) + vale for OOS components at $0
-  - Removed "Cant." input from bundle manager (always 1 per component) and "Stock" input from cofre creation/edit
-  - Stock badges on bundle component items in product wizard
-  - POS product cards, catalog cards, list view, columns all derive cofre stock from components
-  - Inventory list view: cofre rows expandable to show component products with individual stock, actions disabled
-  - Inventory hub low stock alerts: bundle-aware stock derivation
-  - Excel export: cofres appended at end with derived stock and component names
-  - Key files: `src/features/pos/types.ts` (BundleComponent), `src/features/pos/queries.ts` (bundle_items join), `src/features/inventario/components/inventory-list-view.tsx` (expandable cofre rows)
+**Module-scoped accent colors** — `[data-module]` en `<html>` con CSS variable scopes. Inline blocking script en root layout setea el atributo antes del first paint (sin flash); `ModuleAccentScope` sincroniza en route changes. Dropdowns, popovers, tooltips, scrollbars y focus rings adoptan el accent via CSS cascade a través de portals.
+- Mapping (longer prefix wins): `/inventario` → amber, `/inventario/transito` → blue, `/inventario/carga-inicial` → slate, `/clientes` + `/notas-credito` → teal, `/reportes` + `/configuracion` → neutral, default → rose.
+- Amber scrollbar anclado a amber-500 (no amber-300) porque la escala amber deriva yellow→orange y el 300 diverge del orange identity.
+- Key files: `src/lib/module-accent.ts` (source of truth), `src/components/shared/module-accent-scope.tsx`, `src/app/globals.css` (scopes `[data-module="..."]` con overrides de shadcn `--accent`/`--ring`).
 
-- **Security hardening** (2026-04-08): boneyard auth bypass restricted to dev only, image proxy SSRF protection + auth check, purge functions blocked in production
-- **Atomic cancel RPCs** (2026-04-08): `cancel_sale` and `cancel_return` RPCs replace non-atomic sequential loops. Bundle-aware stock reversal, FOR UPDATE row locks, sale status recalculation — all in single transaction
-- **POS UI polish** (2026-04-08): cofre component list in cart (indented left-border), pending sale completion shows correct totals, success screen differentiates pending vs completed, nested confirm dialogs dim wizard properly, partial OOS cofres show "X producto(s) sin stock" across all views, cofre edit loads existing bundle_items
-- **Backend test plan & hardening** (2026-04-09): 227 backend tests executed — all 227 passed
-  - `TEST-PLAN.md` — 362 tests total (227 backend + 135 UI/UX manual)
-  - Auth hardening: `requireUserId()` added to all 57 server actions across 7 modules — expired sessions now return clean "Tu sesion expiro" error
-  - Fix: `cancel_sale` RPC — only restore stock for components with actual inventory movements (prevents phantom stock on partial OOS cofre cancel)
-  - Fix: `create_sale_transaction` RPC — validates payment total >= sale total at DB level
-  - Fix: `deleteProduct` blocks deletion of bundle component products
-  - Fix: `transit_weeks` partial unique index on `(tenant_id, year, month, week_number) WHERE deleted_at IS NULL`
-  - Fix (18.2): all UPDATE/SELECT/DELETE queries now include `tenant_id` filter — defense-in-depth with RLS. Child tables verify parent tenant via join
-  - Fix (18.9): junction/config hard deletes (`removeCustomerPrice`, `removeProductFromCategory`, `deleteTransitWeekItem`) now tenant-scoped. Hard delete retained by design for stateless join records
-  - Fix (18.10): shared `zUUID` schema (`src/lib/validation.ts`) with `validateId()`/`validateIds()` helpers. All 16 simple-param actions now validate IDs. `logExport` validates via dedicated schema
-- **Discount UI redesign** (2026-04-09): PriceListManager completely rewritten for design consistency with categories
-  - Teal-themed discount cards: gradient left stripe, large percentage badge, client count pill (Users icon), mini price example (strikethrough → discounted), hover-reveal actions
-  - Create/Edit dialog: hero header with teal gradient icon, two styled sections (info card + teal discount card), live price preview ($1,000 → discounted → savings)
-  - Empty state: dashed teal border, floating animated Percent icon, CTA button
-  - Add button: dashed teal outline, hover teal tint
-  - Staggered spring entrance animations, AnimatePresence for add/remove
-  - CustomerPriceEditor: teal gradient header, animated empty state, teal search results panel, "Precios activos" label with count badge
-  - `usePriceLists` query enhanced to include per-list `client_count` (backwards compatible)
-  - Customer detail sheet: added top spacing between close button and content
-  - Key files: `src/features/clientes/components/price-list-manager.tsx`, `src/features/clientes/components/customer-price-editor.tsx`, `src/features/clientes/queries.ts`
+**Design A system** — 3 shared components usados en TODAS las páginas:
+- `PageHero` (date pill + Zodiak title + subtitle + CTA)
+- `KpiCard` (default variant con CountUp, badge, children slot para mini-viz)
+- `SectionCard` (labeled wrapper con `className` y `action` prop opcional para header actions)
+- Client create/edit es dialog overlay (no páginas separadas). `/clientes/nuevo` y `/clientes/[id]` redirigen a `/clientes`.
 
-- **Receipt PDF system** (2026-04-09): ticket-sized PDF receipts with @react-pdf/renderer
-  - New `sale-receipt-pdf.ts` with dynamic page height (80mm wide, content-fit tall)
-  - Filename: `Recibo-V-XXXX` (sales), `Recibo-D-XXXX` (returns)
-  - "Descargar PDF" button in wizard confirmation, sale detail, sale detail modal
-  - "Imprimir" still uses react-to-print (browser print dialog with HTML receipt)
-  - Receipt data snapshot before store `clear()` — fixes empty receipt bug
-  - `print-color-adjust: exact` on HTML receipt for visible backgrounds in print
-- **PDF footer credits** (2026-04-09): all report PDFs show "Powered by Eclat POS" (left) + timestamp (center) + "Abbrix" (right)
-- **Plus Jakarta Sans for PDFs** (2026-04-09): registered local TTF fonts (Regular/Medium/SemiBold/Bold) for @react-pdf/renderer
-  - Shared `src/lib/pdf-fonts.ts` registration module used by report exports and receipt PDF
-  - Font files in `public/fonts/` — matches design system typography
-- **Activity feed expansion** (2026-04-09): covers all modules, not just sales/returns
-  - New types: vales (created/completed/cancelled), credit notes (lending/exchange/settled), export logs, cancelled sales, pending sales
-  - Each type has distinct icon and color. RPC returns 8 items per source, sorted by time DESC
-  - Activity feed moved to bottom row (half-width), top products moved next to sales chart (capped at 3)
-- **Dashboard spacing fix** (2026-04-09): DashboardInner wrapped in `space-y-6` for consistent section gaps
-- **Vale detail modal** (2026-04-09): "Ver detalle" dropdown in vales table opens a sheet with header, KPIs, items, notes, completed date
-- **Vale ready toast button** (2026-04-09): ready vales toast notification has "Ver vales" button linking to /vales
-- **Productos UI fixes** (2026-04-09): Activo button rose-colored (was teal) in create + edit, Marca toggle Ideal/Eclat in edit dialog (was free-text), slug warning in edit dialog, removed all auto-SKU generation (variant SKU optional), category subcategory inline form renders nested in parent with matching color, empty parents can add first subcategory
-- **UUID validation regex** (2026-04-09): `lib/validation.ts` zUUID uses regex pattern instead of `z.uuid()` (Zod v4 strict UUID rejected seed/legacy IDs with 0000 in version position)
-- **Manual test plan progress** (2026-04-09): 22/135 tests done manually + 12/135 done via Playwright = 34/135 total. Sections complete: 1 (Auth), 2 (Dashboard), 3 (Productos minus 3 image tests skipped). Playwright covered: 6 (Sales), 11 (Vales), 13 (Reportes), 16 (Cross-module). All passed without bugs found in automated tests.
-- **npm audit cleanup** (2026-04-13): de 10 vulnerabilidades (3 moderate + 7 high) a `found 0 vulnerabilities`
-  - Direct deps: `boneyard-js` 1.6.7→1.7.5 (cascada @chenglou/pretext + hono + @hono/node-server), `next` + `eslint-config-next` 16.2.1→16.2.3 (DoS Server Components CVE), `xlsx` 0.18.5→tarball oficial `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz` (npm version abandoned, prototype pollution + ReDoS — API idéntica, sin cambios en `excel-generators.ts` ni `media-export.ts`)
-  - Overrides scoped por major en `package.json` para transitivas que no se podían fijar bumpando padres: `brace-expansion@1` (eslint→minimatch@3), `brace-expansion@5` (typescript-eslint + @ts-morph→minimatch@10), `path-to-regexp@8` (shadcn→express@5→router@2), `picomatch@2` (fast-glob→micromatch), `picomatch@4` (tinyglobby + @dotenvx/dotenvx), `lodash` (recharts), `hono` + `@hono/node-server` (defensa en profundidad)
-  - Verificado: type-check limpio (después de borrar `.next/` para regenerar validators con la nueva versión), `next build` exitoso, 22 páginas estáticas generadas
-- **Dashboard widgets — sin gradientes + Activity expand modal** (2026-04-15): los 4 SectionCards del home (Rendimiento de ventas, Productos mas vendidos, Actividad reciente, Alertas de inventario) ahora tienen fondo blanco limpio sin tints, look más profesional/minimalista
-  - `SectionCard` ganó un prop `action` para renderizar acciones en el header (botón Expandir vive ahí)
-  - Botón Expandir motion-driven en el header de Actividad reciente (hover scale + tap feedback)
-  - `ActivityFeedDialog` nuevo: dialog 85vh × max-w-2xl con search, filter chips (LayoutGroup con sliding pill), items agrupados por día, sticky DayHeader con count badge, empty state animado, skeleton mientras carga
-  - DayHeader prominente: title bold + sublabel fecha corta (Hoy/Ayer) + count pill + border bottom — resuelve el "header invisible" del primer intento
-  - Stagger fade-in en items, hover lift `x: 2`, icon scale on hover, key del wrapper solo depende del filtro (no del search) para no remountar en cada keystroke
-  - Nuevo RPC Supabase `get_activity_feed(p_tenant_id, p_days_back default 30)` — union de sales/returns/vales/credit_notes/exports últimos 30 días, cap 200/source, scoped por tenant_id
-  - Hook `useActivityFeed({ daysBack, enabled })` con TanStack Query, dispara solo al abrir el modal (`enabled: open`), staleTime 60s
-  - Activity maps (`activityIconMap`/`activityStyleMap`) exportados desde `activity-feed.tsx` para reuso en el dialog
-  - Key files: `src/features/dashboard/components/activity-feed-dialog.tsx`, `src/components/shared/section-card.tsx`, `src/features/dashboard/queries.ts`
-- **Wave 1 — chart polish (gradients + glow + motion)** (2026-04-15): primera ronda de "menos aburrido" en las visualizaciones del home, sin nuevas dependencies
-  - `SalesChart` reescrito de plano CSS a motion-driven: bars con stagger spring (delay incremental por bar), CSS linear-gradients escalando rose left→right, box-shadow glow más intenso en active week + best week, dot blanco-ringed en el borde derecho de cada bar (vive dentro del motion.div para moverse con el bar sin coordinate math), pulse ring continuo en active week, ★ marker amber en best week, CountUp animado en el total mensual, highlight stripe blanca arriba de cada bar
-  - **Removed**: SVG line overlay y grid lines horizontales — el SVG path overlay tenía bugs de coordenadas (`preserveAspectRatio="none"` distorsionaba Y, calc() hardcoded para mobile no respondía a desktop), las grid lines pasaban por el medio de las bars en posiciones no-alineadas con los gaps. Mantra: clean & minimal.
-  - `SalesProgress` (mini hero): gradient fill rosa en today bar (#FB6E89→#E11D52), glow rgba(225,29,82,0.35), highlight stripe arriba, spring transition en lugar de easeOut
-  - `WeeklyBarChart` (mini sparkline teal): gradient teal por bar (escalado de intensidad por día), glow + pulse ring en current day, spring entrance
-  - `InventoryHealth` (stacked bar): los tres segmentos (OK/Bajo/Critico) con linear-gradients propios + box-shadow glow + highlight stripes, springs en vez de easeOut
-  - `CountUp`: nuevo behavior — primer mount sigue con blur+fade entrance, pero a partir del segundo mount cualquier cambio de valor dispara un scale pulse (`scale: [1, 1.04, 1]` con cubic-bezier .22,1,.36,1) via useAnimationControls. Confirmación visual de que el número se actualizó.
-  - Decisión arquitectónica: el research recomendaba `motion.AnimateNumber` pero NO existe en motion v12.38 (es API más nueva). El `CountUp` custom del proyecto ya usa `useMotionValue + useSpring + textContent direct` (zero re-renders), así que se mejoró en lugar de reemplazar.
-  - Key files: `src/features/dashboard/components/sales-chart.tsx` (rewrite), `src/features/dashboard/components/mini-bar-chart.tsx`, `src/features/dashboard/components/mini-sparkline.tsx`, `src/features/dashboard/components/mini-progress-bar.tsx`, `src/features/pos/components/count-up.tsx`
+**Dashboard** — single `get_dashboard_data` RPC reemplaza 13+ queries. Client-side TanStack Query (`useDashboardData`), page shell renderiza instantáneamente, inline skeletons por sección, 30s stale / 60s auto-refresh.
+- 4 KpiCards con mini-viz como children: `SalesProgress`, `WeeklyBarChart`, `PaymentBreakdown`, `InventoryHealth` (cada uno con gradient fill + glow + highlight stripe + spring transitions).
+- Layout: `SalesChart` (3cols) + `TopProducts` cap 3 en la fila superior; `ActivityFeed` (2cols) + `InventoryAlerts` en la fila inferior. `DashboardInner` envuelto en `space-y-6`.
+- QuickActions: white cards con colored icon containers.
+- `SalesChart` motion-driven: bars con stagger spring, CSS linear-gradients rose, box-shadow glow intenso en active + best week, dot blanco-ringed en borde derecho, pulse ring en active, ★ amber en best, CountUp en total. SVG overlay y grid lines removidos (coordinate bugs + desalineación).
+- `CountUp`: primer mount con blur+fade, cambios subsecuentes disparan scale pulse `[1, 1.04, 1]` via `useAnimationControls`. **Gotcha**: `motion.AnimateNumber` no existe en motion v12.38 (API más nueva); el `CountUp` custom usa `useMotionValue + useSpring + textContent direct` (zero re-renders).
+- **Activity feed** cubre todos los módulos (sales, returns, vales, credit notes, exports, cancelled, pending) via RPC `get_activity_feed(p_tenant_id, p_days_back default 30)`. Hook `useActivityFeed({ daysBack, enabled })` dispara solo al abrir el modal. `ActivityFeedDialog` (85vh × max-w-2xl): search, filter chips (LayoutGroup con sliding pill), items agrupados por día con sticky DayHeader + count badge, stagger fade-in. `activityIconMap`/`activityStyleMap` exportados de `activity-feed.tsx` para reuso.
+- Key files: `src/features/dashboard/components/{sales-chart,mini-bar-chart,mini-sparkline,mini-progress-bar,activity-feed-dialog}.tsx`, `src/features/pos/components/count-up.tsx`, `src/features/dashboard/queries.ts`.
 
-### Sprint 8 — Decisiones arquitectonicas y sistemas clave
+**Image handling** — proxy API `/api/image-proxy` (con SSRF protection + auth check), WebP compression (~10KB target), tiered validation (≤15MB ok, 15-25MB warn, >25MB block), URL choice panel (download+optimize vs direct link), deferred upload en product wizard. `next.config.ts` con remotePatterns para Supabase storage hostname.
+- Key files: `src/app/api/image-proxy/route.ts`, `src/lib/supabase/storage.ts`, `src/features/productos/components/product-image-picker.tsx`.
+- **Media Manager** en `/configuracion` tab Imágenes: StorageOverview (4 KPIs + coverage bar) + MediaBrowser (grid/list, filtros, sort, search) + bulk actions (batch optimize URL→Supabase, re-compress, orphan cleanup, audit export Excel). Selection con checkboxes + `BulkActionToolbar`. Phases C (multi-image gallery) y D (variant images) diferidos a Sprint 9+ — ver `Build/09-IMAGE-HANDLING.md`.
 
-- **Module-scoped accent colors**: `[data-module]` en `<html>` con CSS variable scopes. Source of truth: `src/lib/module-accent.ts`. Mapping: `/inventario` → amber, `/inventario/transito` → blue, `/inventario/carga-inicial` → slate, `/clientes` + `/notas-credito` → teal, `/reportes` + `/configuracion` → neutral, default → rose. Accent variables DEBEN estar en `@layer base` (Tailwind v4 tree-shakes unlayered custom properties). Utilities: `bg-accent-50`..`bg-accent-900`, `text-accent-*`, `border-accent-*`.
-- **Image handling**: proxy API (`/api/image-proxy`), WebP compression, deferred upload en product wizard. Storage utils en `src/lib/supabase/storage.ts`.
-- **Media Manager**: en `/configuracion` tab Imagenes. Phases C (multi-image) y D (variant images) diferidos a Sprint 9+ — ver `Build/09-IMAGE-HANDLING.md`.
-- **Design A system**: 3 shared components — `PageHero`, `KpiCard`, `SectionCard` — usados en todas las paginas. Client create/edit es dialog overlay (no paginas separadas).
-- **Dashboard**: single `get_dashboard_data` RPC, client-side TanStack Query (`useDashboardData`), inline skeletons por seccion, 30s stale/60s refresh.
-- **Export log**: table `export_logs` en Supabase, `logExport()` action, filtro mensual con month navigator.
-- **Ventas date filters**: Hoy | Esta semana | < Mes > | Fecha custom, combinados con status tabs.
-- **Brand system**: Ideal/Eclat toggle (no free-text). Inventory muestra split por marca.
-- **Client number**: `client_number` column (unique per tenant).
-- **Global discount**: preset picker (from settings) + custom % o $. Disponible en wizard, CartPanel, PaymentDialog, WizardPaymentStep. Stacks con customer pricing.
-- **Sales PDF reports**: weekly (dialog con week picker) y monthly (4x3 month grid picker).
-- **Cofre stock system**: cofre stock = `min(component_stock)`, derived at read-time, never stored. Bundle quantity always 1. RPCs expand bundles for stock deduction. `p_skip_components` param for partial OOS cofre+vale sales. Inventory list view shows expandable cofre rows with component stock.
+**Export log** — tabla `export_logs` (report_name, format, exported_by, created_at) con RLS. Action `logExport()` registra cada descarga. Hook `useExportLogs()` con invalidación automática. `ExportLog` component con empty state, relative timestamps (date-fns es), format badges, month navigator con chevrons. SectionCard "Historial de exportaciones" al fondo de Reportes.
 
-### Modulos completados (Sprints 1-7) — resumen
+**Reportes** — `ExportCard` con `color` prop (paleta completa). 6 paletas: rose (Ventas), teal (Inv. Físico), amber (Inv. Tránsito), violet (Inv. Carga Inicial), blush (Clientes), emerald (Productos). Hover lift `y: -2` con colored shadow, iconos size-11, staggered spring entrance. SectionCards tinted: emerald-50/30 Excel, rose-50/30 PDF. Sales PDF reports: weekly (full report con dialog week picker Esta semana/Anterior/Elegir) y monthly (4x3 month grid picker con year nav). Footer: "Powered by Eclat POS" + timestamp + "Abbrix".
 
-| Sprint | Modulo | Ruta | Key patterns |
+**Receipt PDF** — ticket-sized (80mm wide, content-fit tall) con @react-pdf/renderer. Filenames: `Recibo-V-XXXX` (sales), `Recibo-D-XXXX` (returns). "Descargar PDF" en wizard confirmation, sale detail, sale detail modal. "Imprimir" sigue usando `react-to-print` con HTML receipt. **Gotcha**: snapshot de receipt data antes de `store.clear()` — sin el snapshot, el PDF sale vacío.
+
+**Ventas/Clientes/Vales/Notas** — `DateFilterPills` compartido: Hoy (default) | Esta semana | < Mes > | Fecha custom, con month navigator chevrons. Combina con status tabs (Todos/Cotizaciones/Ventas/Devoluciones/Canceladas). `CustomerDialog` con collapsible sections (Info + Detalles adicionales), teal accents, success animation. `CustomerDetailSheet` slide-over con purchase history (`useCustomerSales` query con filtros year/month server-side). `client_number` column unique per tenant. **Brand system**: toggle Ideal/Eclat (no free-text); physical inventory muestra value split por marca. Búsqueda client-side via `useMemo` en vales + credit notes (PostgREST joined table limitation).
+
+**Global discount** — preset picker (from settings price lists) + custom % o $ input. Disponible en wizard products step, CartPanel, PaymentDialog, WizardPaymentStep. Stacks con customer pricing. Cart muestra savings banner, before/after totals, per-item strikethrough cuando hay descuento activo.
+
+**Discount UI (PriceListManager)** — teal-themed cards (gradient left stripe, % badge, client count pill con Users icon, mini price example, hover-reveal actions). Create/Edit dialog con hero header + live price preview ($1,000 → discounted → savings). Empty state dashed teal border con floating Percent icon. `usePriceLists` query incluye per-list `client_count`. `CustomerPriceEditor`: teal gradient header, animated empty state, search panel con "Precios activos" count badge.
+- Key files: `src/features/clientes/components/{price-list-manager,customer-price-editor}.tsx`, `src/features/clientes/queries.ts`.
+
+**Vales system** — customer backorder vouchers para productos OOS.
+- `/vales` con KPIs, DataTable, status tabs (incluye "Cancelados"), date filter, search, "Ver detalle" dropdown → sheet con header/KPIs/items/notes/completed date.
+- POS wizard: botón "Vale" en confirmation (paid/pending), OOS products selectable con confirmation dialog. Stock badges siempre visibles (green/amber/red); OOS clickable con indigo + button.
+- Mixed cart: "Venta + Vale" auto-split (sale para in-stock + vale para OOS).
+- Pickup: complete dialog deduce stock. DB trigger `check_vales_on_stock_change` auto-marca status "ready" cuando hay stock. Ready banner en dashboard layout con botón "Ver vales" (localStorage dismissal).
+- DB: tablas `vales` + `vale_items`, RPCs `create_vale` + `complete_vale`.
+- Key files: `src/features/vales/`, `src/app/(dashboard)/vales/page.tsx`, `src/features/pos/components/wizard-confirmation-step.tsx`.
+
+**Notas de Crédito (repurposed)** — distributor lending/exchange, reemplaza antiguas notas monetarias de devoluciones.
+- Full-screen split-panel create dialog (todos los customers + products visibles, client-side filtering).
+- Dos modos: **Préstamo** (stock out, settle para restock) y **Intercambio** (stock adjusts both ways).
+- Settle dialog, status tabs (Activas/Liquidadas/Canceladas), search por `NC-` number o distributor.
+- DB: tabla `credit_note_items`, columnas `credit_type`/`settled_at` en `credit_notes`, RPCs `create_distributor_credit_note` + `settle_credit_note`. Notas antiguas filtradas por `credit_type IN ('lending','exchange')`.
+- `cancelCreditNote` action + schema.
+- Credit note payment removido del payment dialog + wizard dropdown (kept en DB/constants para historical display).
+- Key files: `src/features/notas-credito/`, `src/features/notas-credito/components/create-credit-note-dialog.tsx`.
+
+**Devoluciones (restructured)** — returns as product swaps, no monetary credit.
+- Return dialog: "Producto vendible" toggle + "Cambio para el cliente" section (defaults same product, "Sin cambio" option). Stock movement breakdown con net effect.
+- RPC `create_return_transaction`: no auto credit note, soporta replacement product stock deduction.
+- DB: columnas `replacement_variant_id`/`replacement_product_name`/`replacement_variant_label` en `return_items`.
+- `cancelReturn` action con full stock reversal (restock + replacement). Sale status recalculation (completed/partially_returned/fully_returned). Cancelled returns mostrados faded con badge. **Fix**: cancelled returns excluidos de `max_returnable` calc.
+- Key files: `src/features/ventas/components/return-dialog.tsx`.
+
+**Cancel actions pattern** — consistente across Vales, Notas de Crédito, Devoluciones: `ConfirmDialog`, destructive variant, XCircle icon, toast/sileo feedback, query invalidation.
+
+**Cofre (bundle) stock system** — overhaul completo:
+- Cofre stock es **derived** at read-time: `min(component_stock)` — nunca almacenado manualmente. Bundle quantity siempre 1.
+- Vender un cofre deduce stock de cada component product (no de la cofre variant). RPCs bundle-aware: `create_sale_transaction` (con `p_skip_components`), `create_pending_sale`, `complete_pending_sale`, `cancel_pending_sale`.
+- **Partial OOS cofre + vale**: sale al full cofre price (skip OOS components via `p_skip_components`) + vale para OOS components a $0.
+- Removido "Cant." del bundle manager y "Stock" del cofre creation/edit.
+- POS cards, catalog, list view, columns — todos derivan cofre stock de components.
+- Inventory list view: cofre rows **expandables** con component stock individual, actions disabled. Low stock alerts bundle-aware. Excel export: cofres appended al final con derived stock + component names.
+- POS UI: cofre components en cart con indented left-border, partial OOS muestra "X producto(s) sin stock", cofre edit carga existing `bundle_items`.
+- Key files: `src/features/pos/types.ts` (`BundleComponent`), `src/features/pos/queries.ts` (bundle_items join), `src/features/inventario/components/inventory-list-view.tsx`.
+
+**Stock threshold unificado** — hardcoded 5 across products, POS, inventory, dashboard RPC. 0 → "Sin stock" (red), 1-5 → "Bajo" (amber), 6+ → sin badge. Inventory hub alerts card muestra agotados/bajo breakdown.
+
+**POS variant picker** — multi-variant products muestran picker dialog (no silently add first variant). Shows name, price, stock per variant. OOS flow preservado.
+
+**Productos UI**: Activo button rose (no teal), Marca toggle Ideal/Eclat en edit, slug amber warning en create + edit, SKU/Slug order swapped, removido auto-SKU generation (variant SKU opcional), category subcategory inline form nested en parent con matching color, empty parents pueden add first subcategory. POS product cards sin edit pencil icon.
+
+### Security hardening
+
+- Boneyard auth bypass restringido a dev only; image proxy con SSRF + auth; purge functions bloqueados en production.
+- `requireUserId()` en los 57 server actions (7 módulos) — sesiones expiradas retornan "Tu sesión expiró".
+- Atomic cancel RPCs (`cancel_sale`, `cancel_return`) reemplazan non-atomic sequential loops: bundle-aware stock reversal, `FOR UPDATE` row locks, sale status recalculation en single transaction.
+- **Fix** `cancel_sale`: solo restaura stock para components con actual inventory movements (prevents phantom stock en partial OOS cofre cancel).
+- **Fix** `create_sale_transaction`: valida payment total >= sale total a nivel DB.
+- **Fix** `deleteProduct`: bloquea deletion de bundle component products.
+- **Fix** `transit_weeks`: partial unique index on `(tenant_id, year, month, week_number) WHERE deleted_at IS NULL`.
+- Tenant isolation: todas las UPDATE/SELECT/DELETE incluyen `tenant_id` filter (defense-in-depth con RLS); child tables verifican parent tenant via join.
+- Junction/config hard deletes (`removeCustomerPrice`, `removeProductFromCategory`, `deleteTransitWeekItem`) tenant-scoped. Hard delete retained by design para stateless joins.
+- UUID validation: todos los 16 simple-param actions validan IDs via `zUUID` regex (ver sección Supabase arriba).
+
+### Testing
+
+362 tests totales (`TEST-PLAN.md`): 227 backend (todos pasando) + 135 UI/UX manual. Progreso manual/Playwright: 34/135 (secciones 1 Auth, 2 Dashboard, 3 Productos — minus 3 image tests skipped; Playwright cubrió 6 Sales, 11 Vales, 13 Reportes, 16 Cross-module).
+
+### npm audit cleanup (2026-04-13)
+
+De 10 vulnerabilidades (3 moderate + 7 high) a `found 0 vulnerabilities`.
+- Direct deps: `boneyard-js` 1.6.7→1.7.5 (cascada @chenglou/pretext + hono + @hono/node-server), `next` + `eslint-config-next` 16.2.1→16.2.3 (DoS Server Components CVE), `xlsx` 0.18.5→tarball oficial `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz` (npm version abandoned — API idéntica, sin cambios en `excel-generators.ts` ni `media-export.ts`).
+- Overrides scoped por major en `package.json` para transitivas: `brace-expansion@1` (eslint→minimatch@3), `brace-expansion@5` (typescript-eslint + @ts-morph→minimatch@10), `path-to-regexp@8` (shadcn→express@5→router@2), `picomatch@2` (fast-glob→micromatch), `picomatch@4` (tinyglobby + @dotenvx/dotenvx), `lodash` (recharts), `hono` + `@hono/node-server` (defensa en profundidad).
+- **Gotcha**: había que borrar `.next/` para regenerar validators con la nueva versión de Next.
+
+### Fixes recientes (cosméticos, no load-bearing)
+
+- Sidebar scoop usaba `white` en vez de `var(--background)` (#FDFBFA) → seam visible contra neutral-50.
+- Stripped redundant manual accent overrides en 9 inventario dialog/picker files (el module scope system los driven automáticamente).
+- Status tab buttons con `variant="default"` (no inline accent), mobile card borders `neutral-100`, mobile card layout con buttons en separate row.
+- Dashboard widgets sin gradientes tinted (fondo blanco limpio, look profesional/minimalista).
+- ConvertQuoteDialog null check en `sale_items`; ReportsGrid split en `ExcelExports` + `PdfExports`.
+
+## Módulos completados (Sprints 1-7)
+
+| Sprint | Módulo | Ruta | Key patterns |
 |--------|--------|------|-------------|
 | 1 | Auth + Layout | `/login`, dashboard | Sidebar colapsable con scoops, mobile sheet nav, localStorage persist |
 | 2 | Productos | `/productos`, `/configuracion` | Product wizard, has_variants toggle, is_bundle/cofres, CategoryManager |
 | 3 | Clientes | `/clientes` | CustomerPriceEditor, price lists = "Descuento personalizado", useUnsavedGuard |
-| 4 | POS | `/pos`, `/ventas` | Zustand cart, resolvePrice priority (especifico > % > base), RPC atomico `create_sale_transaction`, realtime sync |
-| 5 | Inventario | `/inventario/*` | 3 inventarios independientes (fisico/transito/carga inicial), `initial_load_overrides`, transit weeks hierarchy |
+| 4 | POS | `/pos`, `/ventas` | Zustand cart, resolvePrice priority (específico > % > base), RPC atómico `create_sale_transaction`, realtime sync |
+| 5 | Inventario | `/inventario/*` | 3 inventarios independientes (físico/tránsito/carga inicial), `initial_load_overrides`, transit weeks hierarchy |
 | 6 | Devoluciones | `/ventas/[id]`, `/notas-credito` | RPC `create_return_transaction`, credit note redemption con FOR UPDATE lock, auto status transitions |
 | 7 | Reportes | `/reportes` | 6 Excel (SheetJS) + 4 PDF (@react-pdf/renderer), all read-only |

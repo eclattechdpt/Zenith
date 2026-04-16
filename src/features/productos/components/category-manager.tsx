@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import {
   DndContext,
@@ -81,9 +81,12 @@ export function CategoryManager() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
+  const reorderingRef = useRef(false)
+
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (!over || active.id === over.id) return
+    if (reorderingRef.current) return
 
     const oldIndex = topLevel.findIndex((c) => c.id === active.id)
     const newIndex = topLevel.findIndex((c) => c.id === over.id)
@@ -96,11 +99,16 @@ export function CategoryManager() {
 
     const updates = reordered.map((cat, i) => ({ id: cat.id, sort_order: i }))
 
-    const result = await reorderCategories(updates)
-    if (result && "error" in result) {
-      sileo.error({ title: "Error al reordenar" })
+    reorderingRef.current = true
+    try {
+      const result = await reorderCategories(updates)
+      if (result && "error" in result) {
+        sileo.error({ title: "Error al reordenar" })
+      }
+      queryClient.invalidateQueries({ queryKey: ["categories"] })
+    } finally {
+      reorderingRef.current = false
     }
-    queryClient.invalidateQueries({ queryKey: ["categories"] })
   }
 
   // --- Loading state ---

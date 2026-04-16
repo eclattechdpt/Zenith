@@ -1,6 +1,6 @@
 "use client"
 
-import { formatCurrency } from "@/lib/utils"
+import { motion } from "motion/react"
 
 interface Product {
   nombre: string
@@ -10,50 +10,65 @@ interface Product {
   margen: number
 }
 
-const rankStyles = [
-  "bg-rose-50 text-rose-500 border-rose-200",
-  "bg-blush-50 text-blush-600 border-blush-200",
-  "bg-neutral-50 text-neutral-500 border-neutral-200",
+const THUMB_GRADIENTS = [
+  "from-rose-100 to-rose-200",
+  "from-blush-100 to-blush-200",
+  "from-neutral-100 to-neutral-200",
 ]
+const THUMB_LETTER_COLORS = [
+  "text-rose-600",
+  "text-blush-700",
+  "text-neutral-600",
+]
+
+const SPRING = { type: "spring" as const, stiffness: 140, damping: 22 }
 
 export function TopProductsGrid({ products }: { products: Product[] }) {
   return (
-    <div className="space-y-2">
-      {products.map((p, i) => (
-        <div
-          key={p.nombre}
-          className="flex items-center gap-3 rounded-xl border border-neutral-100 bg-neutral-50/50 p-3"
-        >
-          <span
-            className={`flex size-7 shrink-0 items-center justify-center rounded-lg border text-[10px] font-extrabold ${
-              rankStyles[Math.min(i, 2)]
-            }`}
+    <div className="space-y-4">
+      {products.map((p, i) => {
+        const gradient = THUMB_GRADIENTS[Math.min(i, 2)]
+        const letterColor = THUMB_LETTER_COLORS[Math.min(i, 2)]
+        const initial = p.nombre[0]?.toUpperCase() ?? "?"
+
+        return (
+          <motion.div
+            key={`${p.nombre}-${i}`}
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ ...SPRING, delay: 0.1 + i * 0.08 }}
+            className="flex items-center gap-4"
           >
-            {i + 1}
-          </span>
+            <div
+              className={`flex size-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${gradient}`}
+            >
+              <span
+                className={`font-display text-[18px] font-semibold ${letterColor}`}
+              >
+                {initial}
+              </span>
+            </div>
 
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-semibold text-neutral-800">
-              {p.nombre}
-            </p>
-            <p className="truncate text-[11px] text-neutral-500">
-              {p.variante}
-            </p>
-          </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[11px] font-medium uppercase tracking-[1px] text-neutral-400">
+                {p.nombre}
+              </p>
+              <p className="mt-0.5 flex items-baseline gap-1">
+                <span className="font-display text-[28px] font-semibold leading-none tracking-[-1px] text-neutral-950 tabular-nums">
+                  {p.unidades}
+                </span>
+                <span className="text-[12px] font-medium text-neutral-400">
+                  uds.
+                </span>
+              </p>
+            </div>
 
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-            <span className="hidden text-[11px] font-medium tabular-nums text-neutral-500 sm:block">
-              {p.unidades} uds
-            </span>
-            <span className="text-[12px] font-bold tabular-nums text-neutral-900 sm:text-[13px]">
-              {formatCurrency(p.ingresos)}
-            </span>
-            <span className="hidden rounded-full bg-success-light px-2 py-0.5 text-[10px] font-bold text-success-dark sm:block">
+            <span className="shrink-0 text-[14px] font-semibold tabular-nums text-neutral-400">
               {p.margen}%
             </span>
-          </div>
-        </div>
-      ))}
+          </motion.div>
+        )
+      })}
     </div>
   )
 }

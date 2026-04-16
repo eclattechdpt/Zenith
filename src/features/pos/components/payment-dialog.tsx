@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react"
 import { sileo } from "sileo"
-import { useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -73,7 +73,8 @@ export function PaymentDialog({
   const itemsDiscount = getItemsDiscount()
   const total = getTotal()
   const [payments, setPayments] = useState<CartPayment[]>([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const saleMutation = useMutation({ mutationFn: createSale })
+  const isSubmitting = saleMutation.isPending
   const [discountOpen, setDiscountOpen] = useState(false)
   const [customInputOpen, setCustomInputOpen] = useState(false)
   const [discountMode, setDiscountMode] = useState<"percent" | "fixed">("percent")
@@ -125,29 +126,45 @@ export function PaymentDialog({
   }
 
   async function handleConfirm() {
-    setIsSubmitting(true)
+    if (saleMutation.isPending) return
 
-    const result = await createSale({
-      customer_id: customer?.id ?? null,
-      items: items.map((item) => ({
-        product_variant_id: item.variantId,
-        product_name: item.productName,
-        variant_label: item.variantLabel,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        unit_cost: item.unitCost,
-        discount: item.discount,
-      })),
-      payments: total === 0 ? [] : payments.map((p) => ({
-        method: p.method,
-        amount: p.amount,
-        reference: p.reference,
-      })),
-      discount_amount: globalDiscount,
-      notes: notes || null,
-    })
+    // Snapshot cart state BEFORE mutation so receipt survives cart clear on success
+    const snapshot = {
+      items: items.map((item) => ({ ...item })),
+      payments: payments.map((p) => ({ ...p })),
+      customer: customer ? { ...customer } : null,
+      subtotal,
+      itemsDiscount,
+      globalDiscount,
+      total,
+      change,
+    }
 
-    setIsSubmitting(false)
+    let result
+    try {
+      result = await saleMutation.mutateAsync({
+        customer_id: snapshot.customer?.id ?? null,
+        items: snapshot.items.map((item) => ({
+          product_variant_id: item.variantId,
+          product_name: item.productName,
+          variant_label: item.variantLabel,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          unit_cost: item.unitCost,
+          discount: item.discount,
+        })),
+        payments: snapshot.total === 0 ? [] : snapshot.payments.map((p) => ({
+          method: p.method,
+          amount: p.amount,
+          reference: p.reference,
+        })),
+        discount_amount: snapshot.globalDiscount,
+        notes: notes || null,
+      })
+    } catch {
+      sileo.error({ title: "Error al crear la venta", description: "Revisa tu conexión e intenta de nuevo." })
+      return
+    }
 
     if ("error" in result) {
       const msg =
@@ -160,12 +177,12 @@ export function PaymentDialog({
     const sale = result.data
     sileo.success({ title: `Venta ${sale.sale_number} completada`, description: "La venta fue registrada y el inventario actualizado" })
 
-    // Build receipt data before clearing the cart
+    // Build receipt from snapshot captured before mutation
     const receiptData: ReceiptData = {
       saleNumber: sale.sale_number,
       date: sale.created_at,
-      customerName: customer?.name ?? null,
-      items: items.map((item) => ({
+      customerName: snapshot.customer?.name ?? null,
+      items: snapshot.items.map((item) => ({
         product_name: item.productName,
         variant_label: item.variantLabel,
         quantity: item.quantity,
@@ -173,14 +190,14 @@ export function PaymentDialog({
         discount: item.discount,
         line_total: item.unitPrice * item.quantity - item.discount,
       })),
-      payments: payments.map((p) => ({
+      payments: snapshot.payments.map((p) => ({
         method: p.method,
         amount: p.amount,
       })),
-      subtotal,
-      discountAmount: itemsDiscount + globalDiscount,
-      total,
-      change,
+      subtotal: snapshot.subtotal,
+      discountAmount: snapshot.itemsDiscount + snapshot.globalDiscount,
+      total: snapshot.total,
+      change: snapshot.change,
     }
 
     // Invalidate queries
@@ -197,7 +214,13 @@ export function PaymentDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next && saleMutation.isPending) return
+        onOpenChange(next)
+      }}
+    >
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Cobrar</DialogTitle>

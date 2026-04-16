@@ -29,6 +29,7 @@ export const createReturnSchema = z.object({
   items: z
     .array(returnItemSchema)
     .min(1, "Selecciona al menos un producto a devolver"),
+  idempotency_key: z.string().regex(uuidPattern).optional(),
 })
 
 export const cancelSaleSchema = z.object({

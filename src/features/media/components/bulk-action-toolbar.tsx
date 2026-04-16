@@ -65,8 +65,18 @@ export function BulkActionToolbar({
 
     let success = 0
     let failed = 0
+    const processed = new Set<string>()
 
     for (const item of toOptimize) {
+      // Skip duplicates within the same batch — two rows can point at the
+      // same productId (e.g. multi-variant selections) and we only want one
+      // upload per product.
+      if (processed.has(item.productId)) {
+        setProgress((p) => ({ ...p, current: p.current + 1 }))
+        continue
+      }
+      processed.add(item.productId)
+
       try {
         const file = await fetchImageFromUrl(item.imageUrl!)
         const publicUrl = await uploadProductImage(file, item.productId)
@@ -142,8 +152,15 @@ export function BulkActionToolbar({
 
     let success = 0
     let failed = 0
+    const processed = new Set<string>()
 
     for (const item of toRecompress) {
+      if (processed.has(item.productId)) {
+        setProgress((p) => ({ ...p, current: p.current + 1 }))
+        continue
+      }
+      processed.add(item.productId)
+
       try {
         // Download current image
         const res = await fetch(item.imageUrl!)

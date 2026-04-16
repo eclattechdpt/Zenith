@@ -26,7 +26,7 @@ export function DashboardHeroSubtitle() {
         {sign}
         {ventasDelDiaCambio}% vs ayer
       </span>
-      <span className="text-neutral-400">·</span>
+      <span className="text-accent-500">•</span>
       <span className="text-neutral-500">
         {transacciones} {transacciones === 1 ? "transacción" : "transacciones"} hoy
       </span>

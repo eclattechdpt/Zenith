@@ -184,7 +184,7 @@ export function ActivityFeedDialog({ open, onOpenChange }: Props) {
                       <motion.div
                         layoutId="filter-pill"
                         transition={SPRING}
-                        className="absolute inset-0 rounded-full bg-neutral-900"
+                        className="absolute inset-0 rounded-full bg-gradient-to-br from-rose-500 to-rose-600 shadow-sm shadow-rose-500/25"
                       />
                     )}
                     <span className="relative z-10">{f.label}</span>

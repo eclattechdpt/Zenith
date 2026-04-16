@@ -194,7 +194,12 @@ export async function assignProductToCategory(productId: string, categoryId: str
     .from("product_categories")
     .insert({ product_id: productId, category_id: categoryId, tenant_id: TENANT_ID })
 
-  if (error) return { error: { _form: [error.message] } }
+  if (error) {
+    if (error.code === "23505") {
+      return { error: { _form: ["El producto ya pertenece a esta categoria"] } }
+    }
+    return { error: { _form: [error.message] } }
+  }
 
   revalidatePath("/productos")
   revalidatePath("/configuracion")

@@ -63,7 +63,12 @@ export async function createCustomer(input: CustomerInput) {
     .select()
     .single()
 
-  if (error) return { error: { _form: [error.message] } }
+  if (error) {
+    if (error.code === "23505") {
+      return { error: { client_number: ["Ya existe un cliente con este número"] } }
+    }
+    return { error: { _form: [error.message] } }
+  }
 
   revalidatePath("/clientes")
   return { data: customer }
@@ -98,7 +103,12 @@ export async function updateCustomer(id: string, input: CustomerInput) {
     .select()
     .single()
 
-  if (error) return { error: { _form: [error.message] } }
+  if (error) {
+    if (error.code === "23505") {
+      return { error: { client_number: ["Ya existe un cliente con este número"] } }
+    }
+    return { error: { _form: [error.message] } }
+  }
 
   revalidatePath("/clientes")
   revalidatePath(`/clientes/${id}`)

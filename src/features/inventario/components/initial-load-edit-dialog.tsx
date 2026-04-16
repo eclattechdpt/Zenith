@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { motion } from "motion/react"
 import { sileo } from "sileo"
@@ -32,10 +32,22 @@ export function InitialLoadEditDialog({
   variant,
   onOpenChange,
 }: InitialLoadEditDialogProps) {
+  const submittingRef = useRef(false)
   return (
-    <Dialog open={!!variant} onOpenChange={onOpenChange}>
+    <Dialog
+      open={!!variant}
+      onOpenChange={(next) => {
+        if (!next && submittingRef.current) return
+        onOpenChange(next)
+      }}
+    >
       {variant && (
-        <InitialLoadEditForm variant={variant} onOpenChange={onOpenChange} />
+        <InitialLoadEditForm
+          key={variant.id}
+          variant={variant}
+          onOpenChange={onOpenChange}
+          submittingRef={submittingRef}
+        />
       )}
     </Dialog>
   )
@@ -44,9 +56,11 @@ export function InitialLoadEditDialog({
 function InitialLoadEditForm({
   variant,
   onOpenChange,
+  submittingRef,
 }: {
   variant: InventoryVariant
   onOpenChange: (open: boolean) => void
+  submittingRef: React.MutableRefObject<boolean>
 }) {
   const catalogName = variant.products.name
   const catalogPrice = variant.price
@@ -57,6 +71,7 @@ function InitialLoadEditForm({
   )
   const [stock, setStock] = useState(variant.initial_stock)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [idempotencyKey] = useState(() => crypto.randomUUID())
   const queryClient = useQueryClient()
 
   const parsedPrice = overridePrice ? parseFloat(overridePrice) : null
@@ -64,17 +79,20 @@ function InitialLoadEditForm({
   const canSubmit = stock >= 0 && isValidPrice
 
   async function handleSubmit() {
-    if (!canSubmit) return
+    if (!canSubmit || isSubmitting) return
     setIsSubmitting(true)
+    submittingRef.current = true
 
     const result = await upsertInitialLoadOverride({
       product_variant_id: variant.id,
       override_name: overrideName.trim() || null,
       override_price: parsedPrice,
       new_stock: stock,
+      idempotency_key: idempotencyKey,
     })
 
     setIsSubmitting(false)
+    submittingRef.current = false
 
     if ("error" in result && result.error) {
       const msg =

@@ -282,6 +282,7 @@ export function CustomerPriceEditor({
                     key={cp.id}
                     customerPrice={cp}
                     isSaving={savingVariantId === cp.product_variant_id}
+                    isDeleting={isDeleting && deleteTarget?.id === cp.id}
                     onUpdate={(price) => handleUpdatePrice(cp, price)}
                     onDelete={() =>
                       setDeleteTarget({
@@ -400,11 +401,13 @@ function SearchResultRow({
 function OverrideRow({
   customerPrice,
   isSaving,
+  isDeleting,
   onUpdate,
   onDelete,
 }: {
   customerPrice: CustomerPriceWithDetails
   isSaving: boolean
+  isDeleting: boolean
   onUpdate: (price: number) => void
   onDelete: () => void
 }) {
@@ -501,9 +504,10 @@ function OverrideRow({
             <Button
               variant="ghost"
               size="icon-xs"
+              disabled={isDeleting}
               onClick={onDelete}
             >
-              <Trash2 className="size-3" />
+              {isDeleting ? <Loader2 className="size-3 animate-spin" /> : <Trash2 className="size-3" />}
             </Button>
           </>
         )}
