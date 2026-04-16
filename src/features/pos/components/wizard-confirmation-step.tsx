@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import {
   Check,
   Clock,
@@ -139,6 +139,9 @@ export function WizardConfirmationStep({
   const [submitting, setSubmitting] = useState<"complete" | "pending" | "vale-paid" | "vale-pending" | null>(
     null
   )
+  // Synchronous same-tick guard. React state can't protect against two .click()
+  // calls in the same JS tick because the disabled re-render hasn't landed yet.
+  const submittingRef = useRef<string | null>(null)
   const [confirmAction, setConfirmAction] = useState<
     "complete" | "pending" | "vale" | "split" | null
   >(null)
@@ -149,41 +152,54 @@ export function WizardConfirmationStep({
   const change = paymentTotal > getTotal() ? paymentTotal - getTotal() : 0
 
   const handleComplete = async () => {
+    if (submittingRef.current) return
+    submittingRef.current = "complete"
     setConfirmAction(null)
     setSubmitting("complete")
     try {
       await onCompleteSale()
     } finally {
+      submittingRef.current = null
       setSubmitting(null)
     }
   }
 
   const handlePending = async () => {
+    if (submittingRef.current) return
+    submittingRef.current = "pending"
     setConfirmAction(null)
     setSubmitting("pending")
     try {
       await onPendingSale()
     } finally {
+      submittingRef.current = null
       setSubmitting(null)
     }
   }
 
   const handleVale = async (paymentStatus: "paid" | "pending") => {
+    if (submittingRef.current) return
+    const key = paymentStatus === "paid" ? "vale-paid" : "vale-pending"
+    submittingRef.current = key
     setConfirmAction(null)
-    setSubmitting(paymentStatus === "paid" ? "vale-paid" : "vale-pending")
+    setSubmitting(key)
     try {
       await onCreateVale(paymentStatus)
     } finally {
+      submittingRef.current = null
       setSubmitting(null)
     }
   }
 
   const handleSplit = async (valePaymentStatus: "paid" | "pending") => {
+    if (submittingRef.current) return
+    submittingRef.current = "complete"
     setConfirmAction(null)
     setSubmitting("complete")
     try {
       await onSplitSale(valePaymentStatus)
     } finally {
+      submittingRef.current = null
       setSubmitting(null)
     }
   }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { X, Check } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -67,6 +67,9 @@ export function POSSaleWizard({
   )
   const [receiptSnapshot, setReceiptSnapshot] = useState<ReceiptData | null>(null)
   const [wasPending, setWasPending] = useState(false)
+  // Blocks ESC/overlay close while a sale-completion handler is in-flight,
+  // so the receipt survives the mutation finishing after the user hit ESC.
+  const submittingRef = useRef(false)
 
   const queryClient = useQueryClient()
   const isOnline = useOnlineStatus()
@@ -157,6 +160,9 @@ export function POSSaleWizard({
   // ── Sale completion ──
 
   const handleCompleteSale = useCallback(async () => {
+    if (submittingRef.current) return
+    submittingRef.current = true
+    try {
     if (!isOnline) {
       sileo.error({ title: "Sin conexion", description: "Revisa tu conexion a internet e intenta de nuevo." })
       return
@@ -226,11 +232,17 @@ export function POSSaleWizard({
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
+    } finally {
+      submittingRef.current = false
+    }
   }, [mode, pendingSale, items, customer, globalDiscount, notes, payments, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Pending sale ──
 
   const handlePendingSale = useCallback(async () => {
+    if (submittingRef.current) return
+    submittingRef.current = true
+    try {
     if (!isOnline) {
       sileo.error({ title: "Sin conexion", description: "Revisa tu conexion a internet e intenta de nuevo." })
       return
@@ -271,11 +283,17 @@ export function POSSaleWizard({
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
+    } finally {
+      submittingRef.current = false
+    }
   }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Create vale ──
 
   const handleCreateVale = useCallback(async (paymentStatus: "paid" | "pending") => {
+    if (submittingRef.current) return
+    submittingRef.current = true
+    try {
     if (!isOnline) {
       sileo.error({ title: "Sin conexion", description: "Revisa tu conexion a internet e intenta de nuevo." })
       return
@@ -325,11 +343,17 @@ export function POSSaleWizard({
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
+    } finally {
+      submittingRef.current = false
+    }
   }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Split sale (in-stock → sale, out-of-stock → vale) ──
 
   const handleSplitSale = useCallback(async (valePaymentStatus: "paid" | "pending") => {
+    if (submittingRef.current) return
+    submittingRef.current = true
+    try {
     if (!isOnline) {
       sileo.error({ title: "Sin conexion", description: "Revisa tu conexion a internet e intenta de nuevo." })
       return
@@ -480,6 +504,9 @@ export function POSSaleWizard({
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
+    } finally {
+      submittingRef.current = false
+    }
   }, [items, customer, payments, notes, globalDiscount, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Print (uses snapshot captured before store clear) ──
@@ -497,6 +524,7 @@ export function POSSaleWizard({
   // ── Close & reset ──
 
   const handleClose = useCallback(() => {
+    if (submittingRef.current) return
     setStepIndex(0)
     setPayments([])
     setSaleResult(null)
@@ -506,7 +534,13 @@ export function POSSaleWizard({
   }, [onClose])
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen && submittingRef.current) return
+        if (!isOpen) handleClose()
+      }}
+    >
       <DialogContent
         showCloseButton={false}
         className="flex h-[85vh] w-[95vw] flex-col gap-0 overflow-hidden bg-neutral-50 p-0 sm:max-w-6xl sm:rounded-2xl"
