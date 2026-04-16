@@ -69,6 +69,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
     reset,
     watch,
     setValue,
+    setError,
     formState: { errors },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CustomerInput>({
@@ -214,11 +215,22 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
     setIsSubmitting(false)
 
     if ("error" in result) {
-      const formError = (result.error as Record<string, string[]>)._form
-      sileo.error({
-        title: formError?.[0] ??
-          `Error al ${isEditing ? "actualizar" : "crear"} el cliente`,
-      })
+      const errs = result.error as Record<string, string[]>
+      // Route field-level errors back to their inputs so the user sees the
+      // specific message (e.g. "Ya existe un cliente con este número") inline
+      // instead of a generic toast. Falls back to _form for unscoped errors.
+      let hasFieldError = false
+      for (const [key, messages] of Object.entries(errs)) {
+        if (key === "_form" || !messages?.length) continue
+        setError(key as keyof CustomerInput, { type: "server", message: messages[0] })
+        hasFieldError = true
+      }
+      if (!hasFieldError) {
+        sileo.error({
+          title: errs._form?.[0] ??
+            `Error al ${isEditing ? "actualizar" : "crear"} el cliente`,
+        })
+      }
       return
     }
 
