@@ -653,6 +653,7 @@ export type Database = {
           is_active: boolean
           is_bundle: boolean
           name: string
+          name_normalized: string | null
           slug: string
           tenant_id: string
           updated_at: string
@@ -669,6 +670,7 @@ export type Database = {
           is_active?: boolean
           is_bundle?: boolean
           name: string
+          name_normalized?: string | null
           slug: string
           tenant_id: string
           updated_at?: string
@@ -685,6 +687,7 @@ export type Database = {
           is_active?: boolean
           is_bundle?: boolean
           name?: string
+          name_normalized?: string | null
           slug?: string
           tenant_id?: string
           updated_at?: string
@@ -1388,6 +1391,7 @@ export type Database = {
       }
       get_dashboard_data: { Args: { p_tenant_id: string }; Returns: Json }
       get_inventory_summary: { Args: { p_tenant_id: string }; Returns: Json }
+      immutable_unaccent: { Args: { "": string }; Returns: string }
       settle_credit_note: {
         Args: {
           p_created_by?: string

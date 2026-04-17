@@ -18,6 +18,12 @@ export function formatCurrency(amount: number): string {
   return currencyFormatter.format(amount)
 }
 
+// ── Search ──
+
+export function normalizeSearch(input: string): string {
+  return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+}
+
 // ── Dates ──
 
 export function formatDate(date: Date | string): string {

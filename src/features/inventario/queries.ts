@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { createClient } from "@/lib/supabase/client"
+import { normalizeSearch } from "@/lib/utils"
 
 import type {
   InventoryVariant,
@@ -29,12 +30,13 @@ const VARIANT_SELECT = `id, sku, name, price, stock, initial_stock, stock_min, i
 
 async function findMatchingIds(supabase: ReturnType<typeof createClient>, search: string) {
   const q = search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
+  const qNorm = normalizeSearch(q)
 
   const { data: productMatches } = await supabase
     .from("products")
     .select("id")
     .is("deleted_at", null)
-    .or(`name.ilike.%${q}%,brand.ilike.%${q}%`)
+    .or(`name_normalized.ilike.%${qNorm}%,brand.ilike.%${q}%`)
 
   const productIds = (productMatches ?? []).map((m) => m.id)
 

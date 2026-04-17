@@ -291,9 +291,11 @@ export function InventoryTable({
   const [editTarget, setEditTarget] = useState<InventoryVariant | null>(null)
 
   // ── Total value (with brand split for physical inventory) ──
+  // Bundles (cofres) are derived from components; skipping them avoids double-counting.
   const { totalValue, idealValue, eclatValue } = useMemo(() => {
     let total = 0, ideal = 0, eclat = 0
     for (const v of variants) {
+      if (v.products?.is_bundle) continue
       const stock =
         inventoryType === "initial_load" ? v.initial_stock : v.stock
       const price =

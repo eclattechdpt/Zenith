@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { createClient } from "@/lib/supabase/client"
+import { normalizeSearch } from "@/lib/utils"
 
 import type {
   ProductWithDetails,
@@ -49,6 +50,7 @@ export function useProducts(filters?: ProductFilters) {
       if (filters?.search) {
         // Escape SQL/PostgREST wildcards so %, _, and * are treated as literal characters
         const q = filters.search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
+        const qNorm = normalizeSearch(q)
 
         // Find product IDs that have a variant matching the code
         const { data: skuMatches } = await supabase
@@ -61,11 +63,11 @@ export function useProducts(filters?: ProductFilters) {
 
         if (skuProductIds.length > 0) {
           query = query.or(
-            `name.ilike.%${q}%,brand.ilike.%${q}%,id.in.(${skuProductIds.join(",")})`
+            `name_normalized.ilike.%${qNorm}%,brand.ilike.%${q}%,id.in.(${skuProductIds.join(",")})`
           )
         } else {
           query = query.or(
-            `name.ilike.%${q}%,brand.ilike.%${q}%`
+            `name_normalized.ilike.%${qNorm}%,brand.ilike.%${q}%`
           )
         }
       }
@@ -250,12 +252,13 @@ export function useProductSearch(search: string) {
       const supabase = createClient()
 
       const q = search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
+      const qNorm = normalizeSearch(q)
 
       const { data, error } = await supabase
         .from("products")
         .select("id, name, brand, image_url, is_active")
         .is("deleted_at", null)
-        .ilike("name", `%${q}%`)
+        .ilike("name_normalized", `%${qNorm}%`)
         .order("name")
         .limit(10)
 

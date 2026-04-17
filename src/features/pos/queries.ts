@@ -4,6 +4,7 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { startOfDay, subDays, format } from "date-fns"
 
 import { createClient } from "@/lib/supabase/client"
+import { normalizeSearch } from "@/lib/utils"
 import type { PendingSaleWithSummary, POSDashboardStats } from "./types"
 
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID!
@@ -76,6 +77,7 @@ export function usePOSProducts(search: string) {
 
       const supabase = createClient()
       const q = search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
+      const qNorm = normalizeSearch(q)
 
       const { data: skuMatches } = await supabase
         .from("product_variants")
@@ -110,10 +112,10 @@ export function usePOSProducts(search: string) {
 
       if (skuProductIds.length > 0) {
         query = query.or(
-          `name.ilike.%${q}%,brand.ilike.%${q}%,id.in.(${skuProductIds.join(",")})`
+          `name_normalized.ilike.%${qNorm}%,brand.ilike.%${q}%,id.in.(${skuProductIds.join(",")})`
         )
       } else {
-        query = query.or(`name.ilike.%${q}%,brand.ilike.%${q}%`)
+        query = query.or(`name_normalized.ilike.%${qNorm}%,brand.ilike.%${q}%`)
       }
 
       const { data, error } = await query
@@ -493,6 +495,7 @@ export function useAllPOSProducts(search: string, categoryIds: string[] | null) 
 
       if (search.trim()) {
         const q = search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
+        const qNorm = normalizeSearch(q)
 
         const { data: skuMatches } = await supabase
           .from("product_variants")
@@ -506,10 +509,10 @@ export function useAllPOSProducts(search: string, categoryIds: string[] | null) 
 
         if (skuProductIds.length > 0) {
           query = query.or(
-            `name.ilike.%${q}%,brand.ilike.%${q}%,id.in.(${skuProductIds.join(",")})`
+            `name_normalized.ilike.%${qNorm}%,brand.ilike.%${q}%,id.in.(${skuProductIds.join(",")})`
           )
         } else {
-          query = query.or(`name.ilike.%${q}%,brand.ilike.%${q}%`)
+          query = query.or(`name_normalized.ilike.%${qNorm}%,brand.ilike.%${q}%`)
         }
       }
 
