@@ -175,8 +175,16 @@
   - Note: research recommended `motion.AnimateNumber` but it doesn't exist in motion v12.38; the existing custom `CountUp` (useMotionValue + useSpring + direct textContent) was enhanced instead
 
 ### Pending
+- **TODO: Password change flow for admin user** — check whether there's a UI for changing `admin@eclat.com` password in the app (or if it must be done via Supabase dashboard). If missing, decide whether to build it.
 - Final UX polish pass
-- Vercel deployment
+
+### Done (2026-04-16)
+- Vercel deployment live at `https://eclatpos.com` (Cloudflare DNS → Vercel project-scoped CNAME, SSL issued, apex canonical)
+- `NEXT_PUBLIC_APP_URL=https://eclatpos.com` env var set in Vercel
+- Database wiped to production-ready empty state (only 32 categories kept, all transactional + catalog + customer data cleared)
+- POS wizard hardening (same-tick guard + ESC-block) — commit `9bea04e`
+- Customer dialog field-level error plumbing — commit `2d3af22`
+- Twitter-image metadata inline fix (unblocked Vercel build) — commit `cac9cf5`
 
 ## Key References
 
