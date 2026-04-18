@@ -127,7 +127,8 @@
       "Bash(curl -sIL https://eclatpos.com)",
       "Bash(curl -sIL https://www.eclatpos.com)",
       "Bash(curl -sI https://eclatpos.com/opengraph-image)",
-      "mcp__supabase__list_extensions"
+      "mcp__supabase__list_extensions",
+      "Bash(awk '{print $5, $9}')"
     ]
   },
   "enableAllProjectMcpServers": true,

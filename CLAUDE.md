@@ -379,6 +379,7 @@ De 10 vulnerabilidades (3 moderate + 7 high) a `found 0 vulnerabilities`.
 - Status tab buttons con `variant="default"` (no inline accent), mobile card borders `neutral-100`, mobile card layout con buttons en separate row.
 - Dashboard widgets sin gradientes tinted (fondo blanco limpio, look profesional/minimalista).
 - ConvertQuoteDialog null check en `sale_items`; ReportsGrid split en `ExcelExports` + `PdfExports`.
+- Dashboard bottom-row widgets — `w-full min-w-0` en `SectionCard` para anchos iguales en `xl:grid-cols-2`; `inventoryAlerts` capado a 8 (activity ya lo estaba); descripción usa `kpiData.stockBajoAlertas` para mantener el total real.
 
 ## Módulos completados (Sprints 1-7)
 

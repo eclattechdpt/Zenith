@@ -386,7 +386,7 @@ function transformDashboardData(raw: RawDashboardData): DashboardData {
     salesChart,
     activity: activityItems.slice(0, 8),
     topProducts,
-    inventoryAlerts,
+    inventoryAlerts: inventoryAlerts.slice(0, 8),
   }
 }
 

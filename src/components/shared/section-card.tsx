@@ -67,7 +67,7 @@ export function SectionCard({
       initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       transition={{ ...SPRING, delay }}
-      className={`rounded-2xl border p-6 shadow-sm shadow-neutral-900/[0.03] ${surface} ${className ?? ""}`}
+      className={`w-full min-w-0 rounded-2xl border p-6 shadow-sm shadow-neutral-900/[0.03] ${surface} ${className ?? ""}`}
     >
       {label && (
         <div className={`flex items-center gap-2 ${headerSpacingClass}`}>

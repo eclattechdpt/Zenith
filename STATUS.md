@@ -165,6 +165,7 @@
   - DayHeader redesigned after first attempt (was invisible) — now prominent with border-bottom and count pill
   - New Supabase RPC `get_activity_feed(p_tenant_id, p_days_back default 30)` — union of sales/returns/vales/credit_notes/exports last 30 days, cap 200/source, tenant-scoped
   - `useActivityFeed` hook with `enabled: open` (only fires when modal opens), 60s stale time
+- **Dashboard widget equal widths + max 8 alerts** (2026-04-17): Added `w-full min-w-0` to `SectionCard` root so both bottom-row widgets fill their grid tracks identically; capped `inventoryAlerts` to 8 items in `transformDashboardData` (activity was already capped); switched alerts description to `kpiData.stockBajoAlertas` so it still shows the real total after the slice.
 - **Wave 1 — chart polish (gradients + glow + motion)** (2026-04-15): First pass of "less boring" charts on the dashboard, zero new dependencies
   - `SalesChart` rewritten from plain CSS to motion-driven: stagger spring entrance, escalating rose CSS gradients, glow box-shadow on active week + best week, white-ringed tip dot at right edge of each bar (lives inside motion.div for natural movement), continuous pulse ring on active week, amber ★ marker on best week, animated CountUp on monthly total, highlight stripe on top of each bar
   - Removed SVG line overlay (broken coordinates with preserveAspectRatio="none" + responsive calc bugs) and background grid lines (crossed through bars at unaligned positions) for clean minimal look

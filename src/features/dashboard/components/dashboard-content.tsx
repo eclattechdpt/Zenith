@@ -210,7 +210,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
 
           <SectionCard
             label="Alertas de inventario"
-            description={`${inventoryAlerts.length} alertas`}
+            description={`${kpiData.stockBajoAlertas} alertas`}
             icon={AlertTriangle}
             iconBg="bg-amber-100"
             iconColor="text-amber-600"
