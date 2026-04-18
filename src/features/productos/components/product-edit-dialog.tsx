@@ -23,6 +23,8 @@ import {
 import { sileo } from "sileo"
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import { useDirtyCloseGuard } from "@/hooks/use-dirty-close-guard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -116,7 +118,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
 
   const {
     register, handleSubmit, setValue, watch, getValues, reset,
-    formState: { errors },
+    formState: { errors, isDirty },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CreateProductInput>({
     resolver: zodResolver(createProductSchema) as any,
@@ -227,8 +229,13 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
     onClose()
   }, [onClose, reset])
 
+  const shouldGuard = isDirty && !success
+  const { confirmOpen, attemptClose, confirmDiscard, cancelDiscard } =
+    useDirtyCloseGuard(shouldGuard, handleClose)
+
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+    <>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && attemptClose()}>
       <DialogContent
         showCloseButton={false}
         className="flex h-[85vh] w-[95vw] flex-col gap-0 overflow-hidden bg-neutral-50 p-0 sm:max-w-3xl sm:rounded-2xl"
@@ -281,7 +288,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
             </div>
             <button
               type="button"
-              onClick={handleClose}
+              onClick={attemptClose}
               className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600"
             >
               <X className="h-5 w-5" />
@@ -570,7 +577,7 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
         {/* ── Footer ── */}
         {!success && !isLoading && (
           <div className="flex flex-shrink-0 items-center justify-between border-t border-neutral-100 bg-white px-6 py-4 sm:px-8">
-            <Button type="button" variant="ghost" className="rounded-xl text-neutral-500" onClick={handleClose}>
+            <Button type="button" variant="ghost" className="rounded-xl text-neutral-500" onClick={attemptClose}>
               Cancelar
             </Button>
             <motion.div whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }} transition={SPRING_SMOOTH}>
@@ -583,5 +590,16 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
         )}
       </DialogContent>
     </Dialog>
+    <ConfirmDialog
+      open={confirmOpen}
+      onOpenChange={(next) => { if (!next) cancelDiscard() }}
+      title="Descartar cambios"
+      description="Hay cambios sin guardar que se perderán si cierras."
+      confirmLabel="Descartar"
+      cancelLabel="Seguir editando"
+      variant="destructive"
+      onConfirm={confirmDiscard}
+    />
+    </>
   )
 }

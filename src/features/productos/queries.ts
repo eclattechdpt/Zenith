@@ -52,11 +52,11 @@ export function useProducts(filters?: ProductFilters) {
         const q = filters.search.trim().replace(/[%_*]/g, (ch) => `\\${ch}`)
         const qNorm = normalizeSearch(q)
 
-        // Find product IDs that have a variant matching the code
+        // Find product IDs that have a variant matching the code or variant label
         const { data: skuMatches } = await supabase
           .from("product_variants")
           .select("product_id")
-          .ilike("sku", `%${q}%`)
+          .or(`sku.ilike.%${q}%,name_normalized.ilike.%${qNorm}%`)
           .is("deleted_at", null)
 
         const skuProductIds = [...new Set((skuMatches ?? []).map((m) => m.product_id))]

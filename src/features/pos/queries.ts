@@ -82,7 +82,7 @@ export function usePOSProducts(search: string) {
       const { data: skuMatches } = await supabase
         .from("product_variants")
         .select("product_id")
-        .ilike("sku", `%${q}%`)
+        .or(`sku.ilike.%${q}%,name_normalized.ilike.%${qNorm}%`)
         .is("deleted_at", null)
 
       const skuProductIds = [
@@ -500,7 +500,7 @@ export function useAllPOSProducts(search: string, categoryIds: string[] | null) 
         const { data: skuMatches } = await supabase
           .from("product_variants")
           .select("product_id")
-          .ilike("sku", `%${q}%`)
+          .or(`sku.ilike.%${q}%,name_normalized.ilike.%${qNorm}%`)
           .is("deleted_at", null)
 
         const skuProductIds = [

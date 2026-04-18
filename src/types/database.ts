@@ -581,6 +581,7 @@ export type Database = {
           initial_stock: number
           is_active: boolean
           name: string | null
+          name_normalized: string | null
           price: number
           product_id: string
           reserved_stock: number
@@ -601,6 +602,7 @@ export type Database = {
           initial_stock?: number
           is_active?: boolean
           name?: string | null
+          name_normalized?: string | null
           price?: number
           product_id: string
           reserved_stock?: number
@@ -621,6 +623,7 @@ export type Database = {
           initial_stock?: number
           is_active?: boolean
           name?: string | null
+          name_normalized?: string | null
           price?: number
           product_id?: string
           reserved_stock?: number

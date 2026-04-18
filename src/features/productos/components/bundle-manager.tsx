@@ -176,7 +176,7 @@ export function BundleManager({ items, onChange }: BundleManagerProps) {
                             )}
                           </p>
                           <p className="text-xs text-neutral-500">
-                            {optionLabel || variant.sku || "Variante unica"}
+                            {optionLabel || variant.name || variant.sku || "Variante unica"}
                             {" · "}Stock: {variant.stock}
                           </p>
                         </div>

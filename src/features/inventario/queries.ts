@@ -43,7 +43,7 @@ async function findMatchingIds(supabase: ReturnType<typeof createClient>, search
   const { data: skuMatches } = await supabase
     .from("product_variants")
     .select("id")
-    .ilike("sku", `%${q}%`)
+    .or(`sku.ilike.%${q}%,name_normalized.ilike.%${qNorm}%`)
     .is("deleted_at", null)
 
   const skuVariantIds = (skuMatches ?? []).map((m) => m.id)

@@ -18,6 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import { useDirtyCloseGuard } from "@/hooks/use-dirty-close-guard"
 import { formatCurrency } from "@/lib/utils"
 
 import { upsertInitialLoadOverride } from "../actions"
@@ -33,24 +35,14 @@ export function InitialLoadEditDialog({
   onOpenChange,
 }: InitialLoadEditDialogProps) {
   const submittingRef = useRef(false)
-  return (
-    <Dialog
-      open={!!variant}
-      onOpenChange={(next) => {
-        if (!next && submittingRef.current) return
-        onOpenChange(next)
-      }}
-    >
-      {variant && (
-        <InitialLoadEditForm
-          key={variant.id}
-          variant={variant}
-          onOpenChange={onOpenChange}
-          submittingRef={submittingRef}
-        />
-      )}
-    </Dialog>
-  )
+  return variant ? (
+    <InitialLoadEditForm
+      key={variant.id}
+      variant={variant}
+      onOpenChange={onOpenChange}
+      submittingRef={submittingRef}
+    />
+  ) : null
 }
 
 function InitialLoadEditForm({
@@ -77,6 +69,14 @@ function InitialLoadEditForm({
   const parsedPrice = overridePrice ? parseFloat(overridePrice) : null
   const isValidPrice = parsedPrice === null || (!isNaN(parsedPrice) && parsedPrice >= 0)
   const canSubmit = stock >= 0 && isValidPrice
+
+  const isDirty =
+    overrideName !== (variant.override_name ?? "") ||
+    overridePrice !== (variant.override_price != null ? String(variant.override_price) : "") ||
+    stock !== variant.initial_stock
+
+  const { confirmOpen, attemptClose, confirmDiscard, cancelDiscard } =
+    useDirtyCloseGuard(isDirty, () => onOpenChange(false))
 
   async function handleSubmit() {
     if (!canSubmit || isSubmitting) return
@@ -112,6 +112,16 @@ function InitialLoadEditForm({
   const variantLabel = variant.name || variant.sku || ""
 
   return (
+    <>
+    <Dialog
+      open
+      onOpenChange={(next) => {
+        if (!next) {
+          if (submittingRef.current) return
+          attemptClose()
+        }
+      }}
+    >
     <DialogContent showCloseButton={false} className="sm:max-w-md p-6">
       <DialogHeader>
         <DialogTitle>Editar producto — Carga Inicial</DialogTitle>
@@ -181,7 +191,7 @@ function InitialLoadEditForm({
         <Button
           variant="outline"
           disabled={isSubmitting}
-          onClick={() => onOpenChange(false)}
+          onClick={attemptClose}
         >
           Cancelar
         </Button>
@@ -191,5 +201,17 @@ function InitialLoadEditForm({
         </Button>
       </DialogFooter>
     </DialogContent>
+    </Dialog>
+    <ConfirmDialog
+      open={confirmOpen}
+      onOpenChange={(next) => { if (!next) cancelDiscard() }}
+      title="Descartar cambios"
+      description="Hay cambios sin guardar que se perderán si cierras."
+      confirmLabel="Descartar"
+      cancelLabel="Seguir editando"
+      variant="destructive"
+      onConfirm={confirmDiscard}
+    />
+    </>
   )
 }

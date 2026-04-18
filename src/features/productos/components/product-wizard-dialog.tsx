@@ -23,6 +23,8 @@ import {
 import { sileo } from "sileo"
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import { useDirtyCloseGuard } from "@/hooks/use-dirty-close-guard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -94,7 +96,7 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
 
   const {
     register, handleSubmit, setValue, watch, getValues, reset,
-    formState: { errors },
+    formState: { errors, isDirty },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CreateProductInput>({
     resolver: zodResolver(createProductSchema) as any,
@@ -268,8 +270,13 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
     onClose()
   }, [onClose, reset, getValues])
 
+  const shouldGuard = (isDirty || !!pendingFileRef.current) && !success
+  const { confirmOpen, attemptClose, confirmDiscard, cancelDiscard } =
+    useDirtyCloseGuard(shouldGuard, handleClose)
+
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+    <>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && attemptClose()}>
       <DialogContent
         showCloseButton={false}
         className="flex h-[85vh] w-[95vw] flex-col gap-0 overflow-hidden bg-neutral-50 p-0 sm:max-w-3xl sm:rounded-2xl"
@@ -322,7 +329,7 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
             </div>
             <button
               type="button"
-              onClick={handleClose}
+              onClick={attemptClose}
               className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600"
             >
               <X className="h-5 w-5" />
@@ -769,7 +776,7 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
               type="button"
               variant="ghost"
               className="rounded-xl text-neutral-500"
-              onClick={handleClose}
+              onClick={attemptClose}
             >
               Cancelar
             </Button>
@@ -796,5 +803,16 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
         )}
       </DialogContent>
     </Dialog>
+    <ConfirmDialog
+      open={confirmOpen}
+      onOpenChange={(next) => { if (!next) cancelDiscard() }}
+      title="Descartar cambios"
+      description="Hay cambios sin guardar que se perderán si cierras."
+      confirmLabel="Descartar"
+      cancelLabel="Seguir editando"
+      variant="destructive"
+      onConfirm={confirmDiscard}
+    />
+    </>
   )
 }

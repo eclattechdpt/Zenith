@@ -18,6 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import { useDirtyCloseGuard } from "@/hooks/use-dirty-close-guard"
 
 import { adjustStock, adjustInitialStock } from "../actions"
 import type { InventoryVariant, InventoryType } from "../types"
@@ -34,25 +36,15 @@ export function StockAdjustmentDialog({
   onOpenChange,
 }: StockAdjustmentDialogProps) {
   const submittingRef = useRef(false)
-  return (
-    <Dialog
-      open={!!variant}
-      onOpenChange={(next) => {
-        if (!next && submittingRef.current) return
-        onOpenChange(next)
-      }}
-    >
-      {variant && (
-        <StockAdjustmentForm
-          key={variant.id}
-          variant={variant}
-          inventoryType={inventoryType}
-          onOpenChange={onOpenChange}
-          submittingRef={submittingRef}
-        />
-      )}
-    </Dialog>
-  )
+  return variant ? (
+    <StockAdjustmentForm
+      key={variant.id}
+      variant={variant}
+      inventoryType={inventoryType}
+      onOpenChange={onOpenChange}
+      submittingRef={submittingRef}
+    />
+  ) : null
 }
 
 function StockAdjustmentForm({
@@ -76,6 +68,10 @@ function StockAdjustmentForm({
 
   const difference = newStock - currentStock
   const canSubmit = newStock >= 0 && difference !== 0 && reason.trim().length > 0
+  const isDirty = difference !== 0 || reason.trim().length > 0
+
+  const { confirmOpen, attemptClose, confirmDiscard, cancelDiscard } =
+    useDirtyCloseGuard(isDirty, () => onOpenChange(false))
 
   const action =
     inventoryType === "initial_load" ? adjustInitialStock : adjustStock
@@ -117,6 +113,16 @@ function StockAdjustmentForm({
   const productLabel = `${variant.products.name}${variant.name ? ` — ${variant.name}` : ""}${variant.sku ? ` (${variant.sku})` : ""}`
 
   return (
+    <>
+    <Dialog
+      open
+      onOpenChange={(next) => {
+        if (!next) {
+          if (submittingRef.current) return
+          attemptClose()
+        }
+      }}
+    >
     <DialogContent showCloseButton={false} className="sm:max-w-md p-6">
       <DialogHeader>
         <DialogTitle>Ajustar stock</DialogTitle>
@@ -185,7 +191,7 @@ function StockAdjustmentForm({
         <Button
           variant="outline"
           disabled={isSubmitting}
-          onClick={() => onOpenChange(false)}
+          onClick={attemptClose}
         >
           Cancelar
         </Button>
@@ -195,5 +201,17 @@ function StockAdjustmentForm({
         </Button>
       </DialogFooter>
     </DialogContent>
+    </Dialog>
+    <ConfirmDialog
+      open={confirmOpen}
+      onOpenChange={(next) => { if (!next) cancelDiscard() }}
+      title="Descartar cambios"
+      description="Hay cambios sin guardar que se perderán si cierras."
+      confirmLabel="Descartar"
+      cancelLabel="Seguir editando"
+      variant="destructive"
+      onConfirm={confirmDiscard}
+    />
+    </>
   )
 }

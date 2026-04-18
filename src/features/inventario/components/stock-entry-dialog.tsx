@@ -18,6 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import { useDirtyCloseGuard } from "@/hooks/use-dirty-close-guard"
 
 import { addStock, addInitialStock } from "../actions"
 import type { InventoryVariant, InventoryType } from "../types"
@@ -34,25 +36,15 @@ export function StockEntryDialog({
   onOpenChange,
 }: StockEntryDialogProps) {
   const submittingRef = useRef(false)
-  return (
-    <Dialog
-      open={!!variant}
-      onOpenChange={(next) => {
-        if (!next && submittingRef.current) return
-        onOpenChange(next)
-      }}
-    >
-      {variant && (
-        <StockEntryForm
-          key={variant.id}
-          variant={variant}
-          inventoryType={inventoryType}
-          onOpenChange={onOpenChange}
-          submittingRef={submittingRef}
-        />
-      )}
-    </Dialog>
-  )
+  return variant ? (
+    <StockEntryForm
+      key={variant.id}
+      variant={variant}
+      inventoryType={inventoryType}
+      onOpenChange={onOpenChange}
+      submittingRef={submittingRef}
+    />
+  ) : null
 }
 
 function StockEntryForm({
@@ -75,6 +67,10 @@ function StockEntryForm({
   const queryClient = useQueryClient()
 
   const canSubmit = quantity > 0
+  const isDirty = quantity > 0 || reason.trim().length > 0
+
+  const { confirmOpen, attemptClose, confirmDiscard, cancelDiscard } =
+    useDirtyCloseGuard(isDirty, () => onOpenChange(false))
 
   const action = inventoryType === "initial_load" ? addInitialStock : addStock
 
@@ -115,6 +111,16 @@ function StockEntryForm({
   const productLabel = `${variant.products.name}${variant.name ? ` — ${variant.name}` : ""}${variant.sku ? ` (${variant.sku})` : ""}`
 
   return (
+    <>
+    <Dialog
+      open
+      onOpenChange={(next) => {
+        if (!next) {
+          if (submittingRef.current) return
+          attemptClose()
+        }
+      }}
+    >
     <DialogContent showCloseButton={false} className="sm:max-w-md p-6">
       <DialogHeader>
         <DialogTitle>Entrada de mercancia</DialogTitle>
@@ -175,7 +181,7 @@ function StockEntryForm({
         <Button
           variant="outline"
           disabled={isSubmitting}
-          onClick={() => onOpenChange(false)}
+          onClick={attemptClose}
         >
           Cancelar
         </Button>
@@ -185,5 +191,17 @@ function StockEntryForm({
         </Button>
       </DialogFooter>
     </DialogContent>
+    </Dialog>
+    <ConfirmDialog
+      open={confirmOpen}
+      onOpenChange={(next) => { if (!next) cancelDiscard() }}
+      title="Descartar cambios"
+      description="Hay cambios sin guardar que se perderán si cierras."
+      confirmLabel="Descartar"
+      cancelLabel="Seguir editando"
+      variant="destructive"
+      onConfirm={confirmDiscard}
+    />
+    </>
   )
 }
