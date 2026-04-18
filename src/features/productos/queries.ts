@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
 
 import { createClient } from "@/lib/supabase/client"
 import { normalizeSearch } from "@/lib/utils"
@@ -304,6 +304,7 @@ export function useVariantsByIds(ids: string[]) {
     },
     enabled: ids.length > 0,
     staleTime: 30_000,
+    placeholderData: keepPreviousData,
   })
 }
 

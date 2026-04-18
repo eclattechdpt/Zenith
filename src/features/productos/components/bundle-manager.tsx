@@ -53,19 +53,40 @@ export function BundleManager({ items, onChange }: BundleManagerProps) {
     onChange(items.filter((i) => i.product_variant_id !== variantId))
   }
 
-  // Resolve variant info from the dedicated query (never affected by search)
+  // Resolve variant info — primary source is the dedicated query (stable
+  // across search). Fallback to the picker's product list so a just-added
+  // item has its info immediately, before the refetch lands.
   function getVariantInfo(variantId: string) {
     const v = bundleVariants.find((bv) => bv.id === variantId)
-    if (!v) return null
-    const optionLabel = v.option_values.join(" / ")
-    return {
-      productName: v.product?.name ?? "Producto",
-      brand: v.product?.brand ?? null,
-      variantLabel: optionLabel || v.name || v.sku || "Unica",
-      sku: v.sku,
-      price: v.price,
-      stock: v.stock,
+    if (v) {
+      const optionLabel = v.option_values.join(" / ")
+      return {
+        productName: v.product?.name ?? "Producto",
+        brand: v.product?.brand ?? null,
+        variantLabel: optionLabel || v.name || v.sku || "Unica",
+        sku: v.sku,
+        price: v.price,
+        stock: v.stock,
+      }
     }
+    for (const product of products) {
+      const variant = product.product_variants.find((pv) => pv.id === variantId)
+      if (variant) {
+        const optionLabel = variant.variant_option_assignments
+          .map((a) => a.variant_options?.value)
+          .filter(Boolean)
+          .join(" / ")
+        return {
+          productName: product.name,
+          brand: product.brand,
+          variantLabel: optionLabel || variant.name || variant.sku || "Unica",
+          sku: variant.sku,
+          price: variant.price,
+          stock: variant.stock,
+        }
+      }
+    }
+    return null
   }
 
   return (
