@@ -201,6 +201,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             iconColor="text-blush-600"
             delay={0.54}
             collapsible
+            defaultCollapsed={activity!.length === 0}
             action={
               <ExpandActivityButton onClick={() => setActivityOpen(true)} />
             }
@@ -216,6 +217,7 @@ function DashboardInner({ data }: { data: NonNullable<ReturnType<typeof useDashb
             iconColor="text-amber-600"
             delay={0.60}
             collapsible
+            defaultCollapsed={inventoryAlerts.length === 0}
           >
             <InventoryAlertsGrid alerts={inventoryAlerts} />
           </SectionCard>

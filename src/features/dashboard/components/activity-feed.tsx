@@ -53,6 +53,14 @@ const iconMap = activityIconMap
 const styleMap = activityStyleMap
 
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
+  if (items.length === 0) {
+    return (
+      <p className="py-6 text-center text-xs text-neutral-400">
+        Sin actividad reciente
+      </p>
+    )
+  }
+
   return (
     <div className="space-y-3.5">
       {items.map((item) => {
