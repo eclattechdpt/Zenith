@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Plus, Trash2, Search, Package } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -8,9 +8,8 @@ import { Input } from "@/components/ui/input"
 import { EmptyState } from "@/components/shared/empty-state"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 
-import { useProducts } from "../queries"
+import { useProducts, useVariantsByIds } from "../queries"
 import type { BundleItemInput } from "../schemas"
-import type { ProductWithDetails } from "../types"
 
 interface BundleManagerProps {
   items: BundleItemInput[]
@@ -22,6 +21,14 @@ export function BundleManager({ items, onChange }: BundleManagerProps) {
   const [showSearch, setShowSearch] = useState(false)
   const [deleteVariantId, setDeleteVariantId] = useState<string | null>(null)
 
+  // Resolve info for variants currently in the bundle — independent of search
+  const itemIds = useMemo(
+    () => items.map((i) => i.product_variant_id),
+    [items]
+  )
+  const { data: bundleVariants = [] } = useVariantsByIds(itemIds)
+
+  // Products for the search picker — only used when adding a new item
   const { data: products = [] } = useProducts({
     search: searchQuery || undefined,
     isActive: true,
@@ -46,26 +53,19 @@ export function BundleManager({ items, onChange }: BundleManagerProps) {
     onChange(items.filter((i) => i.product_variant_id !== variantId))
   }
 
-  // Resolve variant info from products data
+  // Resolve variant info from the dedicated query (never affected by search)
   function getVariantInfo(variantId: string) {
-    for (const product of products) {
-      const variant = product.product_variants.find((v) => v.id === variantId)
-      if (variant) {
-        const optionLabel = variant.variant_option_assignments
-          .map((a) => a.variant_options?.value)
-          .filter(Boolean)
-          .join(" / ")
-        return {
-          productName: product.name,
-          brand: product.brand,
-          variantLabel: optionLabel || variant.sku || "Unica",
-          sku: variant.sku,
-          price: variant.price,
-          stock: variant.stock,
-        }
-      }
+    const v = bundleVariants.find((bv) => bv.id === variantId)
+    if (!v) return null
+    const optionLabel = v.option_values.join(" / ")
+    return {
+      productName: v.product?.name ?? "Producto",
+      brand: v.product?.brand ?? null,
+      variantLabel: optionLabel || v.name || v.sku || "Unica",
+      sku: v.sku,
+      price: v.price,
+      stock: v.stock,
     }
-    return null
   }
 
   return (

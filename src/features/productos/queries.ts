@@ -242,6 +242,71 @@ export function useProductsByCategory(categoryId: string | null) {
   })
 }
 
+// --- VARIANTS BY ID (for bundle items) ---
+
+export interface VariantByIdInfo {
+  id: string
+  sku: string | null
+  name: string | null
+  price: number
+  stock: number
+  is_active: boolean
+  product: { id: string; name: string; brand: string | null } | null
+  option_values: string[]
+}
+
+export function useVariantsByIds(ids: string[]) {
+  const sortedKey = [...ids].sort().join(",")
+  return useQuery({
+    queryKey: ["variants-by-ids", sortedKey],
+    queryFn: async (): Promise<VariantByIdInfo[]> => {
+      if (ids.length === 0) return []
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from("product_variants")
+        .select(
+          `id, sku, name, price, stock, is_active,
+          products:product_id(id, name, brand),
+          variant_option_assignments:variant_option_assignments(
+            variant_options:variant_options(value)
+          )`
+        )
+        .in("id", ids)
+        .is("deleted_at", null)
+
+      if (error) throw error
+
+      return (data ?? []).map((v) => {
+        const rawProducts = v.products as unknown
+        const prod = Array.isArray(rawProducts) ? rawProducts[0] : rawProducts
+        const product = prod
+          ? {
+              id: (prod as { id: string }).id,
+              name: (prod as { name: string }).name,
+              brand: (prod as { brand: string | null }).brand,
+            }
+          : null
+        const option_values =
+          (v.variant_option_assignments ?? [])
+            .map((a: { variant_options: { value: string } | null }) => a.variant_options?.value)
+            .filter((val): val is string => Boolean(val))
+        return {
+          id: v.id,
+          sku: v.sku,
+          name: v.name,
+          price: v.price,
+          stock: v.stock,
+          is_active: v.is_active,
+          product,
+          option_values,
+        }
+      })
+    },
+    enabled: ids.length > 0,
+    staleTime: 30_000,
+  })
+}
+
 // --- PRODUCT SEARCH (for assignment) ---
 
 export function useProductSearch(search: string) {
