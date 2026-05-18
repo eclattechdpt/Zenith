@@ -131,7 +131,13 @@
       "Bash(awk '{print $5, $9}')",
       "Bash(awk '/^\\\\/Users/{f=$0} /error|warning/{print f\": \"$0}')",
       "Bash(awk '/^\\\\/Users.*src\\\\/features\\\\/pos\\\\/components\\\\/\\(wizard-products-step|wizard-payment-step|wizard-confirmation-step|cart-panel|pos-sale-wizard\\)\\\\.tsx$/{f=1; next} /^\\\\/Users/{f=0} f && /error/')",
-      "Bash(awk '/^\\\\/Users.*src\\\\/features\\\\/pos\\\\/\\(components\\\\/\\(cart-panel|wizard-products-step|wizard-payment-step|wizard-confirmation-step|pos-sale-wizard|pos-sliding-cart|customer-picker|wizard-customer-step|sale-receipt|item-discount-picker|sale-receipt-pdf\\)\\\\.ts|store\\\\.ts|actions\\\\.ts|schemas\\\\.ts|types\\\\.ts|queries\\\\.ts\\)/{f=1; n=$0; next} /^\\\\/Users/{f=0} f && /error|warning/{print n\": \"$0}')"
+      "Bash(awk '/^\\\\/Users.*src\\\\/features\\\\/pos\\\\/\\(components\\\\/\\(cart-panel|wizard-products-step|wizard-payment-step|wizard-confirmation-step|pos-sale-wizard|pos-sliding-cart|customer-picker|wizard-customer-step|sale-receipt|item-discount-picker|sale-receipt-pdf\\)\\\\.ts|store\\\\.ts|actions\\\\.ts|schemas\\\\.ts|types\\\\.ts|queries\\\\.ts\\)/{f=1; n=$0; next} /^\\\\/Users/{f=0} f && /error|warning/{print n\": \"$0}')",
+      "Bash(awk '/Aceite Omega/{print NR\": \"$0; for\\(i=1;i<=8;i++\\){getline; print NR\": \"$0}}' /Users/alvaromac/Documents/Work/Zenith/.playwright-mcp/products-snapshot.yml)",
+      "Bash(awk '/Acido Hialuronico/{print NR\": \"$0; for\\(i=1;i<=6;i++\\){getline; print NR\": \"$0}}' /Users/alvaromac/Documents/Work/Zenith/.playwright-mcp/snap-2.yml)",
+      "Bash(awk '/Aceite Omega/{print NR; for\\(i=1;i<=6;i++\\){getline; print NR\": \"$0}}' /Users/alvaromac/Documents/Work/Zenith/.playwright-mcp/snap-products-2.yml)",
+      "Bash(awk '/Desc\\\\. cliente|Descuento/{print NR; for\\(i=1;i<=4;i++\\){getline; print NR\": \"$0}}' /Users/alvaromac/Documents/Work/Zenith/.playwright-mcp/snap-chip.yml)",
+      "Bash(awk '/Acido Hialuronico/{print NR; for\\(i=1;i<=6;i++\\){getline; print NR\": \"$0}}' /Users/alvaromac/Documents/Work/Zenith/.playwright-mcp/snap-test3.yml)",
+      "Bash(awk *)"
     ]
   },
   "enableAllProjectMcpServers": true,
