@@ -33,3 +33,25 @@ export function formatDate(date: Date | string): string {
 export function formatTime(date: Date | string): string {
   return format(new Date(date), "h:mm a", { locale: es })
 }
+
+// ── Discount percent ──
+
+// Returns "30%" / "30.5%" / "30.45%" — trims trailing zeros after the decimal point.
+// Prefers `exactPercent` (known % from preset or custom-% input) over computation.
+// Falls back to `(amount / subtotal) * 100` with 2-decimal precision.
+export function formatDiscountPercent(
+  amount: number,
+  subtotal: number,
+  exactPercent?: number | null
+): string {
+  let value: number
+  if (exactPercent != null && exactPercent > 0) {
+    value = exactPercent
+  } else if (subtotal > 0 && amount > 0) {
+    value = (amount / subtotal) * 100
+  } else {
+    return ""
+  }
+  const rounded = Number(value.toFixed(2))
+  return `${rounded}%`
+}

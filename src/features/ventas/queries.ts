@@ -86,7 +86,7 @@ export function useQuoteDetail(quoteId: string | null) {
           customers:customers(id, name),
           sale_items(
             id, product_variant_id, product_name, variant_label,
-            quantity, unit_price, unit_cost, discount, line_total
+            quantity, unit_price, unit_cost, discount, discount_percent, line_total
           )`
         )
         .eq("id", quoteId!)
@@ -112,7 +112,7 @@ export function useSaleDetail(saleId: string | null) {
           customers:customers(id, name),
           sale_items(
             id, product_variant_id, product_name, variant_label,
-            quantity, unit_price, unit_cost, discount, line_total
+            quantity, unit_price, unit_cost, discount, discount_percent, line_total
           ),
           sale_payments(id, method, amount, reference),
           returns!returns_sale_id_fkey(

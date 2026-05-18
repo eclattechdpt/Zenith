@@ -23,7 +23,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatDiscountPercent } from "@/lib/utils"
 import { PAYMENT_METHODS } from "@/lib/constants"
 import { usePriceLists } from "@/features/clientes/queries"
 import { usePOSStore } from "../store"
@@ -80,10 +80,16 @@ export function WizardPaymentStep({
   onNext,
   onBack,
 }: WizardPaymentStepProps) {
-  const globalDiscount = usePOSStore((s) => s.globalDiscount)
-  const setGlobalDiscount = usePOSStore((s) => s.setGlobalDiscount)
+  const cartDiscount = usePOSStore((s) => s.cartDiscount)
+  const setCartDiscount = usePOSStore((s) => s.setCartDiscount)
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
+  const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const subtotal = getSubtotal()
+  const cartDiscountAmount =
+    cartDiscount.source === "custom_amount"
+      ? cartDiscount.customAmount
+      : getItemsDiscount()
+  const cartDiscountPercent = cartDiscount.source ? cartDiscount.percent : null
 
   const { data: priceLists = [] } = usePriceLists()
   const activeDiscounts = priceLists.filter((pl) => Number(pl.discount_percent) > 0)
@@ -155,20 +161,24 @@ export function WizardPaymentStep({
         </div>
 
         {/* Discount display */}
-        {globalDiscount > 0 && (
+        {cartDiscount.source && cartDiscountAmount > 0 && (
           <div className="mt-3 flex items-center justify-between rounded-lg bg-rose-50/60 border border-rose-100 px-3 py-2">
             <span className="flex items-center gap-1.5 text-xs font-semibold text-rose-500">
               <Tag className="size-3" />
               Descuento aplicado
+              {(() => {
+                const pct = formatDiscountPercent(cartDiscountAmount, subtotal, cartDiscountPercent)
+                return pct ? <span className="tabular-nums">({pct})</span> : null
+              })()}
             </span>
             <div className="flex items-center gap-1.5">
               <span className="text-xs font-bold text-rose-500 tabular-nums">
-                -{formatCurrency(globalDiscount)}
+                -{formatCurrency(cartDiscountAmount)}
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  setGlobalDiscount(0)
+                  setCartDiscount(null)
                   setDiscountInput("")
                   setDiscountOpen(false)
                   setCustomInputOpen(false)
@@ -182,7 +192,7 @@ export function WizardPaymentStep({
         )}
 
         {/* Add discount button */}
-        {globalDiscount === 0 && !discountOpen && (
+        {!cartDiscount.source && !discountOpen && (
           <button
             type="button"
             onClick={() => { setDiscountOpen(true); setCustomInputOpen(false) }}
@@ -194,7 +204,7 @@ export function WizardPaymentStep({
         )}
 
         {/* Discount picker */}
-        {discountOpen && globalDiscount === 0 && (
+        {discountOpen && !cartDiscount.source && (
           <div className="mt-3 rounded-lg border border-rose-100 bg-rose-50/40 p-2.5 space-y-2">
             {!customInputOpen && (
               <>
@@ -204,8 +214,7 @@ export function WizardPaymentStep({
                     type="button"
                     onClick={() => {
                       const pct = Number(pl.discount_percent)
-                      const amount = Math.round(subtotal * (pct / 100) * 100) / 100
-                      setGlobalDiscount(amount)
+                      setCartDiscount({ percent: pct, source: "list", listId: pl.id })
                       setDiscountOpen(false)
                     }}
                     className="flex w-full items-center justify-between rounded-lg bg-white border border-neutral-200/80 px-3 py-2.5 text-xs transition-colors hover:border-rose-200 hover:bg-rose-50/50"
@@ -276,10 +285,12 @@ export function WizardPaymentStep({
                     onClick={() => {
                       const val = parseFloat(discountInput)
                       if (isNaN(val) || val <= 0) return
-                      const amount = discountMode === "percent"
-                        ? Math.round(subtotal * (val / 100) * 100) / 100
-                        : Math.min(val, subtotal)
-                      setGlobalDiscount(amount)
+                      if (discountMode === "percent") {
+                        setCartDiscount({ percent: val, source: "custom_pct" })
+                      } else {
+                        const amount = Math.min(val, subtotal)
+                        setCartDiscount({ source: "custom_amount", customAmount: amount, percent: 0 })
+                      }
                       setDiscountOpen(false)
                       setCustomInputOpen(false)
                     }}

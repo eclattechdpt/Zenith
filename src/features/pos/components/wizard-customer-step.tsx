@@ -33,6 +33,8 @@ export function WizardCustomerStep({ onNext }: WizardCustomerStepProps) {
   const setCustomer = usePOSStore((s) => s.setCustomer)
   const items = usePOSStore((s) => s.items)
   const updateItemPrice = usePOSStore((s) => s.updateItemPrice)
+  const cartDiscount = usePOSStore((s) => s.cartDiscount)
+  const setCartDiscount = usePOSStore((s) => s.setCartDiscount)
 
   const { data: customers = [], isLoading } = useCustomers(
     debouncedSearch.trim() ? { search: debouncedSearch } : undefined
@@ -52,6 +54,19 @@ export function WizardCustomerStep({ onNext }: WizardCustomerStepProps) {
         discountPercent: Number(raw.price_lists?.discount_percent ?? 0),
       }
       setCustomer(cartCustomer)
+
+      // Auto-aplica el descuento del cliente, salvo que el usuario ya hubiera elegido otro
+      const wasCustomerOrEmpty =
+        cartDiscount.source === null || cartDiscount.source === "customer"
+      if (cartCustomer.discountPercent > 0 && wasCustomerOrEmpty) {
+        setCartDiscount({
+          percent: cartCustomer.discountPercent,
+          source: "customer",
+          listId: cartCustomer.priceListId,
+        })
+      } else if (cartCustomer.discountPercent === 0 && cartDiscount.source === "customer") {
+        setCartDiscount(null)
+      }
 
       if (items.length > 0) {
         try {
@@ -74,11 +89,7 @@ export function WizardCustomerStep({ onNext }: WizardCustomerStepProps) {
               }
             })
 
-            const priceMap = await resolvePrices(
-              basePrices,
-              cartCustomer.priceListId,
-              cartCustomer.discountPercent
-            )
+            const priceMap = await resolvePrices(basePrices, cartCustomer.priceListId)
 
             for (const [variantId, price] of priceMap) {
               updateItemPrice(variantId, price)
@@ -91,12 +102,15 @@ export function WizardCustomerStep({ onNext }: WizardCustomerStepProps) {
 
       setSearch("")
     },
-    [setCustomer, items, updateItemPrice]
+    [setCustomer, items, updateItemPrice, cartDiscount.source, setCartDiscount]
   )
 
   const handleClearCustomer = useCallback(() => {
     setCustomer(null)
-  }, [setCustomer])
+    if (cartDiscount.source === "customer") {
+      setCartDiscount(null)
+    }
+  }, [setCustomer, cartDiscount.source, setCartDiscount])
 
   return (
     <div className="flex h-full flex-col">

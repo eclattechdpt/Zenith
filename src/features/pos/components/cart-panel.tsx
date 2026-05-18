@@ -21,7 +21,7 @@ import { AnimatePresence, motion } from "motion/react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatDiscountPercent } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
@@ -30,6 +30,7 @@ import { usePOSStore } from "../store"
 import { createQuote } from "../actions"
 import { usePriceLists } from "@/features/clientes/queries"
 import type { CartItem } from "../types"
+import { ItemDiscountPicker } from "./item-discount-picker"
 
 export function CartPanel({
   onCheckout,
@@ -39,14 +40,25 @@ export function CartPanel({
   const queryClient = useQueryClient()
   const items = usePOSStore((s) => s.items)
   const customer = usePOSStore((s) => s.customer)
-  const globalDiscount = usePOSStore((s) => s.globalDiscount)
+  const cartDiscount = usePOSStore((s) => s.cartDiscount)
   const notes = usePOSStore((s) => s.notes)
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const getTotal = usePOSStore((s) => s.getTotal)
   const getItemCount = usePOSStore((s) => s.getItemCount)
-  const setGlobalDiscount = usePOSStore((s) => s.setGlobalDiscount)
+  const setCartDiscount = usePOSStore((s) => s.setCartDiscount)
+  const buildSaleItemPayload = usePOSStore((s) => s.buildSaleItemPayload)
   const clear = usePOSStore((s) => s.clear)
+
+  // Cart-level discount $ aplicado (incluye % distribuido + custom_amount) — para UI
+  const cartDiscountAmount =
+    cartDiscount.source === "custom_amount"
+      ? cartDiscount.customAmount
+      : getItemsDiscount()
+  const cartDiscountPercent = cartDiscount.source ? cartDiscount.percent : null
+  // Backend: solo el custom_amount como discount_amount (el % ya está en cada item)
+  const backendDiscountAmount =
+    cartDiscount.source === "custom_amount" ? cartDiscount.customAmount : 0
 
   const { data: priceLists = [] } = usePriceLists()
   const activeDiscounts = priceLists.filter((pl) => Number(pl.discount_percent) > 0)
@@ -59,10 +71,8 @@ export function CartPanel({
   const [discountInput, setDiscountInput] = useState("")
 
   const subtotal = getSubtotal()
-  const itemsDiscount = getItemsDiscount()
   const total = getTotal()
   const itemCount = getItemCount()
-  const hasDiscount = itemsDiscount > 0 || globalDiscount > 0
 
   async function handleSaveQuote() {
     if (isSavingQuote) return
@@ -70,16 +80,9 @@ export function CartPanel({
 
     const result = await createQuote({
       customer_id: customer?.id ?? null,
-      items: items.map((item) => ({
-        product_variant_id: item.variantId,
-        product_name: item.productName,
-        variant_label: item.variantLabel,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        unit_cost: item.unitCost,
-        discount: item.discount,
-      })),
-      discount_amount: globalDiscount,
+      items: items.map(buildSaleItemPayload),
+      discount_amount: backendDiscountAmount,
+      discount_percent: cartDiscountPercent,
       notes: notes || null,
       expires_days: 15,
     })
@@ -192,34 +195,29 @@ export function CartPanel({
             </span>
           </div>
 
-          {/* Customer discount (items-level) */}
-          {itemsDiscount > 0 && (
-            <div className="flex justify-between items-center">
-              <span className="flex items-center gap-1 text-xs text-teal-600">
-                <Tag className="size-3" />
-                Desc. cliente
-              </span>
-              <span className="text-xs font-medium text-teal-600 tabular-nums">
-                -{formatCurrency(itemsDiscount)}
-              </span>
-            </div>
-          )}
-
-          {/* Global discount display */}
-          {globalDiscount > 0 && (
+          {/* Cart-level discount display */}
+          {cartDiscount.source && cartDiscountAmount > 0 && (
             <div className="flex justify-between items-center">
               <span className="flex items-center gap-1 text-xs text-rose-500">
-                <Percent className="size-3" />
-                Descuento
+                {cartDiscount.source === "customer" ? (
+                  <Tag className="size-3" />
+                ) : (
+                  <Percent className="size-3" />
+                )}
+                {cartDiscount.source === "customer" ? "Desc. cliente" : "Descuento"}
+                {(() => {
+                  const pct = formatDiscountPercent(cartDiscountAmount, subtotal, cartDiscountPercent)
+                  return pct ? <span className="tabular-nums">({pct})</span> : null
+                })()}
               </span>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-medium text-rose-500 tabular-nums">
-                  -{formatCurrency(globalDiscount)}
+                  -{formatCurrency(cartDiscountAmount)}
                 </span>
                 <button
                   type="button"
                   onClick={() => {
-                    setGlobalDiscount(0)
+                    setCartDiscount(null)
                     setDiscountInput("")
                     setDiscountOpen(false)
                   }}
@@ -232,7 +230,7 @@ export function CartPanel({
           )}
 
           {/* Add discount button */}
-          {globalDiscount === 0 && !discountOpen && (
+          {!cartDiscount.source && !discountOpen && (
             <button
               type="button"
               onClick={() => { setDiscountOpen(true); setCustomInputOpen(false) }}
@@ -244,7 +242,7 @@ export function CartPanel({
           )}
 
           {/* Discount picker */}
-          {discountOpen && globalDiscount === 0 && (
+          {discountOpen && !cartDiscount.source && (
             <div className="rounded-lg border border-rose-100 bg-rose-50/40 p-2.5 space-y-2">
               {/* Predefined discounts */}
               {!customInputOpen && (
@@ -255,8 +253,7 @@ export function CartPanel({
                       type="button"
                       onClick={() => {
                         const pct = Number(pl.discount_percent)
-                        const amount = Math.round(subtotal * (pct / 100) * 100) / 100
-                        setGlobalDiscount(amount)
+                        setCartDiscount({ percent: pct, source: "list", listId: pl.id })
                         setDiscountOpen(false)
                       }}
                       className="flex w-full items-center justify-between rounded-lg bg-white border border-neutral-200/80 px-3 py-2.5 text-xs transition-colors hover:border-rose-200 hover:bg-rose-50/50"
@@ -328,10 +325,12 @@ export function CartPanel({
                       onClick={() => {
                         const val = parseFloat(discountInput)
                         if (isNaN(val) || val <= 0) return
-                        const amount = discountMode === "percent"
-                          ? Math.round(subtotal * (val / 100) * 100) / 100
-                          : Math.min(val, subtotal)
-                        setGlobalDiscount(amount)
+                        if (discountMode === "percent") {
+                          setCartDiscount({ percent: val, source: "custom_pct" })
+                        } else {
+                          const amount = Math.min(val, subtotal)
+                          setCartDiscount({ source: "custom_amount", customAmount: amount, percent: 0 })
+                        }
                         setDiscountOpen(false)
                         setCustomInputOpen(false)
                       }}
@@ -406,14 +405,19 @@ export function CartPanel({
 function CartItemRow({ item }: { item: CartItem }) {
   const updateQuantity = usePOSStore((s) => s.updateQuantity)
   const removeItem = usePOSStore((s) => s.removeItem)
+  const cartDiscount = usePOSStore((s) => s.cartDiscount)
+  const getItemEffectivePercent = usePOSStore((s) => s.getItemEffectivePercent)
+  const getItemDiscountAmount = usePOSStore((s) => s.getItemDiscountAmount)
 
-  const lineTotal = item.unitPrice * item.quantity - item.discount
+  const itemDiscount = getItemDiscountAmount(item)
+  const effectivePct = getItemEffectivePercent(item)
+  const grossLine = item.unitPrice * item.quantity
+  const lineTotal = Math.max(0, grossLine - itemDiscount)
   const isLowStock = item.quantity > item.stock
-  const hasCustomerDiscount =
-    item.basePrice > 0 && item.unitPrice < item.basePrice
-  const discountPercent = hasCustomerDiscount
-    ? Math.round((1 - item.unitPrice / item.basePrice) * 100)
-    : 0
+  const hasSpecificPrice = item.basePrice > 0 && item.unitPrice < item.basePrice
+  const hasAnyDiscount = effectivePct > 0 || hasSpecificPrice
+  const isGift = item.itemDiscountSource === "gift"
+  void cartDiscount
 
   return (
     <div className="group relative flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-neutral-50/80">
@@ -442,28 +446,28 @@ function CartItemRow({ item }: { item: CartItem }) {
 
         {/* Price details */}
         <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-          {hasCustomerDiscount ? (
+          {hasAnyDiscount ? (
             <>
               <span className="text-[10px] text-neutral-400 line-through tabular-nums">
                 {formatCurrency(item.basePrice)}
               </span>
-              <span className="text-[10px] font-semibold text-teal-600 tabular-nums">
-                {formatCurrency(item.unitPrice)}
+              <span
+                className={cn(
+                  "text-[10px] font-semibold tabular-nums",
+                  isGift ? "text-violet-600" : "text-rose-600"
+                )}
+              >
+                {isGift
+                  ? "GRATIS"
+                  : formatCurrency(Math.max(0, lineTotal / item.quantity))}
               </span>
-              <Badge className="text-[8px] h-4 px-1 bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-50">
-                -{discountPercent}%
-              </Badge>
             </>
           ) : (
             <span className="text-[10px] text-neutral-400 tabular-nums">
               {formatCurrency(item.unitPrice)} c/u
             </span>
           )}
-          {item.discount > 0 && (
-            <span className="text-[10px] font-medium text-rose-500 tabular-nums">
-              -{formatCurrency(item.discount)}
-            </span>
-          )}
+          <ItemDiscountPicker item={item} />
         </div>
 
         {/* Quantity controls + warnings */}

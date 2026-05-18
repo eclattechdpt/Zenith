@@ -37,7 +37,7 @@ import {
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { SectionCard } from "@/components/shared/section-card"
 import { KpiCard } from "@/components/shared/kpi-card"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatDiscountPercent } from "@/lib/utils"
 import {
   SALE_STATUSES,
   PAYMENT_METHODS,
@@ -171,6 +171,7 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
       })),
       subtotal: Number(sale.subtotal),
       discountAmount: Number(sale.discount_amount),
+      discountPercent: sale.discount_percent != null ? Number(sale.discount_percent) : null,
       total: Number(sale.total),
       change: Math.max(0, paymentTotal - Number(sale.total)),
     }
@@ -473,18 +474,51 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
                       {item.variant_label}
                     </p>
                   )}
-                  <p className="mt-0.5 text-xs text-neutral-400">
-                    {item.quantity} x{" "}
-                    {formatCurrency(Number(item.unit_price))}
-                  </p>
-                  {Number(item.discount) > 0 && (
-                    <p className="mt-0.5 text-xs text-rose-500">
-                      Descuento −{formatCurrency(Number(item.discount))}
-                    </p>
-                  )}
+                  {(() => {
+                    const itemDisc = Number(item.discount)
+                    const itemPct = item.discount_percent != null ? Number(item.discount_percent) : null
+                    const hasDisc = itemDisc > 0
+                    const isGift = hasDisc && Number(item.line_total) === 0
+                    const pctLabel = itemPct != null && itemPct > 0
+                      ? formatDiscountPercent(itemDisc, Number(item.unit_price) * item.quantity, itemPct)
+                      : null
+                    return (
+                      <p className="mt-0.5 flex items-center gap-1.5 text-xs">
+                        {hasDisc ? (
+                          <>
+                            <span className="text-neutral-400 line-through tabular-nums">
+                              {item.quantity} x {formatCurrency(Number(item.unit_price))}
+                            </span>
+                            {pctLabel && (
+                              <span className="font-semibold text-rose-600">
+                                -{pctLabel}
+                              </span>
+                            )}
+                            {isGift && (
+                              <span className="rounded bg-violet-100 px-1.5 text-[10px] font-bold text-violet-700">
+                                REGALO
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-neutral-400 tabular-nums">
+                            {item.quantity} x {formatCurrency(Number(item.unit_price))}
+                          </span>
+                        )}
+                      </p>
+                    )
+                  })()}
                 </div>
-                <p className="text-sm font-semibold tabular-nums text-neutral-950">
-                  {formatCurrency(Number(item.line_total))}
+                <p
+                  className={
+                    Number(item.line_total) === 0 && Number(item.discount) > 0
+                      ? "text-sm font-semibold tabular-nums text-violet-600"
+                      : "text-sm font-semibold tabular-nums text-neutral-950"
+                  }
+                >
+                  {Number(item.line_total) === 0 && Number(item.discount) > 0
+                    ? "GRATIS"
+                    : formatCurrency(Number(item.line_total))}
                 </p>
               </div>
             ))}
@@ -498,14 +532,23 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
                 {formatCurrency(Number(sale.subtotal))}
               </span>
             </div>
-            {Number(sale.discount_amount) > 0 && (
-              <div className="flex justify-between text-sm text-rose-600">
-                <span>Descuento</span>
-                <span className="tabular-nums">
-                  −{formatCurrency(Number(sale.discount_amount))}
-                </span>
-              </div>
-            )}
+            {Number(sale.discount_amount) > 0 && (() => {
+              const sub = Number(sale.subtotal)
+              const disc = Number(sale.discount_amount)
+              const exactPct = sale.discount_percent != null ? Number(sale.discount_percent) : null
+              const pctLabel = formatDiscountPercent(disc, sub, exactPct)
+              return (
+                <div className="flex justify-between text-sm text-rose-600">
+                  <span>
+                    Descuento
+                    {pctLabel && <span className="tabular-nums"> ({pctLabel})</span>}
+                  </span>
+                  <span className="tabular-nums">
+                    −{formatCurrency(disc)}
+                  </span>
+                </div>
+              )
+            })()}
             <div className="mt-2 flex items-center justify-between rounded-xl bg-gradient-to-r from-rose-50 to-rose-100/60 px-4 py-3">
               <span className="text-xs font-bold uppercase tracking-[1px] text-neutral-900">
                 Total

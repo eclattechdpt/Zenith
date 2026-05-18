@@ -76,11 +76,22 @@ export function POSSaleWizard({
 
   const items = usePOSStore((s) => s.items)
   const customer = usePOSStore((s) => s.customer)
-  const globalDiscount = usePOSStore((s) => s.globalDiscount)
+  const cartDiscount = usePOSStore((s) => s.cartDiscount)
   const notes = usePOSStore((s) => s.notes)
+  const getSubtotal = usePOSStore((s) => s.getSubtotal)
   const getTotal = usePOSStore((s) => s.getTotal)
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const clear = usePOSStore((s) => s.clear)
+
+  // Cart-level discount amount + percent for sending to backend
+  const cartDiscountAmount =
+    cartDiscount.source === "custom_amount"
+      ? cartDiscount.customAmount
+      : getItemsDiscount()
+  const cartDiscountPercent = cartDiscount.source ? cartDiscount.percent : null
+  const backendDiscountAmount =
+    cartDiscount.source === "custom_amount" ? cartDiscount.customAmount : 0
+  const buildSaleItemPayload = usePOSStore((s) => s.buildSaleItemPayload)
 
   const steps = STEPS_BY_MODE[mode]
   const currentStep = steps[stepIndex]
@@ -126,36 +137,44 @@ export function POSSaleWizard({
           quantity: i.quantity,
           unit_price: i.unit_price,
           discount: i.discount,
+          discount_percent: null,
           line_total: i.line_total,
         })),
         payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
         subtotal: pendingSale.subtotal,
         discountAmount: pendingSale.discount_amount,
+        discountPercent: pendingSale.discount_percent ?? null,
         total: pendingSale.total,
         change: Math.max(0, paymentTotal - pendingSale.total),
       }
     }
-    const subtotal = getTotal() + getItemsDiscount() + globalDiscount
+    const subtotal = getSubtotal()
     const totalVal = getTotal()
     return {
       saleNumber,
       date: new Date().toISOString(),
       customerName: customer?.name ?? null,
-      items: items.map((i) => ({
-        product_name: i.productName,
-        variant_label: i.variantLabel,
-        quantity: i.quantity,
-        unit_price: i.unitPrice,
-        discount: i.discount,
-        line_total: Math.max(0, i.unitPrice * i.quantity - i.discount),
-      })),
+      items: items.map((i) => {
+        const payload = buildSaleItemPayload(i)
+        const gross = i.unitPrice * i.quantity
+        return {
+          product_name: i.productName,
+          variant_label: i.variantLabel,
+          quantity: i.quantity,
+          unit_price: i.unitPrice,
+          discount: payload.discount,
+          discount_percent: payload.discount_percent,
+          line_total: Math.max(0, gross - payload.discount),
+        }
+      }),
       payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
       subtotal,
-      discountAmount: getItemsDiscount() + globalDiscount,
+      discountAmount: cartDiscountAmount,
+      discountPercent: cartDiscountPercent,
       total: totalVal,
       change: Math.max(0, paymentTotal - totalVal),
     }
-  }, [mode, pendingSale, items, customer, payments, globalDiscount, getTotal, getItemsDiscount])
+  }, [mode, pendingSale, items, customer, payments, cartDiscountAmount, cartDiscountPercent, getSubtotal, getTotal, buildSaleItemPayload])
 
   // ── Sale completion ──
 
@@ -190,15 +209,7 @@ export function POSSaleWizard({
         setReceiptSnapshot(snap)
         sileo.success({ title: `Venta ${result.data!.sale_number} completada`, description: "La venta fue registrada y el inventario actualizado" })
       } else {
-        const saleItems = items.map((item) => ({
-          product_variant_id: item.variantId,
-          product_name: item.productName,
-          variant_label: item.variantLabel,
-          quantity: item.quantity,
-          unit_price: item.unitPrice,
-          unit_cost: item.unitCost,
-          discount: item.discount,
-        }))
+        const saleItems = items.map(buildSaleItemPayload)
         const result = await createSale({
           customer_id: customer?.id ?? null,
           items: saleItems,
@@ -207,7 +218,8 @@ export function POSSaleWizard({
             amount: p.amount,
             reference: p.reference,
           })),
-          discount_amount: globalDiscount,
+          discount_amount: backendDiscountAmount,
+          discount_percent: cartDiscountPercent,
           notes: notes || null,
         })
         if (result.error) {
@@ -235,7 +247,7 @@ export function POSSaleWizard({
     } finally {
       submittingRef.current = false
     }
-  }, [mode, pendingSale, items, customer, globalDiscount, notes, payments, clear, queryClient, isOnline, buildReceiptSnapshot])
+  }, [mode, pendingSale, items, customer, cartDiscountAmount, cartDiscountPercent, notes, payments, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Pending sale ──
 
@@ -248,19 +260,12 @@ export function POSSaleWizard({
       return
     }
     try {
-      const saleItems = items.map((item) => ({
-        product_variant_id: item.variantId,
-        product_name: item.productName,
-        variant_label: item.variantLabel,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        unit_cost: item.unitCost,
-        discount: item.discount,
-      }))
+      const saleItems = items.map(buildSaleItemPayload)
       const result = await createPendingSale({
         customer_id: customer?.id ?? null,
         items: saleItems,
-        discount_amount: globalDiscount,
+        discount_amount: backendDiscountAmount,
+        discount_percent: cartDiscountPercent,
         notes: notes || null,
       })
       if (result.error) {
@@ -286,7 +291,7 @@ export function POSSaleWizard({
     } finally {
       submittingRef.current = false
     }
-  }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
+  }, [items, customer, cartDiscountAmount, cartDiscountPercent, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Create vale ──
 
@@ -316,7 +321,7 @@ export function POSSaleWizard({
         customer_id: customer.id,
         items: saleItems,
         payment_status: paymentStatus,
-        discount_amount: globalDiscount,
+        discount_amount: cartDiscountAmount,
         notes: notes || null,
       })
       if (result.error) {
@@ -346,7 +351,7 @@ export function POSSaleWizard({
     } finally {
       submittingRef.current = false
     }
-  }, [items, customer, globalDiscount, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
+  }, [items, customer, cartDiscountAmount, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Split sale (in-stock → sale, out-of-stock → vale) ──
 
@@ -394,6 +399,9 @@ export function POSSaleWizard({
               unitCost: 0,
               discount: 0,
               stock: 0,
+              itemDiscountPercent: null,
+              itemDiscountSource: null,
+              itemDiscountListId: null,
             })
           }
         }
@@ -507,7 +515,7 @@ export function POSSaleWizard({
     } finally {
       submittingRef.current = false
     }
-  }, [items, customer, payments, notes, globalDiscount, clear, queryClient, isOnline, buildReceiptSnapshot])
+  }, [items, customer, payments, notes, cartDiscountAmount, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Print (uses snapshot captured before store clear) ──
 
@@ -656,7 +664,7 @@ export function POSSaleWizard({
                   onClose={handleClose}
                   saleResult={saleResult}
                   receiptSnapshot={receiptSnapshot}
-                  pendingSale={mode === "complete-pending" && pendingSale ? { subtotal: pendingSale.subtotal, discount_amount: pendingSale.discount_amount, total: pendingSale.total } : null}
+                  pendingSale={mode === "complete-pending" && pendingSale ? { subtotal: pendingSale.subtotal, discount_amount: pendingSale.discount_amount, discount_percent: pendingSale.discount_percent ?? null, total: pendingSale.total } : null}
                   wasPending={wasPending}
                 />
               )}

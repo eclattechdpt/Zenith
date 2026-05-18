@@ -12,6 +12,7 @@ import { createElement as h } from "react"
 
 import { PAYMENT_METHODS } from "@/lib/constants"
 import { registerPdfFonts, PDF_FONT } from "@/lib/pdf-fonts"
+import { formatDiscountPercent } from "@/lib/utils"
 import type { ReceiptData } from "./sale-receipt"
 
 // ── Register custom fonts ──
@@ -152,26 +153,44 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
           h(Text, { style: s.tableHeaderText }, "Producto"),
           h(Text, { style: s.tableHeaderText }, "Importe"),
         ),
-        ...data.items.map((item, i) =>
-          h(View, { key: String(i), style: i < data.items.length - 1 ? s.itemRow : s.itemRowLast },
+        ...data.items.map((item, i) => {
+          const hasDiscount = item.discount > 0
+          const isGift = hasDiscount && item.line_total === 0
+          const pctLabel =
+            item.discount_percent != null && item.discount_percent > 0
+              ? formatDiscountPercent(
+                  item.discount,
+                  item.unit_price * item.quantity,
+                  item.discount_percent
+                )
+              : null
+          return h(
+            View,
+            { key: String(i), style: i < data.items.length - 1 ? s.itemRow : s.itemRowLast },
             h(View, { style: s.itemLine },
               h(View, { style: { flex: 1, paddingRight: 8 } },
                 h(Text, { style: s.itemName }, item.product_name),
                 item.variant_label !== item.product_name
                   ? h(Text, { style: s.itemVariant }, item.variant_label)
                   : null,
-                h(Text, { style: s.itemQty }, `${item.quantity} x ${currency(item.unit_price)}`),
+                hasDiscount
+                  ? h(View, { style: { flexDirection: "row", gap: 4, marginTop: 1 } },
+                      h(Text, { style: { ...s.itemQty, textDecoration: "line-through", color: "#bbb" } },
+                        `${item.quantity} x ${currency(item.unit_price)}`),
+                      pctLabel
+                        ? h(Text, { style: { ...s.discountText, fontWeight: 600 } }, `-${pctLabel}`)
+                        : null,
+                    )
+                  : h(Text, { style: s.itemQty }, `${item.quantity} x ${currency(item.unit_price)}`),
               ),
-              h(Text, { style: s.itemTotal }, currency(item.line_total)),
+              h(
+                Text,
+                { style: isGift ? { ...s.itemTotal, color: "#8b5cf6" } : s.itemTotal },
+                isGift ? "GRATIS" : currency(item.line_total)
+              ),
             ),
-            item.discount > 0
-              ? h(View, { style: s.discountLine },
-                  h(Text, { style: s.discountText }, "Descuento"),
-                  h(Text, { style: s.discountText }, `-${currency(item.discount)}`),
-                )
-              : null,
-          ),
-        ),
+          )
+        }),
 
         // Subtotal
         h(View, { style: s.subtotalRow },
@@ -180,7 +199,12 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
         ),
         data.discountAmount > 0
           ? h(View, { style: { flexDirection: "row", justifyContent: "space-between", marginTop: 3 } },
-              h(Text, { style: s.discountText }, "Descuento"),
+              h(Text, { style: s.discountText },
+                (() => {
+                  const pct = formatDiscountPercent(data.discountAmount, data.subtotal, data.discountPercent)
+                  return pct ? `Descuento (${pct})` : "Descuento"
+                })()
+              ),
               h(Text, { style: s.discountText }, `-${currency(data.discountAmount)}`),
             )
           : null,

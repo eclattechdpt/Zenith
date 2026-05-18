@@ -834,6 +834,7 @@ export type Database = {
       sale_items: {
         Row: {
           discount: number
+          discount_percent: number | null
           id: string
           line_total: number
           product_name: string
@@ -846,6 +847,7 @@ export type Database = {
         }
         Insert: {
           discount?: number
+          discount_percent?: number | null
           id?: string
           line_total: number
           product_name: string
@@ -858,6 +860,7 @@ export type Database = {
         }
         Update: {
           discount?: number
+          discount_percent?: number | null
           id?: string
           line_total?: number
           product_name?: string
@@ -927,6 +930,7 @@ export type Database = {
           customer_id: string | null
           deleted_at: string | null
           discount_amount: number
+          discount_percent: number | null
           expires_at: string | null
           id: string
           notes: string | null
@@ -943,6 +947,7 @@ export type Database = {
           customer_id?: string | null
           deleted_at?: string | null
           discount_amount?: number
+          discount_percent?: number | null
           expires_at?: string | null
           id?: string
           notes?: string | null
@@ -959,6 +964,7 @@ export type Database = {
           customer_id?: string | null
           deleted_at?: string | null
           discount_amount?: number
+          discount_percent?: number | null
           expires_at?: string | null
           id?: string
           notes?: string | null

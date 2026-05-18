@@ -119,7 +119,11 @@ export function getSalesColumns({
       cell: ({ row }) => {
         const name = row.original.customers?.name
         if (!name) return <span className="text-neutral-400">—</span>
-        return <span className="text-sm text-neutral-600">{name}</span>
+        return (
+          <span className="block truncate text-sm text-neutral-600" title={name}>
+            {name}
+          </span>
+        )
       },
     },
     {

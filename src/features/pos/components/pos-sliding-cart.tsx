@@ -2,8 +2,29 @@
 
 import { ShoppingBag, Minus, Plus, Trash2, ArrowRight, User } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
-import { cn, formatCurrency } from "@/lib/utils"
+import { cn, formatCurrency, formatDiscountPercent } from "@/lib/utils"
 import { usePOSStore } from "../store"
+import { ItemDiscountPicker } from "./item-discount-picker"
+import type { CartItem } from "../types"
+
+function SlidingItemLineTotal({ item }: { item: CartItem }) {
+  const cartDiscount = usePOSStore((s) => s.cartDiscount)
+  const pct = item.itemDiscountPercent ??
+    (cartDiscount.source && cartDiscount.source !== "custom_amount" ? cartDiscount.percent : 0)
+  const isGift = item.itemDiscountSource === "gift"
+  const gross = item.unitPrice * item.quantity
+  const net = Math.max(0, gross - (gross * pct) / 100)
+  return (
+    <p
+      className={cn(
+        "text-sm font-bold tabular-nums",
+        isGift ? "text-violet-600" : pct > 0 ? "text-rose-600" : "text-neutral-800"
+      )}
+    >
+      {isGift ? "GRATIS" : formatCurrency(net)}
+    </p>
+  )
+}
 
 const THIN_SCROLL =
   "[scrollbar-width:thin] [scrollbar-color:rgba(0,0,0,0.08)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300/40"
@@ -90,8 +111,9 @@ export function POSSlidingCart({ onCheckout }: POSSlidingCartProps) {
                           {item.variantLabel}
                         </p>
                       )}
-                      <p className="mt-0.5 text-xs text-neutral-400">
-                        {formatCurrency(item.unitPrice)} c/u
+                      <p className="mt-0.5 flex items-center gap-1.5 text-xs text-neutral-400">
+                        <span>{formatCurrency(item.unitPrice)} c/u</span>
+                        <ItemDiscountPicker item={item} />
                       </p>
                     </div>
                     <button
@@ -127,11 +149,7 @@ export function POSSlidingCart({ onCheckout }: POSSlidingCartProps) {
                         <Plus className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    <p className="text-sm font-bold tabular-nums text-neutral-800">
-                      {formatCurrency(
-                        item.unitPrice * item.quantity - item.discount
-                      )}
-                    </p>
+                    <SlidingItemLineTotal item={item} />
                   </div>
                 </motion.div>
               ))}
@@ -152,7 +170,13 @@ export function POSSlidingCart({ onCheckout }: POSSlidingCartProps) {
               </div>
               {getItemsDiscount() > 0 && (
                 <div className="flex justify-between text-xs text-teal-600">
-                  <span>Descuento</span>
+                  <span>
+                    Descuento
+                    {(() => {
+                      const pct = formatDiscountPercent(getItemsDiscount(), getSubtotal())
+                      return pct ? <span className="tabular-nums"> ({pct})</span> : null
+                    })()}
+                  </span>
                   <span className="font-medium tabular-nums">
                     -{formatCurrency(getItemsDiscount())}
                   </span>

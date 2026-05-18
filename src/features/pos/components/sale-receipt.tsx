@@ -2,7 +2,7 @@ import { forwardRef } from "react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatDiscountPercent } from "@/lib/utils"
 import { PAYMENT_METHODS } from "@/lib/constants"
 
 interface ReceiptItem {
@@ -11,6 +11,7 @@ interface ReceiptItem {
   quantity: number
   unit_price: number
   discount: number
+  discount_percent?: number | null
   line_total: number
 }
 
@@ -27,6 +28,7 @@ export interface ReceiptData {
   payments: ReceiptPayment[]
   subtotal: number
   discountAmount: number
+  discountPercent?: number | null
   total: number
   change: number
 }
@@ -232,37 +234,53 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
                       fontSize: "10px",
                       color: "#888",
                       marginTop: "1px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
                     }}
                   >
-                    {item.quantity} x {formatCurrency(item.unit_price)}
+                    {item.discount > 0 ? (
+                      <>
+                        <span
+                          style={{
+                            textDecoration: "line-through",
+                            color: "#bbb",
+                          }}
+                        >
+                          {item.quantity} x {formatCurrency(item.unit_price)}
+                        </span>
+                        {item.discount_percent != null && item.discount_percent > 0 && (
+                          <span
+                            style={{
+                              color: "#F43F6B",
+                              fontWeight: 600,
+                            }}
+                          >
+                            -{formatDiscountPercent(item.discount, item.unit_price * item.quantity, item.discount_percent)}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span>
+                        {item.quantity} x {formatCurrency(item.unit_price)}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div
                   style={{
                     fontWeight: 600,
                     fontSize: "11px",
-                    color: "#1a1a1a",
+                    color: item.line_total === 0 ? "#8b5cf6" : "#1a1a1a",
                     whiteSpace: "nowrap",
                     fontVariantNumeric: "tabular-nums",
                   }}
                 >
-                  {formatCurrency(item.line_total)}
+                  {item.line_total === 0 && item.discount > 0
+                    ? "GRATIS"
+                    : formatCurrency(item.line_total)}
                 </div>
               </div>
-              {item.discount > 0 && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: "10px",
-                    color: "#F43F6B",
-                    marginTop: "2px",
-                  }}
-                >
-                  <span>Descuento</span>
-                  <span>-{formatCurrency(item.discount)}</span>
-                </div>
-              )}
             </div>
           ))}
 
@@ -293,7 +311,17 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
                 marginTop: "4px",
               }}
             >
-              <span>Descuento</span>
+              <span>
+                Descuento
+                {(() => {
+                  const pct = formatDiscountPercent(data.discountAmount, data.subtotal, data.discountPercent)
+                  return pct ? (
+                    <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                      {" "}({pct})
+                    </span>
+                  ) : null
+                })()}
+              </span>
               <span style={{ fontVariantNumeric: "tabular-nums" }}>
                 -{formatCurrency(data.discountAmount)}
               </span>

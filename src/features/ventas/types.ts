@@ -39,6 +39,7 @@ export interface SaleDetailItem {
   unit_price: number
   unit_cost: number
   discount: number
+  discount_percent: number | null
   line_total: number
 }
 

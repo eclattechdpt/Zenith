@@ -78,8 +78,7 @@ export function ProductSearch() {
     const price = await resolvePrice(
       variant.id,
       Number(variant.price),
-      customer?.priceListId ?? null,
-      customer?.discountPercent ?? 0
+      customer?.priceListId ?? null
     )
 
     addItem({

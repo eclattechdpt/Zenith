@@ -18,7 +18,7 @@ import {
 } from "lucide-react"
 import { motion } from "motion/react"
 import { cn } from "@/lib/utils"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatDiscountPercent } from "@/lib/utils"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 import { PAYMENT_METHODS } from "@/lib/constants"
 import { usePOSStore } from "../store"
@@ -50,7 +50,7 @@ interface WizardConfirmationStepProps {
   /** Snapshot of receipt data captured before store clear */
   receiptSnapshot?: ReceiptData | null
   /** When completing a pending sale, pass its data so totals display correctly */
-  pendingSale?: { subtotal: number; discount_amount: number; total: number } | null
+  pendingSale?: { subtotal: number; discount_amount: number; discount_percent: number | null; total: number } | null
   /** Whether this was saved as pending (for success screen message) */
   wasPending?: boolean
 }
@@ -74,6 +74,12 @@ export function WizardConfirmationStep({
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const getTotal = usePOSStore((s) => s.getTotal)
+  const cartDiscount = usePOSStore((s) => s.cartDiscount)
+  const cartDiscountAmount =
+    cartDiscount.source === "custom_amount"
+      ? cartDiscount.customAmount
+      : getItemsDiscount()
+  const cartDiscountPercent = cartDiscount.source ? cartDiscount.percent : null
 
   const handleDownloadPdf = useCallback(async () => {
     if (!receiptSnapshot) return
@@ -114,6 +120,9 @@ export function WizardConfirmationStep({
             unitCost: 0,
             discount: 0,
             stock: 0,
+            itemDiscountPercent: null,
+            itemDiscountSource: null,
+            itemDiscountListId: null,
           })
         }
       }
@@ -443,14 +452,28 @@ export function WizardConfirmationStep({
                   {formatCurrency(pendingSale ? pendingSale.subtotal : getSubtotal())}
                 </span>
               </div>
-              {(pendingSale ? pendingSale.discount_amount > 0 : getItemsDiscount() > 0) && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-teal-600">Descuento</span>
-                  <span className="font-semibold tabular-nums text-teal-600">
-                    -{formatCurrency(pendingSale ? pendingSale.discount_amount : getItemsDiscount())}
-                  </span>
-                </div>
-              )}
+              {(() => {
+                const subtotalValue = pendingSale ? pendingSale.subtotal : getSubtotal()
+                const discountValue = pendingSale
+                  ? pendingSale.discount_amount
+                  : cartDiscountAmount
+                if (discountValue <= 0) return null
+                const exactPct = pendingSale ? pendingSale.discount_percent : cartDiscountPercent
+                const pctLabel = formatDiscountPercent(discountValue, subtotalValue, exactPct)
+                return (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-teal-600">
+                      Descuento
+                      {pctLabel && (
+                        <span className="tabular-nums"> ({pctLabel})</span>
+                      )}
+                    </span>
+                    <span className="font-semibold tabular-nums text-teal-600">
+                      -{formatCurrency(discountValue)}
+                    </span>
+                  </div>
+                )
+              })()}
               <div className="flex items-baseline justify-between border-t border-neutral-100 pt-3">
                 <span className="text-base font-bold text-neutral-800">
                   Total

@@ -1,23 +1,24 @@
 import { createClient } from "@/lib/supabase/client"
 
 /**
- * Resolves the price for a variant based on a customer's price list.
+ * Resolves the price for a variant based on a customer's specific negotiated prices.
  *
  * Priority:
  * 1. Specific customer price (customer_prices table)
- * 2. Price list discount % applied to base price
- * 3. Base variant price
+ * 2. Base variant price
+ *
+ * NOTA: El % de la lista de precios YA NO se aplica aquí. Ese descuento se maneja
+ * a nivel del carrito (cartDiscount con source="customer") para que el usuario
+ * pueda decidir si usarlo o reemplazarlo con otro descuento.
  */
 export async function resolvePrice(
   variantId: string,
   basePrice: number,
-  priceListId: string | null,
-  discountPercent: number
+  priceListId: string | null
 ): Promise<number> {
   if (!priceListId) return basePrice
 
   try {
-    // Check for a specific price override
     const supabase = createClient()
     const { data } = await supabase
       .from("customer_prices")
@@ -27,12 +28,6 @@ export async function resolvePrice(
       .single()
 
     if (data) return Number(data.price)
-
-    // Apply list discount
-    if (discountPercent > 0) {
-      return Math.round(basePrice * (1 - discountPercent / 100) * 100) / 100
-    }
-
     return basePrice
   } catch {
     return basePrice
@@ -41,12 +36,12 @@ export async function resolvePrice(
 
 /**
  * Resolves prices for multiple variants at once (batch).
- * More efficient than calling resolvePrice one by one.
+ * Solo aplica precios específicos negociados — el descuento % de la lista lo
+ * maneja el carrito.
  */
 export async function resolvePrices(
   variants: { variantId: string; basePrice: number }[],
-  priceListId: string | null,
-  discountPercent: number
+  priceListId: string | null
 ): Promise<Map<string, number>> {
   const result = new Map<string, number>()
 
@@ -58,7 +53,6 @@ export async function resolvePrices(
   }
 
   try {
-    // Fetch all specific prices for this price list + these variants in one query
     const supabase = createClient()
     const variantIds = variants.map((v) => v.variantId)
 
@@ -74,16 +68,7 @@ export async function resolvePrices(
 
     for (const v of variants) {
       const specific = overrideMap.get(v.variantId)
-      if (specific !== undefined) {
-        result.set(v.variantId, specific)
-      } else if (discountPercent > 0) {
-        result.set(
-          v.variantId,
-          Math.round(v.basePrice * (1 - discountPercent / 100) * 100) / 100
-        )
-      } else {
-        result.set(v.variantId, v.basePrice)
-      }
+      result.set(v.variantId, specific !== undefined ? specific : v.basePrice)
     }
 
     return result

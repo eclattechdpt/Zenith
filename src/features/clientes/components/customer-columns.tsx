@@ -149,7 +149,11 @@ export function getCustomerColumns({
       cell: ({ row }) => {
         const email = row.original.email
         if (!email) return <span className="text-neutral-400">—</span>
-        return <span className="text-sm text-neutral-600">{email}</span>
+        return (
+          <span className="block truncate text-sm text-neutral-600" title={email}>
+            {email}
+          </span>
+        )
       },
     },
     {

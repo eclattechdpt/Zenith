@@ -48,7 +48,7 @@ export async function createSale(input: CreateSaleInput) {
   const parsed = createSaleSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  const { items, payments, customer_id, discount_amount, notes, skip_components } = parsed.data
+  const { items, payments, customer_id, discount_amount, discount_percent, notes, skip_components } = parsed.data
 
   // Calculate totals
   const subtotal = items.reduce(
@@ -91,6 +91,7 @@ export async function createSale(input: CreateSaleInput) {
       p_customer_id: customer_id ?? null,
       p_subtotal: subtotal,
       p_discount_amount: itemsDiscount + discount_amount,
+      p_discount_percent: discount_percent ?? null,
       p_total: total,
       p_notes: notes ?? null,
       p_created_by: userId,
@@ -102,6 +103,7 @@ export async function createSale(input: CreateSaleInput) {
         unit_price: item.unit_price,
         unit_cost: item.unit_cost,
         discount: item.discount,
+        discount_percent: item.discount_percent ?? null,
       })),
       p_payments: payments.map((p) => ({
         method: p.method,
@@ -133,7 +135,7 @@ export async function createQuote(input: CreateQuoteInput) {
   const parsed = createQuoteSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  const { items, customer_id, discount_amount, notes, expires_days } =
+  const { items, customer_id, discount_amount, discount_percent, notes, expires_days } =
     parsed.data
 
   const subtotal = items.reduce(
@@ -180,6 +182,7 @@ export async function createQuote(input: CreateQuoteInput) {
       customer_id: customer_id ?? null,
       subtotal,
       discount_amount: itemsDiscount + discount_amount,
+      discount_percent: discount_percent ?? null,
       total,
       status: "quote",
       notes: notes ?? null,
@@ -204,6 +207,7 @@ export async function createQuote(input: CreateQuoteInput) {
       unit_price: item.unit_price,
       unit_cost: item.unit_cost,
       discount: item.discount,
+      discount_percent: item.discount_percent ?? null,
       line_total: lineTotal,
     })
 
@@ -248,6 +252,7 @@ export async function createPendingSale(input: CreatePendingSaleInput) {
     p_customer_id: parsed.data.customer_id ?? null,
     p_subtotal: subtotal,
     p_discount_amount: parsed.data.discount_amount + itemsDiscount,
+    p_discount_percent: parsed.data.discount_percent ?? null,
     p_total: total,
     p_notes: parsed.data.notes ?? null,
     p_created_by: userId,
@@ -259,6 +264,7 @@ export async function createPendingSale(input: CreatePendingSaleInput) {
       unit_price: i.unit_price,
       unit_cost: i.unit_cost,
       discount: i.discount,
+      discount_percent: i.discount_percent ?? null,
     })),
   })
 

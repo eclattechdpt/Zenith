@@ -76,8 +76,11 @@ export function getProductColumns({
       cell: ({ row }) => {
         const product = row.original
         return (
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[13px] font-semibold text-neutral-900">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span
+              className="block truncate text-[13px] font-semibold text-neutral-900"
+              title={product.name}
+            >
               {product.name}
             </span>
             {product.brand && (

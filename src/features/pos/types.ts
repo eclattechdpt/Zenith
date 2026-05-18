@@ -12,6 +12,13 @@ export interface BundleComponent {
   stock: number
 }
 
+export type DiscountSource =
+  | "customer"      // descuento base del cliente
+  | "list"          // otra price_list (promoción)
+  | "custom_pct"    // % escrito a mano
+  | "custom_amount" // monto $ escrito a mano (solo cart-level)
+  | "gift"          // 100% — solo per-item
+
 export interface CartItem {
   variantId: string
   productId: string
@@ -26,6 +33,17 @@ export interface CartItem {
   stock: number
   isBundle?: boolean
   bundleComponents?: BundleComponent[]
+  // ── Override per-item del descuento (gana sobre el cart-level) ──
+  itemDiscountPercent: number | null
+  itemDiscountSource: DiscountSource | null
+  itemDiscountListId: string | null  // cuando source = "customer" o "list"
+}
+
+export interface CartDiscount {
+  percent: number                     // 0–100
+  source: DiscountSource | null       // null = sin descuento
+  listId: string | null               // cuando source = "customer" o "list"
+  customAmount: number                // cuando source = "custom_amount" (no es %)
 }
 
 export interface CartCustomer {
@@ -47,6 +65,7 @@ export interface PendingSaleWithSummary {
   status: string
   subtotal: number
   discount_amount: number
+  discount_percent: number | null
   total: number
   notes: string | null
   created_at: string

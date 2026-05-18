@@ -128,7 +128,10 @@
       "Bash(curl -sIL https://www.eclatpos.com)",
       "Bash(curl -sI https://eclatpos.com/opengraph-image)",
       "mcp__supabase__list_extensions",
-      "Bash(awk '{print $5, $9}')"
+      "Bash(awk '{print $5, $9}')",
+      "Bash(awk '/^\\\\/Users/{f=$0} /error|warning/{print f\": \"$0}')",
+      "Bash(awk '/^\\\\/Users.*src\\\\/features\\\\/pos\\\\/components\\\\/\\(wizard-products-step|wizard-payment-step|wizard-confirmation-step|cart-panel|pos-sale-wizard\\)\\\\.tsx$/{f=1; next} /^\\\\/Users/{f=0} f && /error/')",
+      "Bash(awk '/^\\\\/Users.*src\\\\/features\\\\/pos\\\\/\\(components\\\\/\\(cart-panel|wizard-products-step|wizard-payment-step|wizard-confirmation-step|pos-sale-wizard|pos-sliding-cart|customer-picker|wizard-customer-step|sale-receipt|item-discount-picker|sale-receipt-pdf\\)\\\\.ts|store\\\\.ts|actions\\\\.ts|schemas\\\\.ts|types\\\\.ts|queries\\\\.ts\\)/{f=1; n=$0; next} /^\\\\/Users/{f=0} f && /error|warning/{print n\": \"$0}')"
     ]
   },
   "enableAllProjectMcpServers": true,

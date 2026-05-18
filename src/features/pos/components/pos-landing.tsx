@@ -104,8 +104,7 @@ export function POSLanding() {
           price = await resolvePrice(
             variant.id,
             variant.price,
-            customer.priceListId,
-            customer.discountPercent
+            customer.priceListId
           )
         } catch {
           // Fall back to base price

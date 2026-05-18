@@ -21,7 +21,28 @@ import { usePOSStore } from "../store"
 import { resolvePrice } from "../utils"
 import { usePriceLists } from "@/features/clientes/queries"
 import { POSProductGrid } from "./pos-product-grid"
+import { ItemDiscountPicker } from "./item-discount-picker"
 import type { POSProductWithImage } from "../queries"
+import type { CartItem, CartDiscount } from "../types"
+
+// Computa el line total considerando override per-item o cart-level
+function ItemLineTotal({ item, cartDiscount }: { item: CartItem; cartDiscount: CartDiscount }) {
+  const pct = item.itemDiscountPercent ??
+    (cartDiscount.source && cartDiscount.source !== "custom_amount" ? cartDiscount.percent : 0)
+  const isGift = item.itemDiscountSource === "gift"
+  const gross = item.unitPrice * item.quantity
+  const net = Math.max(0, gross - (gross * pct) / 100)
+  return (
+    <p
+      className={cn(
+        "text-sm font-bold tabular-nums",
+        isGift ? "text-violet-600" : pct > 0 ? "text-rose-600" : "text-neutral-800"
+      )}
+    >
+      {isGift ? "GRATIS" : formatCurrency(net)}
+    </p>
+  )
+}
 
 // Thin, minimal scrollbar applied to every overflow area
 const THIN_SCROLL =
@@ -41,12 +62,17 @@ export function WizardProductsStep({
   const removeItem = usePOSStore((s) => s.removeItem)
   const updateQuantity = usePOSStore((s) => s.updateQuantity)
   const customer = usePOSStore((s) => s.customer)
-  const globalDiscount = usePOSStore((s) => s.globalDiscount)
-  const setGlobalDiscount = usePOSStore((s) => s.setGlobalDiscount)
+  const cartDiscount = usePOSStore((s) => s.cartDiscount)
+  const setCartDiscount = usePOSStore((s) => s.setCartDiscount)
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const getTotal = usePOSStore((s) => s.getTotal)
   const getItemCount = usePOSStore((s) => s.getItemCount)
+
+  const cartDiscountAmount =
+    cartDiscount.source === "custom_amount"
+      ? cartDiscount.customAmount
+      : getItemsDiscount()
 
   // Out-of-stock confirmation dialog state
   const [pendingOosProduct, setPendingOosProduct] = useState<POSProductWithImage | null>(null)
@@ -82,8 +108,7 @@ export function WizardProductsStep({
           price = await resolvePrice(
             variant.id,
             variant.price,
-            customer.priceListId,
-            customer.discountPercent
+            customer.priceListId
           )
         } catch {
           // Use base price if resolution fails
@@ -300,6 +325,7 @@ export function WizardProductsStep({
                                   {formatCurrency(item.unitPrice)} c/u
                                 </span>
                               )}
+                              <ItemDiscountPicker item={item} />
                             </p>
                           </div>
                           <button
@@ -341,9 +367,7 @@ export function WizardProductsStep({
                               <Plus className="h-3.5 w-3.5" />
                             </button>
                           </div>
-                          <p className="text-sm font-bold tabular-nums text-neutral-800">
-                            {formatCurrency(item.unitPrice * item.quantity)}
-                          </p>
+                          <ItemLineTotal item={item} cartDiscount={cartDiscount} />
                         </div>
                       </div>
                     ))}
@@ -401,8 +425,8 @@ export function WizardProductsStep({
                           </div>
                         )}
 
-                        {/* Global discount display */}
-                        {globalDiscount > 0 && (
+                        {/* Cart-level discount display */}
+                        {cartDiscount.source && cartDiscountAmount > 0 && (
                           <div className="flex justify-between items-center text-xs">
                             <span className="flex items-center gap-1 font-semibold text-rose-500">
                               <Percent className="h-3 w-3" />
@@ -410,12 +434,12 @@ export function WizardProductsStep({
                             </span>
                             <div className="flex items-center gap-1.5">
                               <span className="font-semibold tabular-nums text-rose-500">
-                                -{formatCurrency(globalDiscount)}
+                                -{formatCurrency(cartDiscountAmount)}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setGlobalDiscount(0)
+                                  setCartDiscount(null)
                                   setDiscountInput("")
                                   setDiscountOpen(false)
                                 }}
@@ -428,7 +452,7 @@ export function WizardProductsStep({
                         )}
 
                         {/* Add discount button */}
-                        {globalDiscount === 0 && !discountOpen && (
+                        {!cartDiscount.source && !discountOpen && (
                           <button
                             type="button"
                             onClick={() => { setDiscountOpen(true); setCustomInputOpen(false) }}
@@ -440,7 +464,7 @@ export function WizardProductsStep({
                         )}
 
                         {/* Discount picker */}
-                        {discountOpen && globalDiscount === 0 && (
+                        {discountOpen && !cartDiscount.source && (
                           <div className="rounded-lg border border-rose-100 bg-rose-50/40 p-2 space-y-1.5">
                             {/* Predefined discounts */}
                             {!customInputOpen && (
@@ -451,8 +475,7 @@ export function WizardProductsStep({
                                     type="button"
                                     onClick={() => {
                                       const pct = Number(pl.discount_percent)
-                                      const amount = Math.round(getSubtotal() * (pct / 100) * 100) / 100
-                                      setGlobalDiscount(amount)
+                                      setCartDiscount({ percent: pct, source: "list", listId: pl.id })
                                       setDiscountOpen(false)
                                     }}
                                     className="flex w-full items-center justify-between rounded-md bg-white border border-neutral-200/80 px-3 py-2 text-xs transition-colors hover:border-rose-200 hover:bg-rose-50/50"
@@ -525,10 +548,12 @@ export function WizardProductsStep({
                                       const val = parseFloat(discountInput)
                                       if (isNaN(val) || val <= 0) return
                                       const sub = getSubtotal()
-                                      const amount = discountMode === "percent"
-                                        ? Math.round(sub * (val / 100) * 100) / 100
-                                        : Math.min(val, sub)
-                                      setGlobalDiscount(amount)
+                                      if (discountMode === "percent") {
+                                        setCartDiscount({ percent: val, source: "custom_pct" })
+                                      } else {
+                                        const amount = Math.min(val, sub)
+                                        setCartDiscount({ source: "custom_amount", customAmount: amount, percent: 0 })
+                                      }
                                       setDiscountOpen(false)
                                       setCustomInputOpen(false)
                                     }}

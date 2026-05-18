@@ -10,6 +10,7 @@ export const cartItemSchema = z.object({
   unit_price: z.number().min(0),
   unit_cost: z.number().min(0),
   discount: z.number().min(0).default(0),
+  discount_percent: z.number().min(0).max(100).optional().nullable(),
 })
 
 export const paymentSchema = z.object({
@@ -23,6 +24,7 @@ export const createSaleSchema = z.object({
   items: z.array(cartItemSchema).min(1, "Agrega al menos un producto"),
   payments: z.array(paymentSchema).min(1, "Registra al menos un pago"),
   discount_amount: z.number().min(0).default(0),
+  discount_percent: z.number().min(0).max(100).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
   skip_components: z.array(z.string().regex(uuidPattern)).optional(),
 })
@@ -31,6 +33,7 @@ export const createQuoteSchema = z.object({
   customer_id: z.string().regex(uuidPattern, "UUID invalido").optional().nullable(),
   items: z.array(cartItemSchema).min(1, "Agrega al menos un producto"),
   discount_amount: z.number().min(0).default(0),
+  discount_percent: z.number().min(0).max(100).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
   expires_days: z.number().int().min(1).max(90).default(15),
 })
@@ -44,6 +47,7 @@ export const createPendingSaleSchema = z.object({
   customer_id: z.string().regex(uuidPattern).optional().nullable(),
   items: z.array(cartItemSchema).min(1),
   discount_amount: z.number().min(0).default(0),
+  discount_percent: z.number().min(0).max(100).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
 })
 

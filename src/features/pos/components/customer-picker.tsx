@@ -18,6 +18,8 @@ export function CustomerPicker() {
   const setCustomer = usePOSStore((s) => s.setCustomer)
   const items = usePOSStore((s) => s.items)
   const updateItemPrice = usePOSStore((s) => s.updateItemPrice)
+  const cartDiscount = usePOSStore((s) => s.cartDiscount)
+  const setCartDiscount = usePOSStore((s) => s.setCartDiscount)
 
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
@@ -42,18 +44,28 @@ export function CustomerPicker() {
     setOpen(false)
     setSearch("")
 
-    // Recalculate all cart prices with the new customer's price list
+    // Auto-aplicar el descuento del cliente al carrito (solo si no hay otro override del usuario)
+    const wasCustomerOrEmpty =
+      cartDiscount.source === null || cartDiscount.source === "customer"
+    if (c.discountPercent > 0 && wasCustomerOrEmpty) {
+      setCartDiscount({
+        percent: c.discountPercent,
+        source: "customer",
+        listId: c.priceListId,
+      })
+    } else if (c.discountPercent === 0 && cartDiscount.source === "customer") {
+      // Cliente nuevo no tiene descuento, limpia el customer-source previo
+      setCartDiscount(null)
+    }
+
+    // Recalcular precios específicos (no el % — eso lo hace el cartDiscount)
     if (items.length > 0) {
       const basePrices = items.map((i) => ({
         variantId: i.variantId,
         basePrice: i.basePrice,
       }))
 
-      const resolved = await resolvePrices(
-        basePrices,
-        c.priceListId,
-        c.discountPercent
-      )
+      const resolved = await resolvePrices(basePrices, c.priceListId)
 
       for (const [variantId, price] of resolved) {
         updateItemPrice(variantId, price)
@@ -63,6 +75,11 @@ export function CustomerPicker() {
 
   function handleClear() {
     setCustomer(null)
+
+    // Limpia el descuento del cliente si estaba activo
+    if (cartDiscount.source === "customer") {
+      setCartDiscount(null)
+    }
 
     // Reset all prices to base (stored in each cart item)
     for (const item of items) {

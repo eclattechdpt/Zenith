@@ -159,11 +159,15 @@ export function CreditNotesTable() {
       size: 160,
       minSize: 120,
       header: "Distribuidor",
-      cell: ({ row }) => (
-        <span className="text-sm text-neutral-600">
-          {row.original.customers?.name ?? "—"}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const name = row.original.customers?.name
+        if (!name) return <span className="text-neutral-400">—</span>
+        return (
+          <span className="block truncate text-sm text-neutral-600" title={name}>
+            {name}
+          </span>
+        )
+      },
     },
     {
       id: "items_summary",
