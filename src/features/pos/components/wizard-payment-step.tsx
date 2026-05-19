@@ -55,12 +55,6 @@ const METHOD_META: Record<
     bg: "bg-violet-50",
     border: "border-violet-200",
   },
-  credit_note: {
-    icon: Banknote,
-    color: "text-amber-600",
-    bg: "bg-amber-50",
-    border: "border-amber-200",
-  },
   other: {
     icon: Banknote,
     color: "text-neutral-600",

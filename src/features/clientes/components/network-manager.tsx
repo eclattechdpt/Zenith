@@ -34,7 +34,7 @@ const SPRING_SNAPPY = { type: "spring" as const, stiffness: 500, damping: 35 }
 
 // Tailwind 500-ish swatches que combinan con el design system
 const COLOR_PRESETS = [
-  "#94a3b8", // slate (default)
+  "#94a3b8", // slate — default (debe coincidir con customerNetworkSchema.color default)
   "#f43f5e", // rose
   "#14b8a6", // teal
   "#f59e0b", // amber
@@ -63,11 +63,11 @@ export function NetworkManager() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CustomerNetworkInput>({ resolver: zodResolver(customerNetworkSchema) as any })
 
-  const currentColor = watch("color") ?? "#94a3b8"
+  const currentColor = watch("color") ?? COLOR_PRESETS[0]
 
   function openCreate() {
     setEditId(null)
-    reset({ name: "", color: "#94a3b8", sort_order: 0 })
+    reset({ name: "", color: COLOR_PRESETS[0], sort_order: 0 })
     setDialogOpen(true)
   }
 

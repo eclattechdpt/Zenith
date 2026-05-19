@@ -421,7 +421,7 @@ export function usePendingSales() {
         .select(
           `id, sale_number, status, subtotal, discount_amount, discount_percent, total, notes, created_at,
           customers:customer_id(id, name),
-          sale_items(id, product_name, variant_label, quantity, unit_price, discount, line_total, product_variant_id)`
+          sale_items(id, product_name, variant_label, quantity, unit_price, discount, discount_percent, line_total, product_variant_id)`
         )
         .eq("tenant_id", TENANT_ID)
         .eq("status", "pending")

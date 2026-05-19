@@ -138,7 +138,7 @@ export function POSSaleWizard({
           quantity: i.quantity,
           unit_price: i.unit_price,
           discount: i.discount,
-          discount_percent: null,
+          discount_percent: i.discount_percent ?? null,
           line_total: i.line_total,
         })),
         payments: payments.map((p) => ({ method: p.method, amount: p.amount, reference: p.reference })),

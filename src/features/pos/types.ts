@@ -78,6 +78,7 @@ export interface PendingSaleWithSummary {
     quantity: number
     unit_price: number
     discount: number
+    discount_percent: number | null
     line_total: number
     product_variant_id: string
   }[]
