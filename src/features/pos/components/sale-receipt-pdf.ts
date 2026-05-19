@@ -109,7 +109,9 @@ function estimateHeight(data: ReceiptData): number {
     + 40 + 50 // total box + payment box base
     + 16 + 50 + 20 // footer padding + footer + paddingBottom
   const itemsH = data.items.length * 38 // ~38pt per item (name + variant + qty)
-  const paymentsH = data.payments.length * 16
+  const paymentsH =
+    data.payments.length * 16 +
+    data.payments.filter((p) => p.reference).length * 12 // espacio extra por referencia
   const changeH = data.change > 0 ? 20 : 0
   return base + itemsH + paymentsH + changeH
 }
@@ -225,14 +227,20 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
         ),
         h(View, { style: s.payBox },
           h(Text, { style: s.payLabel }, "Forma de pago"),
-          ...data.payments.map((p, i) =>
-            h(View, { key: String(i), style: s.payRow },
+          ...data.payments.flatMap((p, i) => {
+            const row = h(View, { key: `pay-${i}`, style: s.payRow },
               h(Text, { style: s.payMethod },
                 PAYMENT_METHODS[p.method as keyof typeof PAYMENT_METHODS] ?? p.method,
               ),
               h(Text, { style: s.payAmount }, currency(p.amount)),
-            ),
-          ),
+            )
+            if (!p.reference) return [row]
+            const note = h(Text, {
+              key: `ref-${i}`,
+              style: { fontSize: 8, color: "#888", fontStyle: "italic", paddingLeft: 8, marginTop: 1 },
+            }, p.reference)
+            return [row, note]
+          }),
           data.change > 0
             ? h(View, { style: s.changeRow },
                 h(Text, { style: s.changeText }, "Cambio"),

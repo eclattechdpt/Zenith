@@ -140,7 +140,7 @@ export function POSSaleWizard({
           discount_percent: null,
           line_total: i.line_total,
         })),
-        payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
+        payments: payments.map((p) => ({ method: p.method, amount: p.amount, reference: p.reference })),
         subtotal: pendingSale.subtotal,
         discountAmount: pendingSale.discount_amount,
         discountPercent: pendingSale.discount_percent ?? null,

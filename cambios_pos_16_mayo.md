@@ -10,7 +10,6 @@ _(nada en curso)_
 
 - **2.** Cuando el usuario deja una venta pendiente con descuento y regresa al carrito, la venta no muestra el descuento aplicado.
 - **4.** Cambiar el formato de la impresora POS para que sea más legible (referencia: formato tipo Walmart).
-- **5.** Imprimir el comentario del pago "Otro" en el recibo.
 
 ## Por discutir / planear
 
@@ -24,4 +23,5 @@ _(nada en curso)_
 
 - **1 + 8.** Descuento por producto (presets, custom %, custom $, **Regalo**) + el descuento del cliente como cart-level explícito con chip toggle. **Sin stacking** (resuelve el bug del 30% × 50% = 65% efectivo). Soporta cofres como regalo completo. Persistido en BD (`sale_items.discount_percent` + `sales.discount_percent`). ✅
 - **3.** Al imprimir una nota mostrar el precio tachado + descuento aplicado (solo porcentaje). ✅
+- **5.** Imprimir el comentario del pago "Otro" en el recibo (HTML + PDF). ✅
 - **7.** Al elegir cliente con descuento base, decidir si se usa o se cambia por otro activo (resuelto como parte de 1+8 — el descuento del cliente es ahora un cart-level toggleable). ✅

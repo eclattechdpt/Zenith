@@ -150,6 +150,7 @@ export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps)
       payments: sale.sale_payments.map((p) => ({
         method: p.method,
         amount: Number(p.amount),
+        reference: p.reference,
       })),
       subtotal: Number(sale.subtotal),
       discountAmount: Number(sale.discount_amount),

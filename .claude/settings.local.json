@@ -137,7 +137,8 @@
       "Bash(awk '/Aceite Omega/{print NR; for\\(i=1;i<=6;i++\\){getline; print NR\": \"$0}}' /Users/alvaromac/Documents/Work/Zenith/.playwright-mcp/snap-products-2.yml)",
       "Bash(awk '/Desc\\\\. cliente|Descuento/{print NR; for\\(i=1;i<=4;i++\\){getline; print NR\": \"$0}}' /Users/alvaromac/Documents/Work/Zenith/.playwright-mcp/snap-chip.yml)",
       "Bash(awk '/Acido Hialuronico/{print NR; for\\(i=1;i<=6;i++\\){getline; print NR\": \"$0}}' /Users/alvaromac/Documents/Work/Zenith/.playwright-mcp/snap-test3.yml)",
-      "Bash(awk *)"
+      "Bash(awk *)",
+      "Bash(git config *)"
     ]
   },
   "enableAllProjectMcpServers": true,

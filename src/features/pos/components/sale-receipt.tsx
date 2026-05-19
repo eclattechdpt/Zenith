@@ -18,6 +18,7 @@ interface ReceiptItem {
 interface ReceiptPayment {
   method: string
   amount: number
+  reference?: string | null
 }
 
 export interface ReceiptData {
@@ -399,26 +400,44 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
               <div
                 key={i}
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: "11px",
-                  color: "#444",
                   marginBottom: i < data.payments.length - 1 ? "3px" : 0,
                 }}
               >
-                <span>
-                  {PAYMENT_METHODS[
-                    p.method as keyof typeof PAYMENT_METHODS
-                  ] ?? p.method}
-                </span>
-                <span
+                <div
                   style={{
-                    fontWeight: 500,
-                    fontVariantNumeric: "tabular-nums",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "11px",
+                    color: "#444",
                   }}
                 >
-                  {formatCurrency(p.amount)}
-                </span>
+                  <span>
+                    {PAYMENT_METHODS[
+                      p.method as keyof typeof PAYMENT_METHODS
+                    ] ?? p.method}
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {formatCurrency(p.amount)}
+                  </span>
+                </div>
+                {p.reference && (
+                  <div
+                    style={{
+                      fontSize: "10px",
+                      color: "#888",
+                      fontStyle: "italic",
+                      marginTop: "1px",
+                      paddingLeft: "8px",
+                    }}
+                  >
+                    {p.reference}
+                  </div>
+                )}
               </div>
             ))}
             {data.change > 0 && (
