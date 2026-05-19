@@ -8,9 +8,11 @@ import { validateId } from "@/lib/validation"
 import {
   customerSchema,
   customerPriceSchema,
+  customerNetworkSchema,
   priceListSchema,
   type CustomerInput,
   type CustomerPriceInput,
+  type CustomerNetworkInput,
   type PriceListInput,
 } from "./schemas"
 
@@ -53,6 +55,7 @@ export async function createCustomer(input: CustomerInput) {
     address: parsed.data.address || null,
     notes: parsed.data.notes || null,
     price_list_id: parsed.data.price_list_id || null,
+    network_id: parsed.data.network_id || null,
     tenant_id: TENANT_ID,
     created_by: userId,
   }
@@ -96,6 +99,7 @@ export async function updateCustomer(id: string, input: CustomerInput) {
       address: parsed.data.address || null,
       notes: parsed.data.notes || null,
       price_list_id: parsed.data.price_list_id || null,
+      network_id: parsed.data.network_id || null,
     })
     .eq("id", id)
     .eq("tenant_id", TENANT_ID)
@@ -309,5 +313,106 @@ export async function removeCustomerPrice(id: string) {
   if (error) return { error: { _form: [error.message] } }
 
   revalidatePath("/configuracion")
+  return { data: { success: true } }
+}
+
+// --- CUSTOMER NETWORKS ---
+
+export async function createCustomerNetwork(input: CustomerNetworkInput) {
+  const parsed = customerNetworkSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
+  const supabase = await createServerClient()
+
+  const { data, error } = await supabase
+    .from("customer_networks")
+    .insert({
+      ...parsed.data,
+      tenant_id: TENANT_ID,
+      created_by: auth.userId,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    if (error.code === "23505") {
+      return { error: { _form: [`Ya existe una red con el nombre "${parsed.data.name}"`] } }
+    }
+    return { error: { _form: [error.message] } }
+  }
+
+  revalidatePath("/configuracion")
+  revalidatePath("/clientes")
+  return { data }
+}
+
+export async function updateCustomerNetwork(id: string, input: CustomerNetworkInput) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
+  const parsed = customerNetworkSchema.safeParse(input)
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
+
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
+  const supabase = await createServerClient()
+
+  const { data, error } = await supabase
+    .from("customer_networks")
+    .update({
+      name: parsed.data.name,
+      color: parsed.data.color,
+      sort_order: parsed.data.sort_order,
+    })
+    .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
+    .is("deleted_at", null)
+    .select()
+    .single()
+
+  if (error) {
+    if (error.code === "23505") {
+      return { error: { _form: [`Ya existe una red con el nombre "${parsed.data.name}"`] } }
+    }
+    return { error: { _form: [error.message] } }
+  }
+
+  revalidatePath("/configuracion")
+  revalidatePath("/clientes")
+  return { data }
+}
+
+export async function deleteCustomerNetwork(id: string) {
+  const idErr = validateId(id)
+  if (idErr) return idErr
+
+  const auth = await requireUserId()
+  if (auth.error) return { error: auth.error }
+
+  const supabase = await createServerClient()
+
+  // No bloqueamos por uso: clientes con esta red simplemente quedan en NULL.
+  const { error: clearError } = await supabase
+    .from("customers")
+    .update({ network_id: null })
+    .eq("network_id", id)
+    .eq("tenant_id", TENANT_ID)
+
+  if (clearError) return { error: { _form: [clearError.message] } }
+
+  const { error } = await supabase
+    .from("customer_networks")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("tenant_id", TENANT_ID)
+
+  if (error) return { error: { _form: [error.message] } }
+
+  revalidatePath("/configuracion")
+  revalidatePath("/clientes")
   return { data: { success: true } }
 }

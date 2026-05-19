@@ -182,6 +182,37 @@ export function getCustomerColumns({
       },
     },
     {
+      id: "network",
+      size: 140,
+      minSize: 100,
+      header: "Red",
+      cell: ({ row }) => {
+        const net = row.original.customer_networks
+        if (!net) return <span className="text-neutral-400">—</span>
+        return (
+          <div
+            className="inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-0.5"
+            style={{
+              backgroundColor: `${net.color}15`,
+              borderColor: `${net.color}40`,
+            }}
+            title={net.name}
+          >
+            <span
+              className="size-2 flex-shrink-0 rounded-full"
+              style={{ backgroundColor: net.color }}
+            />
+            <span
+              className="truncate text-[11px] font-semibold"
+              style={{ color: net.color }}
+            >
+              {net.name}
+            </span>
+          </div>
+        )
+      },
+    },
+    {
       id: "actions",
       size: 50,
       minSize: 50,

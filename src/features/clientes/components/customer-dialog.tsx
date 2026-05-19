@@ -38,7 +38,7 @@ import {
 import { CollapsibleSection } from "@/features/productos/components/collapsible-section"
 
 import { customerSchema, type CustomerInput } from "../schemas"
-import { usePriceLists, useCustomer } from "../queries"
+import { usePriceLists, useCustomer, useCustomerNetworks } from "../queries"
 import { createCustomer, updateCustomer } from "../actions"
 
 const SPRING_SMOOTH = { type: "spring" as const, stiffness: 300, damping: 35 }
@@ -61,6 +61,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
 
   const queryClient = useQueryClient()
   const { data: priceLists = [] } = usePriceLists()
+  const { data: networks = [] } = useCustomerNetworks()
   const { data: existingCustomer } = useCustomer(customerId ?? "")
 
   const {
@@ -82,6 +83,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
       address: "",
       notes: "",
       price_list_id: null,
+      network_id: null,
     },
   })
 
@@ -167,6 +169,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
         address: existingCustomer.address ?? "",
         notes: existingCustomer.notes ?? "",
         price_list_id: existingCustomer.price_list_id ?? null,
+        network_id: existingCustomer.network_id ?? null,
       })
     }
   }, [isEditing, existingCustomer, reset])
@@ -182,6 +185,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
         address: "",
         notes: "",
         price_list_id: null,
+        network_id: null,
       })
       setSuccess(false)
       setInfoOpen(true)
@@ -450,6 +454,62 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
               >
                 <div className="rounded-xl border border-white/80 bg-white p-4 shadow-sm">
                   <div className="space-y-4">
+                    {/* Red */}
+                    <div className="flex flex-col gap-1.5">
+                      <Label className="text-xs font-medium text-neutral-500">
+                        Red <span className="font-normal text-neutral-400">(opcional)</span>
+                      </Label>
+                      {networks.length === 0 ? (
+                        <p className="rounded-lg border border-dashed border-neutral-200 bg-neutral-50/40 px-3 py-2 text-[11px] text-neutral-400">
+                          No hay redes definidas. Créalas en Configuración → Redes.
+                        </p>
+                      ) : (
+                        <div className="flex flex-wrap gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setValue("network_id", null, { shouldDirty: true })}
+                            className={`flex h-7 items-center gap-1.5 rounded-full border px-3 text-[11px] font-semibold transition-all ${
+                              !watch("network_id")
+                                ? "border-neutral-800 bg-neutral-800 text-white"
+                                : "border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300 hover:text-neutral-700"
+                            }`}
+                          >
+                            Sin red
+                          </button>
+                          {networks.map((n) => {
+                            const selected = watch("network_id") === n.id
+                            return (
+                              <button
+                                key={n.id}
+                                type="button"
+                                onClick={() =>
+                                  setValue("network_id", n.id, { shouldDirty: true })
+                                }
+                                className={`flex h-7 items-center gap-1.5 rounded-full border px-3 text-[11px] font-semibold transition-all ${
+                                  selected
+                                    ? "border-transparent text-white shadow-sm"
+                                    : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:text-neutral-800"
+                                }`}
+                                style={
+                                  selected
+                                    ? { backgroundColor: n.color }
+                                    : undefined
+                                }
+                              >
+                                <span
+                                  className="size-2 rounded-full"
+                                  style={{
+                                    backgroundColor: selected ? "rgba(255,255,255,0.7)" : n.color,
+                                  }}
+                                />
+                                {n.name}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+
                     {/* Address */}
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="cd-address" className="text-xs font-medium text-neutral-500">

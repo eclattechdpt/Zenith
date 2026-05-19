@@ -12,7 +12,7 @@ _(nada en curso)_
 
 ## Por discutir / planear
 
-- **6.** Marcar clientas como "red interna" o "red externa".
+_(nada por discutir)_
 
 ## Terminados
 
@@ -26,3 +26,4 @@ _(nada en curso)_
 - **13.** (Nuevo) POS landing tenía un sliding cart de fondo que se duplicaba con el carrito del wizard (mismo store, dos UIs editables → bugs de sincronización). Eliminado `pos-sliding-cart.tsx`. Ahora al agregar un producto el wizard auto-abre en paso "Cliente", y cerrar el wizard limpia el carrito (descarta venta en curso). Modo `from-cart` eliminado por desuso. ✅
 - **11.** KPIs de `/ventas` ahora reactivos al filtro de fecha (Hoy / Esta semana / Mes / Fecha custom). Subtítulos reflejan el rango activo ("ventas · hoy", "ingresos · mayo 2026", etc.). Filtro state subido al page, `SalesTable` ahora controlada via `dateFilter` + `onDateFilterChange`. Helpers `getDateRange` y `getRangeLabel` extraídos a `src/features/ventas/date-filter.ts`. Resuelve la incoherencia previa donde los KPIs eran all-time y la tabla filtrada por fecha. ✅
 - **12.** "Valor total combinado" del hub de inventario ahora suma solo físico + tránsito (excluye carga inicial). Las pills de abajo siguen mostrando los 3 valores individuales. Carga inicial es inventario de referencia y no debe sumarse al operativo. Widget "Proporción del total" sigue calculando initial vs all-three con un sum local porque `grand_total` cambió de semántica. ✅
+- **6.** Clientes ahora se pueden clasificar por "Red" (interna, externa, referida, etc.) — lista editable desde Configuración → tab nueva "Redes". Tabla nueva `customer_networks` (name, color, sort_order); columna `network_id` opcional en customers. CRUD admin: `NetworkManager` con tarjetas tipo PriceListManager, color picker con 8 presets, conteo de clientes por red, soft delete que limpia el network_id de clientes afectados. Pills coloreadas en el form de cliente (sección "Detalles adicionales", default "Sin red"). Columna "Red" en la tabla de clientes con pill tinted por el color de la red. KPIs específicos en tab Redes (totalNetworks / clientesClasificados / promedioPorRed). ✅

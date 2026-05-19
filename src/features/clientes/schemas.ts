@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { zUUID } from "@/lib/validation"
+
 export const customerSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").max(200),
   client_number: z.string().max(50).optional().nullable().or(z.literal("")),
@@ -25,6 +27,16 @@ export const customerSchema = z.object({
   address: z.string().max(500).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
   price_list_id: z.string().uuid().optional().nullable(),
+  network_id: zUUID.optional().nullable(),
+})
+
+export const customerNetworkSchema = z.object({
+  name: z.string().min(1, "El nombre es requerido").max(100),
+  color: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Color debe ser hex (#RRGGBB)")
+    .default("#94a3b8"),
+  sort_order: z.coerce.number().int().min(0).default(0),
 })
 
 export const priceListSchema = z.object({
@@ -42,3 +54,4 @@ export const customerPriceSchema = z.object({
 export type CustomerInput = z.infer<typeof customerSchema>
 export type PriceListInput = z.infer<typeof priceListSchema>
 export type CustomerPriceInput = z.infer<typeof customerPriceSchema>
+export type CustomerNetworkInput = z.infer<typeof customerNetworkSchema>

@@ -12,6 +12,7 @@ import {
   ImageIcon,
   ImagePlus,
   ImageOff,
+  Network,
   Terminal,
   Activity,
   Database,
@@ -26,8 +27,9 @@ import {
   useImagenStats,
   useDevStats,
 } from "../queries"
+import { useCustomerNetworks } from "@/features/clientes/queries"
 
-type TabId = "categorias" | "descuentos" | "imagenes" | "desarrollo"
+type TabId = "categorias" | "descuentos" | "redes" | "imagenes" | "desarrollo"
 
 interface ConfigKpiWidgetsProps {
   activeTab: TabId
@@ -112,6 +114,47 @@ function DescuentosKpis() {
         iconBg="bg-violet-50"
         iconColor="text-violet-500"
         format={(n) => `${n.toFixed(1)}%`}
+        delay={0.12}
+      />
+    </div>
+  )
+}
+
+function RedesKpis() {
+  const { data: networks = [], isLoading } = useCustomerNetworks()
+  const totalNetworks = networks.length
+  const clientesClasificados = networks.reduce((sum, n) => sum + n.client_count, 0)
+  const promedioPorRed =
+    totalNetworks > 0 ? Math.round(clientesClasificados / totalNetworks) : 0
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+      <KpiCard
+        title="Redes definidas"
+        value={isLoading ? 0 : totalNetworks}
+        subtitle="Clasificaciones disponibles"
+        icon={Network}
+        variant="hero"
+        heroGradient="from-blue-500 to-blue-600"
+        heroShadow="shadow-blue-500/10"
+        delay={0}
+      />
+      <KpiCard
+        title="Clientes clasificados"
+        value={isLoading ? 0 : clientesClasificados}
+        subtitle="Con red asignada"
+        icon={Users}
+        iconBg="bg-blue-50"
+        iconColor="text-blue-500"
+        delay={0.06}
+      />
+      <KpiCard
+        title="Promedio por red"
+        value={isLoading ? 0 : promedioPorRed}
+        subtitle="Clientes por clasificación"
+        icon={TrendingDown}
+        iconBg="bg-violet-50"
+        iconColor="text-violet-500"
         delay={0.12}
       />
     </div>
@@ -292,6 +335,7 @@ function DesarrolloKpis() {
 const KPI_MAP: Record<TabId, React.FC> = {
   categorias: CategoriasKpis,
   descuentos: DescuentosKpis,
+  redes: RedesKpis,
   imagenes: ImagenesKpis,
   desarrollo: DesarrolloKpis,
 }

@@ -6,6 +6,7 @@ import {
   FolderTree,
   Percent,
   ImageIcon,
+  Network,
   Terminal,
 } from "lucide-react"
 
@@ -13,6 +14,7 @@ import { PageHero } from "@/components/shared/page-hero"
 import { SectionCard } from "@/components/shared/section-card"
 import { CategoryManager } from "@/features/productos/components/category-manager"
 import { PriceListManager } from "@/features/clientes/components/price-list-manager"
+import { NetworkManager } from "@/features/clientes/components/network-manager"
 import { MediaManager } from "@/features/media/components/media-manager"
 import { DevPanel } from "@/features/configuracion/components/dev-panel"
 import { DevPasswordGate } from "@/features/configuracion/components/dev-password-gate"
@@ -34,6 +36,14 @@ const TABS = [
     iconBg: "bg-teal-50",
     iconColor: "text-teal-500",
     description: "Define descuentos para diferentes tipos de clientes",
+  },
+  {
+    id: "redes" as const,
+    label: "Redes",
+    icon: Network,
+    iconBg: "bg-blue-50",
+    iconColor: "text-blue-500",
+    description: "Clasifica a tus clientes por red de distribución",
   },
   {
     id: "imagenes" as const,
@@ -166,6 +176,7 @@ export default function ConfiguracionPage() {
             >
               {activeTab === "categorias" && <CategoryManager />}
               {activeTab === "descuentos" && <PriceListManager />}
+              {activeTab === "redes" && <NetworkManager />}
               {activeTab === "imagenes" && <MediaManager />}
             </SectionCard>
           ) : null}

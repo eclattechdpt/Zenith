@@ -268,6 +268,42 @@ export type Database = {
           },
         ]
       }
+      customer_networks: {
+        Row: {
+          color: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          name: string
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           address: string | null
@@ -278,6 +314,7 @@ export type Database = {
           email: string | null
           id: string
           name: string
+          network_id: string | null
           notes: string | null
           phone: string | null
           price_list_id: string | null
@@ -293,6 +330,7 @@ export type Database = {
           email?: string | null
           id?: string
           name: string
+          network_id?: string | null
           notes?: string | null
           phone?: string | null
           price_list_id?: string | null
@@ -308,6 +346,7 @@ export type Database = {
           email?: string | null
           id?: string
           name?: string
+          network_id?: string | null
           notes?: string | null
           phone?: string | null
           price_list_id?: string | null
@@ -315,6 +354,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customers_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "customer_networks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customers_price_list_id_fkey"
             columns: ["price_list_id"]

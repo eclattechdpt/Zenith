@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { createClient } from "@/lib/supabase/client"
 
-import type { CustomerPriceWithDetails, CustomerWithPriceList, PriceList } from "./types"
+import type { CustomerNetwork, CustomerPriceWithDetails, CustomerWithPriceList, PriceList } from "./types"
 
 // --- CUSTOMERS ---
 
@@ -22,7 +22,8 @@ export function useCustomers(filters?: CustomerFilters) {
         .from("customers")
         .select(
           `*,
-          price_lists:price_lists(id, name, discount_percent)`
+          price_lists:price_lists(id, name, discount_percent),
+          customer_networks:customer_networks(id, name, color)`
         )
         .is("deleted_at", null)
         .order("name")
@@ -53,7 +54,8 @@ export function useCustomer(id: string) {
         .from("customers")
         .select(
           `*,
-          price_lists:price_lists(id, name, discount_percent)`
+          price_lists:price_lists(id, name, discount_percent),
+          customer_networks:customer_networks(id, name, color)`
         )
         .eq("id", id)
         .is("deleted_at", null)
@@ -202,6 +204,46 @@ export function usePriceLists() {
         ...pl,
         client_count: countMap.get(pl.id) ?? 0,
       })) as PriceListWithClientCount[]
+    },
+  })
+}
+
+// --- CUSTOMER NETWORKS ---
+
+export type CustomerNetworkWithCount = CustomerNetwork & { client_count: number }
+
+export function useCustomerNetworks() {
+  return useQuery({
+    queryKey: ["customer-networks"],
+    queryFn: async (): Promise<CustomerNetworkWithCount[]> => {
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from("customer_networks")
+        .select("*")
+        .is("deleted_at", null)
+        .order("sort_order")
+        .order("name")
+
+      if (error) throw error
+
+      const { data: customers } = await supabase
+        .from("customers")
+        .select("network_id")
+        .is("deleted_at", null)
+        .not("network_id", "is", null)
+
+      const countMap = new Map<string, number>()
+      for (const c of customers ?? []) {
+        if (c.network_id) {
+          countMap.set(c.network_id, (countMap.get(c.network_id) ?? 0) + 1)
+        }
+      }
+
+      return (data ?? []).map((n) => ({
+        ...n,
+        client_count: countMap.get(n.id) ?? 0,
+      })) as CustomerNetworkWithCount[]
     },
   })
 }
