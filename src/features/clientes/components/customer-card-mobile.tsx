@@ -107,10 +107,15 @@ export function CustomerCardMobile({ customer, onEdit, onDelete, onView }: Custo
           {/* Discount badge */}
           <div className="mt-2.5">
             {list ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-neutral-600">{list.name}</span>
+              <div className="flex min-w-0 items-center gap-2">
+                <span
+                  className="min-w-0 flex-1 truncate text-xs font-medium text-neutral-600"
+                  title={list.name}
+                >
+                  {list.name}
+                </span>
                 {Number(list.discount_percent) > 0 && (
-                  <Badge className="text-[10px] bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-50">
+                  <Badge className="flex-shrink-0 text-[10px] bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-50">
                     -{Number(list.discount_percent)}%
                   </Badge>
                 )}

@@ -165,10 +165,15 @@ export function getCustomerColumns({
         const list = row.original.price_lists
         if (!list) return <span className="text-neutral-400">—</span>
         return (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-neutral-600">{list.name}</span>
+          <div className="flex min-w-0 items-center gap-2">
+            <span
+              className="min-w-0 flex-1 truncate text-sm text-neutral-600"
+              title={list.name}
+            >
+              {list.name}
+            </span>
             {Number(list.discount_percent) > 0 && (
-              <Badge variant="secondary" className="text-[10px]">
+              <Badge variant="secondary" className="flex-shrink-0 text-[10px]">
                 -{Number(list.discount_percent)}%
               </Badge>
             )}
