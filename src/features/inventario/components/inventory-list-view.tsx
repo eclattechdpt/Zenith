@@ -117,7 +117,17 @@ function groupByProduct(
       group.worstStatus = "bajo"
   }
 
-  return order.map((id) => map.get(id)!)
+  const groups = order.map((id) => map.get(id)!)
+  // Ordena variantes de cada grupo por SKU (natural / numérica)
+  for (const g of groups) {
+    g.variants.sort((a, b) =>
+      (a.sku ?? "").localeCompare(b.sku ?? "", undefined, {
+        numeric: true,
+        sensitivity: "base",
+      })
+    )
+  }
+  return groups
 }
 
 // ── Sort ───────────────────────────────────────────────────────────────────

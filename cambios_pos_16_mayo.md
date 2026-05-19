@@ -14,7 +14,6 @@ _(nada en curso)_
 ## Por discutir / planear
 
 - **6.** Marcar clientas como "red interna" o "red externa".
-- **10.** Arreglar el orden al buscar productos para que salgan en orden numérico.
 - **11.** Mostrar las ventas del día en la sección `/ventas`.
 - **12.** Modificar inventario para que la suma sea solo físico + tránsito (excluir carga inicial).
 
@@ -24,4 +23,5 @@ _(nada en curso)_
 - **3.** Al imprimir una nota mostrar el precio tachado + descuento aplicado (solo porcentaje). ✅
 - **5.** Imprimir el comentario del pago "Otro" en el recibo (HTML + PDF). ✅
 - **9.** Imprimir el número de distribuidor del cliente en el recibo (HTML + PDF). ✅
+- **10.** Variantes de productos ordenadas por SKU (natural) en inventario y pickers del POS. ✅
 - **7.** Al elegir cliente con descuento base, decidir si se usa o se cambia por otro activo (resuelto como parte de 1+8 — el descuento del cliente es ahora un cart-level toggleable). ✅

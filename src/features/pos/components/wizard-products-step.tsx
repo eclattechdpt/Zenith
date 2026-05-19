@@ -18,7 +18,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { cn } from "@/lib/utils"
 import { formatCurrency, formatDiscountPercent } from "@/lib/utils"
 import { usePOSStore } from "../store"
-import { resolvePrice } from "../utils"
+import { resolvePrice, sortVariantsBySku } from "../utils"
 import { usePriceLists } from "@/features/clientes/queries"
 import { POSProductGrid } from "./pos-product-grid"
 import { ItemDiscountPicker } from "./item-discount-picker"
@@ -612,9 +612,9 @@ export function WizardProductsStep({
               Selecciona una variante
             </p>
             <div className="mt-2 max-h-60 space-y-1.5 overflow-y-auto">
-              {variantPickerProduct.product_variants
-                .filter((v) => v.is_active)
-                .map((variant) => {
+              {sortVariantsBySku(
+                variantPickerProduct.product_variants.filter((v) => v.is_active)
+              ).map((variant) => {
                   const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
                   const existingItem = items.find((i) => i.variantId === variant.id)
                   const isFull = availableStock > 0 && existingItem && existingItem.quantity >= availableStock

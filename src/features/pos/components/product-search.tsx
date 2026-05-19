@@ -13,7 +13,7 @@ import { useDebounce } from "@/hooks/use-debounce"
 
 import { usePOSProducts, type POSProduct } from "../queries"
 import { usePOSStore } from "../store"
-import { resolvePrice } from "../utils"
+import { resolvePrice, sortVariantsBySku } from "../utils"
 import type { CartCustomer } from "../types"
 
 function useAllPOSProducts() {
@@ -171,7 +171,9 @@ function ProductResultItem({
   onSelectProduct: (product: POSProduct) => void
   onSelectVariant: (variant: POSProduct["product_variants"][number]) => void
 }) {
-  const activeVariants = product.product_variants.filter((v) => v.is_active)
+  const activeVariants = sortVariantsBySku(
+    product.product_variants.filter((v) => v.is_active)
+  )
   const isSingleVariant = !product.has_variants && activeVariants.length === 1
   const [expanded, setExpanded] = useState(false)
 
