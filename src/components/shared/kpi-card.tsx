@@ -134,34 +134,33 @@ export function KpiCard({
         )}
       </div>
 
-      {/* Hero row: huge number + inline pill, subtitle diagonal bottom-right */}
-      <div className="mt-5 flex items-end justify-between gap-3">
-        <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-          <CountUp
-            value={value}
-            format={formatFn}
-            className={`block font-display font-semibold tracking-[-1.5px] ${heroTextClass} ${heroSize}`}
-          />
-          {badge && (
-            <motion.span
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ ...SPRING, delay: delay + 0.2 }}
-              className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${pillClass}`}
-            >
-              {(badge.trend === "up" || badge.trend === "down") && (
-                <ArrowIcon className="size-3" strokeWidth={2.25} />
-              )}
-              {badge.label}
-            </motion.span>
-          )}
-        </div>
-        <p
-          className={`shrink-0 pb-1.5 text-right text-[11px] font-medium ${subtitleClass}`}
-        >
-          {subtitle}
-        </p>
+      {/* Hero row: huge number + inline pill */}
+      <div className="mt-5 flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+        <CountUp
+          value={value}
+          format={formatFn}
+          className={`block min-w-0 max-w-full truncate font-display font-semibold tracking-[-1.5px] ${heroTextClass} ${heroSize}`}
+        />
+        {badge && (
+          <motion.span
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ ...SPRING, delay: delay + 0.2 }}
+            className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${pillClass}`}
+          >
+            {(badge.trend === "up" || badge.trend === "down") && (
+              <ArrowIcon className="size-3" strokeWidth={2.25} />
+            )}
+            {badge.label}
+          </motion.span>
+        )}
       </div>
+      {/* Subtitle below the value (avoids overlap when value is wide) */}
+      <p
+        className={`mt-1.5 truncate text-[11px] font-medium ${subtitleClass}`}
+      >
+        {subtitle}
+      </p>
 
       {/* Children (mini-viz) — hidden when collapsed */}
       {children && (
