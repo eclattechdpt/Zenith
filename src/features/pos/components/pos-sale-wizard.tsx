@@ -27,7 +27,7 @@ import { WizardConfirmationStep } from "./wizard-confirmation-step"
 
 // ── Types ──
 
-type WizardMode = "from-cart" | "new-sale" | "complete-pending"
+type WizardMode = "new-sale" | "complete-pending"
 type StepKey = "customer" | "products" | "payment" | "confirmation"
 
 interface POSSaleWizardProps {
@@ -39,7 +39,6 @@ interface POSSaleWizardProps {
 }
 
 const STEPS_BY_MODE: Record<WizardMode, StepKey[]> = {
-  "from-cart": ["customer", "payment", "confirmation"],
   "new-sale": ["customer", "products", "payment", "confirmation"],
   "complete-pending": ["payment", "confirmation"],
 }
@@ -540,8 +539,11 @@ export function POSSaleWizard({
     setSaleResult(null)
     setReceiptSnapshot(null)
     setWasPending(false)
+    // Cerrar el wizard descarta la venta en curso. clear() también es no-op
+    // tras una venta exitosa (handleCompleteSale ya limpió el store).
+    clear()
     onClose()
-  }, [onClose])
+  }, [onClose, clear])
 
   return (
     <Dialog
@@ -650,6 +652,15 @@ export function POSSaleWizard({
               {currentStep === "payment" && (
                 <WizardPaymentStep
                   total={total}
+                  pendingSaleDiscount={
+                    mode === "complete-pending" && pendingSale
+                      ? {
+                          amount: pendingSale.discount_amount,
+                          percent: pendingSale.discount_percent ?? null,
+                          subtotal: pendingSale.subtotal,
+                        }
+                      : undefined
+                  }
                   onNext={handlePaymentNext}
                   onBack={goBack}
                 />

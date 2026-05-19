@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { AnimatePresence, motion } from "motion/react"
+import { motion } from "motion/react"
 import { Flame, Clock } from "lucide-react"
 import { PageHero } from "@/components/shared/page-hero"
 import { useReactToPrint } from "react-to-print"
@@ -24,13 +24,12 @@ import { POSKpiWidgets } from "./pos-kpi-widgets"
 import { POSPendingSales } from "./pos-pending-sales"
 import { POSProductCarousel } from "./pos-product-carousel"
 import { POSProductGrid } from "./pos-product-grid"
-import { POSSlidingCart, POSCartFAB } from "./pos-sliding-cart"
 import { POSSaleWizard } from "./pos-sale-wizard"
 import { ProductEditDialog } from "@/features/productos/components/product-edit-dialog"
 
 // ── Types ──
 
-type WizardMode = "from-cart" | "new-sale" | "complete-pending"
+type WizardMode = "new-sale" | "complete-pending"
 
 // ── Realtime query keys (stable references) ──
 
@@ -85,7 +84,16 @@ export function POSLanding() {
   useRealtimeSync("product_variants", VARIANT_KEYS)
   useRealtimeSync("sales", SALES_KEYS)
 
+  // ── Wizard openers ──
+  const openNewSale = useCallback(() => {
+    setWizardMode("new-sale")
+    setPendingSale(null)
+    setWizardOpen(true)
+  }, [])
+
   // ── Add product to cart (shared by carousels and grid) ──
+  // Adding from the landing auto-opens the wizard. The wizard owns the cart UI
+  // end-to-end; there is no separate cart panel on the landing anymore.
   const handleAddProduct = useCallback(
     async (product: POSProductWithImage) => {
       const availableVariants = product.product_variants.filter(
@@ -122,22 +130,11 @@ export function POSLanding() {
         unitCost: variant.cost,
         stock: availableStock,
       })
+
+      if (!wizardOpen) openNewSale()
     },
-    [items, addItem, customer]
+    [items, addItem, customer, wizardOpen, openNewSale]
   )
-
-  // ── Wizard openers ──
-  const openNewSale = useCallback(() => {
-    setWizardMode("new-sale")
-    setPendingSale(null)
-    setWizardOpen(true)
-  }, [])
-
-  const openCheckout = useCallback(() => {
-    setWizardMode("from-cart")
-    setPendingSale(null)
-    setWizardOpen(true)
-  }, [])
 
   const openCompletePending = useCallback((sale: PendingSaleWithSummary) => {
     setWizardMode("complete-pending")
@@ -175,7 +172,7 @@ export function POSLanding() {
 
   return (
     <>
-      <div className="flex h-full gap-4">
+      <div className="flex h-full">
         {/* ── Main content ── */}
         <div className="min-w-0 flex-1 space-y-8 overflow-y-auto p-5 sm:p-8">
           {/* ── Hero header ── */}
@@ -228,21 +225,7 @@ export function POSLanding() {
           {/* ── Full product grid (in card) ── */}
           <POSProductGrid onAdd={handleAddProduct} onEditProduct={setEditProductId} />
         </div>
-
-        {/* ── Sliding cart sidebar (desktop) ── */}
-        <div className="hidden sm:block">
-          <AnimatePresence>
-            {items.length > 0 && (
-              <POSSlidingCart onCheckout={openCheckout} />
-            )}
-          </AnimatePresence>
-        </div>
       </div>
-
-      {/* ── Cart FAB (mobile) ── */}
-      <AnimatePresence>
-        {items.length > 0 && <POSCartFAB onClick={openCheckout} />}
-      </AnimatePresence>
 
       {/* ── Sale wizard modal ── */}
       <POSSaleWizard

@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
 import { useDebounce } from "@/hooks/use-debounce"
 import { usePOSProducts, type POSProduct } from "@/features/pos/queries"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, sortVariantsBySku } from "@/lib/utils"
 
 // ── Color hash for thumbnails ──
 
@@ -186,8 +186,10 @@ function ProductVariantList({
   excludeVariantIds: string[]
   onSelect: (variant: { id: string; name: string; price: number }) => void
 }) {
-  const variants = product.product_variants.filter(
-    (v) => v.is_active && !excludeVariantIds.includes(v.id)
+  const variants = sortVariantsBySku(
+    product.product_variants.filter(
+      (v) => v.is_active && !excludeVariantIds.includes(v.id)
+    )
   )
 
   if (variants.length === 0) return null

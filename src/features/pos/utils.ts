@@ -1,19 +1,6 @@
 import { createClient } from "@/lib/supabase/client"
 
-/**
- * Ordena variantes por SKU usando comparación natural (numérica).
- * "E-99" < "E-100", "E-2106" < "E-2111", etc.
- */
-export function sortVariantsBySku<T extends { sku?: string | null }>(
-  variants: T[]
-): T[] {
-  return [...variants].sort((a, b) =>
-    (a.sku ?? "").localeCompare(b.sku ?? "", undefined, {
-      numeric: true,
-      sensitivity: "base",
-    })
-  )
-}
+export { sortVariantsBySku } from "@/lib/utils"
 
 /**
  * Resolves the price for a variant based on a customer's specific negotiated prices.

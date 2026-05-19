@@ -3,7 +3,7 @@
 import { memo, useState } from "react"
 import { Pencil, Trash2, AlertCircle, ChevronDown, Layers } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, sortVariantsBySku } from "@/lib/utils"
 import { getCategoryNames } from "../types"
 import type { ProductWithDetails } from "../types"
 
@@ -70,7 +70,9 @@ export const ProductCard = memo(function ProductCard({
   const colorIdx = getColorIndex(product.name)
   const palette = INITIAL_COLORS[colorIdx]
   const priceRange = getPriceRange(product)
-  const activeVariants = product.product_variants.filter((v) => v.is_active)
+  const activeVariants = sortVariantsBySku(
+    product.product_variants.filter((v) => v.is_active)
+  )
   const hasMultipleVariants = product.has_variants && activeVariants.length > 1
 
   return (

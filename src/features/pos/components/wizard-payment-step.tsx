@@ -71,12 +71,17 @@ const METHOD_META: Record<
 
 interface WizardPaymentStepProps {
   total: number
+  // Cuando se está completando una venta pendiente, el descuento ya fue
+  // decidido al guardarla y es read-only aquí. Si está undefined, se usa el
+  // descuento vivo del carrito (modo new-sale).
+  pendingSaleDiscount?: { amount: number; percent: number | null; subtotal: number }
   onNext: (payments: CartPayment[]) => void
   onBack: () => void
 }
 
 export function WizardPaymentStep({
   total,
+  pendingSaleDiscount,
   onNext,
   onBack,
 }: WizardPaymentStepProps) {
@@ -84,12 +89,22 @@ export function WizardPaymentStep({
   const setCartDiscount = usePOSStore((s) => s.setCartDiscount)
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
-  const subtotal = getSubtotal()
-  const cartDiscountAmount =
+  const isPendingMode = pendingSaleDiscount !== undefined
+  const liveSubtotal = getSubtotal()
+  const subtotal = isPendingMode ? pendingSaleDiscount.subtotal : liveSubtotal
+  const liveCartDiscountAmount =
     cartDiscount.source === "custom_amount"
       ? cartDiscount.customAmount
       : getItemsDiscount()
-  const cartDiscountPercent = cartDiscount.source ? cartDiscount.percent : null
+  const cartDiscountAmount = isPendingMode
+    ? pendingSaleDiscount.amount
+    : liveCartDiscountAmount
+  const cartDiscountPercent = isPendingMode
+    ? pendingSaleDiscount.percent
+    : cartDiscount.source ? cartDiscount.percent : null
+  const hasDiscount = isPendingMode
+    ? cartDiscountAmount > 0
+    : Boolean(cartDiscount.source) && cartDiscountAmount > 0
 
   const { data: priceLists = [] } = usePriceLists()
   const activeDiscounts = priceLists.filter((pl) => Number(pl.discount_percent) > 0)
@@ -161,7 +176,7 @@ export function WizardPaymentStep({
         </div>
 
         {/* Discount display */}
-        {cartDiscount.source && cartDiscountAmount > 0 && (
+        {hasDiscount && (
           <div className="mt-3 flex items-center justify-between rounded-lg bg-rose-50/60 border border-rose-100 px-3 py-2">
             <span className="flex items-center gap-1.5 text-xs font-semibold text-rose-500">
               <Tag className="size-3" />
@@ -175,24 +190,26 @@ export function WizardPaymentStep({
               <span className="text-xs font-bold text-rose-500 tabular-nums">
                 -{formatCurrency(cartDiscountAmount)}
               </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setCartDiscount(null)
-                  setDiscountInput("")
-                  setDiscountOpen(false)
-                  setCustomInputOpen(false)
-                }}
-                className="flex size-5 items-center justify-center rounded text-rose-400 hover:bg-rose-100 hover:text-rose-600 transition-colors"
-              >
-                <X className="size-3" />
-              </button>
+              {!isPendingMode && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCartDiscount(null)
+                    setDiscountInput("")
+                    setDiscountOpen(false)
+                    setCustomInputOpen(false)
+                  }}
+                  className="flex size-5 items-center justify-center rounded text-rose-400 hover:bg-rose-100 hover:text-rose-600 transition-colors"
+                >
+                  <X className="size-3" />
+                </button>
+              )}
             </div>
           </div>
         )}
 
-        {/* Add discount button */}
-        {!cartDiscount.source && !discountOpen && (
+        {/* Add discount button — solo en modo new-sale; en complete-pending el descuento ya fue decidido */}
+        {!isPendingMode && !cartDiscount.source && !discountOpen && (
           <button
             type="button"
             onClick={() => { setDiscountOpen(true); setCustomInputOpen(false) }}
@@ -204,7 +221,7 @@ export function WizardPaymentStep({
         )}
 
         {/* Discount picker */}
-        {discountOpen && !cartDiscount.source && (
+        {!isPendingMode && discountOpen && !cartDiscount.source && (
           <div className="mt-3 rounded-lg border border-rose-100 bg-rose-50/40 p-2.5 space-y-2">
             {!customInputOpen && (
               <>

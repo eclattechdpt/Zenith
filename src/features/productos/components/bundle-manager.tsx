@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { EmptyState } from "@/components/shared/empty-state"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import { sortVariantsBySku } from "@/lib/utils"
 
 import { useProducts, useVariantsByIds } from "../queries"
 import type { BundleItemInput } from "../schemas"
@@ -173,38 +174,38 @@ export function BundleManager({ items, onChange }: BundleManagerProps) {
               </p>
             ) : (
               availableProducts.map((product) =>
-                product.product_variants
-                  .filter((v) => v.is_active)
-                  .map((variant) => {
-                    const optionLabel = variant.variant_option_assignments
-                      .map((a) => a.variant_options?.value)
-                      .filter(Boolean)
-                      .join(" / ")
-                    return (
-                      <button
-                        key={variant.id}
-                        type="button"
-                        onClick={() => addItem(variant)}
-                        className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-neutral-50"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-neutral-900">
-                            {product.name}
-                            {product.brand && (
-                              <span className="ml-1 text-xs text-neutral-500">
-                                {product.brand}
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-xs text-neutral-500">
-                            {optionLabel || variant.name || variant.sku || "Variante unica"}
-                            {" · "}Stock: {variant.stock}
-                          </p>
-                        </div>
-                        <Plus className="size-4 shrink-0 text-neutral-400" />
-                      </button>
-                    )
-                  })
+                sortVariantsBySku(
+                  product.product_variants.filter((v) => v.is_active)
+                ).map((variant) => {
+                  const optionLabel = variant.variant_option_assignments
+                    .map((a) => a.variant_options?.value)
+                    .filter(Boolean)
+                    .join(" / ")
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      onClick={() => addItem(variant)}
+                      className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-neutral-50"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-neutral-900">
+                          {product.name}
+                          {product.brand && (
+                            <span className="ml-1 text-xs text-neutral-500">
+                              {product.brand}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          {optionLabel || variant.name || variant.sku || "Variante unica"}
+                          {" · "}Stock: {variant.stock}
+                        </p>
+                      </div>
+                      <Plus className="size-4 shrink-0 text-neutral-400" />
+                    </button>
+                  )
+                })
               )
             )}
           </div>

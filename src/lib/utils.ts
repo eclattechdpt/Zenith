@@ -34,6 +34,23 @@ export function formatTime(date: Date | string): string {
   return format(new Date(date), "h:mm a", { locale: es })
 }
 
+// ── Variants ──
+
+/**
+ * Ordena variantes por SKU usando comparación natural (numérica).
+ * "E-99" < "E-100", "E-2106" < "E-2111", etc. Variantes sin SKU al final.
+ */
+export function sortVariantsBySku<T extends { sku?: string | null }>(
+  variants: T[]
+): T[] {
+  return [...variants].sort((a, b) =>
+    (a.sku ?? "").localeCompare(b.sku ?? "", undefined, {
+      numeric: true,
+      sensitivity: "base",
+    })
+  )
+}
+
 // ── Discount percent ──
 
 // Returns "30%" / "30.5%" / "30.45%" — trims trailing zeros after the decimal point.

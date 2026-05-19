@@ -11,7 +11,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, sortVariantsBySku } from "@/lib/utils"
 
 import { getCategoryNames } from "../types"
 import type { ProductWithDetails } from "../types"
@@ -59,7 +59,9 @@ function ProductRow({
   onDelete?: (product: ProductWithDetails) => void
 }) {
   const [expanded, setExpanded] = useState(false)
-  const activeVariants = product.product_variants.filter((v) => v.is_active)
+  const activeVariants = sortVariantsBySku(
+    product.product_variants.filter((v) => v.is_active)
+  )
   const hasMultipleVariants = product.has_variants && activeVariants.length > 1
   const totalStock = getTotalStock(product)
   const lowVariants = getLowStockVariants(product)

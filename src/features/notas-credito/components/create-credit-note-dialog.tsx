@@ -24,7 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import { cn, sortVariantsBySku } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 
 import { useCustomers } from "@/features/clientes/queries"
@@ -381,9 +381,9 @@ export function CreateCreditNoteDialog({ open, onOpenChange }: Props) {
               {filteredProducts.length > 0 ? (
                 <div className="space-y-1.5 pt-1">
                   {filteredProducts.map((p) =>
-                    (p.product_variants ?? [])
-                      .filter((v) => v.is_active)
-                      .map((v) => {
+                    sortVariantsBySku(
+                      (p.product_variants ?? []).filter((v) => v.is_active)
+                    ).map((v) => {
                         const dir = mode === "lending" ? "out" : addDirection
                         const alreadyAdded = items.some(
                           (i) => i.product_variant_id === v.id && i.direction === dir

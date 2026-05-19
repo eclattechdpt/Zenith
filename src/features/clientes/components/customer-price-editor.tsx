@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { NumericInput } from "@/features/productos/components/variant-manager"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, sortVariantsBySku } from "@/lib/utils"
 
 import { useCustomerPrices } from "../queries"
 import { setCustomerPrice, removeCustomerPrice } from "../actions"
@@ -74,7 +74,7 @@ export function CustomerPriceEditor({
       const nameMatch = product.name.toLowerCase().includes(q)
       const brandMatch = product.brand?.toLowerCase().includes(q)
 
-      for (const variant of product.product_variants) {
+      for (const variant of sortVariantsBySku(product.product_variants)) {
         if (variant.deleted_at) continue
         if (!variant.is_active) continue
         if (overriddenVariantIds.has(variant.id)) continue
