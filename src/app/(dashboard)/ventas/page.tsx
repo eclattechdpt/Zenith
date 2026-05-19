@@ -1,16 +1,30 @@
 "use client"
 
-import { Suspense } from "react"
+import { Suspense, useState } from "react"
 import { Receipt, DollarSign, TrendingUp } from "lucide-react"
+import { startOfMonth } from "date-fns"
 
 import { PageHero } from "@/components/shared/page-hero"
 import { KpiCard } from "@/components/shared/kpi-card"
 import { SalesTable } from "@/features/ventas/components/sales-table"
 import { useSalesStats } from "@/features/ventas/queries"
+import { getDateRange, getRangeLabel, type DateFilterState } from "@/features/ventas/date-filter"
 import { formatCurrency } from "@/lib/utils"
 
 export default function VentasPage() {
-  const stats = useSalesStats()
+  const [dateFilter, setDateFilter] = useState<DateFilterState>({
+    preset: "today",
+    selectedMonth: startOfMonth(new Date()),
+    customDate: "",
+  })
+
+  const dateRange = getDateRange(dateFilter)
+  const rangeLabel = getRangeLabel(dateFilter)
+
+  const stats = useSalesStats({
+    dateFrom: dateRange?.from,
+    dateTo: dateRange?.to,
+  })
 
   return (
     <Suspense>
@@ -22,14 +36,14 @@ export default function VentasPage() {
         <KpiCard
           title="Total ventas"
           value={stats.totalSales}
-          subtitle="ventas completadas"
+          subtitle={rangeLabel ? `ventas · ${rangeLabel}` : "ventas completadas"}
           icon={Receipt}
           variant="hero"
         />
         <KpiCard
           title="Ingresos"
           value={stats.totalRevenue}
-          subtitle="ingresos totales"
+          subtitle={rangeLabel ? `ingresos · ${rangeLabel}` : "ingresos totales"}
           icon={DollarSign}
           format={formatCurrency}
           iconBg="bg-teal-50"
@@ -49,7 +63,7 @@ export default function VentasPage() {
       </div>
 
       {/* Sales table */}
-      <SalesTable />
+      <SalesTable dateFilter={dateFilter} onDateFilterChange={setDateFilter} />
     </div>
     </Suspense>
   )

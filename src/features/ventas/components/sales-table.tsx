@@ -6,17 +6,15 @@ import { Search, Receipt, X, ChevronLeft, ChevronRight, CalendarDays } from "luc
 import { useQueryState, parseAsString } from "nuqs"
 import { motion, AnimatePresence } from "motion/react"
 import {
-  startOfDay,
-  endOfDay,
-  startOfWeek,
   startOfMonth,
-  endOfMonth,
   subMonths,
   addMonths,
   isAfter,
   format,
 } from "date-fns"
 import { es } from "date-fns/locale"
+
+import { getDateRange, type DateFilterState } from "../date-filter"
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -55,39 +53,12 @@ const STATUS_TABS = [
   { value: "cancelled", label: "Canceladas" },
 ] as const
 
-function getDateRange(
-  preset: string,
-  selectedMonth: Date,
-  customDate?: string
-): { from: string; to: string } | null {
-  const now = new Date()
-  const todayEnd = endOfDay(now).toISOString()
-  if (preset === "today") {
-    return { from: startOfDay(now).toISOString(), to: todayEnd }
-  }
-  if (preset === "week") {
-    return {
-      from: startOfWeek(now, { weekStartsOn: 1 }).toISOString(),
-      to: todayEnd,
-    }
-  }
-  if (preset === "month") {
-    return {
-      from: startOfMonth(selectedMonth).toISOString(),
-      to: endOfMonth(selectedMonth).toISOString(),
-    }
-  }
-  if (preset === "custom" && customDate) {
-    const date = new Date(customDate)
-    return {
-      from: startOfDay(date).toISOString(),
-      to: endOfDay(date).toISOString(),
-    }
-  }
-  return null
+interface SalesTableProps {
+  dateFilter: DateFilterState
+  onDateFilterChange: (next: DateFilterState) => void
 }
 
-export function SalesTable() {
+export function SalesTable({ dateFilter, onDateFilterChange }: SalesTableProps) {
   const [search, setSearch] = useQueryState("q", parseAsString.withDefault(""))
   const debouncedSearch = useDebounce(search, 250)
   const [isFocused, setIsFocused] = useState(false)
@@ -97,16 +68,14 @@ export function SalesTable() {
     "status",
     parseAsString.withDefault("")
   )
-  const [datePreset, setDatePreset] = useState("today")
-  const [selectedMonth, setSelectedMonth] = useState(() => startOfMonth(new Date()))
-  const [customDate, setCustomDate] = useState("")
+  const { preset: datePreset, selectedMonth, customDate } = dateFilter
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   const isCurrentMonth =
     format(selectedMonth, "yyyy-MM") === format(new Date(), "yyyy-MM")
   const monthLabel = format(selectedMonth, "MMMM yyyy", { locale: es })
 
-  const dateRange = getDateRange(datePreset, selectedMonth, customDate)
+  const dateRange = getDateRange(dateFilter)
 
   const {
     data: sales = [],
@@ -318,7 +287,10 @@ export function SalesTable() {
         <div className="mt-3 flex flex-wrap items-center gap-1">
           <button
             type="button"
-            onClick={() => { setDatePreset("today"); setCustomDate(""); setDatePickerOpen(false) }}
+            onClick={() => {
+              onDateFilterChange({ ...dateFilter, preset: "today", customDate: "" })
+              setDatePickerOpen(false)
+            }}
             className={cn(
               "h-7 rounded-full px-3 text-[11px] font-semibold transition-all",
               datePreset === "today"
@@ -330,7 +302,10 @@ export function SalesTable() {
           </button>
           <button
             type="button"
-            onClick={() => { setDatePreset("week"); setCustomDate(""); setDatePickerOpen(false) }}
+            onClick={() => {
+              onDateFilterChange({ ...dateFilter, preset: "week", customDate: "" })
+              setDatePickerOpen(false)
+            }}
             className={cn(
               "h-7 rounded-full px-3 text-[11px] font-semibold transition-all",
               datePreset === "week"
@@ -346,9 +321,12 @@ export function SalesTable() {
             <button
               type="button"
               onClick={() => {
-                setSelectedMonth((m) => subMonths(m, 1))
-                setDatePreset("month")
-                setCustomDate("")
+                onDateFilterChange({
+                  ...dateFilter,
+                  preset: "month",
+                  selectedMonth: subMonths(selectedMonth, 1),
+                  customDate: "",
+                })
                 setDatePickerOpen(false)
               }}
               className="flex size-7 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
@@ -358,9 +336,12 @@ export function SalesTable() {
             <button
               type="button"
               onClick={() => {
-                setSelectedMonth(startOfMonth(new Date()))
-                setDatePreset("month")
-                setCustomDate("")
+                onDateFilterChange({
+                  ...dateFilter,
+                  preset: "month",
+                  selectedMonth: startOfMonth(new Date()),
+                  customDate: "",
+                })
                 setDatePickerOpen(false)
               }}
               className={cn(
@@ -376,12 +357,13 @@ export function SalesTable() {
               type="button"
               disabled={isCurrentMonth}
               onClick={() => {
-                setSelectedMonth((m) => {
-                  const next = addMonths(m, 1)
-                  return isAfter(next, new Date()) ? startOfMonth(new Date()) : next
+                const next = addMonths(selectedMonth, 1)
+                onDateFilterChange({
+                  ...dateFilter,
+                  preset: "month",
+                  selectedMonth: isAfter(next, new Date()) ? startOfMonth(new Date()) : next,
+                  customDate: "",
                 })
-                setDatePreset("month")
-                setCustomDate("")
                 setDatePickerOpen(false)
               }}
               className="flex size-7 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors disabled:opacity-30 disabled:pointer-events-none"
@@ -394,7 +376,9 @@ export function SalesTable() {
           {datePreset === "custom" && customDate ? (
             <button
               type="button"
-              onClick={() => { setDatePreset("today"); setCustomDate("") }}
+              onClick={() =>
+                onDateFilterChange({ ...dateFilter, preset: "today", customDate: "" })
+              }
               className="flex h-7 items-center gap-1 rounded-full bg-accent-500 px-3 text-[11px] font-semibold text-white shadow-sm"
             >
               {format(new Date(customDate), "d MMM yyyy", { locale: es })}
@@ -419,8 +403,11 @@ export function SalesTable() {
                   selected={customDate ? new Date(customDate + "T12:00:00") : undefined}
                   onSelect={(date) => {
                     if (date) {
-                      setCustomDate(format(date, "yyyy-MM-dd"))
-                      setDatePreset("custom")
+                      onDateFilterChange({
+                        ...dateFilter,
+                        preset: "custom",
+                        customDate: format(date, "yyyy-MM-dd"),
+                      })
                       setDatePickerOpen(false)
                     }
                   }}

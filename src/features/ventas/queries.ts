@@ -62,8 +62,11 @@ export function useSales(filters?: SalesFilters) {
 
 // --- SALES STATS (for KPI widgets) ---
 
-export function useSalesStats() {
-  const { data: sales } = useSales()
+export function useSalesStats(range?: { dateFrom?: string; dateTo?: string }) {
+  const { data: sales } = useSales({
+    dateFrom: range?.dateFrom,
+    dateTo: range?.dateTo,
+  })
 
   const completed = (sales ?? []).filter((s) => s.status === "completed" || s.status === "partially_returned" || s.status === "fully_returned")
   const totalSales = completed.length

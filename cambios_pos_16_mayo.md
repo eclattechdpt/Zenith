@@ -13,7 +13,6 @@ _(nada en curso)_
 ## Por discutir / planear
 
 - **6.** Marcar clientas como "red interna" o "red externa".
-- **11.** Mostrar las ventas del día en la sección `/ventas`.
 - **12.** Modificar inventario para que la suma sea solo físico + tránsito (excluir carga inicial).
 
 ## Terminados
@@ -26,3 +25,4 @@ _(nada en curso)_
 - **7.** Al elegir cliente con descuento base, decidir si se usa o se cambia por otro activo (resuelto como parte de 1+8 — el descuento del cliente es ahora un cart-level toggleable). ✅
 - **2.** Venta pendiente con descuento al reabrir mostraba el botón "Agregar descuento" en vez del banner "Descuento aplicado". Fix: nueva prop `pendingSaleDiscount` en `WizardPaymentStep` que hidrata el descuento desde la venta pendiente (read-only — sin X de remover, sin botón de agregar) en modo `complete-pending`. ✅
 - **13.** (Nuevo) POS landing tenía un sliding cart de fondo que se duplicaba con el carrito del wizard (mismo store, dos UIs editables → bugs de sincronización). Eliminado `pos-sliding-cart.tsx`. Ahora al agregar un producto el wizard auto-abre en paso "Cliente", y cerrar el wizard limpia el carrito (descarta venta en curso). Modo `from-cart` eliminado por desuso. ✅
+- **11.** KPIs de `/ventas` ahora reactivos al filtro de fecha (Hoy / Esta semana / Mes / Fecha custom). Subtítulos reflejan el rango activo ("ventas · hoy", "ingresos · mayo 2026", etc.). Filtro state subido al page, `SalesTable` ahora controlada via `dateFilter` + `onDateFilterChange`. Helpers `getDateRange` y `getRangeLabel` extraídos a `src/features/ventas/date-filter.ts`. Resuelve la incoherencia previa donde los KPIs eran all-time y la tabla filtrada por fecha. ✅
