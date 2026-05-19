@@ -139,6 +139,7 @@ export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps)
       saleNumber: sale.sale_number,
       date: sale.created_at,
       customerName: sale.customers?.name ?? null,
+      customerNumber: sale.customers?.client_number ?? null,
       items: sale.sale_items.map((item) => ({
         product_name: item.product_name,
         variant_label: item.variant_label,

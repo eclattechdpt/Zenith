@@ -23,7 +23,7 @@ export function useSales(filters?: SalesFilters) {
         .from("sales")
         .select(
           `*,
-          customers:customers(id, name),
+          customers:customers(id, name, client_number),
           sale_items(id),
           sale_payments(method, amount),
           returns!returns_sale_id_fkey(id, status, deleted_at)`
@@ -83,7 +83,7 @@ export function useQuoteDetail(quoteId: string | null) {
         .from("sales")
         .select(
           `*,
-          customers:customers(id, name),
+          customers:customers(id, name, client_number),
           sale_items(
             id, product_variant_id, product_name, variant_label,
             quantity, unit_price, unit_cost, discount, discount_percent, line_total
@@ -109,7 +109,7 @@ export function useSaleDetail(saleId: string | null) {
         .from("sales")
         .select(
           `*,
-          customers:customers(id, name),
+          customers:customers(id, name, client_number),
           sale_items(
             id, product_variant_id, product_name, variant_label,
             quantity, unit_price, unit_cost, discount, discount_percent, line_total

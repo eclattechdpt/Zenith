@@ -49,6 +49,7 @@ export interface CartDiscount {
 export interface CartCustomer {
   id: string
   name: string
+  clientNumber: string | null
   priceListId: string | null
   discountPercent: number
 }

@@ -131,6 +131,7 @@ export function POSSaleWizard({
         saleNumber,
         date: new Date().toISOString(),
         customerName: pendingSale.customer?.name ?? null,
+        customerNumber: null,
         items: pendingSale.items.map((i) => ({
           product_name: i.product_name,
           variant_label: i.variant_label,
@@ -154,6 +155,7 @@ export function POSSaleWizard({
       saleNumber,
       date: new Date().toISOString(),
       customerName: customer?.name ?? null,
+      customerNumber: customer?.clientNumber ?? null,
       items: items.map((i) => {
         const payload = buildSaleItemPayload(i)
         const gross = i.unitPrice * i.quantity

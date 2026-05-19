@@ -25,6 +25,7 @@ export interface ReceiptData {
   saleNumber: string
   date: string
   customerName: string | null
+  customerNumber: string | null
   items: ReceiptItem[]
   payments: ReceiptPayment[]
   subtotal: number
@@ -148,30 +149,67 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
               style={{
                 paddingTop: "10px",
                 borderTop: "1px solid #eeeeee",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
               }}
             >
-              <span
+              <div
                 style={{
-                  fontSize: "9px",
-                  color: "#999",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
-                Cliente
-              </span>
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                }}
-              >
-                {data.customerName}
-              </span>
+                <span
+                  style={{
+                    fontSize: "9px",
+                    color: "#999",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  Cliente
+                </span>
+                <span
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    color: "#1a1a1a",
+                    textAlign: "right",
+                  }}
+                >
+                  {data.customerName}
+                </span>
+              </div>
+              {data.customerNumber && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: "3px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "9px",
+                      color: "#999",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Nº Distribuidor
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: 500,
+                      color: "#444",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {data.customerNumber}
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>

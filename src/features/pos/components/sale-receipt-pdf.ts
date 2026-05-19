@@ -102,7 +102,7 @@ function currency(n: number) {
 
 function estimateHeight(data: ReceiptData): number {
   const base = 28 + 30 + 2 + 18  // paddingTop + brand + accentLine + gap
-    + 40 + (data.customerName ? 24 : 0) + 18  // infoBox + customer + gap
+    + 40 + (data.customerName ? 24 : 0) + (data.customerNumber ? 14 : 0) + 18  // infoBox + customer + nº distribuidor + gap
     + 20 // table header
     + 30 + 10 // subtotal row + gap
     + (data.discountAmount > 0 ? 16 : 0)
@@ -142,9 +142,17 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
           ),
         ),
         data.customerName
-          ? h(View, { style: s.clientRow },
-              h(Text, { style: s.clientLabel }, "Cliente"),
-              h(Text, { style: s.clientName }, data.customerName),
+          ? h(View, null,
+              h(View, { style: s.clientRow },
+                h(Text, { style: s.clientLabel }, "Cliente"),
+                h(Text, { style: s.clientName }, data.customerName),
+              ),
+              data.customerNumber
+                ? h(View, { style: { flexDirection: "row", justifyContent: "space-between", marginTop: 3 } },
+                    h(Text, { style: { ...s.clientLabel, fontSize: 7 } }, "Nº Distribuidor"),
+                    h(Text, { style: { fontSize: 8, fontWeight: 500, color: "#444", fontFamily: PDF_FONT } }, data.customerNumber),
+                  )
+                : null,
             )
           : null,
       ),

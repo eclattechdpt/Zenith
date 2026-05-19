@@ -45,11 +45,13 @@ export function WizardCustomerStep({ onNext }: WizardCustomerStepProps) {
       id: string
       name: string
       phone: string | null
+      client_number: string | null
       price_lists: { id: string; discount_percent: number | string } | null
     }) => {
       const cartCustomer: CartCustomer = {
         id: raw.id,
         name: raw.name,
+        clientNumber: raw.client_number ?? null,
         priceListId: raw.price_lists?.id ?? null,
         discountPercent: Number(raw.price_lists?.discount_percent ?? 0),
       }

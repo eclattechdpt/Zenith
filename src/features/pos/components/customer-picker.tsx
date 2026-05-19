@@ -143,6 +143,7 @@ export function CustomerPicker() {
                     handleSelect({
                       id: c.id,
                       name: c.name,
+                      clientNumber: c.client_number ?? null,
                       priceListId: c.price_lists?.id ?? null,
                       discountPercent: Number(
                         c.price_lists?.discount_percent ?? 0
