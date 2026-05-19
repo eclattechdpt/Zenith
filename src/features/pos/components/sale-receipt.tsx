@@ -314,7 +314,16 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
               <span>
                 Descuento
                 {(() => {
-                  const pct = formatDiscountPercent(data.discountAmount, data.subtotal, data.discountPercent)
+                  // Si los items tienen distintos %, NO mostrar % del cart-level
+                  // (engañoso). Solo mostrarlo si todos los items siguen el mismo %.
+                  const uniquePcts = new Set(
+                    data.items
+                      .filter((i) => i.discount > 0)
+                      .map((i) => Number(i.discount_percent ?? 0))
+                  )
+                  const sameForAll = uniquePcts.size === 1 && [...uniquePcts][0] > 0
+                  if (!sameForAll) return null
+                  const pct = formatDiscountPercent(data.discountAmount, data.subtotal, [...uniquePcts][0])
                   return pct ? (
                     <span style={{ fontVariantNumeric: "tabular-nums" }}>
                       {" "}({pct})

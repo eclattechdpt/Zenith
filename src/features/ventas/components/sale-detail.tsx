@@ -38,6 +38,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { SectionCard } from "@/components/shared/section-card"
 import { KpiCard } from "@/components/shared/kpi-card"
 import { formatCurrency, formatDiscountPercent } from "@/lib/utils"
+import { DiscountBreakdown, buildHistoricalBreakdown } from "@/features/pos/components/discount-breakdown"
 import {
   SALE_STATUSES,
   PAYMENT_METHODS,
@@ -533,21 +534,8 @@ export function SaleDetail({ saleId }: SaleDetailProps) {
               </span>
             </div>
             {Number(sale.discount_amount) > 0 && (() => {
-              const sub = Number(sale.subtotal)
-              const disc = Number(sale.discount_amount)
-              const exactPct = sale.discount_percent != null ? Number(sale.discount_percent) : null
-              const pctLabel = formatDiscountPercent(disc, sub, exactPct)
-              return (
-                <div className="flex justify-between text-sm text-rose-600">
-                  <span>
-                    Descuento
-                    {pctLabel && <span className="tabular-nums"> ({pctLabel})</span>}
-                  </span>
-                  <span className="tabular-nums">
-                    −{formatCurrency(disc)}
-                  </span>
-                </div>
-              )
+              const breakdown = buildHistoricalBreakdown(sale.sale_items)
+              return <DiscountBreakdown lines={breakdown} size="normal" />
             })()}
             <div className="mt-2 flex items-center justify-between rounded-xl bg-gradient-to-r from-rose-50 to-rose-100/60 px-4 py-3">
               <span className="text-xs font-bold uppercase tracking-[1px] text-neutral-900">

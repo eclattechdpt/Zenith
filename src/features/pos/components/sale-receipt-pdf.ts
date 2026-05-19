@@ -201,7 +201,14 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
           ? h(View, { style: { flexDirection: "row", justifyContent: "space-between", marginTop: 3 } },
               h(Text, { style: s.discountText },
                 (() => {
-                  const pct = formatDiscountPercent(data.discountAmount, data.subtotal, data.discountPercent)
+                  const uniquePcts = new Set(
+                    data.items
+                      .filter((i) => i.discount > 0)
+                      .map((i) => Number(i.discount_percent ?? 0))
+                  )
+                  const sameForAll = uniquePcts.size === 1 && [...uniquePcts][0] > 0
+                  if (!sameForAll) return "Descuento"
+                  const pct = formatDiscountPercent(data.discountAmount, data.subtotal, [...uniquePcts][0])
                   return pct ? `Descuento (${pct})` : "Descuento"
                 })()
               ),

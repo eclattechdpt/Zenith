@@ -2,6 +2,22 @@ import { create } from "zustand"
 
 import type { CartItem, CartCustomer, CartDiscount, DiscountSource } from "./types"
 
+export interface DiscountLine {
+  // Identifica el tipo de línea: "cart" agrupa items que siguen el carrito;
+  // "item" es un override individual.
+  kind: "cart" | "item"
+  label: string                  // "Desc. cliente" / "Aceite Omega" / ...
+  amount: number                 // $ descontado en esta línea
+  percent: number | null         // % aplicado, null si custom_amount
+  source: DiscountSource
+  isGift?: boolean
+}
+
+export interface DiscountBreakdown {
+  lines: DiscountLine[]
+  totalDiscount: number          // suma de todas las líneas (= cart-level distribuido + overrides + custom_amount)
+}
+
 const EMPTY_DISCOUNT: CartDiscount = {
   percent: 0,
   source: null,
@@ -64,6 +80,8 @@ interface POSStore {
     discount: number
     discount_percent: number | null
   }
+  // Desglose de descuentos para el footer/recibo (solo incluye lo que SÍ aplica)
+  getDiscountBreakdown: () => DiscountBreakdown
 
   // ── Actions ──
   clear: () => void
@@ -230,6 +248,61 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       discount: discountAmount,
       discount_percent: pct > 0 ? pct : null,
     }
+  },
+
+  getDiscountBreakdown: () => {
+    const items = get().items
+    const cart = get().cartDiscount
+    const lines: DiscountLine[] = []
+    let cartLevelTotal = 0
+
+    for (const item of items) {
+      if (item.itemDiscountPercent != null) {
+        // Override per-item — línea individual
+        const gross = item.unitPrice * item.quantity
+        const amount = Math.round(gross * (item.itemDiscountPercent / 100) * 100) / 100
+        if (amount > 0) {
+          lines.push({
+            kind: "item",
+            label: item.productName,
+            amount,
+            percent: item.itemDiscountPercent,
+            source: item.itemDiscountSource ?? "custom_pct",
+            isGift: item.itemDiscountSource === "gift",
+          })
+        }
+      } else if (cart.source && cart.source !== "custom_amount") {
+        // Sigue al cart-level %
+        const gross = item.unitPrice * item.quantity
+        cartLevelTotal += Math.round(gross * (cart.percent / 100) * 100) / 100
+      }
+    }
+
+    // Línea del cart-level solo si AL MENOS un item lo usó
+    if (cartLevelTotal > 0 && cart.source && cart.source !== "custom_amount") {
+      const label = cart.source === "customer" ? "Desc. cliente" : "Descuento"
+      lines.unshift({
+        kind: "cart",
+        label,
+        amount: cartLevelTotal,
+        percent: cart.percent,
+        source: cart.source,
+      })
+    }
+
+    // Cart-level custom_amount: línea propia al final
+    if (cart.source === "custom_amount" && cart.customAmount > 0) {
+      lines.push({
+        kind: "cart",
+        label: "Descuento adicional",
+        amount: cart.customAmount,
+        percent: null,
+        source: "custom_amount",
+      })
+    }
+
+    const totalDiscount = lines.reduce((sum, l) => sum + l.amount, 0)
+    return { lines, totalDiscount }
   },
 
   // ── Actions ──

@@ -22,6 +22,7 @@ import { resolvePrice } from "../utils"
 import { usePriceLists } from "@/features/clientes/queries"
 import { POSProductGrid } from "./pos-product-grid"
 import { ItemDiscountPicker } from "./item-discount-picker"
+import { DiscountBreakdown } from "./discount-breakdown"
 import type { POSProductWithImage } from "../queries"
 import type { CartItem, CartDiscount } from "../types"
 
@@ -66,6 +67,7 @@ export function WizardProductsStep({
   const setCartDiscount = usePOSStore((s) => s.setCartDiscount)
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
+  const getDiscountBreakdown = usePOSStore((s) => s.getDiscountBreakdown)
   const getTotal = usePOSStore((s) => s.getTotal)
   const getItemCount = usePOSStore((s) => s.getItemCount)
 
@@ -392,10 +394,8 @@ export function WizardProductsStep({
                     void customerSavings
                     void hasCustomerDiscount
                     void itemsDiscount
-                    const cartLabel =
-                      cartDiscount.source === "customer"
-                        ? "Desc. cliente"
-                        : "Descuento"
+                    void cartDiscountAmount
+                    const discountBreakdown = getDiscountBreakdown()
                     return (
                       <div className="space-y-1.5">
                         <div className="flex justify-between text-xs text-neutral-500">
@@ -405,59 +405,16 @@ export function WizardProductsStep({
                           </span>
                         </div>
 
-                        {/* Cart-level discount display */}
-                        {cartDiscount.source && cartDiscountAmount > 0 && (
-                          <div className="flex justify-between items-center text-xs">
-                            <span
-                              className={cn(
-                                "flex items-center gap-1 font-semibold",
-                                cartDiscount.source === "customer"
-                                  ? "text-teal-600"
-                                  : "text-rose-500"
-                              )}
-                            >
-                              {cartDiscount.source === "customer" ? (
-                                <Tag className="h-3 w-3" />
-                              ) : (
-                                <Percent className="h-3 w-3" />
-                              )}
-                              {cartLabel}
-                              {(() => {
-                                const pct = formatDiscountPercent(
-                                  cartDiscountAmount,
-                                  getSubtotal(),
-                                  cartDiscount.source ? cartDiscount.percent : null
-                                )
-                                return pct ? (
-                                  <span className="tabular-nums">({pct})</span>
-                                ) : null
-                              })()}
-                            </span>
-                            <div className="flex items-center gap-1.5">
-                              <span
-                                className={cn(
-                                  "font-semibold tabular-nums",
-                                  cartDiscount.source === "customer"
-                                    ? "text-teal-600"
-                                    : "text-rose-500"
-                                )}
-                              >
-                                -{formatCurrency(cartDiscountAmount)}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setCartDiscount(null)
-                                  setDiscountInput("")
-                                  setDiscountOpen(false)
-                                }}
-                                className="flex size-4 items-center justify-center rounded text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                              >
-                                <X className="size-3" />
-                              </button>
-                            </div>
-                          </div>
-                        )}
+                        {/* Discount breakdown — una línea por descuento aplicado */}
+                        <DiscountBreakdown
+                          lines={discountBreakdown.lines}
+                          size="compact"
+                          onClearCartDiscount={() => {
+                            setCartDiscount(null)
+                            setDiscountInput("")
+                            setDiscountOpen(false)
+                          }}
+                        />
 
                         {/* Add discount button */}
                         {!cartDiscount.source && !discountOpen && (
