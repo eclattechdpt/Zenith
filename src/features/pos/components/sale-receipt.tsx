@@ -133,7 +133,7 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
             style={{
               display: "block",
               margin: "0 auto 8px",
-              width: "62mm",
+              width: "38mm",
               maxWidth: "100%",
               height: "auto",
             }}
@@ -245,59 +245,75 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         {/* ── Totals ── */}
         <Row label="Subtotal" value={formatCurrency(data.subtotal)} />
 
-        {data.discountAmount > 0 && (
-          <>
-            {sameDiscountForAll ? (
-              (() => {
-                const pct = formatDiscountPercent(
-                  data.discountAmount,
-                  data.subtotal,
-                  [...uniquePcts][0]
-                )
+        {data.discountAmount > 0 && (() => {
+          // 3 casos:
+          // A) Sin items con descuento → es cart-level (custom_amount). Línea simple.
+          // B) Todos los items con el mismo % → línea agregada con %.
+          // C) % distintos entre items → header DESCUENTOS + 1 línea por producto.
+          if (withDiscount.length === 0) {
+            const pct = formatDiscountPercent(
+              data.discountAmount,
+              data.subtotal,
+              data.discountPercent
+            )
+            return (
+              <Row
+                label={`Descuento${pct ? ` (${pct})` : ""}`}
+                value={`-${formatCurrency(data.discountAmount)}`}
+              />
+            )
+          }
+
+          if (sameDiscountForAll) {
+            const pct = formatDiscountPercent(
+              data.discountAmount,
+              data.subtotal,
+              [...uniquePcts][0]
+            )
+            return (
+              <Row
+                label={`Descuento${pct ? ` (${pct})` : ""}`}
+                value={`-${formatCurrency(data.discountAmount)}`}
+              />
+            )
+          }
+
+          return (
+            <>
+              <div
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  marginTop: "4px",
+                }}
+              >
+                DESCUENTOS
+              </div>
+              {withDiscount.map((item, i) => {
+                const pct = Number(item.discount_percent ?? 0)
+                const isGift = pct === 100
                 return (
                   <Row
-                    label={`Descuento${pct ? ` (${pct})` : ""}`}
-                    value={`-${formatCurrency(data.discountAmount)}`}
+                    key={i}
+                    label={
+                      <span style={{ fontSize: "10px" }}>
+                        {item.product_name}
+                        {pct > 0 && (
+                          <span style={{ fontWeight: 700 }}> ({pct}%)</span>
+                        )}
+                        {isGift && (
+                          <span style={{ fontWeight: 700 }}> REGALO</span>
+                        )}
+                      </span>
+                    }
+                    value={`-${formatCurrency(item.discount)}`}
+                    size={10}
                   />
                 )
-              })()
-            ) : (
-              <>
-                <div
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    marginTop: "4px",
-                  }}
-                >
-                  DESCUENTOS
-                </div>
-                {withDiscount.map((item, i) => {
-                  const pct = Number(item.discount_percent ?? 0)
-                  const isGift = pct === 100
-                  return (
-                    <Row
-                      key={i}
-                      label={
-                        <span style={{ fontSize: "10px" }}>
-                          {item.product_name}
-                          {pct > 0 && (
-                            <span style={{ fontWeight: 700 }}> ({pct}%)</span>
-                          )}
-                          {isGift && (
-                            <span style={{ fontWeight: 700 }}> REGALO</span>
-                          )}
-                        </span>
-                      }
-                      value={`-${formatCurrency(item.discount)}`}
-                      size={10}
-                    />
-                  )
-                })}
-              </>
-            )}
-          </>
-        )}
+              })}
+            </>
+          )
+        })()}
 
         <Separator />
 
