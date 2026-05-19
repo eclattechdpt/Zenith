@@ -1,6 +1,6 @@
 # Cambios POS — 16 de mayo
 
-Última actualización: 2026-05-19
+Última actualización: 2026-05-19 (v2)
 
 ## En curso
 
@@ -13,7 +13,6 @@ _(nada en curso)_
 ## Por discutir / planear
 
 - **6.** Marcar clientas como "red interna" o "red externa".
-- **12.** Modificar inventario para que la suma sea solo físico + tránsito (excluir carga inicial).
 
 ## Terminados
 
@@ -26,3 +25,4 @@ _(nada en curso)_
 - **2.** Venta pendiente con descuento al reabrir mostraba el botón "Agregar descuento" en vez del banner "Descuento aplicado". Fix: nueva prop `pendingSaleDiscount` en `WizardPaymentStep` que hidrata el descuento desde la venta pendiente (read-only — sin X de remover, sin botón de agregar) en modo `complete-pending`. ✅
 - **13.** (Nuevo) POS landing tenía un sliding cart de fondo que se duplicaba con el carrito del wizard (mismo store, dos UIs editables → bugs de sincronización). Eliminado `pos-sliding-cart.tsx`. Ahora al agregar un producto el wizard auto-abre en paso "Cliente", y cerrar el wizard limpia el carrito (descarta venta en curso). Modo `from-cart` eliminado por desuso. ✅
 - **11.** KPIs de `/ventas` ahora reactivos al filtro de fecha (Hoy / Esta semana / Mes / Fecha custom). Subtítulos reflejan el rango activo ("ventas · hoy", "ingresos · mayo 2026", etc.). Filtro state subido al page, `SalesTable` ahora controlada via `dateFilter` + `onDateFilterChange`. Helpers `getDateRange` y `getRangeLabel` extraídos a `src/features/ventas/date-filter.ts`. Resuelve la incoherencia previa donde los KPIs eran all-time y la tabla filtrada por fecha. ✅
+- **12.** "Valor total combinado" del hub de inventario ahora suma solo físico + tránsito (excluye carga inicial). Las pills de abajo siguen mostrando los 3 valores individuales. Carga inicial es inventario de referencia y no debe sumarse al operativo. Widget "Proporción del total" sigue calculando initial vs all-three con un sum local porque `grand_total` cambió de semántica. ✅

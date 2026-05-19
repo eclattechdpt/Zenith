@@ -83,7 +83,12 @@ export default function InventarioPage() {
   const totalWeeks = monthSummary.reduce((s, m) => s + m.week_count, 0)
   const transitMaxMonth = Math.max(...monthSummary.map((m) => m.total_value), 1)
   const grandTotal = summary?.grand_total ?? 0
-  const initialPct = grandTotal > 0 ? Math.round(((summary?.initial_load_total ?? 0) / grandTotal) * 100) : 0
+  // "Proporción del total" sigue mostrando cuánto pesa carga inicial frente a
+  // los tres inventarios, así que para esa razón usamos un sum local con los 3
+  // (grandTotal ahora excluye carga inicial a propósito).
+  const initialLoadTotal = summary?.initial_load_total ?? 0
+  const totalAllThree = grandTotal + initialLoadTotal
+  const initialPct = totalAllThree > 0 ? Math.round((initialLoadTotal / totalAllThree) * 100) : 0
 
   const fmtValue = (val: number) => (visible ? formatCurrency(val) : "******")
 

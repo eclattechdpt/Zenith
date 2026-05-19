@@ -421,14 +421,15 @@ export function useInventorySummary() {
         transit_total: number
       }
 
+      // grand_total = solo físico + tránsito (la cifra "valor total combinado"
+      // del hub). Carga inicial es inventario de referencia que no se mezcla con
+      // el operativo, así que queda fuera del total y se muestra solo como pill.
       return {
         physical_total: Number(result.physical_total),
         initial_load_total: Number(result.initial_load_total),
         transit_total: Number(result.transit_total),
         grand_total:
-          Number(result.physical_total) +
-          Number(result.initial_load_total) +
-          Number(result.transit_total),
+          Number(result.physical_total) + Number(result.transit_total),
       }
     },
   })
