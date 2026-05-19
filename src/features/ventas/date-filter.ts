@@ -38,7 +38,11 @@ export function getDateRange(
     }
   }
   if (preset === "custom" && customDate) {
-    const date = new Date(customDate)
+    // "yyyy-MM-dd" parseado con `new Date(...)` se interpreta como UTC
+    // midnight; en TZs negativos (México UTC-6) eso devuelve el día previo
+    // local. Anclamos al mediodía local para que startOfDay/endOfDay
+    // siempre caigan dentro del día correcto.
+    const date = new Date(customDate + "T12:00:00")
     return {
       from: startOfDay(date).toISOString(),
       to: endOfDay(date).toISOString(),

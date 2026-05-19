@@ -25,6 +25,10 @@ export function useCustomers(filters?: CustomerFilters) {
           price_lists:price_lists(id, name, discount_percent),
           customer_networks:customer_networks(id, name, color)`
         )
+        // Filtrar embeds soft-deleted (PostgREST nested filter) — sin esto, un
+        // tab abierto puede mostrar nombre/color de una red recién eliminada
+        // hasta el próximo invalidate.
+        .is("customer_networks.deleted_at", null)
         .is("deleted_at", null)
         .order("name")
 
@@ -57,6 +61,10 @@ export function useCustomer(id: string) {
           price_lists:price_lists(id, name, discount_percent),
           customer_networks:customer_networks(id, name, color)`
         )
+        // Filtrar embeds soft-deleted (PostgREST nested filter) — sin esto, un
+        // tab abierto puede mostrar nombre/color de una red recién eliminada
+        // hasta el próximo invalidate.
+        .is("customer_networks.deleted_at", null)
         .eq("id", id)
         .is("deleted_at", null)
         .single()

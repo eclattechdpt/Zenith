@@ -381,7 +381,7 @@ export function SalesTable({ dateFilter, onDateFilterChange }: SalesTableProps) 
               }
               className="flex h-7 items-center gap-1 rounded-full bg-accent-500 px-3 text-[11px] font-semibold text-white shadow-sm"
             >
-              {format(new Date(customDate), "d MMM yyyy", { locale: es })}
+              {format(new Date(customDate + "T12:00:00"), "d MMM yyyy", { locale: es })}
               <X className="size-3" />
             </button>
           ) : (

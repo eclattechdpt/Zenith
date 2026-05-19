@@ -240,6 +240,9 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
 
     setSuccess(true)
     queryClient.invalidateQueries({ queryKey: ["customers"] })
+    // El cliente puede haber cambiado/asignado red → refresca el conteo
+    // por red que se muestra en NetworkManager + KPI de Configuración.
+    queryClient.invalidateQueries({ queryKey: ["customer-networks"] })
 
     // Auto-close after success animation
     setTimeout(() => {

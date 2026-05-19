@@ -241,7 +241,7 @@ export function POSSaleWizard({
       queryClient.invalidateQueries({ queryKey: ["inventory"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
       queryClient.invalidateQueries({ queryKey: ["pos"] })
-      queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
+      queryClient.invalidateQueries({ queryKey: ["pos-pending-sales"] })
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
@@ -284,7 +284,7 @@ export function POSSaleWizard({
       sileo.success({ title: "Venta guardada como pendiente", description: "Recuerda cobrar esta venta desde la seccion de ventas pendientes." })
       clear()
       queryClient.invalidateQueries({ queryKey: ["sales"] })
-      queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
+      queryClient.invalidateQueries({ queryKey: ["pos-pending-sales"] })
       queryClient.invalidateQueries({ queryKey: ["pos"] })
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
@@ -509,7 +509,7 @@ export function POSSaleWizard({
       queryClient.invalidateQueries({ queryKey: ["pos"] })
       queryClient.invalidateQueries({ queryKey: ["vales"] })
       queryClient.invalidateQueries({ queryKey: ["vales-ready"] })
-      queryClient.invalidateQueries({ queryKey: ["pending-sales"] })
+      queryClient.invalidateQueries({ queryKey: ["pos-pending-sales"] })
     } catch {
       sileo.error({ title: "Error de conexion", description: "No se pudo conectar con el servidor. Intenta de nuevo." })
     }
