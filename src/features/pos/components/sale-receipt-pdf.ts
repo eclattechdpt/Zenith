@@ -117,8 +117,14 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
   const uniquePcts = new Set(
     withDiscount.map((i) => Number(i.discount_percent ?? 0))
   )
+  // Si el sale.discount_amount agregado tiene una porción cart-level que no
+  // viene de items (cart custom_amount + regalo individual, p.ej.), evita
+  // mostrar un % engañoso en la línea agregada.
+  const itemsDiscountSum = withDiscount.reduce((s, i) => s + i.discount, 0)
+  const cartLevelExtra = Math.max(0, data.discountAmount - itemsDiscountSum)
+  const hasCartLevelExtra = cartLevelExtra > 0.01
   const sameDiscountForAll =
-    uniquePcts.size === 1 && [...uniquePcts][0] > 0
+    uniquePcts.size === 1 && [...uniquePcts][0] > 0 && !hasCartLevelExtra
 
   return h(Document, null,
     h(Page, { size: "LETTER", style: s.page },
@@ -232,7 +238,7 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
                   h(Text, { style: s.discountText }, `-${currency(data.discountAmount)}`),
                 )
               }
-              // C) % distintos → 1 línea por producto
+              // C) % distintos o hay extra cart-level → 1 línea por producto
               return h(View, null,
                 ...withDiscount.map((item, i) => {
                   const pct = Number(item.discount_percent ?? 0)
@@ -247,7 +253,15 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
                     ),
                     h(Text, { style }, `-${currency(item.discount)}`),
                   )
-                })
+                }),
+                hasCartLevelExtra
+                  ? h(View, {
+                      style: { flexDirection: "row", justifyContent: "space-between", marginTop: 2, gap: 6 },
+                    },
+                      h(Text, { style: { ...s.discountText, flex: 1 } }, "Descuento adicional"),
+                      h(Text, { style: s.discountText }, `-${currency(cartLevelExtra)}`),
+                    )
+                  : null,
               )
             })()
           : null,

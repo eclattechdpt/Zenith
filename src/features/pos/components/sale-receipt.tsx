@@ -105,8 +105,15 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
     const uniquePcts = new Set(
       withDiscount.map((i) => Number(i.discount_percent ?? 0))
     )
+    // Detecta cuándo el descuento agregado del sale incluye una porción que NO
+    // viene de items (típicamente cart-level `custom_amount` + algún regalo
+    // individual). Sin esto, el branch "mismo % en todos" mostraría un
+    // porcentaje engañoso porque `data.discountAmount` ya incluye el extra.
+    const itemsDiscountSum = withDiscount.reduce((s, i) => s + i.discount, 0)
+    const cartLevelExtra = Math.max(0, data.discountAmount - itemsDiscountSum)
+    const hasCartLevelExtra = cartLevelExtra > 0.01
     const sameDiscountForAll =
-      uniquePcts.size === 1 && [...uniquePcts][0] > 0
+      uniquePcts.size === 1 && [...uniquePcts][0] > 0 && !hasCartLevelExtra
 
     return (
       <div
@@ -311,6 +318,13 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
                   />
                 )
               })}
+              {hasCartLevelExtra && (
+                <Row
+                  label={<span style={{ fontSize: "10px" }}>Descuento adicional</span>}
+                  value={`-${formatCurrency(cartLevelExtra)}`}
+                  size={10}
+                />
+              )}
             </>
           )
         })()}

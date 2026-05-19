@@ -1359,6 +1359,10 @@ export type Database = {
         Args: { p_sale_id: string; p_tenant_id: string }
         Returns: Json
       }
+      delete_customer_network: {
+        Args: { p_network_id: string; p_tenant_id: string }
+        Returns: Json
+      }
       complete_pending_sale: {
         Args: {
           p_created_by?: string

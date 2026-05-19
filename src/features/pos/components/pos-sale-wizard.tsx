@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { cn } from "@/lib/utils"
 
 import { usePOSStore } from "../store"
@@ -532,8 +533,9 @@ export function POSSaleWizard({
 
   // ── Close & reset ──
 
-  const handleClose = useCallback(() => {
-    if (submittingRef.current) return
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
+
+  const performClose = useCallback(() => {
     setStepIndex(0)
     setPayments([])
     setSaleResult(null)
@@ -544,6 +546,20 @@ export function POSSaleWizard({
     clear()
     onClose()
   }, [onClose, clear])
+
+  // Si hay productos en el carrito y el usuario todavía no llegó a la pantalla
+  // de éxito, pedimos confirmación antes de descartar. Después de saleResult el
+  // store ya está limpio, así que cerrar siempre es seguro.
+  const handleClose = useCallback(() => {
+    if (submittingRef.current) return
+    const hasUnsavedCart =
+      mode !== "complete-pending" && items.length > 0 && !saleResult
+    if (hasUnsavedCart) {
+      setShowDiscardConfirm(true)
+      return
+    }
+    performClose()
+  }, [mode, items.length, saleResult, performClose])
 
   return (
     <Dialog
@@ -685,6 +701,20 @@ export function POSSaleWizard({
           </AnimatePresence>
         </div>
       </DialogContent>
+
+      <ConfirmDialog
+        open={showDiscardConfirm}
+        onOpenChange={setShowDiscardConfirm}
+        title="¿Descartar venta en curso?"
+        description={`Tienes ${items.length} producto${items.length !== 1 ? "s" : ""} en el carrito. Si cierras ahora, se eliminarán y tendrás que volver a agregarlos.`}
+        confirmLabel="Descartar"
+        cancelLabel="Continuar venta"
+        variant="destructive"
+        onConfirm={() => {
+          setShowDiscardConfirm(false)
+          performClose()
+        }}
+      />
     </Dialog>
   )
 }

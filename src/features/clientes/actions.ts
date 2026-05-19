@@ -395,22 +395,16 @@ export async function deleteCustomerNetwork(id: string) {
 
   const supabase = await createServerClient()
 
-  // No bloqueamos por uso: clientes con esta red simplemente quedan en NULL.
-  const { error: clearError } = await supabase
-    .from("customers")
-    .update({ network_id: null })
-    .eq("network_id", id)
-    .eq("tenant_id", TENANT_ID)
-
-  if (clearError) return { error: { _form: [clearError.message] } }
-
-  const { error } = await supabase
-    .from("customer_networks")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("tenant_id", TENANT_ID)
+  // Atomic vía RPC: limpia network_id en customers + soft-delete de la red en
+  // una sola transacción. Si el segundo UPDATE falla, el primero hace rollback.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)(
+    "delete_customer_network",
+    { p_network_id: id, p_tenant_id: TENANT_ID }
+  )
 
   if (error) return { error: { _form: [error.message] } }
+  if (data?.error) return { error: { _form: [data.error] } }
 
   revalidatePath("/configuracion")
   revalidatePath("/clientes")

@@ -3,11 +3,12 @@
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion } from "motion/react"
-import { Flame, Clock } from "lucide-react"
+import { Flame, Clock, Package } from "lucide-react"
 import { PageHero } from "@/components/shared/page-hero"
 import { useReactToPrint } from "react-to-print"
 
 import { useRealtimeSync } from "@/hooks/use-realtime"
+import { formatCurrency, sortVariantsBySku } from "@/lib/utils"
 
 import { usePOSStore } from "../store"
 import { resolvePrice } from "../utils"
@@ -91,29 +92,26 @@ export function POSLanding() {
     setWizardOpen(true)
   }, [])
 
-  // ── Add product to cart (shared by carousels and grid) ──
-  // Adding from the landing auto-opens the wizard. The wizard owns the cart UI
-  // end-to-end; there is no separate cart panel on the landing anymore.
-  const handleAddProduct = useCallback(
-    async (product: POSProductWithImage) => {
-      const availableVariants = product.product_variants.filter(
-        (v) => v.is_active && v.stock - v.reserved_stock > 0
-      )
-      if (availableVariants.length === 0) return
+  // ── Variant picker (landing) ──
+  // Productos con varias variantes activas (e.g. Rimel · "De Luxe" / "Original")
+  // muestran un picker antes de agregar, en vez de auto-elegir la primera.
+  const [variantPickerProduct, setVariantPickerProduct] =
+    useState<POSProductWithImage | null>(null)
 
-      const variant = availableVariants[0]
+  const addVariantToCart = useCallback(
+    async (
+      product: POSProductWithImage,
+      variant: POSProductWithImage["product_variants"][number]
+    ) => {
       const existingItem = items.find((i) => i.variantId === variant.id)
       const availableStock = variant.stock - variant.reserved_stock
+      if (availableStock <= 0) return
       if (existingItem && existingItem.quantity >= availableStock) return
 
       let price = variant.price
       if (customer) {
         try {
-          price = await resolvePrice(
-            variant.id,
-            variant.price,
-            customer.priceListId
-          )
+          price = await resolvePrice(variant.id, variant.price, customer.priceListId)
         } catch {
           // Fall back to base price
         }
@@ -134,6 +132,27 @@ export function POSLanding() {
       if (!wizardOpen) openNewSale()
     },
     [items, addItem, customer, wizardOpen, openNewSale]
+  )
+
+  // ── Add product to cart (shared by carousels and grid) ──
+  // Adding from the landing auto-opens the wizard. The wizard owns the cart UI
+  // end-to-end; there is no separate cart panel on the landing anymore.
+  const handleAddProduct = useCallback(
+    async (product: POSProductWithImage) => {
+      const availableVariants = product.product_variants.filter(
+        (v) => v.is_active && v.stock - v.reserved_stock > 0
+      )
+      if (availableVariants.length === 0) return
+
+      // Multi-variante con stock → abrir picker en vez de auto-elegir la primera
+      if (product.has_variants && availableVariants.length > 1) {
+        setVariantPickerProduct(product)
+        return
+      }
+
+      await addVariantToCart(product, availableVariants[0])
+    },
+    [addVariantToCart]
   )
 
   const openCompletePending = useCallback((sale: PendingSaleWithSummary) => {
@@ -249,6 +268,79 @@ export function POSLanding() {
         productId={editProductId}
         onClose={() => setEditProductId(null)}
       />
+
+      {/* ── Variant picker (multi-variant products) ── */}
+      {variantPickerProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-1 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100">
+                <Package className="h-4 w-4 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-neutral-900">
+                  {variantPickerProduct.name}
+                </h3>
+                {variantPickerProduct.brand && (
+                  <p className="text-xs text-neutral-400">{variantPickerProduct.brand}</p>
+                )}
+              </div>
+            </div>
+            <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
+              Selecciona una variante
+            </p>
+            <div className="mt-2 max-h-60 space-y-1.5 overflow-y-auto">
+              {sortVariantsBySku(
+                variantPickerProduct.product_variants.filter((v) => v.is_active)
+              ).map((variant) => {
+                const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
+                const existingItem = items.find((i) => i.variantId === variant.id)
+                const isFull = availableStock > 0 && existingItem && existingItem.quantity >= availableStock
+                const isOos = availableStock === 0
+                return (
+                  <button
+                    key={variant.id}
+                    type="button"
+                    disabled={isOos || !!isFull}
+                    onClick={async () => {
+                      const product = variantPickerProduct
+                      setVariantPickerProduct(null)
+                      await addVariantToCart(product, variant)
+                    }}
+                    className="flex w-full items-center justify-between rounded-xl border border-neutral-200/80 bg-white px-4 py-3 text-left transition-colors hover:border-rose-200 hover:bg-rose-50/50 disabled:opacity-40 disabled:pointer-events-none"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-neutral-800 truncate">
+                        {variant.name ?? variant.sku ?? "Variante"}
+                      </p>
+                      {variant.sku && variant.name && (
+                        <p className="text-xs text-neutral-400">{variant.sku}</p>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0 ml-3">
+                      <p className="text-sm font-bold text-neutral-900 tabular-nums">
+                        {formatCurrency(variant.price)}
+                      </p>
+                      <p className={`text-[10px] font-semibold ${
+                        isOos ? "text-red-500" : availableStock <= 5 ? "text-amber-500" : "text-emerald-500"
+                      }`}>
+                        {isOos ? "Sin stock" : `${availableStock} en stock`}
+                      </p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => setVariantPickerProduct(null)}
+              className="mt-4 flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-semibold text-neutral-600 transition-colors hover:bg-neutral-100"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }
