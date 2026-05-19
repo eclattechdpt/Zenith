@@ -126,16 +126,18 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
       >
         {/* ── Header ── */}
         <div style={{ textAlign: "center", marginBottom: "10px" }}>
-          <div
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/EclatLogo_Black.svg"
+            alt={BUSINESS_NAME}
             style={{
-              fontSize: "20px",
-              fontWeight: 700,
-              letterSpacing: "4px",
-              marginBottom: "6px",
+              display: "block",
+              margin: "0 auto 8px",
+              width: "62mm",
+              maxWidth: "100%",
+              height: "auto",
             }}
-          >
-            {BUSINESS_NAME}
-          </div>
+          />
           <div style={{ fontSize: "11px", fontWeight: 400 }}>
             {BUSINESS_LOCATION}
           </div>
@@ -356,11 +358,44 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
             marginTop: "10px",
           }}
         >
-          <div style={{ fontWeight: 700, marginBottom: "4px" }}>
+          <div style={{ fontWeight: 700, marginBottom: "8px" }}>
             GRACIAS POR TU COMPRA
           </div>
-          <div style={{ fontSize: "10px" }}>Powered by Eclat POS</div>
-          <div style={{ fontSize: "9px" }}>Desarrollado por Abbrix</div>
+          <div
+            style={{
+              fontSize: "9px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "4px",
+              marginBottom: "4px",
+            }}
+          >
+            <span>Powered by</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/EclatLogo_Black.svg"
+              alt="Eclat POS"
+              style={{ height: "12px", verticalAlign: "middle" }}
+            />
+          </div>
+          <div
+            style={{
+              fontSize: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "3px",
+            }}
+          >
+            <span>Desarrollado por</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/abbrixLogo.svg"
+              alt="Abbrix"
+              style={{ height: "10px", verticalAlign: "middle" }}
+            />
+          </div>
         </div>
       </div>
     )
