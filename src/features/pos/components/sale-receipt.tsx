@@ -35,16 +35,78 @@ export interface ReceiptData {
   change: number
 }
 
-const BUSINESS_NAME = "Eclat"
+const BUSINESS_NAME = "ECLAT"
 const BUSINESS_PHONE = "33 1234 5678"
 const BUSINESS_LOCATION = "Zapopan, Jalisco"
 
+// Estilo "ticket térmico": monospace, puro negro y blanco, sin fondos.
+// Las impresoras térmicas no reproducen fondos coloridos, los renderizan
+// como gris claro que se desvanece. Bold contra regular es lo único que
+// se ve nítido en papel térmico.
+
+const FONT_FAMILY =
+  "'JetBrains Mono', 'Menlo', 'Courier New', Courier, monospace"
+
+const SEPARATOR = "--------------------------------"
+
+// Util: row con label a la izquierda + value tabular a la derecha
+function Row({
+  label,
+  value,
+  bold = false,
+  size = 11,
+}: {
+  label: React.ReactNode
+  value: React.ReactNode
+  bold?: boolean
+  size?: number
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "baseline",
+        fontSize: `${size}px`,
+        fontWeight: bold ? 700 : 400,
+        lineHeight: 1.5,
+      }}
+    >
+      <span style={{ flex: 1, minWidth: 0, paddingRight: "8px" }}>{label}</span>
+      <span style={{ fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+        {value}
+      </span>
+    </div>
+  )
+}
+
+function Separator() {
+  return (
+    <div
+      style={{
+        fontSize: "11px",
+        textAlign: "center",
+        margin: "8px 0",
+        letterSpacing: "0.5px",
+        userSelect: "none",
+      }}
+    >
+      {SEPARATOR}
+    </div>
+  )
+}
+
 export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
   function SaleReceipt({ data }, ref) {
-    const formattedDate = format(new Date(data.date), "dd 'de' MMMM, yyyy", {
-      locale: es,
-    })
+    const formattedDate = format(new Date(data.date), "dd/MM/yyyy", { locale: es })
     const formattedTime = format(new Date(data.date), "HH:mm", { locale: es })
+
+    const withDiscount = data.items.filter((i) => i.discount > 0)
+    const uniquePcts = new Set(
+      withDiscount.map((i) => Number(i.discount_percent ?? 0))
+    )
+    const sameDiscountForAll =
+      uniquePcts.size === 1 && [...uniquePcts][0] > 0
 
     return (
       <div
@@ -52,581 +114,253 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         style={{
           width: "80mm",
           margin: "0 auto",
-          padding: "28px 20px",
-          fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', sans-serif",
+          padding: "20px 14px",
+          fontFamily: FONT_FAMILY,
           fontSize: "11px",
-          color: "#1a1a1a",
+          color: "#000",
           lineHeight: 1.5,
-          background: "#ffffff",
+          background: "#fff",
           WebkitPrintColorAdjust: "exact",
           printColorAdjust: "exact",
         }}
       >
-        {/* ── Section 1: Branding ── */}
-        <div style={{ marginBottom: "24px" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/EclatLogo_DarkWithPink.svg"
-            alt="Eclat"
-            style={{ height: "26px", display: "block", marginBottom: "8px" }}
-          />
+        {/* ── Header ── */}
+        <div style={{ textAlign: "center", marginBottom: "10px" }}>
           <div
             style={{
-              fontSize: "9px",
-              color: "#888",
-              letterSpacing: "0.3px",
-              lineHeight: 1.6,
+              fontSize: "20px",
+              fontWeight: 700,
+              letterSpacing: "4px",
+              marginBottom: "6px",
             }}
           >
-            {BUSINESS_NAME} &middot; {BUSINESS_LOCATION}
-            <br />
+            {BUSINESS_NAME}
+          </div>
+          <div style={{ fontSize: "11px", fontWeight: 400 }}>
+            {BUSINESS_LOCATION}
+          </div>
+          <div style={{ fontSize: "11px", fontWeight: 400 }}>
             Tel. {BUSINESS_PHONE}
           </div>
         </div>
 
-        {/* ── Accent line ── */}
-        <div
-          style={{
-            height: "2px",
-            background: "linear-gradient(90deg, #FF6B8A, #F43F6B, #FF6B8A)",
-            borderRadius: "1px",
-            marginBottom: "24px",
-          }}
+        <Separator />
+
+        {/* ── Sale info ── */}
+        <Row
+          label={<span>FOLIO</span>}
+          value={<span style={{ fontWeight: 700 }}>{data.saleNumber}</span>}
+          bold
         />
+        <Row label="Fecha" value={`${formattedDate} ${formattedTime}`} />
 
-        {/* ── Section 2: Info (Folio + Fecha + Cliente) ── */}
-        <div
-          style={{
-            background: "#f2f0ee",
-            borderRadius: "8px",
-            padding: "12px 14px",
-            marginBottom: "24px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              marginBottom: data.customerName ? "10px" : 0,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: "9px",
-                  color: "#999",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  marginBottom: "2px",
-                }}
-              >
-                Folio
-              </div>
-              <div
-                style={{
-                  fontSize: "15px",
-                  fontWeight: 700,
-                  color: "#1a1a1a",
-                  letterSpacing: "-0.5px",
-                }}
-              >
-                {data.saleNumber}
-              </div>
+        {data.customerName && (
+          <div style={{ marginTop: "4px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700 }}>
+              CLIENTE
             </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: "10px", color: "#666" }}>
-                {formattedDate}
-              </div>
-              <div style={{ fontSize: "10px", color: "#999" }}>
-                {formattedTime} hrs
-              </div>
-            </div>
-          </div>
-
-          {data.customerName && (
             <div
               style={{
-                paddingTop: "10px",
-                borderTop: "1px solid #eeeeee",
+                fontSize: "11px",
+                fontWeight: 400,
+                wordBreak: "break-word",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "9px",
-                    color: "#999",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                  }}
-                >
-                  Cliente
-                </span>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    color: "#1a1a1a",
-                    textAlign: "right",
-                  }}
-                >
-                  {data.customerName}
-                </span>
-              </div>
-              {data.customerNumber && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: "3px",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "9px",
-                      color: "#999",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
-                    Nº Distribuidor
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "10px",
-                      fontWeight: 500,
-                      color: "#444",
-                      fontVariantNumeric: "tabular-nums",
-                    }}
-                  >
-                    {data.customerNumber}
-                  </span>
-                </div>
-              )}
+              {data.customerName}
             </div>
-          )}
+            {data.customerNumber && (
+              <Row
+                label="Nº Distribuidor"
+                value={data.customerNumber}
+                size={10}
+              />
+            )}
+          </div>
+        )}
+
+        <Separator />
+
+        {/* ── Items ── */}
+        <div style={{ marginBottom: "4px" }}>
+          <Row
+            label={<span style={{ fontWeight: 700 }}>PRODUCTO</span>}
+            value={<span style={{ fontWeight: 700 }}>IMPORTE</span>}
+          />
         </div>
 
-        {/* ── Section 3: Resumen (Items) ── */}
-        <div style={{ marginBottom: "24px" }}>
-          {/* Table header */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "0 0 6px",
-              borderBottom: "1px solid #e5e5e5",
-              marginBottom: "8px",
-              fontSize: "9px",
-              color: "#999",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-            }}
-          >
-            <span>Producto</span>
-            <span>Importe</span>
-          </div>
+        {data.items.map((item, i) => {
+          const hasDiscount = item.discount > 0
+          const isGift = hasDiscount && item.line_total === 0
+          const pctLabel =
+            item.discount_percent != null && item.discount_percent > 0
+              ? formatDiscountPercent(
+                  item.discount,
+                  item.unit_price * item.quantity,
+                  item.discount_percent
+                )
+              : null
 
-          {data.items.map((item, i) => (
-            <div
-              key={i}
-              style={{
-                padding: "6px 0",
-                borderBottom:
-                  i < data.items.length - 1 ? "1px solid #f0f0f0" : "none",
-              }}
-            >
+          return (
+            <div key={i} style={{ marginBottom: "6px" }}>
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  wordBreak: "break-word",
                 }}
               >
-                <div style={{ flex: 1, minWidth: 0, paddingRight: "8px" }}>
-                  <div
-                    style={{
-                      fontWeight: 500,
-                      fontSize: "11px",
-                      color: "#1a1a1a",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {item.product_name}
-                  </div>
-                  {item.variant_label !== item.product_name && (
-                    <div style={{ fontSize: "9px", color: "#999" }}>
-                      {item.variant_label}
-                    </div>
-                  )}
-                  <div
-                    style={{
-                      fontSize: "10px",
-                      color: "#888",
-                      marginTop: "1px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
-                  >
-                    {item.discount > 0 ? (
-                      <>
-                        <span
-                          style={{
-                            textDecoration: "line-through",
-                            color: "#bbb",
-                          }}
-                        >
-                          {item.quantity} x {formatCurrency(item.unit_price)}
-                        </span>
-                        {item.discount_percent != null && item.discount_percent > 0 && (
-                          <span
-                            style={{
-                              color: "#F43F6B",
-                              fontWeight: 600,
-                            }}
-                          >
-                            -{formatDiscountPercent(item.discount, item.unit_price * item.quantity, item.discount_percent)}
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      <span>
-                        {item.quantity} x {formatCurrency(item.unit_price)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    fontWeight: 600,
-                    fontSize: "11px",
-                    color: item.line_total === 0 ? "#8b5cf6" : "#1a1a1a",
-                    whiteSpace: "nowrap",
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
-                  {item.line_total === 0 && item.discount > 0
-                    ? "GRATIS"
-                    : formatCurrency(item.line_total)}
-                </div>
+                {item.product_name}
               </div>
+              {item.variant_label !== item.product_name && (
+                <div style={{ fontSize: "10px", fontWeight: 400 }}>
+                  {item.variant_label}
+                </div>
+              )}
+              <Row
+                label={
+                  <span style={{ fontSize: "10px", fontWeight: 400 }}>
+                    {item.quantity} x {formatCurrency(item.unit_price)}
+                    {pctLabel && (
+                      <span style={{ fontWeight: 700 }}> -{pctLabel}</span>
+                    )}
+                    {isGift && (
+                      <span style={{ fontWeight: 700 }}> REGALO</span>
+                    )}
+                  </span>
+                }
+                value={
+                  <span style={{ fontWeight: 700 }}>
+                    {isGift ? "GRATIS" : formatCurrency(item.line_total)}
+                  </span>
+                }
+              />
             </div>
-          ))}
+          )
+        })}
 
-          {/* Subtotal */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              fontSize: "11px",
-              color: "#666",
-              marginTop: "12px",
-              paddingTop: "12px",
-              borderTop: "1px solid #e5e5e5",
-            }}
-          >
-            <span>Subtotal</span>
-            <span style={{ fontVariantNumeric: "tabular-nums" }}>
-              {formatCurrency(data.subtotal)}
-            </span>
-          </div>
-          {data.discountAmount > 0 && (() => {
-            const withDiscount = data.items.filter((i) => i.discount > 0)
-            const uniquePcts = new Set(
-              withDiscount.map((i) => Number(i.discount_percent ?? 0))
-            )
-            const sameForAll = uniquePcts.size === 1 && [...uniquePcts][0] > 0
+        <Separator />
 
-            // Caso A: todos los items con el mismo % → 1 línea agregada
-            if (sameForAll) {
-              const pct = formatDiscountPercent(
-                data.discountAmount,
-                data.subtotal,
-                [...uniquePcts][0]
-              )
-              return (
+        {/* ── Totals ── */}
+        <Row label="Subtotal" value={formatCurrency(data.subtotal)} />
+
+        {data.discountAmount > 0 && (
+          <>
+            {sameDiscountForAll ? (
+              (() => {
+                const pct = formatDiscountPercent(
+                  data.discountAmount,
+                  data.subtotal,
+                  [...uniquePcts][0]
+                )
+                return (
+                  <Row
+                    label={`Descuento${pct ? ` (${pct})` : ""}`}
+                    value={`-${formatCurrency(data.discountAmount)}`}
+                  />
+                )
+              })()
+            ) : (
+              <>
                 <div
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
                     fontSize: "11px",
-                    color: "#F43F6B",
+                    fontWeight: 700,
                     marginTop: "4px",
                   }}
                 >
-                  <span>
-                    Descuento
-                    {pct && (
-                      <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                        {" "}({pct})
-                      </span>
-                    )}
-                  </span>
-                  <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                    -{formatCurrency(data.discountAmount)}
-                  </span>
+                  DESCUENTOS
                 </div>
-              )
-            }
-
-            // Caso B: % distintos → línea por producto
-            return (
-              <div style={{ marginTop: "4px" }}>
                 {withDiscount.map((item, i) => {
                   const pct = Number(item.discount_percent ?? 0)
                   const isGift = pct === 100
-                  const color = isGift ? "#8b5cf6" : "#F43F6B"
                   return (
-                    <div
+                    <Row
                       key={i}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "baseline",
-                        fontSize: "11px",
-                        color,
-                        marginTop: i === 0 ? 0 : "2px",
-                        gap: "8px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          flex: 1,
-                          minWidth: 0,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {isGift ? "🎁 " : "% "}
-                        {item.product_name}
-                        {pct > 0 && (
-                          <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                            {" "}({pct}%)
-                          </span>
-                        )}
-                        {isGift && (
-                          <span
-                            style={{
-                              marginLeft: "4px",
-                              fontSize: "8px",
-                              fontWeight: 700,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.5px",
-                              background: "#ede9fe",
-                              color: "#6d28d9",
-                              padding: "1px 4px",
-                              borderRadius: "3px",
-                            }}
-                          >
-                            Regalo
-                          </span>
-                        )}
-                      </span>
-                      <span
-                        style={{
-                          fontVariantNumeric: "tabular-nums",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        -{formatCurrency(item.discount)}
-                      </span>
-                    </div>
+                      label={
+                        <span style={{ fontSize: "10px" }}>
+                          {item.product_name}
+                          {pct > 0 && (
+                            <span style={{ fontWeight: 700 }}> ({pct}%)</span>
+                          )}
+                          {isGift && (
+                            <span style={{ fontWeight: 700 }}> REGALO</span>
+                          )}
+                        </span>
+                      }
+                      value={`-${formatCurrency(item.discount)}`}
+                      size={10}
+                    />
                   )
                 })}
-              </div>
-            )
-          })()}
-        </div>
+              </>
+            )}
+          </>
+        )}
 
-        {/* ── Section 4: Pago (Total + Payment) ── */}
-        <div style={{ marginBottom: "24px" }}>
-          {/* Total highlight */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              background: "linear-gradient(135deg, #FFF0F3, #FFE0E8)",
-              borderRadius: "8px",
-              padding: "12px 14px",
-              marginBottom: "10px",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "12px",
-                fontWeight: 700,
-                color: "#1a1a1a",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
-            >
-              Total
-            </span>
-            <span
-              style={{
-                fontSize: "18px",
-                fontWeight: 700,
-                color: "#1a1a1a",
-                letterSpacing: "-0.5px",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
+        <Separator />
+
+        {/* ── Total ── */}
+        <Row
+          label={<span style={{ fontSize: "13px", fontWeight: 700 }}>TOTAL</span>}
+          value={
+            <span style={{ fontSize: "13px", fontWeight: 700 }}>
               {formatCurrency(data.total)}
             </span>
-          </div>
+          }
+        />
 
-          {/* Payment method */}
-          <div
-            style={{
-              background: "#f2f0ee",
-              borderRadius: "6px",
-              padding: "10px 14px",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "9px",
-                color: "#999",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                marginBottom: "6px",
-              }}
-            >
-              Forma de pago
-            </div>
-            {data.payments.map((p, i) => (
-              <div
-                key={i}
-                style={{
-                  marginBottom: i < data.payments.length - 1 ? "3px" : 0,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: "11px",
-                    color: "#444",
-                  }}
-                >
-                  <span>
-                    {PAYMENT_METHODS[
-                      p.method as keyof typeof PAYMENT_METHODS
-                    ] ?? p.method}
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 500,
-                      fontVariantNumeric: "tabular-nums",
-                    }}
-                  >
-                    {formatCurrency(p.amount)}
-                  </span>
-                </div>
-                {p.reference && (
-                  <div
-                    style={{
-                      fontSize: "10px",
-                      color: "#888",
-                      fontStyle: "italic",
-                      marginTop: "1px",
-                      paddingLeft: "8px",
-                    }}
-                  >
-                    {p.reference}
-                  </div>
-                )}
-              </div>
-            ))}
-            {data.change > 0 && (
+        <Separator />
+
+        {/* ── Payments ── */}
+        <div style={{ fontSize: "11px", fontWeight: 700, marginBottom: "2px" }}>
+          FORMA DE PAGO
+        </div>
+        {data.payments.map((p, i) => (
+          <div key={i}>
+            <Row
+              label={
+                PAYMENT_METHODS[p.method as keyof typeof PAYMENT_METHODS] ??
+                p.method
+              }
+              value={formatCurrency(p.amount)}
+            />
+            {p.reference && (
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  color: "#22859A",
-                  marginTop: "6px",
-                  paddingTop: "6px",
-                  borderTop: "1px solid #e5e5e5",
+                  fontSize: "10px",
+                  fontWeight: 400,
+                  paddingLeft: "8px",
+                  fontStyle: "italic",
                 }}
               >
-                <span>Cambio</span>
-                <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                  {formatCurrency(data.change)}
-                </span>
+                Ref: {p.reference}
               </div>
             )}
           </div>
-        </div>
+        ))}
+        {data.change > 0 && (
+          <Row
+            label={<span style={{ fontWeight: 700 }}>Cambio</span>}
+            value={<span style={{ fontWeight: 700 }}>{formatCurrency(data.change)}</span>}
+          />
+        )}
 
-        {/* ── Section 5: Technical Credits ── */}
+        <Separator />
+
+        {/* ── Footer ── */}
         <div
           style={{
             textAlign: "center",
-            paddingTop: "16px",
-            borderTop: "1px solid #f0f0f0",
+            fontSize: "11px",
+            fontWeight: 400,
+            marginTop: "10px",
           }}
         >
-          <div
-            style={{
-              fontSize: "10px",
-              color: "#666",
-              fontWeight: 500,
-            }}
-          >
-            Gracias por tu compra
+          <div style={{ fontWeight: 700, marginBottom: "4px" }}>
+            GRACIAS POR TU COMPRA
           </div>
-          <div
-            style={{
-              fontSize: "9px",
-              color: "#bbb",
-              marginTop: "6px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "4px",
-            }}
-          >
-            Powered by
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/EclatLogo_DarkWithPink.svg"
-              alt="Eclat POS"
-              style={{ height: "12px", opacity: 0.5 }}
-            />
-          </div>
-          <div
-            style={{
-              fontSize: "8px",
-              color: "#ccc",
-              marginTop: "6px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "3px",
-            }}
-          >
-            Desarrollado por
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/abbrixLogo.svg"
-              alt="Abbrix"
-              style={{ height: "8px", opacity: 0.4 }}
-            />
-          </div>
+          <div style={{ fontSize: "10px" }}>Powered by Eclat POS</div>
+          <div style={{ fontSize: "9px" }}>Desarrollado por Abbrix</div>
         </div>
       </div>
     )
