@@ -265,9 +265,13 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
               h(Text, { style: s.payAmount }, currency(p.amount)),
             )
             if (!p.reference) return [row]
+            // Sin fontStyle italic — la fuente PlusJakarta no tiene variante
+            // italic registrada (ver lib/pdf-fonts.ts) y @react-pdf/renderer
+            // tira "Could not resolve font". El indent + color gris ya
+            // diferencia la referencia visualmente.
             const note = h(Text, {
               key: `ref-${i}`,
-              style: { fontSize: 8, color: "#888", fontStyle: "italic", paddingLeft: 8, marginTop: 1 },
+              style: { fontSize: 8, color: "#888", paddingLeft: 8, marginTop: 1 },
             }, p.reference)
             return [row, note]
           }),
