@@ -340,41 +340,113 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
               {formatCurrency(data.subtotal)}
             </span>
           </div>
-          {data.discountAmount > 0 && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: "11px",
-                color: "#F43F6B",
-                marginTop: "4px",
-              }}
-            >
-              <span>
-                Descuento
-                {(() => {
-                  // Si los items tienen distintos %, NO mostrar % del cart-level
-                  // (engañoso). Solo mostrarlo si todos los items siguen el mismo %.
-                  const uniquePcts = new Set(
-                    data.items
-                      .filter((i) => i.discount > 0)
-                      .map((i) => Number(i.discount_percent ?? 0))
+          {data.discountAmount > 0 && (() => {
+            const withDiscount = data.items.filter((i) => i.discount > 0)
+            const uniquePcts = new Set(
+              withDiscount.map((i) => Number(i.discount_percent ?? 0))
+            )
+            const sameForAll = uniquePcts.size === 1 && [...uniquePcts][0] > 0
+
+            // Caso A: todos los items con el mismo % → 1 línea agregada
+            if (sameForAll) {
+              const pct = formatDiscountPercent(
+                data.discountAmount,
+                data.subtotal,
+                [...uniquePcts][0]
+              )
+              return (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "11px",
+                    color: "#F43F6B",
+                    marginTop: "4px",
+                  }}
+                >
+                  <span>
+                    Descuento
+                    {pct && (
+                      <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                        {" "}({pct})
+                      </span>
+                    )}
+                  </span>
+                  <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                    -{formatCurrency(data.discountAmount)}
+                  </span>
+                </div>
+              )
+            }
+
+            // Caso B: % distintos → línea por producto
+            return (
+              <div style={{ marginTop: "4px" }}>
+                {withDiscount.map((item, i) => {
+                  const pct = Number(item.discount_percent ?? 0)
+                  const isGift = pct === 100
+                  const color = isGift ? "#8b5cf6" : "#F43F6B"
+                  return (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "baseline",
+                        fontSize: "11px",
+                        color,
+                        marginTop: i === 0 ? 0 : "2px",
+                        gap: "8px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {isGift ? "🎁 " : "% "}
+                        {item.product_name}
+                        {pct > 0 && (
+                          <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                            {" "}({pct}%)
+                          </span>
+                        )}
+                        {isGift && (
+                          <span
+                            style={{
+                              marginLeft: "4px",
+                              fontSize: "8px",
+                              fontWeight: 700,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              background: "#ede9fe",
+                              color: "#6d28d9",
+                              padding: "1px 4px",
+                              borderRadius: "3px",
+                            }}
+                          >
+                            Regalo
+                          </span>
+                        )}
+                      </span>
+                      <span
+                        style={{
+                          fontVariantNumeric: "tabular-nums",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        -{formatCurrency(item.discount)}
+                      </span>
+                    </div>
                   )
-                  const sameForAll = uniquePcts.size === 1 && [...uniquePcts][0] > 0
-                  if (!sameForAll) return null
-                  const pct = formatDiscountPercent(data.discountAmount, data.subtotal, [...uniquePcts][0])
-                  return pct ? (
-                    <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                      {" "}({pct})
-                    </span>
-                  ) : null
-                })()}
-              </span>
-              <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                -{formatCurrency(data.discountAmount)}
-              </span>
-            </div>
-          )}
+                })}
+              </div>
+            )
+          })()}
         </div>
 
         {/* ── Section 4: Pago (Total + Payment) ── */}

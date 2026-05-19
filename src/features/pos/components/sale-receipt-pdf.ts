@@ -208,22 +208,44 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
           h(Text, { style: s.subtotalValue }, currency(data.subtotal)),
         ),
         data.discountAmount > 0
-          ? h(View, { style: { flexDirection: "row", justifyContent: "space-between", marginTop: 3 } },
-              h(Text, { style: s.discountText },
-                (() => {
-                  const uniquePcts = new Set(
-                    data.items
-                      .filter((i) => i.discount > 0)
-                      .map((i) => Number(i.discount_percent ?? 0))
+          ? (() => {
+              const withDiscount = data.items.filter((i) => i.discount > 0)
+              const uniquePcts = new Set(
+                withDiscount.map((i) => Number(i.discount_percent ?? 0))
+              )
+              const sameForAll = uniquePcts.size === 1 && [...uniquePcts][0] > 0
+
+              // Caso A: mismo % → 1 línea agregada
+              if (sameForAll) {
+                const pct = formatDiscountPercent(
+                  data.discountAmount,
+                  data.subtotal,
+                  [...uniquePcts][0]
+                )
+                return h(View, { style: { flexDirection: "row", justifyContent: "space-between", marginTop: 3 } },
+                  h(Text, { style: s.discountText }, pct ? `Descuento (${pct})` : "Descuento"),
+                  h(Text, { style: s.discountText }, `-${currency(data.discountAmount)}`),
+                )
+              }
+
+              // Caso B: % distintos → línea por producto
+              return h(View, { style: { marginTop: 3 } },
+                ...withDiscount.map((item, i) => {
+                  const pct = Number(item.discount_percent ?? 0)
+                  const isGift = pct === 100
+                  const color = isGift ? "#8b5cf6" : C.rose
+                  return h(View, {
+                    key: `disc-${i}`,
+                    style: { flexDirection: "row", justifyContent: "space-between", marginTop: i === 0 ? 0 : 2, gap: 6 },
+                  },
+                    h(Text, {
+                      style: { ...s.discountText, color, flex: 1 },
+                    }, `${isGift ? "🎁" : "%"} ${item.product_name}${pct > 0 ? ` (${pct}%)` : ""}${isGift ? "  REGALO" : ""}`),
+                    h(Text, { style: { ...s.discountText, color } }, `-${currency(item.discount)}`),
                   )
-                  const sameForAll = uniquePcts.size === 1 && [...uniquePcts][0] > 0
-                  if (!sameForAll) return "Descuento"
-                  const pct = formatDiscountPercent(data.discountAmount, data.subtotal, [...uniquePcts][0])
-                  return pct ? `Descuento (${pct})` : "Descuento"
-                })()
-              ),
-              h(Text, { style: s.discountText }, `-${currency(data.discountAmount)}`),
-            )
+                })
+              )
+            })()
           : null,
       ),
 

@@ -146,6 +146,7 @@ export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps)
         quantity: item.quantity,
         unit_price: Number(item.unit_price),
         discount: Number(item.discount),
+        discount_percent: item.discount_percent != null ? Number(item.discount_percent) : null,
         line_total: Number(item.line_total),
       })),
       payments: sale.sale_payments.map((p) => ({
