@@ -98,15 +98,35 @@ export function POSLanding() {
   const [variantPickerProduct, setVariantPickerProduct] =
     useState<POSProductWithImage | null>(null)
 
+  // Confirmación para productos sin stock (candidatos a vale). Mismo flujo que
+  // el paso Productos del wizard: agregar OOS abre un diálogo antes de meterlo
+  // al carrito como vale.
+  const [pendingOosProduct, setPendingOosProduct] =
+    useState<POSProductWithImage | null>(null)
+  const [pendingOosVariant, setPendingOosVariant] = useState<
+    POSProductWithImage["product_variants"][number] | null
+  >(null)
+
   const addVariantToCart = useCallback(
     async (
       product: POSProductWithImage,
       variant: POSProductWithImage["product_variants"][number]
     ) => {
       const existingItem = items.find((i) => i.variantId === variant.id)
-      const availableStock = variant.stock - variant.reserved_stock
-      if (availableStock <= 0) return
-      if (existingItem && existingItem.quantity >= availableStock) return
+
+      // Para cofres, el stock se deriva del mínimo de sus componentes.
+      const isBundle = product.is_bundle && product.bundle_items?.length > 0
+      const availableStock = isBundle
+        ? Math.min(
+            ...product.bundle_items.map((bi) =>
+              Math.max(0, bi.product_variants.stock - bi.product_variants.reserved_stock)
+            )
+          )
+        : Math.max(0, variant.stock - variant.reserved_stock)
+
+      // Con stock: no exceder lo disponible. Sin stock (candidato a vale):
+      // permitir cantidad ilimitada — el wizard lo enruta a un vale.
+      if (availableStock > 0 && existingItem && existingItem.quantity >= availableStock) return
 
       let price = variant.price
       if (customer) {
@@ -127,6 +147,15 @@ export function POSLanding() {
         unitPrice: price,
         unitCost: variant.cost,
         stock: availableStock,
+        isBundle,
+        bundleComponents: isBundle
+          ? product.bundle_items.map((bi) => ({
+              variantId: bi.product_variant_id,
+              productName: bi.product_variants.products.name,
+              variantLabel: bi.product_variants.name ?? bi.product_variants.sku ?? "Unica",
+              stock: Math.max(0, bi.product_variants.stock - bi.product_variants.reserved_stock),
+            }))
+          : undefined,
       })
 
       if (!wizardOpen) openNewSale()
@@ -139,20 +168,58 @@ export function POSLanding() {
   // end-to-end; there is no separate cart panel on the landing anymore.
   const handleAddProduct = useCallback(
     async (product: POSProductWithImage) => {
-      const availableVariants = product.product_variants.filter(
-        (v) => v.is_active && v.stock - v.reserved_stock > 0
-      )
-      if (availableVariants.length === 0) return
+      const activeVariants = product.product_variants.filter((v) => v.is_active)
+      if (activeVariants.length === 0) return
 
-      // Multi-variante con stock → abrir picker en vez de auto-elegir la primera
-      if (product.has_variants && availableVariants.length > 1) {
+      // Multi-variante → abrir picker en vez de auto-elegir la primera
+      if (product.has_variants && activeVariants.length > 1) {
         setVariantPickerProduct(product)
         return
       }
 
-      await addVariantToCart(product, availableVariants[0])
+      // Variante única → agregar directo, pero si está OOS pedir confirmación
+      // (se venderá como vale).
+      const variant = activeVariants[0]
+      const isBundle = product.is_bundle && product.bundle_items?.length > 0
+      const availableStock = isBundle
+        ? Math.min(
+            ...product.bundle_items.map((bi) =>
+              Math.max(0, bi.product_variants.stock - bi.product_variants.reserved_stock)
+            )
+          )
+        : Math.max(0, variant.stock - variant.reserved_stock)
+      const existingItem = items.find((i) => i.variantId === variant.id)
+
+      if (availableStock === 0 && !existingItem) {
+        setPendingOosProduct(product)
+        return
+      }
+
+      await addVariantToCart(product, variant)
     },
-    [addVariantToCart]
+    [addVariantToCart, items]
+  )
+
+  // Selección desde el picker multi-variante. Variantes OOS pasan por el diálogo
+  // de confirmación de vale; las que tienen stock se agregan directo.
+  const handlePickVariant = useCallback(
+    async (variant: POSProductWithImage["product_variants"][number]) => {
+      if (!variantPickerProduct) return
+      const availableStock = Math.max(0, variant.stock - variant.reserved_stock)
+      const existingItem = items.find((i) => i.variantId === variant.id)
+
+      if (availableStock === 0 && !existingItem) {
+        setPendingOosVariant(variant)
+        setPendingOosProduct(variantPickerProduct)
+        setVariantPickerProduct(null)
+        return
+      }
+
+      const product = variantPickerProduct
+      setVariantPickerProduct(null)
+      await addVariantToCart(product, variant)
+    },
+    [addVariantToCart, variantPickerProduct, items]
   )
 
   const openCompletePending = useCallback((sale: PendingSaleWithSummary) => {
@@ -301,12 +368,8 @@ export function POSLanding() {
                   <button
                     key={variant.id}
                     type="button"
-                    disabled={isOos || !!isFull}
-                    onClick={async () => {
-                      const product = variantPickerProduct
-                      setVariantPickerProduct(null)
-                      await addVariantToCart(product, variant)
-                    }}
+                    disabled={!!isFull}
+                    onClick={() => handlePickVariant(variant)}
                     className="flex w-full items-center justify-between rounded-xl border border-neutral-200/80 bg-white px-4 py-3 text-left transition-colors hover:border-rose-200 hover:bg-rose-50/50 disabled:opacity-40 disabled:pointer-events-none"
                   >
                     <div className="min-w-0 flex-1">
@@ -338,6 +401,57 @@ export function POSLanding() {
             >
               Cancelar
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirmación: producto sin stock → vale ── */}
+      {pendingOosProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-1 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100">
+                <Package className="h-4 w-4 text-indigo-600" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-900">
+                Producto sin stock
+              </h3>
+            </div>
+            <p className="mt-3 text-sm text-neutral-500">
+              <span className="font-semibold text-neutral-700">
+                &quot;{pendingOosProduct.name}
+                {pendingOosVariant ? ` — ${pendingOosVariant.name}` : ""}&quot;
+              </span>{" "}
+              no tiene stock disponible. Solo se podra vender como vale — el
+              cliente recibira el producto cuando se reabastezca.
+            </p>
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setPendingOosProduct(null)
+                  setPendingOosVariant(null)
+                }}
+                className="flex h-10 flex-1 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-semibold text-neutral-600 transition-colors hover:bg-neutral-100"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const product = pendingOosProduct
+                  const variant =
+                    pendingOosVariant ??
+                    product.product_variants.filter((v) => v.is_active)[0]
+                  if (product && variant) await addVariantToCart(product, variant)
+                  setPendingOosProduct(null)
+                  setPendingOosVariant(null)
+                }}
+                className="flex h-10 flex-1 items-center justify-center rounded-xl bg-indigo-500 text-sm font-bold text-white transition-colors hover:bg-indigo-600 active:scale-[0.98]"
+              >
+                Entendido, agregar
+              </button>
+            </div>
           </div>
         </div>
       )}
