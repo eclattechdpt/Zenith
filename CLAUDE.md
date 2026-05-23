@@ -265,7 +265,9 @@ Seguir el orden de sprints de `04-PROJECT-STRUCTURE.md`:
 
 No saltar sprints. Cada uno depende del anterior.
 
-## Progreso actual — Sprint 8 (Polish, EN PROGRESO · 2026-04-15)
+## Progreso actual — Sprint 8 (Polish) · **Producción live** en `https://eclatpos.com` · actualizado 2026-05-23
+
+> App funcional y desplegada en Vercel (Cloudflare DNS → CNAME, SSL, apex canonical). DB reseteada a estado productivo limpio. Trabajo posterior al deploy = hardening + features de la tienda (redes de clientes, recibos térmicos, descuentos per-item, guía de ayuda) — ver "Post-deploy" abajo.
 
 ### Sistemas clave y decisiones arquitectónicas
 
@@ -348,6 +350,32 @@ No saltar sprints. Cada uno depende del anterior.
 
 **Productos UI**: Activo button rose (no teal), Marca toggle Ideal/Eclat en edit, slug amber warning en create + edit, SKU/Slug order swapped, removido auto-SKU generation (variant SKU opcional), category subcategory inline form nested en parent con matching color, empty parents pueden add first subcategory. POS product cards sin edit pencil icon.
 
+### Post-deploy (features + hardening tras lanzar producción · may-2026)
+
+**Redes de clientes (Customer Networks)** — clasificación editable de clientes por "red".
+- DB: tabla `customer_networks` (tenant-scoped, soft-delete, `UNIQUE(tenant_id, name)`, `color` hex `#RRGGBB`, `sort_order`, RLS 4 policies, partial index `WHERE deleted_at IS NULL`). `customers.network_id` FK nullable sin `ON DELETE`.
+- RPC atómico `delete_customer_network(p_network_id, p_tenant_id)`: limpia `network_id` de clientes afectados + soft-delete de la red en una transacción, valida tenant ownership, retorna `{ success, cleared_count }`.
+- Actions `createCustomerNetwork`/`updateCustomerNetwork`/`deleteCustomerNetwork` con Zod (name `min(1)`, color regex), traduce 23505 → "Ya existe una red...". `useCustomers`/`useCustomer` embeben `customer_networks(id,name,color)` con `.is("customer_networks.deleted_at", null)` (evita tombstones).
+- UI: tab "Redes" en `/configuracion` (`NetworkManager` con 3 KPIs azules + dialog con 8 color swatches), pills coloreadas en customer dialog ("Detalles adicionales" → "Red"), columna "Red" en tabla de clientes (pill tinted o "—").
+- Key files: `src/features/clientes/components/network-manager.tsx`, `clientes/{actions,queries,schemas}.ts`.
+
+**Recibos — overhaul completo** (sales `Recibo-V-XXXX`, returns `Recibo-D-XXXX`):
+- **Térmico** (`sale-receipt.tsx`): B&W monospace (`JetBrains Mono`/`Menlo`/`Courier New`), texto `#000` sin fondos tintados, sin emoji Unicode ("REGALO"/"GRATIS" en texto), logos B&W (`public/EclatLogo_Black.svg` + `abbrixLogo.svg`), header logo 38mm. Para impresión térmica real.
+- **PDF** (`sale-receipt-pdf.ts`): `size: "LETTER"` (612×792pt) con columna centrada angosta (`PAGE_H_PAD=136`), sin altura dinámica. `clientName` con `flexShrink:1` + `textAlign:right` (fix overflow de nombres largos). **Gotcha**: referencia de pago NO usa `fontStyle:"italic"` — PlusJakarta no tiene variante italic registrada (crashea @react-pdf).
+- **Breakdown de descuentos** (HTML + PDF paritarios): 4 branches — cart-only / sameForAll / per-product / per-product + cart-level-extra. `discount_percent` per-item propagado desde `sale-detail.tsx` + `sale-detail-modal.tsx` al `ReceiptData`. Iconos ASCII-safe en PDF (`%` / `★`, regalo violet `#8b5cf6`).
+- Imprime número de distribuidor (`client_number`) + referencia de pago en HTML y PDF.
+
+**Descuentos per-item + Regalo** — POS soporta descuento por ítem y "Regalo" (100% off, `is_gift`) además del descuento global cart-level. Fuente de descuento cart-level explícita (evita totales engañosos). Key files: `pos/components/{item-discount-picker,discount-breakdown}.tsx`, `pos/store.ts`.
+
+**POS landing redesign** — eliminado el sliding cart de fondo (`pos-sliding-cart.tsx` borrado). Agregar producto auto-abre el wizard. `WizardMode = "new-sale" | "complete-pending"` (2 entradas en `STEPS_BY_MODE`). Pendientes muestran descuento **read-only** en el step Pago (banner "(X%) -$Y" sin botón agregar/quitar, `pendingSaleDiscount` solo en modo complete-pending). Confirm-on-discard al cerrar wizard con items.
+
+**Otros post-deploy**:
+- **Variant SKU natural sort** — `sortVariantsBySku` (`localeCompare` con `numeric:true`) en todos los pickers (productos, POS, bundle, transito, notas-credito, customer-price-editor).
+- **Ventas KPIs date-reactive** — KPIs reaccionan al date filter activo (no solo "hoy").
+- **Inventario** — "valor total combinado" excluye carga inicial; búsqueda de productos accent-insensitive; totales bundle-aware.
+- **Módulo Ayuda** (`/ayuda`) — secciones de ayuda buscables (`help-data.ts`) + guía de usuario descargable en PDF (`src/features/docs/user-guide-pdf.tsx`).
+- **CRUD idempotency + debounce hardening** — guards anti-doble-submit across módulos; POS wizard same-tick click guard + ESC-block.
+
 ### Security hardening
 
 - Boneyard auth bypass restringido a dev only; image proxy con SSRF + auth; purge functions bloqueados en production.
@@ -363,7 +391,9 @@ No saltar sprints. Cada uno depende del anterior.
 
 ### Testing
 
-362 tests totales (`TEST-PLAN.md`): 227 backend (todos pasando) + 135 UI/UX manual. Progreso manual/Playwright: 34/135 (secciones 1 Auth, 2 Dashboard, 3 Productos — minus 3 image tests skipped; Playwright cubrió 6 Sales, 11 Vales, 13 Reportes, 16 Cross-module).
+- **`TEST-PLAN.md`** (pre-deploy): 362 tests — 227 backend (todos pasando) + 135 UI/UX manual (135/135 ejecutados, 3 image tests skipped). Cubre el alcance de Sprints 1-8 hasta el lanzamiento.
+- **`TEST-PLAN-2026-05-19.md`** (post-deploy): 185 tests / 13 secciones para la superficie nueva (variant sort, POS landing/wizard, variant picker, ventas KPIs, inventario hub, redes de clientes backend+UI, recibos descuentos/térmico/PDF, cross-feature, edge cases). **Run 23-may (Claude): 168/185 ✅, 0 parciales.** Cerradas vía code-audit + Playwright + Supabase SQL. Pendientes (21): §10 recibo térmico visual (10.8-10.15) **DIFERIDO a propósito** — el usuario va a cambiar `sale-receipt.tsx`; §8.20 (pills móvil); §12.3-12.9 (e2e pendiente→recibo + cross-tab); §13.8-13.11/13.13 (flujos transaccionales + impresión, no corridos para no mutar la DB).
+  - **Bug encontrado y corregido (2.6/2.13)**: click en "+" de producto sin stock no abría el wizard (`handleAddProduct` filtraba por `stock>0` → return temprano). Fix en `pos-landing.tsx`: usar `activeVariants` + diálogo OOS→vale (réplica de `wizard-products-step`); de paso restaura `bundleComponents` al agregar cofres desde el landing.
 
 ### npm audit cleanup (2026-04-13)
 

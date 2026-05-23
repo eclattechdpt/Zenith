@@ -29,7 +29,7 @@
 | 5 | Inventario | Complete | Tres inventarios (Fisico/Transito/Carga Inicial), hub con totales, ajustes, entradas, historial, overrides, transit mensual, 48 tests, 10 bugs fixed |
 | 6 | Devoluciones y creditos | Complete | Returns (partial/full), credit notes, sale cancellation, POS credit note payment, 20 tests, 10 bugs fixed |
 | 7 | Dashboard y reportes | Complete | Dashboard real data, 6 Excel exports, 4 PDF reports, /reportes page, all queries server-side |
-| 8 | Polish | In progress | Image handling, media manager, design standardization, UX improvements, deploy prep |
+| 8 | Polish | Production live | Image handling, media manager, design standardization, UX improvements. **Deployed to Vercel at https://eclatpos.com (2026-04-16).** Post-deploy: customer networks, receipt overhaul, per-item discounts, help guide |
 
 ## Sprint 8 — Polish (In Progress)
 
@@ -175,8 +175,28 @@
   - `CountUp` enhanced: post-mount value changes now trigger a subtle scale pulse (`[1, 1.04, 1]`) via `useAnimationControls` — visual confirmation that the number updated. First mount still uses blur+fade entrance.
   - Note: research recommended `motion.AnimateNumber` but it doesn't exist in motion v12.38; the existing custom `CountUp` (useMotionValue + useSpring + direct textContent) was enhanced instead
 
+### Post-deploy (after production launch · May 2026)
+- **UX hardening wave** (2026-04-17): CRUD idempotency + debounce across all modules; accent-insensitive product search; bundle-aware inventory totals; bundle component label/flash fixes; unsaved-changes guard; variant search; dashboard widget equal heights/widths. Wired up Vercel MCP + documented production launch.
+- **Help module** (2026-04-17): `/ayuda` page with searchable help sections (`help-data.ts`) + downloadable user-guide PDF (`src/features/docs/user-guide-pdf.tsx`).
+- **Per-item discounts + Regalo** (2026-05-18): POS supports per-item discounts and "Regalo" (100%-off gift, `is_gift`) alongside cart-level global discount. Explicit cart-level discount source to avoid misleading totals. Per-discount breakdown footer. Key files: `pos/components/{item-discount-picker,discount-breakdown}.tsx`.
+- **Variant SKU natural sort** (2026-05-18): `sortVariantsBySku` (`localeCompare` numeric) applied to all variant pickers (products, POS, bundle manager, transit, credit notes, customer price editor).
+- **POS landing redesign** (2026-05-18): Removed background sliding cart (`pos-sliding-cart.tsx` deleted); adding a product auto-opens the wizard. `WizardMode = new-sale | complete-pending`. Pending sales show read-only discount banner in payment step. Confirm-on-discard when closing wizard with items.
+- **Ventas KPIs date-reactive** (2026-05-18): KPIs react to the active date filter (not just "today").
+- **Inventario fix** (2026-05-18): "valor total combinado" excludes carga inicial.
+- **Receipt overhaul** (2026-05-18): (1) Thermal B&W monospace receipt with B&W logos (`EclatLogo_Black.svg`, `abbrixLogo.svg`), 38mm header logo, no Unicode emoji. (2) Distributor number (`client_number`) + payment reference printed on HTML + PDF. (3) Per-product discount breakdown when % differs across items (4 branches: cart-only/sameForAll/per-product/+cart-level). (4) PDF on Letter size, centered narrow column, overflow fix for long client names, italic-crash fix (PlusJakarta has no italic variant). Key files: `pos/components/{sale-receipt.tsx,sale-receipt-pdf.ts}`.
+- **Customer networks (Redes)** (2026-05-18): Editable customer classification by network.
+  - DB: `customer_networks` table (tenant-scoped, soft-delete, `UNIQUE(tenant_id, name)`, hex color, RLS 4 policies). `customers.network_id` nullable FK.
+  - Atomic RPC `delete_customer_network` — clears `network_id` on affected customers + soft-deletes network in one transaction, returns `{ success, cleared_count }`.
+  - Server actions with Zod (name required, `#RRGGBB` color regex, 23505→friendly dup message). `useCustomers`/`useCustomer` embed `customer_networks` filtered by `deleted_at`.
+  - UI: "Redes" tab in `/configuracion` (`NetworkManager` + KPIs + color-swatch dialog), color pills in customer dialog, "Red" column in customer table.
+  - Key files: `clientes/components/network-manager.tsx`, `clientes/{actions,queries,schemas}.ts`.
+- **Post-deploy audit & test plan** (2026-05-19): `TEST-PLAN-2026-05-19.md` (185 tests, 13 sections) covering the new surface. P0/P1/P2 audit findings fixed (atomicity, variants, confirm, receipt edges, pending `discount_percent`, dead code). 22-may run: 9/9 P0s closed + sections 1-8 verified.
+- **Fix: OOS → vale flow on POS landing (2.6/2.13)** (2026-05-23): clicking "+" on an out-of-stock product showed the green checkmark but never opened the wizard — `handleAddProduct` filtered variants by `stock>0` and returned early (lost when the sliding cart was removed). Fix in `pos-landing.tsx`: use `activeVariants` + OOS→vale confirm dialog (mirrors `wizard-products-step`); also restores `bundleComponents` when adding cofres from the landing. Commit `3b50bef`.
+- **Test plan run 23-may** (2026-05-23): `TEST-PLAN-2026-05-19.md` now **168/185 ✅, 0 partials**, via code-audit + Playwright + Supabase SQL. Verified live: POS landing/wizard/discard, variant picker, ventas KPIs reactivity, inventario hub math, networks UI, receipt discount breakdown (V-0048 on-screen + PDF: `% (40%)` + `★ REGALO`, total $444), nav sweep (11 routes, 0 console errors), nuqs persistence. 21 remaining: §10 thermal visual (deferred — `sale-receipt.tsx` changes pending), §8.20 mobile, §12.3-12.9 (e2e/cross-tab), §13.8-13.11/13.13 (transactional/print — not run to avoid DB mutation).
+
 ### Pending
 - **TODO: Password change flow for admin user** — check whether there's a UI for changing `admin@eclat.com` password in the app (or if it must be done via Supabase dashboard). If missing, decide whether to build it.
+- TEST-PLAN-2026-05-19: 21 tests remaining — §10 thermal receipt visual (DEFERRED, pending `sale-receipt.tsx` changes), §8.20 mobile pills, §12.3-12.9 (e2e + cross-tab), §13.8-13.11/13.13 (live transactional + print).
 - Final UX polish pass
 
 ### Done (2026-04-16)
