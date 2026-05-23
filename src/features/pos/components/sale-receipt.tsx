@@ -36,7 +36,7 @@ export interface ReceiptData {
 }
 
 const BUSINESS_NAME = "ECLAT"
-const BUSINESS_PHONE = "33 1234 5678"
+const BUSINESS_PHONE = "33 3167 7771"
 const BUSINESS_LOCATION = "Zapopan, Jalisco"
 
 // Estilo "ticket térmico" optimizado para legibilidad en impresoras térmicas de
@@ -107,6 +107,8 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
     const hasCartLevelExtra = cartLevelExtra > 0.01
     const sameDiscountForAll =
       uniquePcts.size === 1 && [...uniquePcts][0] > 0 && !hasCartLevelExtra
+
+    const totalPieces = data.items.reduce((sum, i) => sum + i.quantity, 0)
 
     return (
       <div
@@ -182,28 +184,23 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         <Separator />
 
         {/* ── Items ── */}
-        <div style={{ marginBottom: "6px" }}>
-          <Row
-            label={<span style={{ fontWeight: 800 }}>PRODUCTO</span>}
-            value={<span style={{ fontWeight: 800 }}>IMPORTE</span>}
-            bold
-          />
+        <div style={{ fontSize: "13px", fontWeight: 800, marginBottom: "6px" }}>
+          PRODUCTOS
         </div>
 
         {data.items.map((item, i) => {
           const hasDiscount = item.discount > 0
           const isGift = hasDiscount && item.line_total === 0
+          const gross = item.unit_price * item.quantity
           const pctLabel =
             item.discount_percent != null && item.discount_percent > 0
-              ? formatDiscountPercent(
-                  item.discount,
-                  item.unit_price * item.quantity,
-                  item.discount_percent
-                )
+              ? formatDiscountPercent(item.discount, gross, item.discount_percent)
               : null
+          // Etiqueta del descuento: "%" si lo tenemos, si no el monto en $.
+          const discountLabel = pctLabel ?? formatCurrency(item.discount)
 
           return (
-            <div key={i} style={{ marginBottom: "8px" }}>
+            <div key={i} style={{ marginBottom: "10px" }}>
               <div
                 style={{
                   fontSize: "14px",
@@ -218,25 +215,47 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
                   {item.variant_label}
                 </div>
               )}
-              <Row
-                size={12}
-                label={
-                  <span style={{ fontWeight: 600 }}>
-                    {item.quantity} x {formatCurrency(item.unit_price)}
-                    {pctLabel && (
-                      <span style={{ fontWeight: 800 }}> -{pctLabel}</span>
-                    )}
-                    {isGift && (
-                      <span style={{ fontWeight: 800 }}> REGALO</span>
-                    )}
-                  </span>
-                }
-                value={
-                  <span style={{ fontWeight: 800 }}>
-                    {isGift ? "GRATIS" : formatCurrency(item.line_total)}
-                  </span>
-                }
-              />
+
+              {hasDiscount ? (
+                <>
+                  {/* Cantidad x Precio = Subtotal del renglón (izquierda) */}
+                  <div style={{ fontSize: "12px", fontWeight: 600 }}>
+                    {item.quantity} x {formatCurrency(item.unit_price)} ={" "}
+                    {formatCurrency(gross)}
+                  </div>
+                  {/* - Descuento (izquierda) · Total con descuento (derecha) */}
+                  <Row
+                    size={12}
+                    bold
+                    label={
+                      <span style={{ fontWeight: 800 }}>
+                        - {discountLabel}
+                        {isGift && " REGALO"}
+                      </span>
+                    }
+                    value={
+                      <span style={{ fontWeight: 800 }}>
+                        {isGift ? "GRATIS" : formatCurrency(item.line_total)}
+                      </span>
+                    }
+                  />
+                </>
+              ) : (
+                /* Sin descuento: Cantidad x Precio (izquierda) · Total (derecha) */
+                <Row
+                  size={12}
+                  label={
+                    <span style={{ fontWeight: 600 }}>
+                      {item.quantity} x {formatCurrency(item.unit_price)}
+                    </span>
+                  }
+                  value={
+                    <span style={{ fontWeight: 800 }}>
+                      {formatCurrency(item.line_total)}
+                    </span>
+                  }
+                />
+              )}
             </div>
           )
         })}
@@ -326,6 +345,10 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         <Separator />
 
         {/* ── Total ── */}
+        <Row
+          label="Piezas"
+          value={totalPieces}
+        />
         <Row
           label={<span style={{ fontSize: "20px", fontWeight: 800 }}>TOTAL</span>}
           value={
