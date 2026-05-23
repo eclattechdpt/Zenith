@@ -69,7 +69,8 @@ export function POSLanding() {
   const handlePrint = useReactToPrint({
     contentRef: receiptRef,
     documentTitle: receiptData ? `Recibo-${receiptData.saleNumber}` : "Recibo",
-    pageStyle: "@page { size: 80mm auto; margin: 0; }",
+    pageStyle:
+      "@page { size: 80mm auto; margin: 0 } body { margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }",
   })
 
   // ── Store ──

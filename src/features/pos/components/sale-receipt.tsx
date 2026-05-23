@@ -39,22 +39,26 @@ const BUSINESS_NAME = "ECLAT"
 const BUSINESS_PHONE = "33 1234 5678"
 const BUSINESS_LOCATION = "Zapopan, Jalisco"
 
-// Estilo "ticket térmico": monospace, puro negro y blanco, sin fondos.
-// Las impresoras térmicas no reproducen fondos coloridos, los renderizan
-// como gris claro que se desvanece. Bold contra regular es lo único que
-// se ve nítido en papel térmico.
+// Estilo "ticket térmico" optimizado para legibilidad en impresoras térmicas de
+// 80mm (área imprimible real ~72mm, 203 DPI, 1-bit: negro puro o nada).
+// Reglas que mantienen el texto NÍTIDO en papel térmico:
+//   1. Ancho del contenido = 72mm (no 80mm) para no caer en el margen no
+//      imprimible (~4mm/lado) y que no se corten los bordes.
+//   2. Sans-serif PESADO (no monospace fino): los trazos gruesos sobreviven la
+//      binarización; la alineación la maneja flexbox, no el monospace.
+//   3. Peso base 600 y énfasis 800 — el 400 sale débil/entrecortado.
+//   4. Tamaños grandes (nada < 11px) — a 203 DPI lo chico se desbarata.
+//   5. Separadores como REGLA SÓLIDA negra (no guiones ni grises).
+//   6. Sin grises, sin fondos, sin logos diminutos (texto en su lugar).
 
-const FONT_FAMILY =
-  "'JetBrains Mono', 'Menlo', 'Courier New', Courier, monospace"
-
-const SEPARATOR = "--------------------------------"
+const FONT_FAMILY = "Arial, Helvetica, 'Segoe UI', system-ui, sans-serif"
 
 // Util: row con label a la izquierda + value tabular a la derecha
 function Row({
   label,
   value,
   bold = false,
-  size = 11,
+  size = 13,
 }: {
   label: React.ReactNode
   value: React.ReactNode
@@ -68,8 +72,8 @@ function Row({
         justifyContent: "space-between",
         alignItems: "baseline",
         fontSize: `${size}px`,
-        fontWeight: bold ? 700 : 400,
-        lineHeight: 1.5,
+        fontWeight: bold ? 800 : 600,
+        lineHeight: 1.45,
       }}
     >
       <span style={{ flex: 1, minWidth: 0, paddingRight: "8px" }}>{label}</span>
@@ -80,20 +84,9 @@ function Row({
   )
 }
 
+// Separador = línea negra sólida (lo más nítido en térmica)
 function Separator() {
-  return (
-    <div
-      style={{
-        fontSize: "11px",
-        textAlign: "center",
-        margin: "8px 0",
-        letterSpacing: "0.5px",
-        userSelect: "none",
-      }}
-    >
-      {SEPARATOR}
-    </div>
-  )
+  return <div style={{ borderTop: "2px solid #000", margin: "10px 0" }} />
 }
 
 export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
@@ -119,13 +112,14 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
       <div
         ref={ref}
         style={{
-          width: "80mm",
+          width: "72mm",
           margin: "0 auto",
-          padding: "20px 14px",
+          padding: "18px 8px",
           fontFamily: FONT_FAMILY,
-          fontSize: "11px",
+          fontSize: "13px",
+          fontWeight: 600,
           color: "#000",
-          lineHeight: 1.5,
+          lineHeight: 1.45,
           background: "#fff",
           WebkitPrintColorAdjust: "exact",
           printColorAdjust: "exact",
@@ -140,15 +134,15 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
             style={{
               display: "block",
               margin: "0 auto 8px",
-              width: "38mm",
+              width: "42mm",
               maxWidth: "100%",
               height: "auto",
             }}
           />
-          <div style={{ fontSize: "11px", fontWeight: 400 }}>
+          <div style={{ fontSize: "12px", fontWeight: 600 }}>
             {BUSINESS_LOCATION}
           </div>
-          <div style={{ fontSize: "11px", fontWeight: 400 }}>
+          <div style={{ fontSize: "12px", fontWeight: 600 }}>
             Tel. {BUSINESS_PHONE}
           </div>
         </div>
@@ -157,21 +151,19 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
 
         {/* ── Sale info ── */}
         <Row
-          label={<span>FOLIO</span>}
-          value={<span style={{ fontWeight: 700 }}>{data.saleNumber}</span>}
+          label={<span style={{ fontWeight: 800 }}>FOLIO</span>}
+          value={<span style={{ fontWeight: 800 }}>{data.saleNumber}</span>}
           bold
         />
         <Row label="Fecha" value={`${formattedDate} ${formattedTime}`} />
 
         {data.customerName && (
-          <div style={{ marginTop: "4px" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700 }}>
-              CLIENTE
-            </div>
+          <div style={{ marginTop: "6px" }}>
+            <div style={{ fontSize: "13px", fontWeight: 800 }}>CLIENTE</div>
             <div
               style={{
-                fontSize: "11px",
-                fontWeight: 400,
+                fontSize: "13px",
+                fontWeight: 600,
                 wordBreak: "break-word",
               }}
             >
@@ -181,7 +173,7 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
               <Row
                 label="Nº Distribuidor"
                 value={data.customerNumber}
-                size={10}
+                size={12}
               />
             )}
           </div>
@@ -190,10 +182,11 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         <Separator />
 
         {/* ── Items ── */}
-        <div style={{ marginBottom: "4px" }}>
+        <div style={{ marginBottom: "6px" }}>
           <Row
-            label={<span style={{ fontWeight: 700 }}>PRODUCTO</span>}
-            value={<span style={{ fontWeight: 700 }}>IMPORTE</span>}
+            label={<span style={{ fontWeight: 800 }}>PRODUCTO</span>}
+            value={<span style={{ fontWeight: 800 }}>IMPORTE</span>}
+            bold
           />
         </div>
 
@@ -210,35 +203,36 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
               : null
 
           return (
-            <div key={i} style={{ marginBottom: "6px" }}>
+            <div key={i} style={{ marginBottom: "8px" }}>
               <div
                 style={{
-                  fontSize: "11px",
-                  fontWeight: 700,
+                  fontSize: "14px",
+                  fontWeight: 800,
                   wordBreak: "break-word",
                 }}
               >
                 {item.product_name}
               </div>
               {item.variant_label !== item.product_name && (
-                <div style={{ fontSize: "10px", fontWeight: 400 }}>
+                <div style={{ fontSize: "12px", fontWeight: 600 }}>
                   {item.variant_label}
                 </div>
               )}
               <Row
+                size={12}
                 label={
-                  <span style={{ fontSize: "10px", fontWeight: 400 }}>
+                  <span style={{ fontWeight: 600 }}>
                     {item.quantity} x {formatCurrency(item.unit_price)}
                     {pctLabel && (
-                      <span style={{ fontWeight: 700 }}> -{pctLabel}</span>
+                      <span style={{ fontWeight: 800 }}> -{pctLabel}</span>
                     )}
                     {isGift && (
-                      <span style={{ fontWeight: 700 }}> REGALO</span>
+                      <span style={{ fontWeight: 800 }}> REGALO</span>
                     )}
                   </span>
                 }
                 value={
-                  <span style={{ fontWeight: 700 }}>
+                  <span style={{ fontWeight: 800 }}>
                     {isGift ? "GRATIS" : formatCurrency(item.line_total)}
                   </span>
                 }
@@ -289,9 +283,9 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
             <>
               <div
                 style={{
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  marginTop: "4px",
+                  fontSize: "13px",
+                  fontWeight: 800,
+                  marginTop: "6px",
                 }}
               >
                 DESCUENTOS
@@ -303,26 +297,26 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
                   <Row
                     key={i}
                     label={
-                      <span style={{ fontSize: "10px" }}>
+                      <span style={{ fontSize: "12px" }}>
                         {item.product_name}
                         {pct > 0 && (
-                          <span style={{ fontWeight: 700 }}> ({pct}%)</span>
+                          <span style={{ fontWeight: 800 }}> ({pct}%)</span>
                         )}
                         {isGift && (
-                          <span style={{ fontWeight: 700 }}> REGALO</span>
+                          <span style={{ fontWeight: 800 }}> REGALO</span>
                         )}
                       </span>
                     }
                     value={`-${formatCurrency(item.discount)}`}
-                    size={10}
+                    size={12}
                   />
                 )
               })}
               {hasCartLevelExtra && (
                 <Row
-                  label={<span style={{ fontSize: "10px" }}>Descuento adicional</span>}
+                  label={<span style={{ fontSize: "12px" }}>Descuento adicional</span>}
                   value={`-${formatCurrency(cartLevelExtra)}`}
-                  size={10}
+                  size={12}
                 />
               )}
             </>
@@ -333,9 +327,9 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
 
         {/* ── Total ── */}
         <Row
-          label={<span style={{ fontSize: "13px", fontWeight: 700 }}>TOTAL</span>}
+          label={<span style={{ fontSize: "20px", fontWeight: 800 }}>TOTAL</span>}
           value={
-            <span style={{ fontSize: "13px", fontWeight: 700 }}>
+            <span style={{ fontSize: "20px", fontWeight: 800 }}>
               {formatCurrency(data.total)}
             </span>
           }
@@ -344,7 +338,7 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         <Separator />
 
         {/* ── Payments ── */}
-        <div style={{ fontSize: "11px", fontWeight: 700, marginBottom: "2px" }}>
+        <div style={{ fontSize: "13px", fontWeight: 800, marginBottom: "4px" }}>
           FORMA DE PAGO
         </div>
         {data.payments.map((p, i) => (
@@ -359,10 +353,9 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
             {p.reference && (
               <div
                 style={{
-                  fontSize: "10px",
-                  fontWeight: 400,
+                  fontSize: "12px",
+                  fontWeight: 600,
                   paddingLeft: "8px",
-                  fontStyle: "italic",
                 }}
               >
                 Ref: {p.reference}
@@ -372,8 +365,8 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         ))}
         {data.change > 0 && (
           <Row
-            label={<span style={{ fontWeight: 700 }}>Cambio</span>}
-            value={<span style={{ fontWeight: 700 }}>{formatCurrency(data.change)}</span>}
+            label={<span style={{ fontWeight: 800 }}>Cambio</span>}
+            value={<span style={{ fontWeight: 800 }}>{formatCurrency(data.change)}</span>}
           />
         )}
 
@@ -383,48 +376,19 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         <div
           style={{
             textAlign: "center",
-            fontSize: "11px",
-            fontWeight: 400,
+            fontSize: "12px",
+            fontWeight: 600,
             marginTop: "10px",
           }}
         >
-          <div style={{ fontWeight: 700, marginBottom: "8px" }}>
+          <div style={{ fontSize: "14px", fontWeight: 800, marginBottom: "8px" }}>
             GRACIAS POR TU COMPRA
           </div>
-          <div
-            style={{
-              fontSize: "9px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "4px",
-              marginBottom: "4px",
-            }}
-          >
-            <span>Powered by</span>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/EclatLogo_Black.svg"
-              alt="Eclat POS"
-              style={{ height: "12px", verticalAlign: "middle" }}
-            />
+          <div style={{ fontSize: "12px", fontWeight: 600 }}>
+            Powered by ECLAT POS
           </div>
-          <div
-            style={{
-              fontSize: "8px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "3px",
-            }}
-          >
-            <span>Desarrollado por</span>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/abbrixLogo.svg"
-              alt="Abbrix"
-              style={{ height: "10px", verticalAlign: "middle" }}
-            />
+          <div style={{ fontSize: "11px", fontWeight: 600 }}>
+            Desarrollado por Abbrix
           </div>
         </div>
       </div>
