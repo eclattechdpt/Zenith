@@ -77,6 +77,7 @@ export function POSSaleWizard({
   const items = usePOSStore((s) => s.items)
   const customer = usePOSStore((s) => s.customer)
   const cartDiscount = usePOSStore((s) => s.cartDiscount)
+  const extra = usePOSStore((s) => s.extra)
   const notes = usePOSStore((s) => s.notes)
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
   const getTotal = usePOSStore((s) => s.getTotal)
@@ -145,6 +146,8 @@ export function POSSaleWizard({
         subtotal: pendingSale.subtotal,
         discountAmount: pendingSale.discount_amount,
         discountPercent: pendingSale.discount_percent ?? null,
+        extraAmount: pendingSale.extra_amount ?? 0,
+        extraLabel: pendingSale.extra_label ?? null,
         total: pendingSale.total,
         change: Math.max(0, paymentTotal - pendingSale.total),
       }
@@ -169,14 +172,16 @@ export function POSSaleWizard({
           line_total: Math.max(0, gross - payload.discount),
         }
       }),
-      payments: payments.map((p) => ({ method: p.method, amount: p.amount })),
+      payments: payments.map((p) => ({ method: p.method, amount: p.amount, reference: p.reference })),
       subtotal,
       discountAmount: cartDiscountAmount,
       discountPercent: cartDiscountPercent,
+      extraAmount: extra.amount,
+      extraLabel: extra.label || null,
       total: totalVal,
       change: Math.max(0, paymentTotal - totalVal),
     }
-  }, [mode, pendingSale, items, customer, payments, cartDiscountAmount, cartDiscountPercent, getSubtotal, getTotal, buildSaleItemPayload])
+  }, [mode, pendingSale, items, customer, payments, cartDiscountAmount, cartDiscountPercent, extra, getSubtotal, getTotal, buildSaleItemPayload])
 
   // ── Sale completion ──
 
@@ -222,6 +227,8 @@ export function POSSaleWizard({
           })),
           discount_amount: backendDiscountAmount,
           discount_percent: cartDiscountPercent,
+          extra_amount: extra.amount,
+          extra_label: extra.label || null,
           notes: notes || null,
         })
         if (result.error) {
@@ -249,7 +256,7 @@ export function POSSaleWizard({
     } finally {
       submittingRef.current = false
     }
-  }, [mode, pendingSale, items, customer, cartDiscountAmount, cartDiscountPercent, notes, payments, clear, queryClient, isOnline, buildReceiptSnapshot])
+  }, [mode, pendingSale, items, customer, cartDiscountAmount, cartDiscountPercent, extra, notes, payments, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Pending sale ──
 
@@ -268,6 +275,8 @@ export function POSSaleWizard({
         items: saleItems,
         discount_amount: backendDiscountAmount,
         discount_percent: cartDiscountPercent,
+        extra_amount: extra.amount,
+        extra_label: extra.label || null,
         notes: notes || null,
       })
       if (result.error) {
@@ -293,7 +302,7 @@ export function POSSaleWizard({
     } finally {
       submittingRef.current = false
     }
-  }, [items, customer, cartDiscountAmount, cartDiscountPercent, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
+  }, [items, customer, cartDiscountAmount, cartDiscountPercent, extra, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Create vale ──
 
@@ -450,6 +459,7 @@ export function POSSaleWizard({
         items: saleItems,
         payments: adjustedPayments.filter((p) => p.amount > 0),
         discount_amount: 0,
+        extra_amount: 0,
         notes: notes || null,
         skip_components: skipComponents.length > 0 ? skipComponents : undefined,
       })
@@ -677,6 +687,14 @@ export function POSSaleWizard({
                         }
                       : undefined
                   }
+                  pendingSaleExtra={
+                    mode === "complete-pending" && pendingSale
+                      ? {
+                          amount: pendingSale.extra_amount ?? 0,
+                          label: pendingSale.extra_label ?? null,
+                        }
+                      : undefined
+                  }
                   onNext={handlePaymentNext}
                   onBack={goBack}
                 />
@@ -693,7 +711,7 @@ export function POSSaleWizard({
                   onClose={handleClose}
                   saleResult={saleResult}
                   receiptSnapshot={receiptSnapshot}
-                  pendingSale={mode === "complete-pending" && pendingSale ? { subtotal: pendingSale.subtotal, discount_amount: pendingSale.discount_amount, discount_percent: pendingSale.discount_percent ?? null, total: pendingSale.total } : null}
+                  pendingSale={mode === "complete-pending" && pendingSale ? { subtotal: pendingSale.subtotal, discount_amount: pendingSale.discount_amount, discount_percent: pendingSale.discount_percent ?? null, extra_amount: pendingSale.extra_amount ?? 0, extra_label: pendingSale.extra_label ?? null, total: pendingSale.total } : null}
                   wasPending={wasPending}
                 />
               )}

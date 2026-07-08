@@ -25,6 +25,8 @@ export const createSaleSchema = z.object({
   payments: z.array(paymentSchema).min(1, "Registra al menos un pago"),
   discount_amount: z.number().min(0).default(0),
   discount_percent: z.number().min(0).max(100).optional().nullable(),
+  extra_amount: z.number().min(0).default(0),
+  extra_label: z.string().max(100).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
   skip_components: z.array(z.string().regex(uuidPattern)).optional(),
 })
@@ -48,6 +50,8 @@ export const createPendingSaleSchema = z.object({
   items: z.array(cartItemSchema).min(1),
   discount_amount: z.number().min(0).default(0),
   discount_percent: z.number().min(0).max(100).optional().nullable(),
+  extra_amount: z.number().min(0).default(0),
+  extra_label: z.string().max(100).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
 })
 

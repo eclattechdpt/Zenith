@@ -31,13 +31,17 @@ export interface ReceiptData {
   subtotal: number
   discountAmount: number
   discountPercent?: number | null
+  extraAmount?: number | null
+  extraLabel?: string | null
   total: number
   change: number
 }
 
+const DEFAULT_EXTRA_LABEL = "Servicio a domicilio"
+
 const BUSINESS_NAME = "ECLAT"
 const BUSINESS_PHONE = "33 3167 7771"
-const BUSINESS_LOCATION = "Zapopan, Jalisco"
+const BUSINESS_LOCATION = "IDEAL Guadalajara"
 
 // Estilo "ticket térmico" optimizado para legibilidad en impresoras térmicas de
 // 80mm (área imprimible real ~72mm, 203 DPI, 1-bit: negro puro o nada).
@@ -342,6 +346,14 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
           )
         })()}
 
+        {/* ── Cargo extra (ej. servicio a domicilio) — SUMA al total ── */}
+        {(data.extraAmount ?? 0) > 0 && (
+          <Row
+            label={data.extraLabel?.trim() || DEFAULT_EXTRA_LABEL}
+            value={`+${formatCurrency(data.extraAmount ?? 0)}`}
+          />
+        )}
+
         <Separator />
 
         {/* ── Total ── */}
@@ -381,7 +393,7 @@ export const SaleReceipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
                   paddingLeft: "8px",
                 }}
               >
-                Ref: {p.reference}
+                Nota: {p.reference}
               </div>
             )}
           </div>

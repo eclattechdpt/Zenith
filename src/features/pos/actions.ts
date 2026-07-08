@@ -48,7 +48,7 @@ export async function createSale(input: CreateSaleInput) {
   const parsed = createSaleSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  const { items, payments, customer_id, discount_amount, discount_percent, notes, skip_components } = parsed.data
+  const { items, payments, customer_id, discount_amount, discount_percent, extra_amount, extra_label, notes, skip_components } = parsed.data
 
   // Calculate totals
   const subtotal = items.reduce(
@@ -56,7 +56,8 @@ export async function createSale(input: CreateSaleInput) {
     0
   )
   const itemsDiscount = items.reduce((sum, item) => sum + item.discount, 0)
-  const total = Math.max(0, subtotal - itemsDiscount - discount_amount)
+  // El cargo extra (ej. servicio a domicilio) SUMA al total tras los descuentos.
+  const total = Math.max(0, subtotal - itemsDiscount - discount_amount) + extra_amount
 
   // Validate payments cover the total
   const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
@@ -93,6 +94,8 @@ export async function createSale(input: CreateSaleInput) {
       p_discount_amount: itemsDiscount + discount_amount,
       p_discount_percent: discount_percent ?? null,
       p_total: total,
+      p_extra_amount: extra_amount,
+      p_extra_label: extra_label ?? null,
       p_notes: notes ?? null,
       p_created_by: userId,
       p_items: items.map((item) => ({
@@ -241,10 +244,11 @@ export async function createPendingSale(input: CreatePendingSaleInput) {
     0
   )
   const itemsDiscount = items.reduce((sum, i) => sum + i.discount, 0)
+  // El cargo extra (ej. servicio a domicilio) SUMA al total tras los descuentos.
   const total = Math.max(
     subtotal - itemsDiscount - parsed.data.discount_amount,
     0
-  )
+  ) + parsed.data.extra_amount
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.rpc as any)("create_pending_sale", {
@@ -254,6 +258,8 @@ export async function createPendingSale(input: CreatePendingSaleInput) {
     p_discount_amount: parsed.data.discount_amount + itemsDiscount,
     p_discount_percent: parsed.data.discount_percent ?? null,
     p_total: total,
+    p_extra_amount: parsed.data.extra_amount,
+    p_extra_label: parsed.data.extra_label ?? null,
     p_notes: parsed.data.notes ?? null,
     p_created_by: userId,
     p_items: items.map((i) => ({

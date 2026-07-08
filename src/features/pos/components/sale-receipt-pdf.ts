@@ -265,6 +265,13 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
               )
             })()
           : null,
+        // Cargo extra (ej. servicio a domicilio) — SUMA al total
+        (data.extraAmount ?? 0) > 0
+          ? h(View, { style: { flexDirection: "row", justifyContent: "space-between", marginTop: 4 } },
+              h(Text, { style: s.subtotalText }, data.extraLabel?.trim() || "Servicio a domicilio"),
+              h(Text, { style: s.subtotalValue }, `+${currency(data.extraAmount ?? 0)}`),
+            )
+          : null,
       ),
 
       // ── Total + Payments ──
@@ -284,7 +291,7 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
             )
             if (!p.reference) return [row]
             // Sin fontStyle italic — PlusJakarta no registra italic variant.
-            const note = h(Text, { key: `ref-${i}`, style: s.payRef }, `Ref: ${p.reference}`)
+            const note = h(Text, { key: `ref-${i}`, style: s.payRef }, `Nota: ${p.reference}`)
             return [row, note]
           }),
           data.change > 0

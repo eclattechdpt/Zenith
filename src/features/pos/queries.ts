@@ -419,7 +419,7 @@ export function usePendingSales() {
       const { data, error } = await supabase
         .from("sales")
         .select(
-          `id, sale_number, status, subtotal, discount_amount, discount_percent, total, notes, created_at,
+          `id, sale_number, status, subtotal, discount_amount, discount_percent, extra_amount, extra_label, total, notes, created_at,
           customers:customer_id(id, name),
           sale_items(id, product_name, variant_label, quantity, unit_price, discount, discount_percent, line_total, product_variant_id)`
         )
@@ -437,6 +437,8 @@ export function usePendingSales() {
         subtotal: row.subtotal,
         discount_amount: row.discount_amount,
         discount_percent: row.discount_percent ?? null,
+        extra_amount: row.extra_amount ?? 0,
+        extra_label: row.extra_label ?? null,
         total: row.total,
         notes: row.notes,
         created_at: row.created_at,

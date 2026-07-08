@@ -25,11 +25,21 @@ const EMPTY_DISCOUNT: CartDiscount = {
   customAmount: 0,
 }
 
+// Cargo extra que SUMA al total (ej. servicio a domicilio). label vacío =>
+// el recibo usa el texto por defecto "Servicio a domicilio".
+export interface CartExtra {
+  amount: number
+  label: string
+}
+
+const EMPTY_EXTRA: CartExtra = { amount: 0, label: "" }
+
 interface POSStore {
   // ── State ──
   items: CartItem[]
   customer: CartCustomer | null
   cartDiscount: CartDiscount
+  extra: CartExtra
   notes: string
 
   // ── Cart items ──
@@ -60,6 +70,8 @@ interface POSStore {
 
   // ── Cart-level discount ──
   setCartDiscount: (discount: Partial<CartDiscount> | null) => void
+  // ── Cargo extra (ej. servicio a domicilio) ──
+  setExtra: (patch: Partial<CartExtra> | null) => void
   setNotes: (notes: string) => void
 
   // ── Computed ──
@@ -92,6 +104,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
   items: [],
   customer: null,
   cartDiscount: EMPTY_DISCOUNT,
+  extra: EMPTY_EXTRA,
   notes: "",
 
   // ── Cart items ──
@@ -193,6 +206,14 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       return { cartDiscount: next }
     }),
 
+  setExtra: (patch) =>
+    set((state) => {
+      if (patch === null) return { extra: EMPTY_EXTRA }
+      const next: CartExtra = { ...state.extra, ...patch }
+      next.amount = Math.max(0, next.amount)
+      return { extra: next }
+    }),
+
   setNotes: (notes) => set({ notes }),
 
   // ── Computed ──
@@ -229,7 +250,8 @@ export const usePOSStore = create<POSStore>((set, get) => ({
     // pero solo si NINGÚN item tiene override (custom_amount no es per-item)
     const customAmount =
       cart.source === "custom_amount" ? cart.customAmount : 0
-    return Math.max(0, subtotal - itemsDiscount - customAmount)
+    // El cargo extra (servicio a domicilio) SUMA al total tras los descuentos.
+    return Math.max(0, subtotal - itemsDiscount - customAmount) + get().extra.amount
   },
 
   getItemCount: () =>
@@ -311,6 +333,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       items: [],
       customer: null,
       cartDiscount: EMPTY_DISCOUNT,
+      extra: EMPTY_EXTRA,
       notes: "",
     }),
 }))

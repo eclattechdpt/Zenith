@@ -978,6 +978,8 @@ export type Database = {
           discount_amount: number
           discount_percent: number | null
           expires_at: string | null
+          extra_amount: number
+          extra_label: string | null
           id: string
           notes: string | null
           sale_number: string
@@ -995,6 +997,8 @@ export type Database = {
           discount_amount?: number
           discount_percent?: number | null
           expires_at?: string | null
+          extra_amount?: number
+          extra_label?: string | null
           id?: string
           notes?: string | null
           sale_number: string
@@ -1012,6 +1016,8 @@ export type Database = {
           discount_amount?: number
           discount_percent?: number | null
           expires_at?: string | null
+          extra_amount?: number
+          extra_label?: string | null
           id?: string
           notes?: string | null
           sale_number?: string
@@ -1392,6 +1398,8 @@ export type Database = {
           p_created_by?: string
           p_customer_id?: string
           p_discount_amount?: number
+          p_extra_amount?: number
+          p_extra_label?: string
           p_items?: Json
           p_notes?: string
           p_subtotal?: number
@@ -1416,6 +1424,8 @@ export type Database = {
           p_created_by?: string
           p_customer_id?: string
           p_discount_amount?: number
+          p_extra_amount?: number
+          p_extra_label?: string
           p_items?: Json
           p_notes?: string
           p_payments?: Json

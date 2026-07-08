@@ -51,7 +51,7 @@ interface WizardConfirmationStepProps {
   /** Snapshot of receipt data captured before store clear */
   receiptSnapshot?: ReceiptData | null
   /** When completing a pending sale, pass its data so totals display correctly */
-  pendingSale?: { subtotal: number; discount_amount: number; discount_percent: number | null; total: number } | null
+  pendingSale?: { subtotal: number; discount_amount: number; discount_percent: number | null; extra_amount: number; extra_label: string | null; total: number } | null
   /** Whether this was saved as pending (for success screen message) */
   wasPending?: boolean
 }
@@ -76,7 +76,11 @@ export function WizardConfirmationStep({
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const getDiscountBreakdown = usePOSStore((s) => s.getDiscountBreakdown)
   const getTotal = usePOSStore((s) => s.getTotal)
+  const storeExtra = usePOSStore((s) => s.extra)
   const cartDiscount = usePOSStore((s) => s.cartDiscount)
+  // Cargo extra: pendiente => del pendingSale; new-sale => del store.
+  const extraAmount = pendingSale ? pendingSale.extra_amount : storeExtra.amount
+  const extraLabel = pendingSale ? pendingSale.extra_label : storeExtra.label
   const cartDiscountAmount =
     cartDiscount.source === "custom_amount"
       ? cartDiscount.customAmount
@@ -475,6 +479,14 @@ export function WizardConfirmationStep({
                 })()
               ) : (
                 <DiscountBreakdown lines={getDiscountBreakdown().lines} size="normal" />
+              )}
+              {extraAmount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-sky-600">{extraLabel?.trim() || "Servicio a domicilio"}</span>
+                  <span className="font-semibold tabular-nums text-sky-600">
+                    +{formatCurrency(extraAmount)}
+                  </span>
+                </div>
               )}
               <div className="flex items-baseline justify-between border-t border-neutral-100 pt-3">
                 <span className="text-base font-bold text-neutral-800">

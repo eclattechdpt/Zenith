@@ -157,6 +157,8 @@ export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps)
       subtotal: Number(sale.subtotal),
       discountAmount: Number(sale.discount_amount),
       discountPercent: sale.discount_percent != null ? Number(sale.discount_percent) : null,
+      extraAmount: sale.extra_amount != null ? Number(sale.extra_amount) : 0,
+      extraLabel: sale.extra_label ?? null,
       total: Number(sale.total),
       change: Math.max(0, paymentTotal - Number(sale.total)),
     }
@@ -443,6 +445,12 @@ export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps)
                       const breakdown = buildHistoricalBreakdown(sale.sale_items)
                       return <DiscountBreakdown lines={breakdown} size="normal" />
                     })()}
+                    {Number(sale.extra_amount) > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-sky-600">{sale.extra_label?.trim() || "Servicio a domicilio"}</span>
+                        <span className="tabular-nums font-semibold text-sky-600">+{formatCurrency(Number(sale.extra_amount))}</span>
+                      </div>
+                    )}
                     <div className="mt-2 flex items-center justify-between rounded-xl bg-gradient-to-r from-rose-50 to-rose-100/60 px-4 py-3">
                       <span className="text-xs font-bold uppercase tracking-[1px] text-neutral-900">Total</span>
                       <span className="font-display text-lg font-bold tabular-nums tracking-tight text-neutral-950">

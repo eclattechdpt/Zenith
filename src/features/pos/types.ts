@@ -67,6 +67,8 @@ export interface PendingSaleWithSummary {
   subtotal: number
   discount_amount: number
   discount_percent: number | null
+  extra_amount: number
+  extra_label: string | null
   total: number
   notes: string | null
   created_at: string

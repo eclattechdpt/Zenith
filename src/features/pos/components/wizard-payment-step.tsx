@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Tag,
   Percent,
+  Truck,
   X,
 } from "lucide-react"
 import { motion } from "motion/react"
@@ -69,21 +70,33 @@ interface WizardPaymentStepProps {
   // decidido al guardarla y es read-only aquí. Si está undefined, se usa el
   // descuento vivo del carrito (modo new-sale).
   pendingSaleDiscount?: { amount: number; percent: number | null; subtotal: number }
+  // Cargo extra ya decidido al guardar una venta pendiente (read-only aquí).
+  pendingSaleExtra?: { amount: number; label: string | null }
   onNext: (payments: CartPayment[]) => void
   onBack: () => void
 }
 
+const DEFAULT_EXTRA_LABEL = "Servicio a domicilio"
+
 export function WizardPaymentStep({
   total,
   pendingSaleDiscount,
+  pendingSaleExtra,
   onNext,
   onBack,
 }: WizardPaymentStepProps) {
   const cartDiscount = usePOSStore((s) => s.cartDiscount)
   const setCartDiscount = usePOSStore((s) => s.setCartDiscount)
+  const extra = usePOSStore((s) => s.extra)
+  const setExtra = usePOSStore((s) => s.setExtra)
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
   const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const isPendingMode = pendingSaleDiscount !== undefined
+
+  // Cargo extra: editable en new-sale (store), read-only en complete-pending.
+  const extraAmount = isPendingMode ? pendingSaleExtra?.amount ?? 0 : extra.amount
+  const extraLabel = isPendingMode ? pendingSaleExtra?.label ?? null : extra.label
+  const hasExtra = extraAmount > 0
   const liveSubtotal = getSubtotal()
   const subtotal = isPendingMode ? pendingSaleDiscount.subtotal : liveSubtotal
   const liveCartDiscountAmount =
@@ -108,9 +121,41 @@ export function WizardPaymentStep({
   const [discountMode, setDiscountMode] = useState<"percent" | "fixed">("percent")
   const [discountInput, setDiscountInput] = useState("")
 
+  const [extraOpen, setExtraOpen] = useState(false)
+  const [extraLabelInput, setExtraLabelInput] = useState(DEFAULT_EXTRA_LABEL)
+  const [extraAmountInput, setExtraAmountInput] = useState("")
+
   const [payments, setPayments] = useState<CartPayment[]>([
     { method: "cash", amount: total, reference: null },
   ])
+
+  // Si hay un solo pago, lo re-sincroniza al nuevo total (ej. tras agregar/
+  // quitar el cargo extra) para mantener el "pago exacto" sin re-tapear.
+  // Funciones planas: el React Compiler las memoiza automáticamente.
+  const resyncSinglePayment = (newTotal: number) => {
+    setPayments((prev) =>
+      prev.length === 1 ? [{ ...prev[0], amount: Math.max(0, newTotal) }] : prev
+    )
+  }
+
+  const applyExtra = () => {
+    const val = parseFloat(extraAmountInput)
+    if (isNaN(val) || val <= 0) return
+    const label = extraLabelInput.trim() || DEFAULT_EXTRA_LABEL
+    const base = total - extra.amount // total sin el extra actual
+    setExtra({ amount: val, label })
+    resyncSinglePayment(base + val)
+    setExtraOpen(false)
+  }
+
+  const removeExtra = () => {
+    const base = total - extra.amount
+    setExtra(null)
+    resyncSinglePayment(base)
+    setExtraAmountInput("")
+    setExtraLabelInput(DEFAULT_EXTRA_LABEL)
+    setExtraOpen(false)
+  }
 
   const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
   const remaining = total - paymentTotal
@@ -319,6 +364,87 @@ export function WizardPaymentStep({
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {/* ── Cargo extra (servicio a domicilio) — SUMA al total ── */}
+        {hasExtra && (
+          <div className="mt-3 flex items-center justify-between rounded-lg bg-sky-50/70 border border-sky-100 px-3 py-2">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-sky-600">
+              <Truck className="size-3" />
+              {extraLabel?.trim() || DEFAULT_EXTRA_LABEL}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-sky-600 tabular-nums">
+                +{formatCurrency(extraAmount)}
+              </span>
+              {!isPendingMode && (
+                <button
+                  type="button"
+                  onClick={removeExtra}
+                  className="flex size-5 items-center justify-center rounded text-sky-400 hover:bg-sky-100 hover:text-sky-600 transition-colors"
+                >
+                  <X className="size-3" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Botón agregar extra — solo new-sale y sin extra activo */}
+        {!isPendingMode && !hasExtra && !extraOpen && (
+          <button
+            type="button"
+            onClick={() => setExtraOpen(true)}
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-sky-200 bg-sky-50/40 py-2 text-xs font-semibold text-sky-400 transition-colors hover:border-sky-300 hover:bg-sky-50 hover:text-sky-500"
+          >
+            <Truck className="size-3.5" />
+            Agregar servicio a domicilio
+          </button>
+        )}
+
+        {/* Formulario del extra: concepto editable + monto */}
+        {!isPendingMode && extraOpen && !hasExtra && (
+          <div className="mt-2 rounded-lg border border-sky-100 bg-sky-50/40 p-2.5 space-y-2">
+            <input
+              type="text"
+              maxLength={100}
+              value={extraLabelInput}
+              onChange={(e) => setExtraLabelInput(e.target.value)}
+              placeholder="Concepto (ej. Servicio a domicilio)"
+              className="h-8 w-full rounded-lg border border-neutral-200/80 bg-white px-2.5 text-sm outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-500/10"
+            />
+            <div className="flex items-center gap-1.5">
+              <div className="relative flex-1">
+                <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-neutral-400">
+                  $
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  step="any"
+                  placeholder="Monto"
+                  value={extraAmountInput}
+                  onChange={(e) => setExtraAmountInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") applyExtra() }}
+                  className="h-8 w-full rounded-lg border border-neutral-200/80 bg-white pl-6 pr-2.5 text-sm tabular-nums outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-500/10"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={applyExtra}
+                className="flex h-8 items-center justify-center rounded-lg bg-sky-500 px-3 text-[11px] font-semibold text-white hover:bg-sky-600 transition-colors"
+              >
+                Aplicar
+              </button>
+              <button
+                type="button"
+                onClick={() => { setExtraOpen(false); setExtraAmountInput("") }}
+                className="flex size-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 transition-colors"
+              >
+                <X className="size-3.5" />
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -544,8 +670,10 @@ export function WizardPaymentStep({
                     )}
                   </div>
 
-                  {/* Reference field */}
-                  {(payment.method === "transfer" ||
+                  {/* Anotación / referencia — texto libre para tarjeta,
+                      transferencia y otro método (se imprime en el ticket) */}
+                  {(payment.method === "card" ||
+                    payment.method === "transfer" ||
                     payment.method === "other") && (
                     <input
                       value={payment.reference ?? ""}
@@ -554,7 +682,8 @@ export function WizardPaymentStep({
                           reference: e.target.value || null,
                         })
                       }
-                      placeholder="Referencia o numero de operacion"
+                      maxLength={100}
+                      placeholder="Anotación (opcional) — ej. banco, terminal, nota"
                       className="mt-3 h-10 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-rose-200"
                     />
                   )}
