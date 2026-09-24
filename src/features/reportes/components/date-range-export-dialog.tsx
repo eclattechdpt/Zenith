@@ -1,13 +1,11 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo } from "react"
 import {
   CalendarRange,
   ChevronLeft,
   ChevronRight,
   Download,
-  FileSpreadsheet,
-  FileText,
   Loader2,
   Check,
 } from "lucide-react"
@@ -104,13 +102,6 @@ function RangeCalendar({
   const [hovered, setHovered] = useState<Date | null>(null)
 
   const today = useMemo(() => new Date(), [])
-
-  // Auto-navigate when range changes externally (presets)
-  useEffect(() => {
-    if (range.from) {
-      setViewDate(startOfMonth(range.from))
-    }
-  }, [range.from?.getTime()]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Effective range including hover preview
   const effectiveRange = useMemo(() => {
@@ -388,7 +379,11 @@ export function DateRangeExportDialog({
         </div>
 
         {/* Custom range calendar */}
-        <RangeCalendar range={range} onSelect={handleCalendarSelect} />
+        <RangeCalendar
+          key={range.from ? startOfMonth(range.from).getTime() : "empty"}
+          range={range}
+          onSelect={handleCalendarSelect}
+        />
 
         {/* Range display */}
         <AnimatePresence mode="wait">
@@ -417,7 +412,6 @@ export function DateRangeExportDialog({
         <div className="flex gap-2">
           <ExportButton
             label="PDF"
-            icon={FileText}
             state={pdfState}
             disabled={!hasValidRange || excelState === "loading"}
             className="bg-rose-500 hover:bg-rose-600"
@@ -425,7 +419,6 @@ export function DateRangeExportDialog({
           />
           <ExportButton
             label="Excel"
-            icon={FileSpreadsheet}
             state={excelState}
             disabled={!hasValidRange || pdfState === "loading"}
             className="bg-emerald-500 hover:bg-emerald-600"
@@ -441,14 +434,12 @@ export function DateRangeExportDialog({
 
 function ExportButton({
   label,
-  icon: Icon,
   state,
   disabled,
   className,
   onClick,
 }: {
   label: string
-  icon: typeof FileText
   state: ExportState
   disabled: boolean
   className: string

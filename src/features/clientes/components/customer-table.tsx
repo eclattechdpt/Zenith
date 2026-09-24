@@ -42,8 +42,8 @@ export function CustomerTable({ onEdit, onCreate, onView, onPreview, onPreviewDi
   const { data: customers = [], isLoading, isFetched, isFetching } = useCustomers({
     search: debouncedSearch || undefined,
   })
-  const hasLoadedOnce = useRef(false)
-  if (isFetched) hasLoadedOnce.current = true
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  if (isFetched && !hasLoadedOnce) setHasLoadedOnce(true)
 
   const [deleteTarget, setDeleteTarget] = useState<CustomerWithPriceList | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -90,7 +90,7 @@ export function CustomerTable({ onEdit, onCreate, onView, onPreview, onPreviewDi
   return (
     <motion.div
       initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
-      animate={{ opacity: hasLoadedOnce.current ? 1 : 0, y: hasLoadedOnce.current ? 0 : 12, filter: hasLoadedOnce.current ? "blur(0px)" : "blur(4px)" }}
+      animate={{ opacity: hasLoadedOnce ? 1 : 0, y: hasLoadedOnce ? 0 : 12, filter: hasLoadedOnce ? "blur(0px)" : "blur(4px)" }}
       transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.18 }}
       className="rounded-2xl border border-neutral-200/60 bg-neutral-50 p-5 shadow-sm shadow-neutral-900/[0.03] sm:p-7"
     >

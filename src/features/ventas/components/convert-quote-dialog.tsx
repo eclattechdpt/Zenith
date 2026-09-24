@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Banknote,
   CreditCard,
@@ -53,18 +53,41 @@ export function ConvertQuoteDialog({
   onOpenChange,
   onConverted,
 }: ConvertQuoteDialogProps) {
-  const queryClient = useQueryClient()
   const { data: quote, isLoading } = useQuoteDetail(quoteId)
   const total = Number(quote?.total ?? 0)
 
-  const [payments, setPayments] = useState<Payment[]>([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  return (
+    <ConvertQuoteDialogSession
+      key={`${quoteId ?? "closed"}:${total}`}
+      quoteId={quoteId}
+      quote={quote}
+      isLoading={isLoading}
+      total={total}
+      onOpenChange={onOpenChange}
+      onConverted={onConverted}
+    />
+  )
+}
 
-  useEffect(() => {
-    if (quoteId && total > 0) {
-      setPayments([{ method: "cash", amount: total, reference: null }])
-    }
-  }, [quoteId, total])
+function ConvertQuoteDialogSession({
+  quoteId,
+  quote,
+  isLoading,
+  total,
+  onOpenChange,
+  onConverted,
+}: ConvertQuoteDialogProps & {
+  quote: ReturnType<typeof useQuoteDetail>["data"]
+  isLoading: boolean
+  total: number
+}) {
+  const queryClient = useQueryClient()
+  const [payments, setPayments] = useState<Payment[]>(() =>
+    quoteId && total > 0
+      ? [{ method: "cash", amount: total, reference: null }]
+      : []
+  )
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const paymentTotal = payments.reduce((sum, p) => sum + p.amount, 0)
   const remaining = Math.max(0, total - paymentTotal)
@@ -73,20 +96,18 @@ export function ConvertQuoteDialog({
     total === 0 || (paymentTotal >= total && payments.every((p) => p.amount > 0))
 
   function addPayment(method: PaymentMethod) {
-    setPayments((prev) => [
-      ...prev,
+    setPayments([
+      ...payments,
       { method, amount: remaining, reference: null },
     ])
   }
 
   function removePayment(index: number) {
-    setPayments((prev) => prev.filter((_, i) => i !== index))
+    setPayments(payments.filter((_, i) => i !== index))
   }
 
   function updatePaymentAmount(index: number, amount: number) {
-    setPayments((prev) =>
-      prev.map((p, i) => (i === index ? { ...p, amount } : p))
-    )
+    setPayments(payments.map((p, i) => (i === index ? { ...p, amount } : p)))
   }
 
   async function handleConfirm() {

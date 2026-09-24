@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useMemo } from "react"
 import {
   RotateCcw,
   Loader2,
@@ -8,7 +8,6 @@ import {
   Minus,
   Plus,
   RefreshCw,
-  X,
 } from "lucide-react"
 import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
@@ -53,13 +52,30 @@ export function ReturnDialog({
   onOpenChange,
   onReturned,
 }: ReturnDialogProps) {
+  return (
+    <ReturnDialogSession
+      key={saleId ?? "closed"}
+      saleId={saleId}
+      onOpenChange={onOpenChange}
+      onReturned={onReturned}
+    />
+  )
+}
+
+function ReturnDialogSession({
+  saleId,
+  onOpenChange,
+  onReturned,
+}: ReturnDialogProps) {
   const queryClient = useQueryClient()
   const { data: sale, isLoading, isError } = useSaleDetail(saleId)
 
-  const [items, setItems] = useState<ReturnItemState[]>([])
+  const [itemOverrides, setItemOverrides] = useState<
+    Record<string, Partial<ReturnItemState>>
+  >({})
   const [reason, setReason] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID())
+  const [idempotencyKey] = useState(() => crypto.randomUUID())
 
   // Compute returnable quantities from sale data
   const returnableItems = useMemo(() => {
@@ -95,18 +111,19 @@ export function ReturnDialog({
     })
   }, [sale])
 
-  // Reset items when dialog opens (saleId changes from null to a value)
-  // or when sale data changes (e.g., after a return was processed)
-  useEffect(() => {
-    setItems(returnableItems)
-    setReason("")
-    setIsSubmitting(false)
-  }, [saleId, returnableItems])
+  const items = returnableItems.map((item) => ({
+    ...item,
+    ...itemOverrides[item.sale_item_id],
+  }))
 
-  // Fresh idempotency key per dialog session (keeps same key for retries within the session)
-  useEffect(() => {
-    setIdempotencyKey(crypto.randomUUID())
-  }, [saleId])
+  function updateItem(index: number, patch: Partial<ReturnItemState>) {
+    const saleItemId = items[index]?.sale_item_id
+    if (!saleItemId) return
+    setItemOverrides((prev) => ({
+      ...prev,
+      [saleItemId]: { ...prev[saleItemId], ...patch },
+    }))
+  }
 
   const selectedItems = items.filter((i) => i.quantity > 0)
   const totalRefund = selectedItems.reduce(
@@ -116,21 +133,19 @@ export function ReturnDialog({
   const isValid = selectedItems.length > 0
 
   function updateQuantity(index: number, delta: number) {
-    setItems((prev) =>
-      prev.map((item, i) => {
-        if (i !== index) return item
-        const newQty = Math.max(0, Math.min(item.max_returnable, item.quantity + delta))
-        return { ...item, quantity: newQty }
-      })
+    const item = items[index]
+    if (!item) return
+    const newQty = Math.max(
+      0,
+      Math.min(item.max_returnable, item.quantity + delta)
     )
+    updateItem(index, { quantity: newQty })
   }
 
   function toggleRestock(index: number) {
-    setItems((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, restock: !item.restock } : item
-      )
-    )
+    const item = items[index]
+    if (!item) return
+    updateItem(index, { restock: !item.restock })
   }
 
   async function handleConfirm() {
@@ -324,18 +339,11 @@ export function ReturnDialog({
                             <button
                               type="button"
                               onClick={() =>
-                                setItems((prev) =>
-                                  prev.map((it, i) =>
-                                    i === index
-                                      ? {
-                                          ...it,
-                                          replacement_variant_id: null,
-                                          replacement_product_name: null,
-                                          replacement_variant_label: null,
-                                        }
-                                      : it
-                                  )
-                                )
+                                updateItem(index, {
+                                  replacement_variant_id: null,
+                                  replacement_product_name: null,
+                                  replacement_variant_label: null,
+                                })
                               }
                               className="text-xs text-neutral-400 hover:text-neutral-600"
                             >
@@ -345,18 +353,11 @@ export function ReturnDialog({
                             <button
                               type="button"
                               onClick={() =>
-                                setItems((prev) =>
-                                  prev.map((it, i) =>
-                                    i === index
-                                      ? {
-                                          ...it,
-                                          replacement_variant_id: it.product_variant_id,
-                                          replacement_product_name: it.product_name,
-                                          replacement_variant_label: it.variant_label,
-                                        }
-                                      : it
-                                  )
-                                )
+                                updateItem(index, {
+                                  replacement_variant_id: item.product_variant_id,
+                                  replacement_product_name: item.product_name,
+                                  replacement_variant_label: item.variant_label,
+                                })
                               }
                               className="text-xs text-teal-500 hover:text-teal-700"
                             >
@@ -425,9 +426,6 @@ export function ReturnDialog({
                     Movimiento de stock
                   </p>
                   {selectedItems.map((item) => {
-                    const restockQty = item.restock ? item.quantity : 0
-                    const replaceQty = item.replacement_variant_id ? item.quantity : 0
-                    const net = restockQty - replaceQty
                     return (
                       <div key={item.sale_item_id} className="space-y-0.5">
                         {item.restock && (

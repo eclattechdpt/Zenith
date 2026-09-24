@@ -165,7 +165,7 @@ function SectionLabel({ text, accent }: { text: string; accent: AccentColors }) 
   )
 }
 
-function TableHeader({ columns, accent }: { columns: { label: string; flex?: number; align?: "right" | "left" }[]; accent: AccentColors }) {
+function TableHeader({ columns }: { columns: { label: string; flex?: number; align?: "right" | "left" }[] }) {
   return (
     <View style={{
       flexDirection: "row",
@@ -429,7 +429,7 @@ function renderSalesReport({
         <PaymentBreakdown methodTotals={methodTotals} totalRevenue={totalRevenue} accent={accent} />
 
         <SectionLabel text="Detalle de ventas" accent={accent} />
-        <TableHeader columns={salesColumns} accent={accent} />
+        <TableHeader columns={salesColumns} />
         {salesList.slice(0, 50).map((sale, i) => (
           <TableRow
             key={sale.sale_number}
@@ -537,7 +537,7 @@ function renderTransitReport({
         />
 
         <SectionLabel text="Detalle por semana" accent={accent} />
-        <TableHeader columns={detailColumns} accent={accent} />
+        <TableHeader columns={detailColumns} />
         {flatRows.map((row, i) => (
           <TableRow
             key={i}
@@ -781,7 +781,7 @@ export async function exportWeeklySalesPdf(weekStart: Date) {
 
         {/* Daily breakdown with mini bars */}
         <SectionLabel text="Desglose por dia" accent={accent} />
-        <TableHeader columns={dailyColumns} accent={accent} />
+        <TableHeader columns={dailyColumns} />
         {dailyData.map((d, i) => {
           const barPct = maxDayRevenue > 0 ? Math.max((d.revenue / maxDayRevenue) * 100, 0) : 0
           return (
@@ -872,7 +872,7 @@ export async function exportWeeklySalesPdf(weekStart: Date) {
 
         {/* Sales detail */}
         <SectionLabel text="Detalle de ventas" accent={accent} />
-        <TableHeader columns={salesColumns} accent={accent} />
+        <TableHeader columns={salesColumns} />
         {salesList.slice(0, 50).map((sale, i) => (
           <TableRow
             key={sale.sale_number}
@@ -1008,7 +1008,7 @@ export async function exportInventoryPdf() {
         )}
 
         <SectionLabel text="Inventario completo" accent={accent} />
-        <TableHeader columns={tableColumns} accent={accent} />
+        <TableHeader columns={tableColumns} />
         {variants.slice(0, 80).map((v, i) => {
           const statusColor = stockStatusColor(v.stock)
           const statusText = stockStatusLabel(v.stock)
@@ -1261,7 +1261,7 @@ export async function exportInitialLoadPdf() {
         />
 
         <SectionLabel text="Detalle de carga inicial" accent={accent} />
-        <TableHeader columns={tableColumns} accent={accent} />
+        <TableHeader columns={tableColumns} />
         {items.slice(0, 80).map((item, i) => (
           <TableRow
             key={i}
@@ -1373,7 +1373,7 @@ export async function exportCustomersPdf() {
         />
 
         <SectionLabel text="Listado de clientes" accent={accent} />
-        <TableHeader columns={tableColumns} accent={accent} />
+        <TableHeader columns={tableColumns} />
         {customers.slice(0, 80).map((c, i) => (
           <TableRow
             key={i}
@@ -1521,7 +1521,7 @@ export async function exportProductsPdf() {
         />
 
         <SectionLabel text="Catalogo" accent={accent} />
-        <TableHeader columns={tableColumns} accent={accent} />
+        <TableHeader columns={tableColumns} />
         {rows.slice(0, 80).map((r, i) => (
           <TableRow
             key={i}

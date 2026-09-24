@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react"
 import { Loader2 } from "lucide-react"
-import { motion } from "motion/react"
 import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 

@@ -256,7 +256,7 @@ export function POSSaleWizard({
     } finally {
       submittingRef.current = false
     }
-  }, [mode, pendingSale, items, customer, cartDiscountAmount, cartDiscountPercent, extra, notes, payments, clear, queryClient, isOnline, buildReceiptSnapshot])
+  }, [mode, pendingSale, items, customer, backendDiscountAmount, cartDiscountPercent, extra, notes, payments, clear, queryClient, isOnline, buildSaleItemPayload, buildReceiptSnapshot])
 
   // ── Pending sale ──
 
@@ -302,7 +302,7 @@ export function POSSaleWizard({
     } finally {
       submittingRef.current = false
     }
-  }, [items, customer, cartDiscountAmount, cartDiscountPercent, extra, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
+  }, [items, customer, backendDiscountAmount, cartDiscountPercent, extra, notes, clear, queryClient, isOnline, buildSaleItemPayload, buildReceiptSnapshot])
 
   // ── Create vale ──
 
@@ -527,7 +527,7 @@ export function POSSaleWizard({
     } finally {
       submittingRef.current = false
     }
-  }, [items, customer, payments, notes, cartDiscountAmount, clear, queryClient, isOnline, buildReceiptSnapshot])
+  }, [items, customer, payments, notes, clear, queryClient, isOnline, buildReceiptSnapshot])
 
   // ── Print (uses snapshot captured before store clear) ──
 

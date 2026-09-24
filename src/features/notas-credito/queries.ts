@@ -50,16 +50,16 @@ export function useCreditNotes(filters?: CreditNotesFilters) {
     placeholderData: (prev) => prev,
   })
 
+  const search = filters?.search?.trim().toLowerCase() ?? ""
   const filtered = useMemo(() => {
     const all = query.data ?? []
-    if (!filters?.search?.trim()) return all
-    const s = filters.search.trim().toLowerCase()
+    if (!search) return all
     return all.filter(
       (n) =>
-        n.credit_number.toLowerCase().includes(s) ||
-        n.customers?.name?.toLowerCase().includes(s)
+        n.credit_number.toLowerCase().includes(search) ||
+        n.customers?.name?.toLowerCase().includes(search)
     )
-  }, [query.data, filters?.search])
+  }, [query.data, search])
 
   return { ...query, data: filtered }
 }

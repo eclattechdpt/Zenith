@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, type Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { motion } from "motion/react"
@@ -73,6 +73,10 @@ function generateSku(name: string, brand?: string | null) {
 
 const SPRING_SMOOTH = { type: "spring" as const, stiffness: 300, damping: 35 }
 
+type ProductFormValues = Omit<CreateProductInput, "image_url"> & {
+  image_url: string | null | undefined
+}
+
 // ── Main ──
 
 interface ProductWizardDialogProps {
@@ -95,11 +99,10 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
   const { data: categories = [] } = useCategories()
 
   const {
-    register, handleSubmit, setValue, watch, getValues, reset,
+    register, setValue, watch, getValues, reset,
     formState: { errors, isDirty },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = useForm<CreateProductInput>({
-    resolver: zodResolver(createProductSchema) as any,
+  } = useForm<ProductFormValues, unknown, CreateProductInput>({
+    resolver: zodResolver(createProductSchema) as Resolver<ProductFormValues, unknown, CreateProductInput>,
     defaultValues: {
       name: "", slug: "", description: "", brand: "", image_url: null, category_ids: [],
       is_active: true, has_variants: false, is_bundle: false,
@@ -140,21 +143,6 @@ export function ProductWizardDialog({ open, onClose }: ProductWizardDialogProps)
       parent,
       children: leafCategories.filter((c) => c.parent_id === parent.id),
     }))
-
-  function ensureAutoFields() {
-    const current = getValues()
-    if (!current.slug) setValue("slug", slugify(current.name))
-    // Auto-generate SKU for any variant missing one
-    let changed = false
-    const updated = current.variants.map((v, i) => {
-      if (!v.sku) {
-        changed = true
-        return { ...v, sku: generateSku(current.name, current.brand) + (i > 0 ? `-${i}` : "") }
-      }
-      return v
-    })
-    if (changed) setValue("variants", updated)
-  }
 
   function updateSingleVariant(field: keyof VariantInput, value: unknown) {
     const current = getValues("variants")

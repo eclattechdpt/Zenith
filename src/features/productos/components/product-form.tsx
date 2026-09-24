@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, type Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
@@ -47,6 +47,10 @@ function slugify(text: string) {
 
 const SPRING_SMOOTH = { type: "spring" as const, stiffness: 300, damping: 35 }
 
+type ProductFormValues = Omit<CreateProductInput, "image_url"> & {
+  image_url: string | null | undefined
+}
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -85,14 +89,14 @@ export function ProductForm({ productId, defaultValues, onBack }: ProductFormPro
     watch,
     getValues,
     formState: { errors, isDirty },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = useForm<CreateProductInput>({
-    resolver: zodResolver(createProductSchema) as any,
+  } = useForm<ProductFormValues, unknown, CreateProductInput>({
+    resolver: zodResolver(createProductSchema) as Resolver<ProductFormValues, unknown, CreateProductInput>,
     defaultValues: {
       name: "",
       slug: "",
       description: "",
       brand: "",
+      image_url: null,
       category_ids: [],
       is_active: true,
       has_variants: false,

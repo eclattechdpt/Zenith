@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState, useCallback } from "react"
+import { useRef, useState, useCallback } from "react"
 import { Search, Ticket, MoreHorizontal, CheckCircle2, XCircle, X, Eye } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { sileo } from "sileo"
@@ -84,8 +84,8 @@ export function ValesTable() {
     dateFrom: dateRange?.from,
     dateTo: dateRange?.to,
   })
-  const hasLoadedOnce = useRef(false)
-  if (isFetched) hasLoadedOnce.current = true
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  if (isFetched && !hasLoadedOnce) setHasLoadedOnce(true)
 
   async function handleCancelVale() {
     if (!cancelTarget) return
@@ -244,7 +244,7 @@ export function ValesTable() {
     <>
       <motion.div
         initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
-        animate={{ opacity: hasLoadedOnce.current ? 1 : 0, y: hasLoadedOnce.current ? 0 : 12, filter: hasLoadedOnce.current ? "blur(0px)" : "blur(4px)" }}
+        animate={{ opacity: hasLoadedOnce ? 1 : 0, y: hasLoadedOnce ? 0 : 12, filter: hasLoadedOnce ? "blur(0px)" : "blur(4px)" }}
         transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.18 }}
         className="rounded-2xl border border-neutral-200/60 bg-neutral-50 p-5 shadow-sm shadow-neutral-900/[0.03] sm:p-7"
       >
@@ -355,7 +355,7 @@ export function ValesTable() {
         {/* Table */}
         <div
           className="transition-opacity duration-200 ease-out"
-          style={{ opacity: isFetching && hasLoadedOnce.current ? 0.5 : 1 }}
+          style={{ opacity: isFetching && hasLoadedOnce ? 0.5 : 1 }}
         >
           {/* Mobile cards */}
           <div className="flex flex-col gap-3 sm:hidden">

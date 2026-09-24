@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useCallback, useMemo, useSyncExternalStore } from "react"
 import Link from "next/link"
 import {
   Warehouse,
@@ -9,7 +9,6 @@ import {
   ArrowRight,
   CalendarDays,
   AlertTriangle,
-  Package,
   TrendingUp,
   Eye,
   EyeOff,
@@ -56,6 +55,16 @@ const MONTH_SHORT = [
   "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
 ]
 
+const VISIBILITY_EVENT = "zenith:visibility-change"
+const subscribeVisibility = (onChange: () => void) => {
+  window.addEventListener("storage", onChange)
+  window.addEventListener(VISIBILITY_EVENT, onChange)
+  return () => {
+    window.removeEventListener("storage", onChange)
+    window.removeEventListener(VISIBILITY_EVENT, onChange)
+  }
+}
+
 export default function InventarioPage() {
   const { data: summary } = useInventorySummary()
   const { data: lowStockItems = [] } = useLowStockAlerts()
@@ -65,17 +74,15 @@ export default function InventarioPage() {
   const today = format(new Date(), "EEEE, d 'de' MMMM", { locale: es })
 
   // ── Visibility toggle (persisted) ──
-  const [visible, setVisible] = useState(true)
-  useEffect(() => {
-    const stored = localStorage.getItem("zenith-inv-visible")
-    if (stored === "false") setVisible(false)
-  }, [])
-  function toggleVisible() {
-    setVisible((v) => {
-      localStorage.setItem("zenith-inv-visible", String(!v))
-      return !v
-    })
-  }
+  const visible = useSyncExternalStore(
+    subscribeVisibility,
+    () => localStorage.getItem("zenith-inv-visible") !== "false",
+    () => true,
+  )
+  const toggleVisible = useCallback(() => {
+    localStorage.setItem("zenith-inv-visible", String(!visible))
+    window.dispatchEvent(new Event(VISIBILITY_EVENT))
+  }, [visible])
 
   // ── Derived data ──
   const outOfStockCount = lowStockItems.filter((v) => v.stock <= 0).length

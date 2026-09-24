@@ -39,8 +39,6 @@ function LipstickIcon({ className }: { className?: string }) {
 
 const SPRING_SNAPPY = { type: "spring" as const, stiffness: 500, damping: 35 }
 const SPRING_SMOOTH = { type: "spring" as const, stiffness: 300, damping: 35 }
-const SPRING_GENTLE = { type: "spring" as const, stiffness: 200, damping: 28 }
-
 // 1 row of pills (~30px pill + py-1 padding on inner = ~38px, plus headroom)
 const PILL_ROW_H = 48
 

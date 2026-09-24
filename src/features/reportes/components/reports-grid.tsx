@@ -7,7 +7,6 @@ import {
   Users,
   ShoppingBag,
   TrendingUp,
-  Warehouse,
   Truck,
   Archive,
   CalendarDays,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { Package, Plus, Search, ChevronDown, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { useQueryState, parseAsString } from "nuqs"
@@ -54,8 +54,8 @@ export function ProductTable() {
     search: search || undefined,
     categoryIds,
   })
-  const hasLoadedOnce = useRef(false)
-  if (isFetched) hasLoadedOnce.current = true
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  if (isFetched && !hasLoadedOnce) setHasLoadedOnce(true)
 
   // Delete confirmation state
   const [deleteTarget, setDeleteTarget] = useState<ProductWithDetails | null>(
@@ -86,7 +86,7 @@ export function ProductTable() {
   return (
     <motion.div
       initial={{ opacity: 0 }}
-      animate={{ opacity: hasLoadedOnce.current ? 1 : 0 }}
+      animate={{ opacity: hasLoadedOnce ? 1 : 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
       className="space-y-4 overflow-hidden rounded-2xl border border-rose-100 bg-gradient-to-b from-white to-rose-50/30 p-4 shadow-sm sm:p-6"
     >
@@ -141,7 +141,7 @@ export function ProductTable() {
           {/* Content */}
           <div
             className="transition-opacity duration-200 ease-out"
-            style={{ opacity: isFetching && hasLoadedOnce.current ? 0.5 : 1 }}
+            style={{ opacity: isFetching && hasLoadedOnce ? 0.5 : 1 }}
           >
             {/* Mobile cards */}
             <div className="flex flex-col gap-3 sm:hidden">

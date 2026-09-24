@@ -52,7 +52,7 @@ export function getChildDotStyle(
   totalChildren: number,
 ): React.CSSProperties {
   const parent = getCategoryColor(parentColorName)
-  const [h, s, l] = parent.hsl
+  const [h, s] = parent.hsl
 
   // Spread children across lightness 42% → 72% (darker to lighter)
   // and reduce saturation slightly as lightness increases

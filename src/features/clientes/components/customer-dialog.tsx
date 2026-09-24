@@ -8,17 +8,13 @@ import { motion, AnimatePresence } from "motion/react"
 import {
   X,
   User,
-  Phone,
-  Mail,
   MapPin,
   StickyNote,
   Percent,
   Loader2,
   Check,
   CheckCircle2,
-  Hash,
   Info,
-  Sparkles,
   ExternalLink,
 } from "lucide-react"
 import { sileo } from "sileo"
@@ -72,9 +68,8 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
     setValue,
     setError,
     formState: { errors },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CustomerInput>({
-    resolver: zodResolver(customerSchema) as any,
+    resolver: zodResolver(customerSchema),
     defaultValues: {
       name: "",
       client_number: "",
@@ -172,7 +167,7 @@ export function CustomerDialog({ open, customerId, onClose }: CustomerDialogProp
         network_id: existingCustomer.network_id ?? null,
       })
     }
-  }, [isEditing, existingCustomer, reset])
+  }, [isEditing, existingCustomer, formatPhone, reset])
 
   // Reset form when dialog opens for new customer
   useEffect(() => {

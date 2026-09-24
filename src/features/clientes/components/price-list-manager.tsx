@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import {
@@ -42,8 +42,6 @@ import type { PriceList } from "../types"
 import { CustomerPriceEditor } from "./customer-price-editor"
 
 const SPRING_SMOOTH = { type: "spring" as const, stiffness: 300, damping: 35 }
-const SPRING_SNAPPY = { type: "spring" as const, stiffness: 500, damping: 35 }
-
 const EXAMPLE_PRICE = 1000
 
 export function PriceListManager() {
@@ -65,12 +63,12 @@ export function PriceListManager() {
     handleSubmit,
     reset,
     setValue,
-    watch,
+    control,
     formState: { errors, isSubmitting },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<PriceListInput>({ resolver: zodResolver(priceListSchema) as any })
 
-  const discountPercent = watch("discount_percent") ?? 0
+  const discountPercent = useWatch({ control, name: "discount_percent" }) ?? 0
 
   function openCreate() {
     setEditId(null)

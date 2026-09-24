@@ -133,7 +133,15 @@ export function DevPanel() {
   }
 
   useEffect(() => {
-    fetchAll().finally(() => setLoading(false))
+    let active = true
+    void Promise.resolve()
+      .then(fetchAll)
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => {
+      active = false
+    }
   }, [])
 
   function handleRefresh() {

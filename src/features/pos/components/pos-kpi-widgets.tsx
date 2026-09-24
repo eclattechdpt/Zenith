@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useCallback, useSyncExternalStore } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import {
   TrendingUp,
@@ -17,22 +17,28 @@ import { usePOSDashboardStats } from "../queries"
 import { CountUp } from "./count-up"
 
 const SPRING = { type: "spring" as const, stiffness: 100, damping: 20 }
+const VISIBILITY_EVENT = "zenith:visibility-change"
+const subscribeVisibility = (onChange: () => void) => {
+  window.addEventListener("storage", onChange)
+  window.addEventListener(VISIBILITY_EVENT, onChange)
+  return () => {
+    window.removeEventListener("storage", onChange)
+    window.removeEventListener(VISIBILITY_EVENT, onChange)
+  }
+}
 
 export function POSKpiWidgets() {
   const { data: stats } = usePOSDashboardStats()
-  const [visible, setVisible] = useState(true)
-
-  useEffect(() => {
-    setVisible(localStorage.getItem("pos-kpi-visible") !== "false")
-  }, [])
+  const visible = useSyncExternalStore(
+    subscribeVisibility,
+    () => localStorage.getItem("pos-kpi-visible") !== "false",
+    () => true,
+  )
 
   const toggleVisible = useCallback(() => {
-    setVisible((prev) => {
-      const next = !prev
-      localStorage.setItem("pos-kpi-visible", String(next))
-      return next
-    })
-  }, [])
+    localStorage.setItem("pos-kpi-visible", String(!visible))
+    window.dispatchEvent(new Event(VISIBILITY_EVENT))
+  }, [visible])
 
   const revenue = stats?.todayRevenue ?? 0
   const units = stats?.todayUnitsSold ?? 0

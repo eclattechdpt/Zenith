@@ -73,19 +73,12 @@ export function WizardConfirmationStep({
   const items = usePOSStore((s) => s.items)
   const customer = usePOSStore((s) => s.customer)
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
-  const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const getDiscountBreakdown = usePOSStore((s) => s.getDiscountBreakdown)
   const getTotal = usePOSStore((s) => s.getTotal)
   const storeExtra = usePOSStore((s) => s.extra)
-  const cartDiscount = usePOSStore((s) => s.cartDiscount)
   // Cargo extra: pendiente => del pendingSale; new-sale => del store.
   const extraAmount = pendingSale ? pendingSale.extra_amount : storeExtra.amount
   const extraLabel = pendingSale ? pendingSale.extra_label : storeExtra.label
-  const cartDiscountAmount =
-    cartDiscount.source === "custom_amount"
-      ? cartDiscount.customAmount
-      : getItemsDiscount()
-  const cartDiscountPercent = cartDiscount.source ? cartDiscount.percent : null
 
   const handleDownloadPdf = useCallback(async () => {
     if (!receiptSnapshot) return
@@ -138,7 +131,6 @@ export function WizardConfirmationStep({
     }
   }
 
-  const hasOutOfStock = outOfStockItems.length > 0
   const isMixedCart = inStockItems.length > 0 && outOfStockItems.length > 0
   const isAllOutOfStock = inStockItems.length === 0 && outOfStockItems.length > 0
 

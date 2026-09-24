@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { Plus, Pencil, Trash2, Loader2, Users, Network } from "lucide-react"
@@ -57,13 +57,13 @@ export function NetworkManager() {
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     setValue,
     formState: { errors, isSubmitting },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CustomerNetworkInput>({ resolver: zodResolver(customerNetworkSchema) as any })
 
-  const currentColor = watch("color") ?? COLOR_PRESETS[0]
+  const currentColor = useWatch({ control, name: "color" }) ?? COLOR_PRESETS[0]
 
   function openCreate() {
     setEditId(null)

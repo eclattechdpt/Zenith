@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch, type Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { motion } from "motion/react"
@@ -16,7 +16,6 @@ import {
   Loader2,
   ChevronDown,
   Pencil,
-  ShoppingBag,
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react"
@@ -96,6 +95,10 @@ function productToFormValues(product: ProductWithDetails): Partial<CreateProduct
 
 const SPRING_SMOOTH = { type: "spring" as const, stiffness: 300, damping: 35 }
 
+type ProductFormValues = Omit<CreateProductInput, "image_url"> & {
+  image_url: string | null | undefined
+}
+
 interface ProductEditDialogProps {
   open: boolean
   productId: string | null
@@ -117,11 +120,10 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
   const { data: product, isLoading } = useProduct(productId ?? "")
 
   const {
-    register, handleSubmit, setValue, watch, getValues, reset,
+    register, control, setValue, getValues, reset,
     formState: { errors, isDirty },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = useForm<CreateProductInput>({
-    resolver: zodResolver(createProductSchema) as any,
+  } = useForm<ProductFormValues, unknown, CreateProductInput>({
+    resolver: zodResolver(createProductSchema) as Resolver<ProductFormValues, unknown, CreateProductInput>,
     defaultValues: {
       name: "", slug: "", description: "", brand: "", image_url: null, category_ids: [],
       is_active: true, has_variants: false, is_bundle: false,
@@ -134,19 +136,19 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
   useEffect(() => {
     if (product) {
       const values = productToFormValues(product)
-      reset({ ...values } as CreateProductInput)
+      reset({ ...values })
     }
   }, [product, reset])
 
-  const categoryIds: string[] = watch("category_ids") ?? []
-  const isActive = watch("is_active")
-  const brand = watch("brand")
-  const hasVariants = watch("has_variants") ?? false
-  const isBundle = watch("is_bundle") ?? false
-  const variants = watch("variants")
-  const bundleItems = watch("bundle_items") ?? []
-  const name = watch("name")
-  const imageUrl = watch("image_url")
+  const categoryIds: string[] = useWatch({ control, name: "category_ids" }) ?? []
+  const isActive = useWatch({ control, name: "is_active" })
+  const brand = useWatch({ control, name: "brand" })
+  const hasVariants = useWatch({ control, name: "has_variants" }) ?? false
+  const isBundle = useWatch({ control, name: "is_bundle" }) ?? false
+  const variants = useWatch({ control, name: "variants" })
+  const bundleItems = useWatch({ control, name: "bundle_items" }) ?? []
+  const name = useWatch({ control, name: "name" })
+  const imageUrl = useWatch({ control, name: "image_url" })
 
   const infoFilled = !!name && name.trim().length > 0
   const pricingFilled = hasVariants
@@ -162,11 +164,6 @@ export function ProductEditDialog({ open, productId, onClose }: ProductEditDialo
       parent,
       children: leafCategories.filter((c) => c.parent_id === parent.id),
     }))
-
-  function ensureAutoFields() {
-    const current = getValues()
-    if (!current.slug) setValue("slug", slugify(current.name))
-  }
 
   function updateSingleVariant(field: keyof VariantInput, value: unknown) {
     const current = getValues("variants")

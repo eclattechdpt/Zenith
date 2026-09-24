@@ -43,9 +43,8 @@ export function CustomerForm({ customerId, defaultValues, onBack }: CustomerForm
     register,
     handleSubmit,
     formState: { errors, isDirty },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CustomerInput>({
-    resolver: zodResolver(customerSchema) as any,
+    resolver: zodResolver(customerSchema),
     defaultValues: {
       name: "",
       phone: "",

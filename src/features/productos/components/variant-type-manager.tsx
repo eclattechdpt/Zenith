@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
@@ -120,6 +120,10 @@ export function VariantTypeManager() {
   // Check if the active type is "Tono" to show color_hex field
   const activeType = variantTypes.find((vt) => vt.id === activeTypeId)
   const showColorField = activeType?.name?.toLowerCase().includes("tono")
+  const optionColorHex = useWatch({
+    control: optionForm.control,
+    name: "color_hex",
+  })
 
   return (
     <div className="flex flex-col gap-3">
@@ -253,10 +257,10 @@ export function VariantTypeManager() {
                     placeholder="#C41E3A"
                     {...optionForm.register("color_hex")}
                   />
-                  {optionForm.watch("color_hex") && (
+                  {optionColorHex && (
                     <span
                       className="size-8 shrink-0 rounded-md border border-neutral-200"
-                      style={{ backgroundColor: optionForm.watch("color_hex") ?? undefined }}
+                      style={{ backgroundColor: optionColorHex ?? undefined }}
                     />
                   )}
                 </div>

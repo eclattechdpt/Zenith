@@ -40,8 +40,6 @@ test.describe("Cross-Module — UI/UX", () => {
     await page.waitForLoadState("networkidle")
 
     // Record current sale count from KPI
-    const kpiText = await page.getByText(/ventas/i).first().textContent()
-
     // Navigate to POS to create a sale (just verify the flow connects)
     await page.goto("/pos")
     await page.waitForLoadState("networkidle")

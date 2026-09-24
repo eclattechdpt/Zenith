@@ -29,13 +29,12 @@ function ClientesPageContent() {
     setDialogOpen(true)
   }, [])
 
-  // Auto-open dialog when navigating with ?action=new
+  // Consume the deep link after the dialog has derived its initial open state.
   useEffect(() => {
     if (searchParams.get("action") === "new") {
-      openCreate()
       window.history.replaceState(null, "", "/clientes")
     }
-  }, [searchParams, openCreate])
+  }, [searchParams])
 
   const openEdit = useCallback((customer: { id: string }) => {
     setEditCustomerId(customer.id)
@@ -117,7 +116,7 @@ function ClientesPageContent() {
 
       {/* Customer create/edit dialog */}
       <CustomerDialog
-        open={dialogOpen}
+        open={dialogOpen || searchParams.get("action") === "new"}
         customerId={editCustomerId}
         onClose={closeDialog}
       />

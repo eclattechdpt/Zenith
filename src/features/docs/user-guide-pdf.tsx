@@ -314,6 +314,8 @@ function Callout({ children, label = "Importante" }: { children: React.ReactNode
 function Screenshot({ src, caption }: { src: string; caption?: string }) {
   return (
     <View wrap={false}>
+      {/* @react-pdf/renderer Image has no alt prop; the adjacent caption describes each screenshot. */}
+      {/* eslint-disable-next-line jsx-a11y/alt-text */}
       <Image style={s.screenshot} src={src} />
       {caption && <Text style={s.caption}>{caption}</Text>}
     </View>

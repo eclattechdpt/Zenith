@@ -57,6 +57,8 @@ export function DataTable<TData, TValue>({
     return () => clearTimeout(timer)
   }, [isLoading])
 
+  // TanStack Table exposes functions that React Compiler cannot memoize safely.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,

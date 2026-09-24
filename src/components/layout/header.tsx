@@ -4,7 +4,6 @@ import { CalendarDays } from "lucide-react"
 
 import { createServerClient } from "@/lib/supabase/server"
 
-import { MobileNav } from "./mobile-nav"
 
 export async function Header() {
   const supabase = await createServerClient()

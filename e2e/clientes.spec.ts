@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 
-import { hasCredentials, loginAndGoTo, expectToast } from "./helpers/auth"
+import { hasCredentials, loginAndGoTo } from "./helpers/auth"
 
 test.describe("Clientes — UI/UX", () => {
   test.skip(!hasCredentials, "Set TEST_USER_EMAIL and TEST_USER_PASSWORD")

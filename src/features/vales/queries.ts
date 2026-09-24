@@ -48,16 +48,16 @@ export function useVales(filters?: ValesFilters) {
   })
 
   // Client-side search (PostgREST can't filter on joined tables in .or())
+  const search = filters?.search?.trim().toLowerCase() ?? ""
   const filtered = useMemo(() => {
     const all = query.data ?? []
-    if (!filters?.search?.trim()) return all
-    const s = filters.search.trim().toLowerCase()
+    if (!search) return all
     return all.filter(
       (v) =>
-        v.vale_number.toLowerCase().includes(s) ||
-        v.customers?.name?.toLowerCase().includes(s)
+        v.vale_number.toLowerCase().includes(search) ||
+        v.customers?.name?.toLowerCase().includes(search)
     )
-  }, [query.data, filters?.search])
+  }, [query.data, search])
 
   return { ...query, data: filtered }
 }

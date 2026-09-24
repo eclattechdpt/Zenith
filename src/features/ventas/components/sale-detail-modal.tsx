@@ -1,8 +1,6 @@
 "use client"
 
 import { useState, useRef, useCallback, useMemo } from "react"
-import { useRouter } from "next/navigation"
-import { motion } from "motion/react"
 import {
   ArrowRightLeft,
   RotateCcw,
@@ -117,7 +115,6 @@ interface SaleDetailModalProps {
 }
 
 export function SaleDetailModal({ saleId, open, onClose }: SaleDetailModalProps) {
-  const router = useRouter()
   const queryClient = useQueryClient()
   const { data: sale, isLoading } = useSaleDetail(saleId)
 

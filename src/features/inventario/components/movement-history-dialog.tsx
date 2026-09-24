@@ -4,7 +4,7 @@ import { useState, useRef } from "react"
 import { format, startOfDay, startOfWeek, startOfMonth, endOfDay } from "date-fns"
 import { es } from "date-fns/locale"
 import { ArrowDown, ArrowUp, History, X } from "lucide-react"
-import { motion, AnimatePresence } from "motion/react"
+import { motion } from "motion/react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

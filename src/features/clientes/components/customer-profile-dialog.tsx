@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
-  User,
   Phone,
   Mail,
   MapPin,
@@ -64,6 +63,23 @@ export function CustomerProfileDialog({
   onClose,
   onEdit,
 }: CustomerProfileDialogProps) {
+  return (
+    <CustomerProfileDialogContent
+      key={`${customerId ?? "none"}:${open}`}
+      customerId={customerId}
+      open={open}
+      onClose={onClose}
+      onEdit={onEdit}
+    />
+  )
+}
+
+function CustomerProfileDialogContent({
+  customerId,
+  open,
+  onClose,
+  onEdit,
+}: CustomerProfileDialogProps) {
   const now = new Date()
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth()
@@ -72,15 +88,6 @@ export function CustomerProfileDialog({
   const [monthFilter, setMonthFilter] = useState<MonthFilter>("all")
   const [customMonth, setCustomMonth] = useState<number | null>(null)
   const [gridOpen, setGridOpen] = useState(false)
-
-  useEffect(() => {
-    if (open) {
-      setYear(currentYear)
-      setMonthFilter("all")
-      setCustomMonth(null)
-      setGridOpen(false)
-    }
-  }, [open, customerId, currentYear])
 
   const queryMonth =
     monthFilter === "all" ? null

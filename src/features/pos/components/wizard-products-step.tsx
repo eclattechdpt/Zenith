@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { cn } from "@/lib/utils"
-import { formatCurrency, formatDiscountPercent } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
 import { usePOSStore } from "../store"
 import { resolvePrice, sortVariantsBySku } from "../utils"
 import { usePriceLists } from "@/features/clientes/queries"

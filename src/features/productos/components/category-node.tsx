@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { motion, AnimatePresence } from "motion/react"
 import { useSortable } from "@dnd-kit/sortable"
@@ -70,7 +70,6 @@ export function CategoryNode({
   onAddChild,
   allCategories,
   parentColorName,
-  totalSiblings = 1,
   creatingAt,
   onCloseCreate,
 }: CategoryNodeProps) {
@@ -317,7 +316,7 @@ function InlineEdit({
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { isSubmitting },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CategoryInput>({ resolver: zodResolver(categorySchema) as any, defaultValues: {
@@ -329,7 +328,7 @@ function InlineEdit({
     color: category.color ?? colorName,
   }})
 
-  const selectedColor = watch("color")
+  const selectedColor = useWatch({ control, name: "color" })
 
   async function onSubmit(data: CategoryInput) {
     const result = await updateCategory(category.id, { ...data, parent_id: category.parent_id })
@@ -406,7 +405,7 @@ export function InlineCreateRow({ parentId, autoColorIndex, onClose, defaultColo
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { isSubmitting },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CategoryInput>({ resolver: zodResolver(categorySchema) as any, defaultValues: {
@@ -418,7 +417,7 @@ export function InlineCreateRow({ parentId, autoColorIndex, onClose, defaultColo
     color: defaultColor,
   }})
 
-  const selectedColor = watch("color")
+  const selectedColor = useWatch({ control, name: "color" })
   const colorDef = getCategoryColor(selectedColor ?? null)
 
   async function onSubmit(data: CategoryInput) {

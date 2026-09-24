@@ -9,8 +9,6 @@ import {
   memo,
 } from "react"
 import {
-  Package,
-  Plus,
   Search,
   X,
   Filter,
@@ -21,8 +19,6 @@ import {
 import Link from "next/link"
 import { motion, AnimatePresence } from "motion/react"
 
-import { Button } from "@/components/ui/button"
-import { EmptyState } from "@/components/shared/empty-state"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 
 import { useQueryClient } from "@tanstack/react-query"
@@ -184,8 +180,8 @@ export function ProductCatalog() {
     search: debouncedSearch || undefined,
     categoryIds,
   })
-  const hasLoadedOnce = useRef(false)
-  if (isFetched) hasLoadedOnce.current = true
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  if (isFetched && !hasLoadedOnce) setHasLoadedOnce(true)
 
   // Parent categories for pills
   const parentCategories = useMemo(
@@ -251,7 +247,7 @@ export function ProductCatalog() {
   return (
     <motion.div
       initial={{ opacity: 0 }}
-      animate={{ opacity: hasLoadedOnce.current ? 1 : 0 }}
+      animate={{ opacity: hasLoadedOnce ? 1 : 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
       className="rounded-2xl border border-neutral-200/60 bg-neutral-50 p-5 shadow-sm shadow-neutral-900/[0.03] sm:p-7"
     >

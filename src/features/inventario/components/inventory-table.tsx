@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useRef, useCallback, useEffect, memo } from "react"
+import { useMemo, useState, useRef, useCallback, useEffect, useSyncExternalStore, memo } from "react"
 import {
   Search,
   X,
@@ -32,6 +32,16 @@ import { StockAdjustmentDialog } from "./stock-adjustment-dialog"
 import { StockEntryDialog } from "./stock-entry-dialog"
 import { MovementHistoryDialog } from "./movement-history-dialog"
 import { InitialLoadEditDialog } from "./initial-load-edit-dialog"
+
+const VISIBILITY_EVENT = "zenith:visibility-change"
+const subscribeVisibility = (onChange: () => void) => {
+  window.addEventListener("storage", onChange)
+  window.addEventListener(VISIBILITY_EVENT, onChange)
+  return () => {
+    window.removeEventListener("storage", onChange)
+    window.removeEventListener(VISIBILITY_EVENT, onChange)
+  }
+}
 
 // ── Spring configs (matching POS) ──────────────────────────────────────────
 
@@ -170,18 +180,15 @@ export function InventoryTable({
   const [viewMode, setViewMode] = useState<"grid" | "list">("list")
 
   // ── Visibility toggle (persisted, matching POS) ──
-  const [visible, setVisible] = useState(true)
-  useEffect(() => {
-    const stored = localStorage.getItem("zenith-inv-stats-visible")
-    if (stored === "false") setVisible(false)
-  }, [])
+  const visible = useSyncExternalStore(
+    subscribeVisibility,
+    () => localStorage.getItem("zenith-inv-stats-visible") !== "false",
+    () => true,
+  )
   const toggleVisible = useCallback(() => {
-    setVisible((prev) => {
-      const next = !prev
-      localStorage.setItem("zenith-inv-stats-visible", String(next))
-      return next
-    })
-  }, [])
+    localStorage.setItem("zenith-inv-stats-visible", String(!visible))
+    window.dispatchEvent(new Event(VISIBILITY_EVENT))
+  }, [visible])
 
   // ── Search state (local + debounce) ──
   const [search, setSearch] = useState("")

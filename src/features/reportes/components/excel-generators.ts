@@ -1,6 +1,5 @@
 import * as XLSX from "xlsx"
 import { format } from "date-fns"
-import { es } from "date-fns/locale"
 
 import { createClient } from "@/lib/supabase/client"
 import { SALE_STATUSES, PAYMENT_METHODS } from "@/lib/constants"

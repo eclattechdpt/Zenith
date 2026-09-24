@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   User,
   Phone,
@@ -55,6 +55,23 @@ export function CustomerDetailSheet({
   onClose,
   onEdit,
 }: CustomerDetailSheetProps) {
+  return (
+    <CustomerDetailSheetContent
+      key={`${customerId ?? "none"}:${open}`}
+      customerId={customerId}
+      open={open}
+      onClose={onClose}
+      onEdit={onEdit}
+    />
+  )
+}
+
+function CustomerDetailSheetContent({
+  customerId,
+  open,
+  onClose,
+  onEdit,
+}: CustomerDetailSheetProps) {
   const now = new Date()
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth()
@@ -63,16 +80,6 @@ export function CustomerDetailSheet({
   const [monthFilter, setMonthFilter] = useState<MonthFilter>("all")
   const [customMonth, setCustomMonth] = useState<number | null>(null)
   const [gridOpen, setGridOpen] = useState(false)
-
-  // Reset filters when opening for a new customer
-  useEffect(() => {
-    if (open) {
-      setYear(currentYear)
-      setMonthFilter("all")
-      setCustomMonth(null)
-      setGridOpen(false)
-    }
-  }, [open, customerId, currentYear])
 
   // Compute the month param for the query
   const queryMonth =

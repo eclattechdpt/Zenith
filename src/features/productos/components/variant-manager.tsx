@@ -98,16 +98,6 @@ export function VariantManager({ variants, onChange, errors, onDeleteRequest }: 
     setExpandedIndex(updated.length - 1)
   }
 
-  function removeVariant(index: number) {
-    const updated = variants.filter((_, i) => i !== index)
-    onChange(updated)
-    if (expandedIndex === index) {
-      setExpandedIndex(updated.length > 0 ? 0 : null)
-    } else if (expandedIndex !== null && expandedIndex > index) {
-      setExpandedIndex(expandedIndex - 1)
-    }
-  }
-
   function updateVariant(index: number, partial: Partial<VariantInput>) {
     const updated = variants.map((v, i) =>
       i === index ? { ...v, ...partial } : v

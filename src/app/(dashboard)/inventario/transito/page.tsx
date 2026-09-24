@@ -3,10 +3,9 @@
 import { Suspense, useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, Plus, Truck, ChevronLeft, ChevronRight } from "lucide-react"
-import { motion, AnimatePresence } from "motion/react"
+import { motion } from "motion/react"
 
 import { Button } from "@/components/ui/button"
-import { EmptyState } from "@/components/shared/empty-state"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { formatCurrency } from "@/lib/utils"
 import { sileo } from "sileo"

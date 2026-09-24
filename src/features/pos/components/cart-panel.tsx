@@ -19,9 +19,8 @@ import { sileo } from "sileo"
 import { useQueryClient } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "motion/react"
 
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency, formatDiscountPercent } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
@@ -44,7 +43,6 @@ export function CartPanel({
   const cartDiscount = usePOSStore((s) => s.cartDiscount)
   const notes = usePOSStore((s) => s.notes)
   const getSubtotal = usePOSStore((s) => s.getSubtotal)
-  const getItemsDiscount = usePOSStore((s) => s.getItemsDiscount)
   const getTotal = usePOSStore((s) => s.getTotal)
   const getItemCount = usePOSStore((s) => s.getItemCount)
   const setCartDiscount = usePOSStore((s) => s.setCartDiscount)
@@ -53,11 +51,6 @@ export function CartPanel({
   const clear = usePOSStore((s) => s.clear)
   const discountBreakdown = getDiscountBreakdown()
 
-  // Cart-level discount $ aplicado (incluye % distribuido + custom_amount) — para UI
-  const cartDiscountAmount =
-    cartDiscount.source === "custom_amount"
-      ? cartDiscount.customAmount
-      : getItemsDiscount()
   const cartDiscountPercent = cartDiscount.source ? cartDiscount.percent : null
   // Backend: solo el custom_amount como discount_amount (el % ya está en cada item)
   const backendDiscountAmount =

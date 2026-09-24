@@ -232,10 +232,9 @@ export function POSLanding() {
   // Auto-open wizard when navigating with ?action=new
   useEffect(() => {
     if (searchParams.get("action") === "new") {
-      openNewSale()
       window.history.replaceState(null, "", "/pos")
     }
-  }, [searchParams, openNewSale])
+  }, [searchParams])
 
   const closeWizard = useCallback(() => {
     setWizardOpen(false)
@@ -316,7 +315,7 @@ export function POSLanding() {
 
       {/* ── Sale wizard modal ── */}
       <POSSaleWizard
-        open={wizardOpen}
+        open={wizardOpen || searchParams.get("action") === "new"}
         onClose={closeWizard}
         mode={wizardMode}
         pendingSale={pendingSale}

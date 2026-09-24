@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useCallback, useSyncExternalStore } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import {
   Warehouse,
@@ -19,6 +19,15 @@ import type { InventoryType } from "../types"
 
 const SPRING = { type: "spring" as const, stiffness: 100, damping: 20 }
 const HIDDEN = "******"
+const VISIBILITY_EVENT = "zenith:visibility-change"
+const subscribeVisibility = (onChange: () => void) => {
+  window.addEventListener("storage", onChange)
+  window.addEventListener(VISIBILITY_EVENT, onChange)
+  return () => {
+    window.removeEventListener("storage", onChange)
+    window.removeEventListener(VISIBILITY_EVENT, onChange)
+  }
+}
 
 // ── Config per inventory type ──
 
@@ -78,18 +87,16 @@ export function InventoryKpiWidgets({
 }: InventoryKpiWidgetsProps) {
   const cfg = TYPE_CONFIG[inventoryType]
 
-  const [visible, setVisible] = useState(true)
-  useEffect(() => {
-    setVisible(localStorage.getItem(cfg.storageKey) !== "false")
-  }, [cfg.storageKey])
+  const visible = useSyncExternalStore(
+    subscribeVisibility,
+    () => localStorage.getItem(cfg.storageKey) !== "false",
+    () => true,
+  )
 
   const toggleVisible = useCallback(() => {
-    setVisible((prev) => {
-      const next = !prev
-      localStorage.setItem(cfg.storageKey, String(next))
-      return next
-    })
-  }, [cfg.storageKey])
+    localStorage.setItem(cfg.storageKey, String(!visible))
+    window.dispatchEvent(new Event(VISIBILITY_EVENT))
+  }, [cfg.storageKey, visible])
 
   const PrimaryIcon = cfg.primaryIcon
 

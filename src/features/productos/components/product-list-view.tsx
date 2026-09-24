@@ -291,12 +291,10 @@ function ProductRow({
 function SortHeader({
   label,
   sortKey,
-  currentSort,
   onSort,
 }: {
   label: string
   sortKey: string
-  currentSort: { key: string; dir: "asc" | "desc" } | null
   onSort: (key: string) => void
 }) {
   return (
@@ -354,7 +352,7 @@ export function ProductListView({ products, onEdit, onDelete }: ProductListViewP
         <thead>
           <tr className="border-b border-neutral-200/60">
             <th className="pb-2 pl-4 pr-3 text-left">
-              <SortHeader label="Producto" sortKey="name" currentSort={sort} onSort={handleSort} />
+              <SortHeader label="Producto" sortKey="name" onSort={handleSort} />
             </th>
             <th className="px-3 pb-2 text-left">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">

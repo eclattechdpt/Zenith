@@ -14,7 +14,6 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { usePOSProducts, type POSProduct } from "../queries"
 import { usePOSStore } from "../store"
 import { resolvePrice, sortVariantsBySku } from "../utils"
-import type { CartCustomer } from "../types"
 
 function useAllPOSProducts() {
   return useQuery({
@@ -146,7 +145,6 @@ export function ProductSearch() {
               <ProductResultItem
                 key={product.id}
                 product={product}
-                customer={customer}
                 onSelectProduct={handleSelectProduct}
                 onSelectVariant={(variant) =>
                   handleSelectVariant(product, variant)
@@ -162,12 +160,10 @@ export function ProductSearch() {
 
 function ProductResultItem({
   product,
-  customer,
   onSelectProduct,
   onSelectVariant,
 }: {
   product: POSProduct
-  customer: CartCustomer | null
   onSelectProduct: (product: POSProduct) => void
   onSelectVariant: (variant: POSProduct["product_variants"][number]) => void
 }) {

@@ -2,7 +2,7 @@
 
 import { memo, useState, useCallback, useRef } from "react"
 import Image from "next/image"
-import { Plus, Pencil, AlertCircle, Check } from "lucide-react"
+import { Plus, AlertCircle, Check } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { formatCurrency } from "@/lib/utils"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
@@ -63,7 +63,6 @@ function getDisplayPrice(product: POSProductWithImage) {
 export const POSProductCard = memo(function POSProductCard({
   product,
   onAdd,
-  onEdit,
   compact = false,
 }: POSProductCardProps) {
   const available = getAvailableStock(product)

@@ -10,17 +10,21 @@ import { useRouter } from "next/navigation"
  */
 export function useUnsavedGuard(isDirty: boolean) {
   const router = useRouter()
-  const submittedRef = useRef(false)
+  const [submitted, setSubmitted] = useState(false)
   const [pendingHref, setPendingHref] = useState<string | null>(null)
   const [pendingCallback, setPendingCallback] = useState<(() => void) | null>(null)
 
-  const shouldBlock = isDirty && !submittedRef.current
+  const shouldBlock = isDirty && !submitted
   const shouldBlockRef = useRef(shouldBlock)
-  shouldBlockRef.current = shouldBlock
+
+  useEffect(() => {
+    shouldBlockRef.current = shouldBlock
+  }, [shouldBlock])
 
   // Mark as submitted so guards stop blocking
   const markSubmitted = useCallback(() => {
-    submittedRef.current = true
+    shouldBlockRef.current = false
+    setSubmitted(true)
   }, [])
 
   // beforeunload — browser close/refresh
@@ -80,7 +84,8 @@ export function useUnsavedGuard(isDirty: boolean) {
 
   // Execute pending navigation and clear state
   const confirmNav = useCallback(() => {
-    submittedRef.current = true
+    shouldBlockRef.current = false
+    setSubmitted(true)
     if (pendingHref) {
       const href = pendingHref
       setPendingHref(null)

@@ -69,7 +69,6 @@ export function StorageOverview({ stats, isLoading }: StorageOverviewProps) {
   const supabasePct = (stats.supabase / total) * 100
   const externalPct = (stats.external / total) * 100
   const dataPct = (stats.data / total) * 100
-  const nonePct = (stats.withoutImage / total) * 100
 
   return (
     <div className="space-y-5">

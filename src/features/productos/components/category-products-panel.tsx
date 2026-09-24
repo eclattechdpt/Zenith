@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { motion, AnimatePresence } from "motion/react"
 import { Search, X, Loader2, Package, Plus } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -188,9 +189,11 @@ export function CategoryProductsPanel({
                     {/* Product image or initials */}
                     <div className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded ${colorDef.light} ${colorDef.text}`}>
                       {product.image_url ? (
-                        <img
+                        <Image
                           src={product.image_url}
                           alt=""
+                          width={24}
+                          height={24}
                           className="h-6 w-6 rounded object-cover"
                         />
                       ) : (

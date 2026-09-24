@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { sileo } from "sileo"
 
 import { useReadyVales } from "../queries"
@@ -23,6 +24,7 @@ function addDismissed(id: string) {
 }
 
 export function ValeReadyBanner() {
+  const router = useRouter()
   const { data: readyVales = [] } = useReadyVales()
   const notifiedRef = useRef<Set<string>>(new Set())
 
@@ -40,11 +42,11 @@ export function ValeReadyBanner() {
         description: "Producto disponible para entrega",
         button: {
           title: "Ver vales",
-          onClick: () => window.location.assign("/vales"),
+          onClick: () => router.push("/vales"),
         },
       })
     }
-  }, [readyVales])
+  }, [readyVales, router])
 
   return null
 }
